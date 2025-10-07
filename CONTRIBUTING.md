@@ -9,7 +9,7 @@
 ## Submitting changes
 
 - Fork the repo (if you're not the maintainer)
-  - <https://github.com/Ovum-Programming-Language/OvumLanguage/fork>
+  - <https://github.com/Ovum-Programming-Language/OvumCompiler/fork>
 - Check out a new branch based and name it to what you intend to do:
   - Example:
     ````
