@@ -1,56 +1,122 @@
-# C++ project template with Google Tests and CI/CD
+# Ovum Compiler (ovumc)
 
-This is a project template. Feel free to use & fork it. It contains all pre-configured 
-CMakeLists.txt, so to use it, replace project name with your one in 
-[main CmakeLists.txt](CMakeLists.txt), and all target and executable names in 
-[CI/CD script](./.github/workflows/ci_tests.yml). Sample program prints a greeting for the first argument.
+The official compiler implementation for the [Ovum Programming Language](https://github.com/Ovum-Programming-Language/OvumLanguage), written in C++. This compiler transforms Ovum source code (`.ovum` files) into executable bytecode for the Ovum Virtual Machine.
 
-## How to build and run
+## About Ovum
 
-Run the following commands from the project directory.
+Ovum is a strongly statically typed, single-threaded programming language focused on safety, clarity, and performance. It features:
 
-1. Create CMake cache
+- **Memory safety** via garbage collection
+- **Immutability by default** with explicit mutation using `var`
+- **Pure functions** (`pure`) that are side-effect free and cacheable
+- **Interface-based polymorphism** (no class inheritance)
+- **Kotlin-like syntax** with minimal, predictable constructs
+- **JIT compilation** with garbage collection for performance
 
-```shell
-cmake -S . -B cmake-build
+## Prerequisites
+
+- **CMake** 3.12 or higher
+- **C++17** compatible compiler (GCC, Clang, or MSVC)
+- **Git** (for dependency management)
+
+## Quick Start
+
+### Automated Installation
+
+The easiest way to build and install the compiler:
+
+```bash
+./install.sh
 ```
 
-2. Build executable target
+This script will:
+1. Configure CMake with Release build settings
+2. Build the `ovumc` executable
+3. Create a symbolic link in your home directory
+4. Optionally install to `/usr/bin` (Linux) or provide Windows instructions
 
-```shell
-cmake --build cmake-build --target cpp_tests
+### Manual Build
+
+1. **Configure the build:**
+   ```bash
+   cmake -S . -B build
+   ```
+
+2. **Build the compiler:**
+   ```bash
+   cmake --build build --target ovumc
+   ```
+
+3. **Build and run tests:**
+   ```bash
+   cmake --build build --target ovumc_tests
+   ctest --test-dir build
+   ```
+
+## Usage
+
+Once built, the `ovumc` compiler can be used to compile Ovum source files:
+
+```bash
+# Compile an Ovum source file
+ovumc input.ovum -o output.bytecode
+
+# Show help
+ovumc -h
 ```
 
-3. Build tests target
+## Development
 
-```shell
-cmake --build cmake-build --target cpp_tests_tests
+### Building for Development
+
+For development builds with debug information:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
 ```
 
-4. Run executable target
+### Running Tests
 
-* On Windows:
+The project includes comprehensive tests using Google Test:
 
-```shell
-.\cmake-build\cpp_tests.exe World
+```bash
+# Run all tests
+ctest --test-dir build
+
+# Run specific test executable
+./build/ovumc_tests.exe  # Windows
+./build/tests/ovumc_tests  # Linux/macOS
 ```
 
-* On *nix:
+### Code Quality
 
-```shell
-./cmake-build/bin/cpp_tests World
-```
+The project includes:
+- **Clang-format** configuration (`.clang-format`)
+- **Clang-tidy** configuration (`.clang-tidy`)
+- **CI/CD pipeline** with automated testing
 
-5. Run tests
+## Contributing
 
-* On Windows:
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on:
 
-```shell
-.\cmake-build\cpp_tests_tests.exe
-```
+- Code style and formatting
+- Testing requirements
+- Pull request process
+- Issue reporting
 
-* On *nix:
+## Related Projects
 
-```shell
-./cmake-build/tests/cpp_tests_tests
-```
+- **[OvumLanguage](https://github.com/Ovum-Programming-Language/OvumLanguage)** - Main language repository with documentation and specifications
+- **[OvumVM](https://github.com/Ovum-Programming-Language/OvumVM)** - Virtual Machine implementation (planned)
+
+## License
+
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+
+## Support
+
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/Ovum-Programming-Language/OvumCompiler/issues)
+- **Documentation**: Visit the [Ovum Language Documentation](https://github.com/Ovum-Programming-Language/OvumDocs) for language documentation or view it [online](https://ovum-programming-language.github.io/OvumDocs/).
+
