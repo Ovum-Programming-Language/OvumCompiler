@@ -29,19 +29,19 @@ jobs:
       - name: Build tests target
         shell: bash
         run: |
-          cmake --build cmake-build-debug --target cpp_tests_tests || echo Built with errors
+          cmake --build cmake-build-debug --target ovumc_tests || echo Built with errors
 
       - name: Run program
         working-directory: .\cmake-build-release
         shell: bash
         run: |
-          ./cpp_tests.exe --help
+          ./ovumc.exe --help
 
       - name: Run tests
         working-directory: .\cmake-build-debug
         shell: bash
         run: |
-          # ./cpp_tests_tests.exe
+          # ./ovumc_tests.exe
           echo "Tests are not run on Windows MinGW due to issues with the test runner"
 
   build-matrix:
@@ -80,22 +80,22 @@ jobs:
       - name: Build main target
         shell: bash
         run: |
-          cmake --build cmake-build-release --target cpp_tests || echo "Built with errors"
+          cmake --build cmake-build-release --target ovumc || echo "Built with errors"
 
       - name: Build tests target
         shell: bash
         run: |
-          cmake --build cmake-build-debug --target cpp_tests_tests || echo "Built with errors"
+          cmake --build cmake-build-debug --target ovumc_tests || echo "Built with errors"
 
       - name: Run program
         shell: bash
         working-directory: ./cmake-build-release
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            ./cpp_tests.exe --help
+            ./ovumc.exe --help
           else 
             cd bin
-            ./cpp_tests --help
+            ./ovumc --help
           fi
 
       - name: Run tests
@@ -103,10 +103,10 @@ jobs:
         working-directory: ./cmake-build-debug
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            ./cpp_tests_tests.exe
+            ./ovumc_tests.exe
           else
             cd tests
-            ./cpp_tests_tests
+            ./ovumc_tests
           fi
 
   memory-leaks:
@@ -125,12 +125,12 @@ jobs:
 
       - name: Build tests target
         run: |
-          cmake --build cmake-build --target cpp_tests_tests
+          cmake --build cmake-build --target ovumc_tests
 
       - name: Run valgrind
         working-directory: ./cmake-build/tests
         run: |
-          valgrind --leak-check=full --track-origins=yes --error-exitcode=1 ./cpp_tests_tests
+          valgrind --leak-check=full --track-origins=yes --error-exitcode=1 ./ovumc_tests
 
   style-check:
     name: Code style check with clang-format

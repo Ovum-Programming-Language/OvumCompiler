@@ -1,7 +1,7 @@
 #!/bin/sh
 
 OS_NAME="$(cmake -P ./PrintOS.cmake 2>&1)"
-PROJECT_NAME="cpp_tests"
+PROJECT_NAME="ovumc"
 CMAKE_BUILD_DIR="$HOME/CMakeBuilds"
 CMAKE_PROJECT_DIR="$CMAKE_BUILD_DIR/$PROJECT_NAME"
 
@@ -72,7 +72,7 @@ if (cmake -S . -B "$CMAKE_PROJECT_DIR" -DCMAKE_BUILD_TYPE=Release -G "Unix Makef
     echo "Because of Windows-specific limitations, it is not possible to create a link to it."
     echo "You can run it from $HOME/$PROJECT_NAME as .\\$PROJECT_NAME$EXEC_EXTENSION"
     echo "Or you can run CMD.EXE with administrative privileges and type: "
-    echo 'mklink "%userprofile%\cpp_tests.exe" "%userprofile%\cpp_tests\cpp_tests.exe"'
+    echo 'mklink "%userprofile%\ovumc.exe" "%userprofile%\ovumc\ovumc.exe"'
     echo ''
     mkdir "$HOME/$PROJECT_NAME"
     cp "$CMAKE_PROJECT_DIR/$PROJECT_NAME$EXEC_EXTENSION" "$HOME/$PROJECT_NAME/$PROJECT_NAME$EXEC_EXTENSION"
