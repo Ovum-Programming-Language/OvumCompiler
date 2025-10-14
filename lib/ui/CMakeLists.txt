@@ -4,6 +4,7 @@ add_library(ui STATIC
 )
 
 target_link_libraries(ui PUBLIC
+        lexer
         mylib
 )
 
