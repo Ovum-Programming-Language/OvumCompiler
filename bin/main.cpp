@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "lib/lexer/Lexer.hpp"
+#include "lib/compiler_ui/compiler_ui_functions.hpp"
 
 int main() {
   const std::string sample = R"ovum(
@@ -12,15 +12,5 @@ fun Main(args: StringArray): Int {
 }
 )ovum";
 
-  Lexer lx(sample, false);
-  try {
-    auto toks = lx.tokenize();
-    for (auto &t : toks) {
-      std::cout << t->to_string() << "\n";
-    }
-  } catch (const std::exception &e) {
-    std::cerr << "Lexer error: " << e.what() << "\n";
-    return 1;
-  }
-  return 0;
+  return StartCompilerConsoleUI({"ovumc", sample}, std::cout);
 }
