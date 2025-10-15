@@ -21,46 +21,65 @@
 
 class TokenFactory {
 public:
-  static std::unique_ptr<Token> make_ident(std::string lex, int32_t line, int32_t col) {
+  static std::unique_ptr<Token> MakeIdent(std::string lex, int32_t line, int32_t col) {
     return std::make_unique<IdentToken>(std::move(lex), line, col);
   }
-  static std::unique_ptr<Token> make_keyword(std::string lex, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeKeyword(std::string lex, int32_t line, int32_t col) {
     return std::make_unique<KeywordToken>(std::move(lex), line, col);
   }
-  static std::unique_ptr<Token> make_operator(std::string lex, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeOperator(std::string lex, int32_t line, int32_t col) {
     return std::make_unique<OperatorToken>(std::move(lex), line, col);
   }
-  static std::unique_ptr<Token> make_punct(char ch, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakePunct(char ch, int32_t line, int32_t col) {
     return std::make_unique<PunctToken>(ch, line, col);
   }
-  static std::unique_ptr<Token> make_punct(std::string lex, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakePunct(std::string lex, int32_t line, int32_t col) {
     return std::make_unique<PunctToken>(std::move(lex), line, col);
   }
-  static std::unique_ptr<Token> make_newline(int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeNewline(int32_t line, int32_t col) {
     return std::make_unique<NewlineToken>(line, col);
   }
-  static std::unique_ptr<Token> make_comment(std::string text, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeComment(std::string text, int32_t line, int32_t col) {
     return std::make_unique<CommentToken>(std::move(text), line, col);
   }
-  static std::unique_ptr<Token> make_eof(int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeEof(int32_t line, int32_t col) {
     return std::make_unique<EofToken>(line, col);
   }
 
-  static std::unique_ptr<Token> make_int_literal(std::string raw, int64_t v, int32_t line, int32_t col) {
-    return std::make_unique<LiteralToken>(TokenType::INT, std::move(raw), std::make_unique<IntValue>(v), line, col);
+  static std::unique_ptr<Token> MakeIntLiteral(std::string raw, int64_t v, int32_t line, int32_t col) {
+    return std::make_unique<LiteralToken>(TokenType::kInt, std::move(raw), std::make_unique<IntValue>(v), line, col);
   }
-  static std::unique_ptr<Token> make_float_literal(std::string raw, long double v, int32_t line, int32_t col) {
-    return std::make_unique<LiteralToken>(TokenType::FLOAT, std::move(raw), std::make_unique<FloatValue>(v), line, col);
+
+  static std::unique_ptr<Token> MakeFloatLiteral(std::string raw, long double v, int32_t line, int32_t col) {
+    return std::make_unique<LiteralToken>(TokenType::kFloat,
+                                          std::move(raw),
+                                          std::make_unique<FloatValue>(v),
+                                          line,
+                                          col);
   }
-  static std::unique_ptr<Token> make_string_literal(std::string raw, std::string s, int32_t line, int32_t col) {
+
+  static std::unique_ptr<Token> MakeStringLiteral(std::string raw, std::string s, int32_t line, int32_t col) {
     return std::make_unique<LiteralToken>(
-        TokenType::STRING, std::move(raw), std::make_unique<StringValue>(std::move(s)), line, col);
+        TokenType::kString,
+        std::move(raw),
+        std::make_unique<StringValue>(std::move(s)),
+        line,
+        col);
   }
-  static std::unique_ptr<Token> make_char_literal(std::string raw, char c, int32_t line, int32_t col) {
-    return std::make_unique<LiteralToken>(TokenType::CHAR, std::move(raw), std::make_unique<CharValue>(c), line, col);
+
+  static std::unique_ptr<Token> MakeCharLiteral(std::string raw, char c, int32_t line, int32_t col) {
+    return std::make_unique<LiteralToken>(TokenType::kChar, std::move(raw), std::make_unique<CharValue>(c), line, col);
   }
-  static std::unique_ptr<Token> make_bool_literal(std::string raw, bool b, int32_t line, int32_t col) {
-    return std::make_unique<LiteralToken>(TokenType::BOOL, std::move(raw), std::make_unique<BoolValue>(b), line, col);
+
+  static std::unique_ptr<Token> MakeBoolLiteral(std::string raw, bool b, int32_t line, int32_t col) {
+    return std::make_unique<LiteralToken>(TokenType::kBool, std::move(raw), std::make_unique<BoolValue>(b), line, col);
   }
 };
 

@@ -6,7 +6,7 @@
 
 class SlashHandler : public Handler {
 public:
-  OptToken Scan(Lexer &lx) override;
+  OptToken Scan(Lexer& lx) override;
 };
 
 #endif // SLASHHANDLER_HPP_

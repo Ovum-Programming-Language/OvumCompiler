@@ -2,7 +2,7 @@
 
 #include "lib/lexer/tokens/TokenFactory.hpp"
 
-OptToken OperatorHandler::Scan(Lexer &lx) {
+OptToken OperatorHandler::Scan(Lexer& lx) {
   std::string op;
   op.push_back(lx.CurrentChar());
   char p = lx.Peek();
@@ -15,5 +15,8 @@ OptToken OperatorHandler::Scan(Lexer &lx) {
     }
   }
 
-  return std::make_optional(TokenFactory::make_operator(std::move(op), lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(
+      TokenFactory::MakeOperator(std::move(op),
+                                  lx.GetLine(),
+                                  lx.GetTokenCol()));
 }

@@ -6,7 +6,7 @@
 
 class NewlineHandler : public Handler {
 public:
-  OptToken Scan(Lexer &lx) override;
+  OptToken Scan(Lexer& lx) override;
 };
 
 #endif // NEWLINEHANDLER_HPP_

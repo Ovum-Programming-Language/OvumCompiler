@@ -3,7 +3,7 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken StringHandler::Scan(Lexer &lx) {
+OptToken StringHandler::Scan(Lexer& lx) {
   std::string raw;
   std::string out;
   raw.push_back('"');
@@ -14,7 +14,10 @@ OptToken StringHandler::Scan(Lexer &lx) {
 
     if (c == '"') {
       return std::make_optional(
-          TokenFactory::make_string_literal(std::move(raw), std::move(out), lx.GetLine(), lx.GetTokenCol()));
+          TokenFactory::MakeStringLiteral(std::move(raw),
+                                            std::move(out),
+                                            lx.GetLine(),
+                                            lx.GetTokenCol()));
     }
 
     if (c == '\\') {

@@ -14,7 +14,8 @@ using OptToken = std::optional<TokenPtr>;
 class Handler { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~Handler() = default;
-  virtual OptToken Scan(Lexer &lx) = 0;
+
+  virtual OptToken Scan(Lexer& lx) = 0;
 };
 
 #endif // HANDLER_HPP_

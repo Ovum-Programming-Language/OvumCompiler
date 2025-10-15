@@ -7,8 +7,11 @@
 class Value {
 public:
   virtual ~Value() = default;
+
   [[nodiscard]] virtual std::unique_ptr<Value> Clone() const = 0;
+
   [[nodiscard]] virtual std::string ToString() const = 0;
+
   [[nodiscard]] virtual std::string GetTypeName() const = 0;
 };
 

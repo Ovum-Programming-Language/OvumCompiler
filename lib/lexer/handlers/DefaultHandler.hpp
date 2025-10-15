@@ -6,7 +6,7 @@
 
 class DefaultHandler : public Handler {
 public:
-  OptToken Scan(Lexer &lx) override;
+  OptToken Scan(Lexer& lx) override;
 };
 
 #endif // DEFAULTHANDLER_HPP_

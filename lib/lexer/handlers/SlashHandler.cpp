@@ -3,7 +3,7 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken SlashHandler::Scan(Lexer &lx) {
+OptToken SlashHandler::Scan(Lexer& lx) {
   if (lx.Peek() == '/') {
     std::string txt;
 
@@ -12,7 +12,10 @@ OptToken SlashHandler::Scan(Lexer &lx) {
     }
 
     if (lx.IsKeepComments()) {
-      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+      return std::make_optional(
+          TokenFactory::MakeComment(std::move(txt),
+                                     lx.GetLine(),
+                                     lx.GetTokenCol()));
     }
 
     return std::nullopt;
@@ -40,11 +43,17 @@ OptToken SlashHandler::Scan(Lexer &lx) {
     }
 
     if (lx.IsKeepComments()) {
-      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+      return std::make_optional(
+          TokenFactory::MakeComment(std::move(txt),
+                                     lx.GetLine(),
+                                     lx.GetTokenCol()));
     }
 
     return std::nullopt;
   }
 
-  return std::make_optional(TokenFactory::make_operator(std::string(1, '/'), lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(
+      TokenFactory::MakeOperator(std::string(1, '/'),
+                                  lx.GetLine(),
+                                  lx.GetTokenCol()));
 }

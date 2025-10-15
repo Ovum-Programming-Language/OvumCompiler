@@ -2,11 +2,15 @@
 
 #include <sstream>
 
-IdentToken::IdentToken(std::string lex, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(lex)) {
+IdentToken::IdentToken(std::string lex,
+                       int32_t line,
+                       int32_t col) :
+  Token(line, col),
+  lexeme_(std::move(lex)) {
 }
 
 TokenType IdentToken::GetType() const noexcept {
-  return TokenType::IDENT;
+  return TokenType::kIdent;
 }
 
 std::string IdentToken::GetLexeme() const noexcept {
@@ -23,7 +27,8 @@ void IdentToken::Accept(TokenVisitor& visitor) const {
 
 std::string IdentToken::ToString() const {
   std::ostringstream os;
-  os << "Token(IDENT, '" << lexeme_ << "', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(IDENT, '" << lexeme_ << "', @" << this->GetLine() << ":" << this
+      ->GetColumn() << ")";
   return os.str();
 }
 

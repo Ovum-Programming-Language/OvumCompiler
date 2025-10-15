@@ -5,45 +5,45 @@
 #include <string_view>
 
 enum TokenType : std::uint8_t {
-  IDENT,
-  KEYWORD,
-  INT,
-  FLOAT,
-  STRING,
-  CHAR,
-  BOOL,
-  OPERATOR,
-  PUNCT,
-  NEWLINE,
-  COMMENT,
-  EOF_T
+  kIdent,
+  kKeyword,
+  kInt,
+  kFloat,
+  kString,
+  kChar,
+  kBool,
+  kOperator,
+  kPunct,
+  kNewline,
+  kComment,
+  kEofT
 };
 
 inline std::string_view to_string_view(TokenType token_type) {
   switch (token_type) {
-    case TokenType::IDENT:
+    case TokenType::kIdent:
       return "IDENT";
-    case TokenType::KEYWORD:
+    case TokenType::kKeyword:
       return "KEYWORD";
-    case TokenType::INT:
+    case TokenType::kInt:
       return "INT";
-    case TokenType::FLOAT:
+    case TokenType::kFloat:
       return "FLOAT";
-    case TokenType::STRING:
+    case TokenType::kString:
       return "STRING";
-    case TokenType::CHAR:
+    case TokenType::kChar:
       return "CHAR";
-    case TokenType::BOOL:
+    case TokenType::kBool:
       return "BOOL";
-    case TokenType::OPERATOR:
+    case TokenType::kOperator:
       return "OPERATOR";
-    case TokenType::PUNCT:
+    case TokenType::kPunct:
       return "PUNCT";
-    case TokenType::NEWLINE:
+    case TokenType::kNewline:
       return "NEWLINE";
-    case TokenType::COMMENT:
+    case TokenType::kComment:
       return "COMMENT";
-    case TokenType::EOF_T:
+    case TokenType::kEofT:
       return "EOF";
     default:
       return "UNKNOWN";

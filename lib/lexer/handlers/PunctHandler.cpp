@@ -2,7 +2,8 @@
 
 #include "lib/lexer/tokens/TokenFactory.hpp"
 
-OptToken PunctHandler::Scan(Lexer &lx) {
+OptToken PunctHandler::Scan(Lexer& lx) {
   char c = lx.CurrentChar();
-  return std::make_optional(TokenFactory::make_punct(c, lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(
+      TokenFactory::MakePunct(c, lx.GetLine(), lx.GetTokenCol()));
 }

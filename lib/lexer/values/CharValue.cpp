@@ -1,6 +1,7 @@
 #include "CharValue.hpp"
 
-CharValue::CharValue(char c) : v(c) {
+CharValue::CharValue(char c) :
+  v(c) {
 }
 
 std::unique_ptr<Value> CharValue::Clone() const {

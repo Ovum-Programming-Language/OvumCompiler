@@ -6,7 +6,7 @@
 
 class WhitespaceHandler : public Handler {
 public:
-  OptToken Scan(Lexer &lx) override;
+  OptToken Scan(Lexer& lx) override;
 };
 
 #endif // WHITESPACEHANDLER_HPP_

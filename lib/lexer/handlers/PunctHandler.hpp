@@ -6,7 +6,7 @@
 
 class PunctHandler : public Handler {
 public:
-  OptToken Scan(Lexer &lx) override;
+  OptToken Scan(Lexer& lx) override;
 };
 
 #endif // PUNCTHANDLER_HPP_

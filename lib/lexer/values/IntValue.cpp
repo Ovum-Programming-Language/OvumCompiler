@@ -1,6 +1,7 @@
 #include "IntValue.hpp"
 
-IntValue::IntValue(int64_t x) : v(x) {
+IntValue::IntValue(int64_t x) :
+  v(x) {
 }
 
 std::unique_ptr<Value> IntValue::Clone() const {

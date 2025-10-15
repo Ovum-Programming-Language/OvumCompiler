@@ -11,7 +11,9 @@ public:
   explicit BoolValue(bool b);
 
   [[nodiscard]] std::unique_ptr<Value> Clone() const override;
+
   [[nodiscard]] std::string ToString() const override;
+
   [[nodiscard]] std::string GetTypeName() const override;
 
 private:

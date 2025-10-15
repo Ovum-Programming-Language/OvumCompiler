@@ -19,28 +19,39 @@ public:
   std::vector<TokenPtr> Tokenize();
 
   [[nodiscard]] bool IsAtEnd() const noexcept;
+
   [[nodiscard]] char Peek(size_t offset = 0) const noexcept;
+
   [[nodiscard]] char CurrentChar() const noexcept;
+
   char Advance();
+
   void RetreatOne();
-  void ConsumeWhile(std::string &out, const std::function<bool(char)> &pred);
+
+  void ConsumeWhile(std::string& out, const std::function<bool(char)>& pred);
+
   [[nodiscard]] std::string GetRawLexeme() const;
 
   [[nodiscard]] int GetLine() const noexcept {
     return line_;
   }
+
   [[nodiscard]] int GetTokenCol() const noexcept {
     return token_col_;
   }
+
   [[nodiscard]] bool IsKeepComments() const noexcept {
     return keep_comments_;
   }
+
   [[nodiscard]] bool IsKeyword(std::string_view s) const;
+
   [[nodiscard]] bool IsMultiop(std::string_view s) const;
 
   void SetHandler(unsigned char c, std::unique_ptr<Handler> handler) {
     handlers_.at(c) = std::move(handler);
   }
+
   void SetDefaultHandler(std::unique_ptr<Handler> handler) {
     default_handler_ = std::move(handler);
   }

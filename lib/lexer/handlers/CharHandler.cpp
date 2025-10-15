@@ -3,7 +3,7 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken CharHandler::Scan(Lexer &lx) {
+OptToken CharHandler::Scan(Lexer& lx) {
   std::string raw;
   raw.push_back('\'');
   char val = '\0';
@@ -43,5 +43,9 @@ OptToken CharHandler::Scan(Lexer &lx) {
     throw LexerError("Unterminated char literal");
   }
 
-  return std::make_optional(TokenFactory::make_char_literal(std::move(raw), val, lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(
+      TokenFactory::MakeCharLiteral(std::move(raw),
+                                      val,
+                                      lx.GetLine(),
+                                      lx.GetTokenCol()));
 }
