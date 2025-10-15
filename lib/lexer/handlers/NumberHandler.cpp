@@ -1,5 +1,7 @@
 #include "NumberHandler.hpp"
 
+#include <cmath>
+
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 

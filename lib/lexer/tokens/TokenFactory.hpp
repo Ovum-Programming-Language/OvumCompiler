@@ -1,7 +1,6 @@
 #ifndef TOKENFACTORY_HPP_
 #define TOKENFACTORY_HPP_
 
-#include <cstdint>
 #include <memory>
 #include <string>
 
