@@ -1,5 +1,8 @@
 #include "CharHandler.hpp"
 
+#include "lib/lexer/LexerError.hpp"
+#include "tokens/TokenFactory.hpp"
+
 OptToken CharHandler::Scan(Lexer &lx) {
   std::string raw;
   raw.push_back('\'');

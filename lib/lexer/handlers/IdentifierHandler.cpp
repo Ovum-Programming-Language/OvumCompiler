@@ -1,5 +1,7 @@
 #include "IdentifierHandler.hpp"
 
+#include "lib/lexer/tokens/TokenFactory.hpp"
+
 OptToken IdentifierHandler::Scan(Lexer &lx) {
   std::string s;
   s.push_back(lx.CurrentChar());

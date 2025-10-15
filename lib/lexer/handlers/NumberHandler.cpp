@@ -1,5 +1,8 @@
 #include "NumberHandler.hpp"
 
+#include "lib/lexer/LexerError.hpp"
+#include "tokens/TokenFactory.hpp"
+
 static bool IsDigitChar(char c) {
   return std::isdigit(static_cast<unsigned char>(c));
 }

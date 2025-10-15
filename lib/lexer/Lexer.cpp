@@ -1,6 +1,20 @@
 #include "Lexer.hpp"
 #include "utils.hpp"
 
+#include "handlers/CharHandler.hpp"
+#include "handlers/DefaultHandler.hpp"
+#include "handlers/Handler.hpp"
+#include "handlers/IdentifierHandler.hpp"
+#include "handlers/NewlineHandler.hpp"
+#include "handlers/NumberHandler.hpp"
+#include "handlers/OperatorHandler.hpp"
+#include "handlers/PunctHandler.hpp"
+#include "handlers/SlashHandler.hpp"
+#include "handlers/StringHandler.hpp"
+#include "handlers/WhitespaceHandler.hpp"
+
+#include "tokens/TokenFactory.hpp"
+
 Lexer::Lexer(std::string_view src, bool keep_comments) : src_(src), keep_comments_(keep_comments) {
   RegisterDefaults();
 }

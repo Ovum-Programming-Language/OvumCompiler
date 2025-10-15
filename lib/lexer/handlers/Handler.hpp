@@ -4,13 +4,14 @@
 #include <memory>
 #include <optional>
 
-class Token;
+#include "lib/lexer/tokens/Token.hpp"
+
 class Lexer;
 
 using TokenPtr = std::unique_ptr<Token>;
 using OptToken = std::optional<TokenPtr>;
 
-class Handler {
+class Handler { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~Handler() = default;
   virtual OptToken Scan(Lexer &lx) = 0;

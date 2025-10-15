@@ -1,5 +1,7 @@
 #include "OperatorHandler.hpp"
 
+#include "lib/lexer/tokens/TokenFactory.hpp"
+
 OptToken OperatorHandler::Scan(Lexer &lx) {
   std::string op;
   op.push_back(lx.CurrentChar());

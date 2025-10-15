@@ -1,5 +1,8 @@
 #include "StringHandler.hpp"
 
+#include "lib/lexer/LexerError.hpp"
+#include "tokens/TokenFactory.hpp"
+
 OptToken StringHandler::Scan(Lexer &lx) {
   std::string raw;
   std::string out;

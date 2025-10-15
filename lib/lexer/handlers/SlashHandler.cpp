@@ -1,5 +1,8 @@
 #include "SlashHandler.hpp"
 
+#include "lib/lexer/LexerError.hpp"
+#include "tokens/TokenFactory.hpp"
+
 OptToken SlashHandler::Scan(Lexer &lx) {
   if (lx.Peek() == '/') {
     std::string txt;

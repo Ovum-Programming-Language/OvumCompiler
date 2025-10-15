@@ -2,27 +2,13 @@
 #define LEXER_HPP_
 
 #include <array>
-#include <cctype>
+#include <cstddef>
 #include <functional>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <unordered_set>
 #include <vector>
 
-#include "handlers/CharHandler.hpp"
-#include "handlers/DefaultHandler.hpp"
 #include "handlers/Handler.hpp"
-#include "handlers/IdentifierHandler.hpp"
-#include "handlers/NewlineHandler.hpp"
-#include "handlers/NumberHandler.hpp"
-#include "handlers/OperatorHandler.hpp"
-#include "handlers/PunctHandler.hpp"
-#include "handlers/SlashHandler.hpp"
-#include "handlers/StringHandler.hpp"
-#include "handlers/WhitespaceHandler.hpp"
-
-#include "tokens/TokenFactory.hpp"
 
 constexpr std::size_t kNumAsciiChars = 256;
 

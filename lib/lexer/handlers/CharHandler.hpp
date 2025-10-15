@@ -3,7 +3,6 @@
 
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
-#include "lib/lexer/LexerError.hpp"
 
 class CharHandler : public Handler {
 public:
