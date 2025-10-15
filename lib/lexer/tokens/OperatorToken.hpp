@@ -2,38 +2,21 @@
 #define OPERATORTOKEN_HPP_
 
 #include <memory>
-#include <sstream>
 #include <string>
-
 #include "Token.hpp"
 #include "TokenType.hpp"
 
-struct TokenVisitor;
+class TokenVisitor;
+
 class OperatorToken final : public Token {
 public:
-  OperatorToken(std::string op, int line, int col) : Token(line, col), lexeme_(std::move(op)) {
-  }
+  OperatorToken(std::string op, int32_t line, int32_t col);
 
-  TokenType type() const noexcept override {
-    return TokenType::OPERATOR;
-  }
-  std::string lexeme() const noexcept override {
-    return lexeme_;
-  }
-
-  std::unique_ptr<Token> clone() const override {
-    return std::make_unique<OperatorToken>(*this);
-  }
-  void accept(TokenVisitor& visitor) const override {
-    visitor.visit(*this);
-  }
-
-  std::string to_string() const override {
-    std::ostringstream os;
-    os << "Token(OPERATOR, '" << lexeme_ << "', @";
-    os << this->line() << ":" << this->column() << ")";
-    return os.str();
-  }
+  [[nodiscard]] TokenType GetType() const noexcept override;
+  [[nodiscard]] std::string GetLexeme() const noexcept override;
+  [[nodiscard]] std::unique_ptr<Token> Clone() const override;
+  void Accept(TokenVisitor& visitor) const override;
+  [[nodiscard]] std::string ToString() const override;
 
 private:
   std::string lexeme_;

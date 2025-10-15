@@ -11,6 +11,19 @@ add_library(lexer STATIC
         handlers/SlashHandler.cpp
         handlers/StringHandler.cpp
         handlers/WhitespaceHandler.cpp
+        tokens/CommentToken.cpp
+        tokens/EofToken.cpp
+        tokens/IdentToken.cpp
+        tokens/KeywordToken.cpp
+        tokens/LiteralToken.cpp
+        tokens/NewlineToken.cpp
+        tokens/OperatorToken.cpp
+        tokens/PunctToken.cpp
+        values/BoolValue.cpp
+        values/CharValue.cpp
+        values/FloatValue.cpp
+        values/IntValue.cpp
+        values/StringValue.cpp
 )
 
 target_include_directories(lexer

@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct IdentifierHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class IdentifierHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // IDENTIFIERHANDLER_HPP_

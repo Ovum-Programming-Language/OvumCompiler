@@ -1,32 +1,42 @@
 #include "SlashHandler.hpp"
 
-OptToken SlashHandler::scan(Lexer &lx) {
-  if (lx.peek() == '/') {
+OptToken SlashHandler::Scan(Lexer &lx) {
+  if (lx.Peek() == '/') {
     std::string txt;
-    while (!lx.is_at_end() && lx.peek() != '\n')
-      txt.push_back(lx.advance());
-    if (lx.keep_comments())
-      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.line(), lx.token_col()));
+
+    while (!lx.IsAtEnd() && lx.Peek() != '\n')
+      txt.push_back(lx.Advance());
+
+    if (lx.IsKeepComments())
+      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+
     return std::nullopt;
-  } else if (lx.peek() == '*') {
-    lx.advance();
+  }
+
+  if (lx.Peek() == '*') {
+    lx.Advance();
     std::string txt;
     bool closed = false;
-    while (!lx.is_at_end()) {
-      char c = lx.advance();
-      if (c == '*' && lx.peek() == '/') {
-        lx.advance();
+
+    while (!lx.IsAtEnd()) {
+      char c = lx.Advance();
+
+      if (c == '*' && lx.Peek() == '/') {
+        lx.Advance();
         closed = true;
         break;
       }
+
       txt.push_back(c);
     }
+
     if (!closed)
       throw LexerError("Unterminated block comment");
-    if (lx.keep_comments())
-      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.line(), lx.token_col()));
+
+    if (lx.IsKeepComments())
+      return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+
     return std::nullopt;
-  } else {
-    return std::make_optional(TokenFactory::make_operator(std::string(1, '/'), lx.line(), lx.token_col()));
   }
+  return std::make_optional(TokenFactory::make_operator(std::string(1, '/'), lx.GetLine(), lx.GetTokenCol()));
 }

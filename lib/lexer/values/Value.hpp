@@ -4,11 +4,12 @@
 #include <memory>
 #include <string>
 
-struct Value {
+class Value {
+public:
   virtual ~Value() = default;
-  virtual std::unique_ptr<Value> clone() const = 0;
-  virtual std::string to_string() const = 0;
-  virtual std::string type_name() const = 0;
+  [[nodiscard]] virtual std::unique_ptr<Value> Clone() const = 0;
+  [[nodiscard]] virtual std::string ToString() const = 0;
+  [[nodiscard]] virtual std::string GetTypeName() const = 0;
 };
 
 #endif // VALUE_HPP_

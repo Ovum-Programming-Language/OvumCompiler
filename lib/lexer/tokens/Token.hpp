@@ -10,28 +10,28 @@
 
 class Token {
 public:
-  Token(int line, int column) : line_(line), column_(column) {
+  Token(int32_t line, int32_t column) : line_(line), column_(column) {
   }
   virtual ~Token() = default;
-  virtual TokenType type() const = 0;
-  virtual std::string lexeme() const = 0;
-  virtual std::unique_ptr<Token> clone() const = 0;
-  virtual void accept(TokenVisitor& v) const = 0;
-  virtual std::string to_string() const {
+  [[nodiscard]] virtual TokenType GetType() const = 0;
+  [[nodiscard]] virtual std::string GetLexeme() const = 0;
+  [[nodiscard]] virtual std::unique_ptr<Token> Clone() const = 0;
+  virtual void Accept(TokenVisitor& v) const = 0;
+  [[nodiscard]] virtual std::string ToString() const {
     std::ostringstream os;
-    os << "Token(" << to_string_view(type()) << ", '" << lexeme() << "', @" << line_ << ":" << column_ << ")";
+    os << "Token(" << to_string_view(GetType()) << ", '" << GetLexeme() << "', @" << line_ << ":" << column_ << ")";
     return os.str();
   }
-  int line() const noexcept {
+  [[nodiscard]] int32_t GetLine() const noexcept {
     return line_;
   }
-  int column() const noexcept {
+  [[nodiscard]] int32_t GetColumn() const noexcept {
     return column_;
   }
 
 private:
-  int line_;
-  int column_;
+  int32_t line_;
+  int32_t column_;
 };
 
 #endif // TOKEN_HPP_

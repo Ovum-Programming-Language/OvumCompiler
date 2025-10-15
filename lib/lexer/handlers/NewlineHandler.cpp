@@ -1,5 +1,5 @@
 #include "NewlineHandler.hpp"
 
-OptToken NewlineHandler::scan(Lexer &lx) {
-  return std::make_optional(TokenFactory::make_newline(lx.line(), lx.token_col()));
+OptToken NewlineHandler::Scan(Lexer &lx) {
+  return std::make_optional(TokenFactory::make_newline(lx.GetLine(), lx.GetTokenCol()));
 }

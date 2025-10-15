@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct StringHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class StringHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // STRINGHANDLER_H

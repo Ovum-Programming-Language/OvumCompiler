@@ -2,22 +2,21 @@
 #define INTVALUE_HPP_
 
 #include <cinttypes>
+#include <memory>
+#include <string>
 
 #include "Value.hpp"
 
-struct IntValue : Value {
+class IntValue : public Value {
+public:
+  explicit IntValue(int64_t x);
+
+  [[nodiscard]] std::unique_ptr<Value> Clone() const override;
+  [[nodiscard]] std::string ToString() const override;
+  [[nodiscard]] std::string GetTypeName() const override;
+
+private:
   int64_t v;
-  explicit IntValue(int64_t x) : v(x) {
-  }
-  std::unique_ptr<Value> clone() const override {
-    return std::make_unique<IntValue>(v);
-  }
-  std::string to_string() const override {
-    return std::to_string(v);
-  }
-  std::string type_name() const override {
-    return "Int";
-  }
 };
 
 #endif // INTVALUE_HPP_

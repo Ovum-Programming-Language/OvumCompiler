@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct WhitespaceHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class WhitespaceHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // WHITESPACEHANDLER_HPP_

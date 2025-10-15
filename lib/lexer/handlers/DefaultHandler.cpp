@@ -1,6 +1,6 @@
 #include "DefaultHandler.hpp"
 
-OptToken DefaultHandler::scan(Lexer &lx) {
-  char c = lx.current_char();
+OptToken DefaultHandler::Scan(Lexer &lx) {
+  char c = lx.CurrentChar();
   throw LexerError(std::string("Unexpected character: ") + c);
 }

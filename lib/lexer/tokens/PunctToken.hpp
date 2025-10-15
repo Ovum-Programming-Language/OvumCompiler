@@ -2,7 +2,6 @@
 #define PUNCTTOKEN_HPP_
 
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include "Token.hpp"
@@ -11,32 +10,14 @@
 
 class PunctToken final : public Token {
 public:
-  PunctToken(char ch, int line, int col) : Token(line, col), lexeme_(1, ch) {
-  }
+  PunctToken(char ch, int32_t line, int32_t col);
+  PunctToken(std::string punct, int32_t line, int32_t col);
 
-  PunctToken(std::string punct, int line, int col) : Token(line, col), lexeme_(std::move(punct)) {
-  }
-
-  TokenType type() const noexcept override {
-    return TokenType::PUNCT;
-  }
-  std::string lexeme() const noexcept override {
-    return lexeme_;
-  }
-
-  std::unique_ptr<Token> clone() const override {
-    return std::make_unique<PunctToken>(*this);
-  }
-  void accept(TokenVisitor& visitor) const override {
-    visitor.visit(*this);
-  }
-
-  std::string to_string() const override {
-    std::ostringstream os;
-    os << "Token(PUNCT, '" << lexeme_ << "', @";
-    os << this->line() << ":" << this->column() << ")";
-    return os.str();
-  }
+  [[nodiscard]] TokenType GetType() const noexcept override;
+  [[nodiscard]] std::string GetLexeme() const noexcept override;
+  [[nodiscard]] std::unique_ptr<Token> Clone() const override;
+  void Accept(TokenVisitor& visitor) const override;
+  [[nodiscard]] std::string ToString() const override;
 
 private:
   std::string lexeme_;

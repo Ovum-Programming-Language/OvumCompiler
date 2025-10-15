@@ -24,41 +24,43 @@
 
 #include "tokens/TokenFactory.hpp"
 
+constexpr std::size_t kNumAsciiChars = 256;
+
 class Lexer {
 public:
   explicit Lexer(std::string_view src, bool keep_comments = false);
 
-  std::vector<TokenPtr> tokenize();
+  std::vector<TokenPtr> Tokenize();
 
-  bool is_at_end() const noexcept;
-  char peek(size_t offset = 0) const noexcept;
-  char current_char() const noexcept;
-  char advance();
-  void retreat_one();
-  void consume_while(std::string &out, const std::function<bool(char)> &pred);
-  std::string raw_lexeme() const;
+  [[nodiscard]] bool IsAtEnd() const noexcept;
+  [[nodiscard]] char Peek(size_t offset = 0) const noexcept;
+  [[nodiscard]] char CurrentChar() const noexcept;
+  char Advance();
+  void RetreatOne();
+  void ConsumeWhile(std::string &out, const std::function<bool(char)> &pred);
+  [[nodiscard]] std::string GetRawLexeme() const;
 
-  int line() const noexcept {
+  [[nodiscard]] int GetLine() const noexcept {
     return line_;
   }
-  int token_col() const noexcept {
+  [[nodiscard]] int GetTokenCol() const noexcept {
     return token_col_;
   }
-  bool keep_comments() const noexcept {
+  [[nodiscard]] bool IsKeepComments() const noexcept {
     return keep_comments_;
   }
-  bool is_keyword(std::string_view s) const;
-  bool is_multiop(std::string_view s) const;
+  [[nodiscard]] bool IsKeyword(std::string_view s) const;
+  [[nodiscard]] bool IsMultiop(std::string_view s) const;
 
-  void set_handler(unsigned char c, std::unique_ptr<Handler> handler) {
-    handlers_[c] = std::move(handler);
+  void SetHandler(unsigned char c, std::unique_ptr<Handler> handler) {
+    handlers_.at(c) = std::move(handler);
   }
-  void set_default_handler(std::unique_ptr<Handler> handler) {
+  void SetDefaultHandler(std::unique_ptr<Handler> handler) {
     default_handler_ = std::move(handler);
   }
 
 private:
-  void register_defaults();
+  void RegisterDefaults();
 
   std::string_view src_;
   bool keep_comments_;
@@ -69,7 +71,8 @@ private:
   int col_{1};
   int token_col_{1};
 
-  std::array<std::unique_ptr<Handler>, 256> handlers_;
+  std::array<std::unique_ptr<Handler>, kNumAsciiChars> handlers_;
+
   std::unique_ptr<Handler> default_handler_;
 };
 

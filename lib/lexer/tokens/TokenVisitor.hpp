@@ -10,16 +10,17 @@ class LiteralToken;
 class KeywordToken;
 class IdentToken;
 
-struct TokenVisitor {
+class TokenVisitor {
+public:
   virtual ~TokenVisitor() = default;
-  virtual void visit(const IdentToken& t) = 0;
-  virtual void visit(const KeywordToken& t) = 0;
-  virtual void visit(const LiteralToken& t) = 0;
-  virtual void visit(const OperatorToken& t) = 0;
-  virtual void visit(const PunctToken& t) = 0;
-  virtual void visit(const NewlineToken& t) = 0;
-  virtual void visit(const CommentToken& t) = 0;
-  virtual void visit(const EofToken& t) = 0;
+  virtual void Visit(const IdentToken& t) = 0;
+  virtual void Visit(const KeywordToken& t) = 0;
+  virtual void Visit(const LiteralToken& t) = 0;
+  virtual void Visit(const OperatorToken& t) = 0;
+  virtual void Visit(const PunctToken& t) = 0;
+  virtual void Visit(const NewlineToken& t) = 0;
+  virtual void Visit(const CommentToken& t) = 0;
+  virtual void Visit(const EofToken& t) = 0;
 };
 
 #endif // TOKENVISITOR_HPP_

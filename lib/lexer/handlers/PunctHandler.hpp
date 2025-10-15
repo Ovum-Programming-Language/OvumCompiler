@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct PunctHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class PunctHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // PUNCTHANDLER_HPP_

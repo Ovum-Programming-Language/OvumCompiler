@@ -10,9 +10,10 @@ class Lexer;
 using TokenPtr = std::unique_ptr<Token>;
 using OptToken = std::optional<TokenPtr>;
 
-struct Handler {
+class Handler {
+public:
   virtual ~Handler() = default;
-  virtual OptToken scan(Lexer &lx) = 0;
+  virtual OptToken Scan(Lexer &lx) = 0;
 };
 
 #endif // HANDLER_HPP_

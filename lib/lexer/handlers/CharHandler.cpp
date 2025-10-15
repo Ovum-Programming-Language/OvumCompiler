@@ -1,13 +1,14 @@
 #include "CharHandler.hpp"
 
-OptToken CharHandler::scan(Lexer &lx) {
+OptToken CharHandler::Scan(Lexer &lx) {
   std::string raw;
   raw.push_back('\'');
   char val = '\0';
-  if (lx.peek() == '\\') {
-    lx.advance();
+
+  if (lx.Peek() == '\\') {
+    lx.Advance();
     raw.push_back('\\');
-    char e = lx.advance();
+    char e = lx.Advance();
     raw.push_back(e);
     switch (e) {
       case 'n':
@@ -27,14 +28,16 @@ OptToken CharHandler::scan(Lexer &lx) {
         break;
     }
   } else {
-    char c = lx.advance();
+    char c = lx.Advance();
     raw.push_back(c);
     val = c;
   }
-  if (lx.peek() == '\'') {
-    lx.advance();
+
+  if (lx.Peek() == '\'') {
+    lx.Advance();
     raw.push_back('\'');
   } else
     throw LexerError("Unterminated char literal");
-  return std::make_optional(TokenFactory::make_char_literal(std::move(raw), val, lx.line(), lx.token_col()));
+
+  return std::make_optional(TokenFactory::make_char_literal(std::move(raw), val, lx.GetLine(), lx.GetTokenCol()));
 }

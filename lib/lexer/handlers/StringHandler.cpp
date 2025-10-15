@@ -1,24 +1,25 @@
 #include "StringHandler.hpp"
 
-OptToken StringHandler::scan(Lexer &lx) {
+OptToken StringHandler::Scan(Lexer &lx) {
   std::string raw;
   std::string out;
   raw.push_back('"');
 
-  while (!lx.is_at_end()) {
-    char c = lx.advance();
+  while (!lx.IsAtEnd()) {
+    char c = lx.Advance();
     raw.push_back(c);
 
     if (c == '"') {
       return std::make_optional(
-          TokenFactory::make_string_literal(std::move(raw), std::move(out), lx.line(), lx.token_col()));
+          TokenFactory::make_string_literal(std::move(raw), std::move(out), lx.GetLine(), lx.GetTokenCol()));
     }
 
     if (c == '\\') {
-      if (lx.is_at_end())
+      if (lx.IsAtEnd())
         throw LexerError("Unterminated string literal (backslash at EOF)");
-      char e = lx.advance();
+      char e = lx.Advance();
       raw.push_back(e);
+
       switch (e) {
         case 'n':
           out.push_back('\n');
@@ -42,6 +43,7 @@ OptToken StringHandler::scan(Lexer &lx) {
     } else {
       if (c == '\n')
         throw LexerError("Unterminated string literal (newline inside)");
+
       out.push_back(c);
     }
   }

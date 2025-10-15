@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct DefaultHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class DefaultHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // DEFAULTHANDLER_HPP_

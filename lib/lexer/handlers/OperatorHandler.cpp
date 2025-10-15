@@ -1,15 +1,17 @@
 #include "OperatorHandler.hpp"
 
-OptToken OperatorHandler::scan(Lexer &lx) {
+OptToken OperatorHandler::Scan(Lexer &lx) {
   std::string op;
-  op.push_back(lx.current_char());
-  char p = lx.peek();
+  op.push_back(lx.CurrentChar());
+  char p = lx.Peek();
+
   if (p != '\0') {
     std::string two = op + p;
-    if (lx.is_multiop(two)) {
-      lx.advance();
+    if (lx.IsMultiop(two)) {
+      lx.Advance();
       op = two;
     }
   }
-  return std::make_optional(TokenFactory::make_operator(std::move(op), lx.line(), lx.token_col()));
+
+  return std::make_optional(TokenFactory::make_operator(std::move(op), lx.GetLine(), lx.GetTokenCol()));
 }

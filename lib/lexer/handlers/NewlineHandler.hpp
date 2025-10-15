@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct NewlineHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class NewlineHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // NEWLINEHANDLER_HPP_

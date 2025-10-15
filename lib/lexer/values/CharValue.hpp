@@ -6,19 +6,16 @@
 
 #include "Value.hpp"
 
-struct CharValue : Value {
+class CharValue : public Value {
+public:
+  explicit CharValue(char c);
+
+  [[nodiscard]] std::unique_ptr<Value> Clone() const override;
+  [[nodiscard]] std::string ToString() const override;
+  [[nodiscard]] std::string GetTypeName() const override;
+
+private:
   char v;
-  explicit CharValue(char c) : v(c) {
-  }
-  std::unique_ptr<Value> clone() const override {
-    return std::make_unique<CharValue>(v);
-  }
-  std::string to_string() const override {
-    return std::string("'") + v + "'";
-  }
-  std::string type_name() const override {
-    return "Char";
-  }
 };
 
 #endif // CHARVALUE_HPP_

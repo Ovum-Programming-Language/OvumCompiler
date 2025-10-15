@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-const std::unordered_set<std::string>& keyword_set() {
+const std::unordered_set<std::string>& KeywordSet() {
   static const std::unordered_set<std::string> s = {
       "fun",        "class",   "interface", "var",    "override", "pure",    "if",        "else",
       "for",        "while",   "return",    "unsafe", "val",      "static",  "public",    "private",
@@ -9,7 +9,7 @@ const std::unordered_set<std::string>& keyword_set() {
   return s;
 }
 
-const std::unordered_set<std::string>& multi_ops_set() {
+const std::unordered_set<std::string>& MultiOpsSet() {
   static const std::unordered_set<std::string> s = {"==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":="};
   return s;
 }

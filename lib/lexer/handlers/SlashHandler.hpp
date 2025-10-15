@@ -4,8 +4,9 @@
 #include "Handler.hpp"
 #include "lib/lexer/Lexer.hpp"
 
-struct SlashHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class SlashHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // SLASHHANDLER_HPP_

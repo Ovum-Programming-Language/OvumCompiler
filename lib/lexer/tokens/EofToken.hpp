@@ -1,9 +1,7 @@
 #ifndef EOFTOKEN_HPP_
 #define EOFTOKEN_HPP_
 
-#include <iosfwd>
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include "Token.hpp"
@@ -12,28 +10,13 @@
 
 class EofToken final : public Token {
 public:
-  EofToken(int line, int col) : Token(line, col), lexeme_("") {
-  }
+  EofToken(int32_t line, int32_t col);
 
-  TokenType type() const noexcept override {
-    return TokenType::EOF_T;
-  }
-  std::string lexeme() const noexcept override {
-    return lexeme_;
-  }
-
-  std::unique_ptr<Token> clone() const override {
-    return std::make_unique<EofToken>(*this);
-  }
-  void accept(TokenVisitor& visitor) const override {
-    visitor.visit(*this);
-  }
-
-  std::string to_string() const override {
-    std::ostringstream os;
-    os << "Token(EOF, @" << this->line() << ":" << this->column() << ")";
-    return os.str();
-  }
+  [[nodiscard]] TokenType GetType() const noexcept override;
+  [[nodiscard]] std::string GetLexeme() const noexcept override;
+  [[nodiscard]] std::unique_ptr<Token> Clone() const override;
+  void Accept(TokenVisitor& visitor) const override;
+  [[nodiscard]] std::string ToString() const override;
 
 private:
   std::string lexeme_;

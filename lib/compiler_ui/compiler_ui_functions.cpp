@@ -12,10 +12,10 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
   Lexer lx(sample, false);
   
   try {
-    auto toks = lx.tokenize();
+    auto toks = lx.Tokenize();
     
     for (auto& t : toks) {
-      out << t->to_string() << "\n";
+      out << t->ToString() << "\n";
     }
   } catch (const std::exception &e) {
     out << "Lexer error: " << e.what() << "\n";

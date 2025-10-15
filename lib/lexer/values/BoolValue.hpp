@@ -6,19 +6,16 @@
 
 #include "Value.hpp"
 
-struct BoolValue : Value {
+class BoolValue : public Value {
+public:
+  explicit BoolValue(bool b);
+
+  [[nodiscard]] std::unique_ptr<Value> Clone() const override;
+  [[nodiscard]] std::string ToString() const override;
+  [[nodiscard]] std::string GetTypeName() const override;
+
+private:
   bool v;
-  explicit BoolValue(bool b) : v(b) {
-  }
-  std::unique_ptr<Value> clone() const override {
-    return std::make_unique<BoolValue>(v);
-  }
-  std::string to_string() const override {
-    return v ? "true" : "false";
-  }
-  std::string type_name() const override {
-    return "Bool";
-  }
 };
 
 #endif // BOOLVALUE_HPP_

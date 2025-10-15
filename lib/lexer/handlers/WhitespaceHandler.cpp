@@ -1,11 +1,12 @@
 #include "WhitespaceHandler.hpp"
 
-OptToken WhitespaceHandler::scan(Lexer &lx) {
-  while (!lx.is_at_end()) {
-    if (char p = lx.peek(); p == ' ' || p == '\t' || p == '\r') {
-      lx.advance();
+OptToken WhitespaceHandler::Scan(Lexer &lx) {
+  while (!lx.IsAtEnd()) {
+    if (char p = lx.Peek(); p == ' ' || p == '\t' || p == '\r') {
+      lx.Advance();
       continue;
     }
+
     break;
   }
   return std::nullopt;

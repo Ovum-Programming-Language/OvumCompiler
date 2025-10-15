@@ -5,8 +5,9 @@
 #include "lib/lexer/Lexer.hpp"
 #include "lib/lexer/LexerError.hpp"
 
-struct CharHandler : Handler {
-  OptToken scan(Lexer &lx) override;
+class CharHandler : public Handler {
+public:
+  OptToken Scan(Lexer &lx) override;
 };
 
 #endif // CHARHANDLER_HPP_
