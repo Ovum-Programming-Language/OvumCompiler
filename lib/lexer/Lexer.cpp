@@ -26,44 +26,51 @@ bool Lexer::IsAtEnd() const noexcept {
 char Lexer::Peek(size_t offset) const noexcept {
   size_t idx = current_ + offset;
 
-  if (idx >= src_.size())
+  if (idx >= src_.size()) {
     return '\0';
+  }
 
   return src_[idx];
 }
 
 char Lexer::CurrentChar() const noexcept {
-  if (current_ == 0)
+  if (current_ == 0) {
     return '\0';
+  }
 
   return src_[current_ - 1];
 }
 
 char Lexer::Advance() {
-  if (IsAtEnd())
+  if (IsAtEnd()) {
     return '\0';
+  }
 
   char c = src_[current_++];
 
   if (c == '\n') {
     ++line_;
     col_ = 1;
-  } else
+  } else {
     ++col_;
+  }
 
   return c;
 }
 
 void Lexer::RetreatOne() {
-  if (current_ == 0)
+  if (current_ == 0) {
     return;
+  }
 
   --current_;
   int l = 1;
 
-  for (size_t i = 0; i < current_; ++i)
-    if (src_[i] == '\n')
+  for (size_t i = 0; i < current_; ++i) {
+    if (src_[i] == '\n') {
       ++l;
+    }
+  }
 
   line_ = l;
   int col = 1;
@@ -74,8 +81,9 @@ void Lexer::RetreatOne() {
       break;
     }
 
-    if (i == 1)
+    if (i == 1) {
       col = static_cast<int>(current_);
+    }
   }
 
   col_ = col;
@@ -88,8 +96,9 @@ void Lexer::ConsumeWhile(std::string &out, const std::function<bool(char)> &pred
 }
 
 std::string Lexer::GetRawLexeme() const {
-  if (current_ >= start_)
+  if (current_ >= start_) {
     return std::string(src_.substr(start_, current_ - start_));
+  }
 
   return {};
 }
@@ -111,13 +120,15 @@ std::vector<TokenPtr> Lexer::Tokenize() {
     char c = Advance();
     Handler *h = handlers_.at(static_cast<unsigned char>(c)).get();
 
-    if (!h)
+    if (!h) {
       h = default_handler_.get();
+    }
 
     OptToken maybe = h->Scan(*this);
 
-    if (maybe && *maybe)
+    if (maybe && *maybe) {
       tokens.push_back(std::move(*maybe));
+    }
   }
 
   tokens.push_back(TokenFactory::make_eof(line_, col_));
@@ -125,8 +136,9 @@ std::vector<TokenPtr> Lexer::Tokenize() {
 }
 
 void Lexer::RegisterDefaults() {
-  for (auto &p : handlers_)
+  for (auto &p : handlers_) {
     p.reset();
+  }
 
   default_handler_.reset();
 
@@ -136,16 +148,19 @@ void Lexer::RegisterDefaults() {
 
   SetHandler('\n', std::make_unique<NewlineHandler>());
 
-  for (unsigned char c = 'a'; c <= 'z'; ++c)
+  for (unsigned char c = 'a'; c <= 'z'; ++c) {
     SetHandler(c, std::make_unique<IdentifierHandler>());
+  }
 
-  for (unsigned char c = 'A'; c <= 'Z'; ++c)
+  for (unsigned char c = 'A'; c <= 'Z'; ++c) {
     SetHandler(c, std::make_unique<IdentifierHandler>());
+  }
 
   SetHandler((unsigned char) '_', std::make_unique<IdentifierHandler>());
 
-  for (unsigned char d = '0'; d <= '9'; ++d)
+  for (unsigned char d = '0'; d <= '9'; ++d) {
     SetHandler(d, std::make_unique<NumberHandler>());
+  }
 
   SetHandler((unsigned char) '.', std::make_unique<NumberHandler>());
 
@@ -156,13 +171,15 @@ void Lexer::RegisterDefaults() {
 
   const std::string opchars = "+-*/%<>=!&|^~?:.";
 
-  for (unsigned char c : opchars)
+  for (unsigned char c : opchars) {
     SetHandler(c, std::make_unique<OperatorHandler>());
+  }
 
   const std::string puncts = ",;:(){}[]";
 
-  for (unsigned char c : puncts)
+  for (unsigned char c : puncts) {
     SetHandler(c, std::make_unique<PunctHandler>());
+  }
 
   SetDefaultHandler(std::make_unique<DefaultHandler>());
 }

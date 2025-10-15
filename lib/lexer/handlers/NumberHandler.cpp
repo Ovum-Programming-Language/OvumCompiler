@@ -20,11 +20,13 @@ OptToken NumberHandler::Scan(Lexer &lx) {
     if (lx.Peek() == 'e' || lx.Peek() == 'E') {
       raw.push_back(lx.Advance());
 
-      if (lx.Peek() == '+' || lx.Peek() == '-')
+      if (lx.Peek() == '+' || lx.Peek() == '-') {
         raw.push_back(lx.Advance());
+      }
 
-      if (!IsDigitChar(lx.Peek()))
+      if (!IsDigitChar(lx.Peek())) {
         throw LexerError("Malformed exponent");
+      }
 
       lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
@@ -50,11 +52,13 @@ OptToken NumberHandler::Scan(Lexer &lx) {
     if (lx.Peek() == 'e' || lx.Peek() == 'E') {
       raw.push_back(lx.Advance());
 
-      if (lx.Peek() == '+' || lx.Peek() == '-')
+      if (lx.Peek() == '+' || lx.Peek() == '-') {
         raw.push_back(lx.Advance());
+      }
 
-      if (!IsDigitChar(lx.Peek()))
+      if (!IsDigitChar(lx.Peek())) {
         throw LexerError("Malformed exponent");
+      }
 
       lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
@@ -73,11 +77,13 @@ OptToken NumberHandler::Scan(Lexer &lx) {
   if (lx.Peek() == 'e' || lx.Peek() == 'E') {
     raw.push_back(lx.Advance());
 
-    if (lx.Peek() == '+' || lx.Peek() == '-')
+    if (lx.Peek() == '+' || lx.Peek() == '-') {
       raw.push_back(lx.Advance());
+    }
 
-    if (!IsDigitChar(lx.Peek()))
+    if (!IsDigitChar(lx.Peek())) {
       throw LexerError("Malformed exponent");
+    }
 
     lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     long double v = NAN;

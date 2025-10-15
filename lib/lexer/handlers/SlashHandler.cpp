@@ -7,11 +7,13 @@ OptToken SlashHandler::Scan(Lexer &lx) {
   if (lx.Peek() == '/') {
     std::string txt;
 
-    while (!lx.IsAtEnd() && lx.Peek() != '\n')
+    while (!lx.IsAtEnd() && lx.Peek() != '\n') {
       txt.push_back(lx.Advance());
+    }
 
-    if (lx.IsKeepComments())
+    if (lx.IsKeepComments()) {
       return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+    }
 
     return std::nullopt;
   }
@@ -33,13 +35,16 @@ OptToken SlashHandler::Scan(Lexer &lx) {
       txt.push_back(c);
     }
 
-    if (!closed)
+    if (!closed) {
       throw LexerError("Unterminated block comment");
+    }
 
-    if (lx.IsKeepComments())
+    if (lx.IsKeepComments()) {
       return std::make_optional(TokenFactory::make_comment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+    }
 
     return std::nullopt;
   }
+
   return std::make_optional(TokenFactory::make_operator(std::string(1, '/'), lx.GetLine(), lx.GetTokenCol()));
 }

@@ -2,7 +2,7 @@
 
 #include "lib/compiler_ui/compiler_ui_functions.hpp"
 
-int main() {
+int main(int32_t argc, char** argv) {
   const std::string sample = R"ovum(
 // demo
 fun Main(args: StringArray): Int {

@@ -18,8 +18,10 @@ OptToken StringHandler::Scan(Lexer &lx) {
     }
 
     if (c == '\\') {
-      if (lx.IsAtEnd())
+      if (lx.IsAtEnd()) {
         throw LexerError("Unterminated string literal (backslash at EOF)");
+      }
+
       char e = lx.Advance();
       raw.push_back(e);
 
@@ -44,8 +46,9 @@ OptToken StringHandler::Scan(Lexer &lx) {
           break;
       }
     } else {
-      if (c == '\n')
+      if (c == '\n') {
         throw LexerError("Unterminated string literal (newline inside)");
+      }
 
       out.push_back(c);
     }

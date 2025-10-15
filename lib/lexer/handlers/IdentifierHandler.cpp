@@ -11,6 +11,7 @@ OptToken IdentifierHandler::Scan(Lexer &lx) {
     if (s == "true" || s == "false") {
       return std::make_optional(TokenFactory::make_bool_literal(s, s == "true", lx.GetLine(), lx.GetTokenCol()));
     }
+
     return std::make_optional(TokenFactory::make_keyword(std::move(s), lx.GetLine(), lx.GetTokenCol()));
   }
 

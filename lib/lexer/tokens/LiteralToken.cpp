@@ -35,8 +35,10 @@ void LiteralToken::Accept(TokenVisitor& visitor) const {
 std::string LiteralToken::ToString() const {
   std::ostringstream os;
   os << "Token(" << to_string_view(typ_) << ", '" << lexeme_ << "'";
-  if (value_)
+  if (value_) {
     os << ", " << value_->ToString();
+  }
+
   os << ", @" << this->GetLine() << ":" << this->GetColumn() << ")";
   return os.str();
 }
