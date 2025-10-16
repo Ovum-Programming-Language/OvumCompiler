@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-KeywordToken::KeywordToken(std::string lex, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(lex)) {
+KeywordToken::KeywordToken(std::string lex, const TokenPosition& position) : lexeme_(std::move(lex)), position_(position) {
 }
 
 std::string KeywordToken::GetStringType() const noexcept {
@@ -23,6 +23,10 @@ void KeywordToken::Accept(TokenVisitor& visitor) const {
 
 std::string KeywordToken::ToString() const {
   std::ostringstream os;
-  os << "Token(KEYWORD, '" << lexeme_ << "', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(KEYWORD, '" << lexeme_ << "', @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& KeywordToken::GetPosition() const noexcept {
+  return position_;
 }

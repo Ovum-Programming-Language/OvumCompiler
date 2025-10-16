@@ -9,7 +9,7 @@
 
 class KeywordToken final : public Token {
 public:
-  KeywordToken(std::string lex, int32_t line, int32_t col);
+  KeywordToken(std::string lex, const TokenPosition& position);
 
   [[nodiscard]] std::string GetStringType() const noexcept override;
 
@@ -21,8 +21,11 @@ public:
 
   [[nodiscard]] std::string ToString() const override;
 
+  [[nodiscard]] const TokenPosition& GetPosition() const noexcept override;
+
 private:
   std::string lexeme_;
+  TokenPosition position_;
 };
 
 #endif // KEYWORDTOKEN_HPP_

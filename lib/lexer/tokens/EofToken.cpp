@@ -2,15 +2,15 @@
 
 #include <sstream>
 
-EofToken::EofToken(int32_t line, int32_t col) : Token(line, col), lexeme_("") {
-}
+EofToken::EofToken(const TokenPosition& position) : position_(position) {
+} 
 
 std::string EofToken::GetStringType() const noexcept {
   return "EOF";
 }
 
 std::string EofToken::GetLexeme() const noexcept {
-  return lexeme_;
+  return "";
 }
 
 std::unique_ptr<Token> EofToken::Clone() const {
@@ -23,6 +23,10 @@ void EofToken::Accept(TokenVisitor& visitor) const {
 
 std::string EofToken::ToString() const {
   std::ostringstream os;
-  os << "Token(EOF, @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(EOF, @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& EofToken::GetPosition() const noexcept {
+  return position_;
 }

@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-OperatorToken::OperatorToken(std::string op, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(op)) {
+OperatorToken::OperatorToken(std::string op, const TokenPosition& position) : lexeme_(std::move(op)), position_(position) {
 }
 
 std::string OperatorToken::GetStringType() const noexcept {
@@ -23,6 +23,10 @@ void OperatorToken::Accept(TokenVisitor& visitor) const {
 
 std::string OperatorToken::ToString() const {
   std::ostringstream os;
-  os << "Token(OPERATOR, '" << lexeme_ << "', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(OPERATOR, '" << lexeme_ << "', @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& OperatorToken::GetPosition() const noexcept {
+  return position_;
 }

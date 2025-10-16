@@ -2,16 +2,13 @@
 #define TOKEN_HPP_
 
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include "TokenVisitor.hpp"
+#include "TokenPosition.hpp"
 
 class Token {
 public:
-  Token(int32_t line, int32_t column) : line_(line), column_(column) {
-  }
-
   virtual ~Token() = default;
 
   [[nodiscard]] virtual std::string GetStringType() const = 0;
@@ -22,23 +19,9 @@ public:
 
   virtual void Accept(TokenVisitor& v) const = 0;
 
-  [[nodiscard]] virtual std::string ToString() const {
-    std::ostringstream os;
-    os << "Token(" << GetStringType() << ", '" << GetLexeme() << "', @" << line_ << ":" << column_ << ")";
-    return os.str();
-  }
+  [[nodiscard]] virtual std::string ToString() const = 0;
 
-  [[nodiscard]] int32_t GetLine() const noexcept {
-    return line_;
-  }
-
-  [[nodiscard]] int32_t GetColumn() const noexcept {
-    return column_;
-  }
-
-private:
-  int32_t line_;
-  int32_t column_;
+  [[nodiscard]] virtual const TokenPosition& GetPosition() const noexcept = 0;
 };
 
 #endif // TOKEN_HPP_

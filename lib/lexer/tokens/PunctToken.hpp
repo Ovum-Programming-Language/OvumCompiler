@@ -9,9 +9,9 @@
 
 class PunctToken final : public Token {
 public:
-  PunctToken(char ch, int32_t line, int32_t col);
+  PunctToken(char ch, const TokenPosition& position);
 
-  PunctToken(std::string punct, int32_t line, int32_t col);
+  PunctToken(std::string punct, const TokenPosition& position);
 
   [[nodiscard]] std::string GetStringType() const noexcept override;
 
@@ -23,8 +23,11 @@ public:
 
   [[nodiscard]] std::string ToString() const override;
 
+  [[nodiscard]] const TokenPosition& GetPosition() const noexcept override;
+
 private:
   std::string lexeme_;
+  TokenPosition position_;
 };
 
 #endif // PUNCTTOKEN_HPP_

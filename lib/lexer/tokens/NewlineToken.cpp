@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-NewlineToken::NewlineToken(int32_t line, int32_t col) : Token(line, col), lexeme_("\\n") {
+NewlineToken::NewlineToken(const TokenPosition& position) : lexeme_("\\n"), position_(position) {
 }
 
 std::string NewlineToken::GetStringType() const noexcept {
@@ -23,6 +23,10 @@ void NewlineToken::Accept(TokenVisitor& visitor) const {
 
 std::string NewlineToken::ToString() const {
   std::ostringstream os;
-  os << "Token(NEWLINE, '\\n', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(NEWLINE, '\\n', @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& NewlineToken::GetPosition() const noexcept {
+  return position_;
 }

@@ -2,8 +2,8 @@
 
 #include <sstream>
 
-LiteralToken::LiteralToken(std::string rawLexeme, std::unique_ptr<Value> value, int32_t line, int32_t col) :
-    Token(line, col), lexeme_(std::move(rawLexeme)), value_(std::move(value)) {
+LiteralToken::LiteralToken(std::string rawLexeme, std::unique_ptr<Value> value, const TokenPosition& position) :
+    lexeme_(std::move(rawLexeme)), value_(std::move(value)), position_(position) {
 }
 
 std::string LiteralToken::GetStringType() const noexcept {
@@ -24,7 +24,7 @@ Value* LiteralToken::GetValue() noexcept {
 
 std::unique_ptr<Token> LiteralToken::Clone() const {
   std::unique_ptr<Value> vcopy = value_ ? value_->Clone() : nullptr;
-  return std::make_unique<LiteralToken>(lexeme_, std::move(vcopy), this->GetLine(), this->GetColumn());
+  return std::make_unique<LiteralToken>(lexeme_, std::move(vcopy), position_);
 }
 
 void LiteralToken::Accept(TokenVisitor& visitor) const {
@@ -39,6 +39,10 @@ std::string LiteralToken::ToString() const {
     os << ", " << value_->ToString();
   }
 
-  os << ", @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << ", @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& LiteralToken::GetPosition() const noexcept {
+  return position_;
 }

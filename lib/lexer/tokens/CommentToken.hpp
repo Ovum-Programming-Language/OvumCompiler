@@ -9,7 +9,7 @@
 
 class CommentToken final : public Token {
 public:
-  CommentToken(std::string txt, int32_t line, int32_t col);
+  CommentToken(std::string txt, const TokenPosition& position);
 
   [[nodiscard]] std::string GetStringType() const noexcept override;
 
@@ -21,8 +21,11 @@ public:
 
   [[nodiscard]] std::string ToString() const override;
 
+  [[nodiscard]] const TokenPosition& GetPosition() const noexcept override;
+
 private:
   std::string text_;
+  TokenPosition position_;
 };
 
 #endif // COMMENTTOKEN_HPP_

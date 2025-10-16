@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-CommentToken::CommentToken(std::string txt, int32_t line, int32_t col) : Token(line, col), text_(std::move(txt)) {
+CommentToken::CommentToken(std::string txt, const TokenPosition& position) : text_(std::move(txt)), position_(position) {
 }
 
 std::string CommentToken::GetStringType() const noexcept {
@@ -23,6 +23,10 @@ void CommentToken::Accept(TokenVisitor& visitor) const {
 
 std::string CommentToken::ToString() const {
   std::ostringstream os;
-  os << "Token(COMMENT, '" << text_ << "', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(COMMENT, '" << text_ << "', @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& CommentToken::GetPosition() const noexcept {
+  return position_;
 }

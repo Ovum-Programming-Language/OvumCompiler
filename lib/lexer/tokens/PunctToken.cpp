@@ -1,10 +1,10 @@
 #include <sstream>
 #include "PunctToken.hpp"
 
-PunctToken::PunctToken(char ch, int32_t line, int32_t col) : Token(line, col), lexeme_(1, ch) {
+PunctToken::PunctToken(char ch, const TokenPosition& position) : lexeme_(1, ch), position_(position) {
 }
 
-PunctToken::PunctToken(std::string punct, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(punct)) {
+PunctToken::PunctToken(std::string punct, const TokenPosition& position) : lexeme_(std::move(punct)), position_(position) {
 }
 
 std::string PunctToken::GetStringType() const noexcept {
@@ -25,6 +25,10 @@ void PunctToken::Accept(TokenVisitor& visitor) const {
 
 std::string PunctToken::ToString() const {
   std::ostringstream os;
-  os << "Token(PUNCT, '" << lexeme_ << "', @" << this->GetLine() << ":" << this->GetColumn() << ")";
+  os << "Token(PUNCT, '" << lexeme_ << "', @" << position_.GetLine() << ":" << position_.GetColumn() << ")";
   return os.str();
+}
+
+const TokenPosition& PunctToken::GetPosition() const noexcept {
+  return position_;
 }
