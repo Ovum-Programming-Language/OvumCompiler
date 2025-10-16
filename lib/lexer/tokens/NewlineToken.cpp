@@ -5,8 +5,8 @@
 NewlineToken::NewlineToken(int32_t line, int32_t col) : Token(line, col), lexeme_("\\n") {
 }
 
-TokenType NewlineToken::GetType() const noexcept {
-  return TokenType::kNewline;
+std::string NewlineToken::GetStringType() const noexcept {
+  return "NEWLINE";
 }
 
 std::string NewlineToken::GetLexeme() const noexcept {

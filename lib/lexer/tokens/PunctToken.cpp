@@ -7,8 +7,8 @@ PunctToken::PunctToken(char ch, int32_t line, int32_t col) : Token(line, col), l
 PunctToken::PunctToken(std::string punct, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(punct)) {
 }
 
-TokenType PunctToken::GetType() const noexcept {
-  return TokenType::kPunct;
+std::string PunctToken::GetStringType() const noexcept {
+  return "PUNCT";
 }
 
 std::string PunctToken::GetLexeme() const noexcept {

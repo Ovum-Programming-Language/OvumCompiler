@@ -5,14 +5,13 @@
 #include <string>
 
 #include "Token.hpp"
-#include "TokenType.hpp"
 #include "TokenVisitor.hpp"
 
 class KeywordToken final : public Token {
 public:
   KeywordToken(std::string lex, int32_t line, int32_t col);
 
-  [[nodiscard]] TokenType GetType() const noexcept override;
+  [[nodiscard]] std::string GetStringType() const noexcept override;
 
   [[nodiscard]] std::string GetLexeme() const noexcept override;
 

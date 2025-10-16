@@ -5,8 +5,8 @@
 KeywordToken::KeywordToken(std::string lex, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(lex)) {
 }
 
-TokenType KeywordToken::GetType() const noexcept {
-  return TokenType::kKeyword;
+std::string KeywordToken::GetStringType() const noexcept {
+  return "KEYWORD";
 }
 
 std::string KeywordToken::GetLexeme() const noexcept {

@@ -5,8 +5,8 @@
 OperatorToken::OperatorToken(std::string op, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(op)) {
 }
 
-TokenType OperatorToken::GetType() const noexcept {
-  return TokenType::kOperator;
+std::string OperatorToken::GetStringType() const noexcept {
+  return "OPERATOR";
 }
 
 std::string OperatorToken::GetLexeme() const noexcept {

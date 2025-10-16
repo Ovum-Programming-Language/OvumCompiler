@@ -5,8 +5,8 @@
 IdentToken::IdentToken(std::string lex, int32_t line, int32_t col) : Token(line, col), lexeme_(std::move(lex)) {
 }
 
-TokenType IdentToken::GetType() const noexcept {
-  return TokenType::kIdent;
+std::string IdentToken::GetStringType() const noexcept {
+  return "IDENT";
 }
 
 std::string IdentToken::GetLexeme() const noexcept {

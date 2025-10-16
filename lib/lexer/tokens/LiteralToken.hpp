@@ -5,15 +5,14 @@
 #include <string>
 
 #include "Token.hpp"
-#include "TokenType.hpp"
 #include "TokenVisitor.hpp"
 #include "lib/lexer/values/Value.hpp"
 
 class LiteralToken final : public Token {
 public:
-  LiteralToken(TokenType typ, std::string rawLexeme, std::unique_ptr<Value> value, int32_t line, int32_t col);
+  LiteralToken(std::string rawLexeme, std::unique_ptr<Value> value, int32_t line, int32_t col);
 
-  [[nodiscard]] TokenType GetType() const noexcept override;
+  [[nodiscard]] std::string GetStringType() const noexcept override;
 
   [[nodiscard]] std::string GetLexeme() const noexcept override;
 
@@ -28,7 +27,6 @@ public:
   [[nodiscard]] std::string ToString() const override;
 
 private:
-  TokenType typ_;
   std::string lexeme_;
   std::unique_ptr<Value> value_;
 };

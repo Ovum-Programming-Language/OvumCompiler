@@ -5,8 +5,8 @@
 EofToken::EofToken(int32_t line, int32_t col) : Token(line, col), lexeme_("") {
 }
 
-TokenType EofToken::GetType() const noexcept {
-  return TokenType::kEofT;
+std::string EofToken::GetStringType() const noexcept {
+  return "EOF";
 }
 
 std::string EofToken::GetLexeme() const noexcept {

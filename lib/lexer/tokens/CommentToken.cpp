@@ -5,8 +5,8 @@
 CommentToken::CommentToken(std::string txt, int32_t line, int32_t col) : Token(line, col), text_(std::move(txt)) {
 }
 
-TokenType CommentToken::GetType() const noexcept {
-  return TokenType::kComment;
+std::string CommentToken::GetStringType() const noexcept {
+  return "COMMENT";
 }
 
 std::string CommentToken::GetLexeme() const noexcept {

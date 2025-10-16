@@ -5,7 +5,6 @@
 #include <sstream>
 #include <string>
 
-#include "TokenType.hpp"
 #include "TokenVisitor.hpp"
 
 class Token {
@@ -15,7 +14,7 @@ public:
 
   virtual ~Token() = default;
 
-  [[nodiscard]] virtual TokenType GetType() const = 0;
+  [[nodiscard]] virtual std::string GetStringType() const = 0;
 
   [[nodiscard]] virtual std::string GetLexeme() const = 0;
 
@@ -25,7 +24,7 @@ public:
 
   [[nodiscard]] virtual std::string ToString() const {
     std::ostringstream os;
-    os << "Token(" << to_string_view(GetType()) << ", '" << GetLexeme() << "', @" << line_ << ":" << column_ << ")";
+    os << "Token(" << GetStringType() << ", '" << GetLexeme() << "', @" << line_ << ":" << column_ << ")";
     return os.str();
   }
 
