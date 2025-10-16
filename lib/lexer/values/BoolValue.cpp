@@ -1,7 +1,6 @@
 #include "BoolValue.hpp"
 
-BoolValue::BoolValue(bool b) :
-  v(b) {
+BoolValue::BoolValue(bool b) : v(b) {
 }
 
 std::unique_ptr<Value> BoolValue::Clone() const {

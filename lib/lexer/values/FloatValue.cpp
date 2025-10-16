@@ -2,8 +2,7 @@
 
 #include <sstream>
 
-FloatValue::FloatValue(long double x) :
-  v(x) {
+FloatValue::FloatValue(long double x) : v(x) {
 }
 
 std::unique_ptr<Value> FloatValue::Clone() const {

@@ -3,14 +3,8 @@
 #include <sstream>
 
 LiteralToken::LiteralToken(
-    TokenType typ,
-    std::string rawLexeme,
-    std::unique_ptr<Value> value,
-    int32_t line,
-    int32_t col) :
-  Token(line, col), typ_(typ),
-  lexeme_(std::move(rawLexeme)),
-  value_(std::move(value)) {
+    TokenType typ, std::string rawLexeme, std::unique_ptr<Value> value, int32_t line, int32_t col) :
+    Token(line, col), typ_(typ), lexeme_(std::move(rawLexeme)), value_(std::move(value)) {
 }
 
 TokenType LiteralToken::GetType() const noexcept {
@@ -31,11 +25,7 @@ Value* LiteralToken::GetValue() noexcept {
 
 std::unique_ptr<Token> LiteralToken::Clone() const {
   std::unique_ptr<Value> vcopy = value_ ? value_->Clone() : nullptr;
-  return std::make_unique<LiteralToken>(typ_,
-                                        lexeme_,
-                                        std::move(vcopy),
-                                        this->GetLine(),
-                                        this->GetColumn());
+  return std::make_unique<LiteralToken>(typ_, lexeme_, std::move(vcopy), this->GetLine(), this->GetColumn());
 }
 
 void LiteralToken::Accept(TokenVisitor& visitor) const {

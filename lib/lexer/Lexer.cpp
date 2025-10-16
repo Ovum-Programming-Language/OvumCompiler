@@ -15,9 +15,7 @@
 
 #include "tokens/TokenFactory.hpp"
 
-Lexer::Lexer(std::string_view src, bool keep_comments) :
-  src_(src),
-  keep_comments_(keep_comments) {
+Lexer::Lexer(std::string_view src, bool keep_comments) : src_(src), keep_comments_(keep_comments) {
   RegisterDefaults();
 }
 
@@ -91,8 +89,7 @@ void Lexer::RetreatOne() {
   col_ = col;
 }
 
-void Lexer::ConsumeWhile(std::string& out,
-                         const std::function<bool(char)>& pred) {
+void Lexer::ConsumeWhile(std::string& out, const std::function<bool(char)>& pred) {
   while (!IsAtEnd() && pred(Peek())) {
     out.push_back(Advance());
   }

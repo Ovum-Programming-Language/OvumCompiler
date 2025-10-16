@@ -13,10 +13,7 @@ OptToken SlashHandler::Scan(Lexer& lx) {
 
     if (lx.IsKeepComments()) {
       std::string comment = txt.substr(1, txt.size() - 1);
-      return std::make_optional(
-          TokenFactory::MakeComment(std::move(comment),
-                                    lx.GetLine(),
-                                    lx.GetTokenCol()));
+      return std::make_optional(TokenFactory::MakeComment(std::move(comment), lx.GetLine(), lx.GetTokenCol()));
     }
 
     return std::nullopt;
@@ -44,17 +41,11 @@ OptToken SlashHandler::Scan(Lexer& lx) {
     }
 
     if (lx.IsKeepComments()) {
-      return std::make_optional(
-          TokenFactory::MakeComment(std::move(txt),
-                                    lx.GetLine(),
-                                    lx.GetTokenCol()));
+      return std::make_optional(TokenFactory::MakeComment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
     }
 
     return std::nullopt;
   }
 
-  return std::make_optional(
-      TokenFactory::MakeOperator(std::string(1, '/'),
-                                 lx.GetLine(),
-                                 lx.GetTokenCol()));
+  return std::make_optional(TokenFactory::MakeOperator(std::string(1, '/'), lx.GetLine(), lx.GetTokenCol()));
 }

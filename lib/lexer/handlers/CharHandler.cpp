@@ -43,9 +43,5 @@ OptToken CharHandler::Scan(Lexer& lx) {
     throw LexerError("Unterminated char literal");
   }
 
-  return std::make_optional(
-      TokenFactory::MakeCharLiteral(std::move(raw),
-                                    val,
-                                    lx.GetLine(),
-                                    lx.GetTokenCol()));
+  return std::make_optional(TokenFactory::MakeCharLiteral(std::move(raw), val, lx.GetLine(), lx.GetTokenCol()));
 }

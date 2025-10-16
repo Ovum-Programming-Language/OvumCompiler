@@ -2,8 +2,7 @@
 
 #include <sstream>
 
-EofToken::EofToken(int32_t line, int32_t col) :
-  Token(line, col), lexeme_("") {
+EofToken::EofToken(int32_t line, int32_t col) : Token(line, col), lexeme_("") {
 }
 
 TokenType EofToken::GetType() const noexcept {

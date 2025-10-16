@@ -10,8 +10,7 @@
 
 class Token {
 public:
-  Token(int32_t line, int32_t column) :
-    line_(line), column_(column) {
+  Token(int32_t line, int32_t column) : line_(line), column_(column) {
   }
 
   virtual ~Token() = default;

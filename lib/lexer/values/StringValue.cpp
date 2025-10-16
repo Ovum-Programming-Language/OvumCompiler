@@ -2,8 +2,7 @@
 
 #include <utility>
 
-StringValue::StringValue(std::string s) :
-  v(std::move(s)) {
+StringValue::StringValue(std::string s) : v(std::move(s)) {
 }
 
 std::unique_ptr<Value> StringValue::Clone() const {
