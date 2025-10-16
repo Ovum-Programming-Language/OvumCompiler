@@ -2,9 +2,9 @@
 
 #include "compiler_ui_functions.hpp"
 
-int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out) {
+int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out, std::ostream& err) {
   if (args.size() < 2) {
-    out << "Insufficient arguments\n";
+    err << "Insufficient arguments\n";
     return 1;
   }
 
@@ -18,7 +18,7 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
       out << t->ToString() << "\n";
     }
   } catch (const std::exception& e) {
-    out << "Lexer error: " << e.what() << "\n";
+    err << "Lexer error: " << e.what() << "\n";
     return 1;
   }
 

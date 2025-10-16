@@ -14,5 +14,7 @@ TEST_F(ProjectIntegrationTestSuite, InitTest) {
 
 TEST_F(ProjectIntegrationTestSuite, NegativeTest1) {
   std::ostringstream out;
-  ASSERT_EQ(StartCompilerConsoleUI(SplitString("test"), out), 1);
+  std::ostringstream err;
+  ASSERT_EQ(StartCompilerConsoleUI(SplitString("test"), out, err), 1);
+  ASSERT_EQ(err.str(), "Insufficient arguments\n");
 }

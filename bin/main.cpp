@@ -12,5 +12,5 @@ fun Main(args: StringArray): Int {
 }
 )ovum";
 
-  return StartCompilerConsoleUI({"ovumc", sample}, std::cout);
+  return StartCompilerConsoleUI({"ovumc", sample}, std::cout, std::cerr);
 }
