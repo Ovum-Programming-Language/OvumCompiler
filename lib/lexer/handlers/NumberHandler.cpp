@@ -47,9 +47,9 @@ OptToken NumberHandler::Scan(Lexer& lx) {
 
     return std::make_optional(
         TokenFactory::MakeFloatLiteral(std::move(raw),
-                                         v,
-                                         lx.GetLine(),
-                                         lx.GetTokenCol()));
+                                       v,
+                                       lx.GetLine(),
+                                       lx.GetTokenCol()));
   }
 
   lx.RetreatOne();
@@ -93,9 +93,9 @@ OptToken NumberHandler::Scan(Lexer& lx) {
 
     return std::make_optional(
         TokenFactory::MakeFloatLiteral(std::move(raw),
-                                         v,
-                                         lx.GetLine(),
-                                         lx.GetTokenCol()));
+                                       v,
+                                       lx.GetLine(),
+                                       lx.GetTokenCol()));
   }
 
   if (lx.Peek() == 'e' || lx.Peek() == 'E') {
@@ -123,9 +123,9 @@ OptToken NumberHandler::Scan(Lexer& lx) {
 
     return std::make_optional(
         TokenFactory::MakeFloatLiteral(std::move(raw),
-                                         v,
-                                         lx.GetLine(),
-                                         lx.GetTokenCol()));
+                                       v,
+                                       lx.GetLine(),
+                                       lx.GetTokenCol()));
   }
 
   int64_t vi = 0;
@@ -138,7 +138,7 @@ OptToken NumberHandler::Scan(Lexer& lx) {
 
   return std::make_optional(
       TokenFactory::MakeIntLiteral(std::move(raw),
-                                     vi,
-                                     lx.GetLine(),
-                                     lx.GetTokenCol()));
+                                   vi,
+                                   lx.GetLine(),
+                                   lx.GetTokenCol()));
 }

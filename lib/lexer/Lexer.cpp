@@ -172,7 +172,7 @@ void Lexer::RegisterDefaults() {
 
   SetHandler((unsigned char) '/', std::make_unique<SlashHandler>());
 
-  const std::string opchars = "+-*/%<>=!&|^~?:.";
+  const std::string opchars = "+-*%<>=!&|^~?:.";
 
   for (unsigned char c : opchars) {
     SetHandler(c, std::make_unique<OperatorHandler>());

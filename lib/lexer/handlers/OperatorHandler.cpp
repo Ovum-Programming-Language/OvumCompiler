@@ -17,6 +17,6 @@ OptToken OperatorHandler::Scan(Lexer& lx) {
 
   return std::make_optional(
       TokenFactory::MakeOperator(std::move(op),
-                                  lx.GetLine(),
-                                  lx.GetTokenCol()));
+                                 lx.GetLine(),
+                                 lx.GetTokenCol()));
 }

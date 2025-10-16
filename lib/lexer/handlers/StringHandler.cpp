@@ -15,9 +15,9 @@ OptToken StringHandler::Scan(Lexer& lx) {
     if (c == '"') {
       return std::make_optional(
           TokenFactory::MakeStringLiteral(std::move(raw),
-                                            std::move(out),
-                                            lx.GetLine(),
-                                            lx.GetTokenCol()));
+                                          std::move(out),
+                                          lx.GetLine(),
+                                          lx.GetTokenCol()));
     }
 
     if (c == '\\') {

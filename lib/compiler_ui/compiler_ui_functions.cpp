@@ -9,7 +9,7 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
   }
 
   const std::string& sample = args[1];
-  Lexer lx(sample, false);
+  Lexer lx(sample, true);
 
   try {
     auto toks = lx.Tokenize();

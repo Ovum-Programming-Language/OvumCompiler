@@ -45,7 +45,7 @@ OptToken CharHandler::Scan(Lexer& lx) {
 
   return std::make_optional(
       TokenFactory::MakeCharLiteral(std::move(raw),
-                                      val,
-                                      lx.GetLine(),
-                                      lx.GetTokenCol()));
+                                    val,
+                                    lx.GetLine(),
+                                    lx.GetTokenCol()));
 }
