@@ -1,5 +1,6 @@
 add_library(lexer STATIC
         Lexer.cpp
+        SourceCodeWrapper.cpp
         utils.cpp
         handlers/CharHandler.cpp
         handlers/DefaultHandler.cpp
@@ -24,6 +25,7 @@ add_library(lexer STATIC
         values/FloatValue.cpp
         values/IntValue.cpp
         values/StringValue.cpp
+        tokens/TokenFactory.cpp
         tokens/TokenPosition.cpp
 )
 

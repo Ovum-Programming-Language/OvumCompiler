@@ -2,18 +2,19 @@
 
 #include "lib/lexer/tokens/TokenFactory.hpp"
 
-OptToken OperatorHandler::Scan(Lexer& lx) {
+OptToken OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string op;
-  op.push_back(lx.CurrentChar());
-  char p = lx.Peek();
+  op.push_back(wrapper.CurrentChar());
+  char p = wrapper.Peek();
 
   if (p != '\0') {
     std::string two = op + p;
-    if (lx.IsMultiop(two)) {
-      lx.Advance();
+
+    if (wrapper.IsMultiop(two)) {
+      wrapper.Advance();
       op = two;
     }
   }
 
-  return std::make_optional(TokenFactory::MakeOperator(std::move(op), lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(TokenFactory::MakeOperator(std::move(op), wrapper.GetLine(), wrapper.GetTokenCol()));
 }

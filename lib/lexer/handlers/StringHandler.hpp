@@ -2,11 +2,10 @@
 #define STRINGHANDLER_H
 
 #include "Handler.hpp"
-#include "lib/lexer/Lexer.hpp"
 
 class StringHandler : public Handler {
 public:
-  OptToken Scan(Lexer& lx) override;
+  OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
 #endif // STRINGHANDLER_H

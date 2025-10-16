@@ -9,26 +9,26 @@ static bool IsDigitChar(char c) {
   return std::isdigit(static_cast<unsigned char>(c));
 }
 
-OptToken NumberHandler::Scan(Lexer& lx) {
+OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
-  char first = lx.CurrentChar();
+  char first = wrapper.CurrentChar();
 
   if (first == '.') {
     raw.push_back('.');
-    lx.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+    wrapper.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
 
-    if (lx.Peek() == 'e' || lx.Peek() == 'E') {
-      raw.push_back(lx.Advance());
+    if (wrapper.Peek() == 'e' || wrapper.Peek() == 'E') {
+      raw.push_back(wrapper.Advance());
 
-      if (lx.Peek() == '+' || lx.Peek() == '-') {
-        raw.push_back(lx.Advance());
+      if (wrapper.Peek() == '+' || wrapper.Peek() == '-') {
+        raw.push_back(wrapper.Advance());
       }
 
-      if (!IsDigitChar(lx.Peek())) {
+      if (!IsDigitChar(wrapper.Peek())) {
         throw LexerError("Malformed exponent");
       }
 
-      lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
+      wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
 
     long double v = NAN;
@@ -39,28 +39,29 @@ OptToken NumberHandler::Scan(Lexer& lx) {
       throw LexerError(std::string("Malformed float literal: ") + raw);
     }
 
-    return std::make_optional(TokenFactory::MakeFloatLiteral(std::move(raw), v, lx.GetLine(), lx.GetTokenCol()));
+    return std::make_optional(
+        TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol()));
   }
 
-  lx.RetreatOne();
-  lx.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+  wrapper.RetreatOne();
+  wrapper.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
 
-  if (lx.Peek() == '.' && std::isdigit(static_cast<unsigned char>(lx.Peek(1)))) {
-    raw.push_back(lx.Advance());
-    lx.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+  if (wrapper.Peek() == '.' && std::isdigit(static_cast<unsigned char>(wrapper.Peek(1)))) {
+    raw.push_back(wrapper.Advance());
+    wrapper.ConsumeWhile(raw, [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
 
-    if (lx.Peek() == 'e' || lx.Peek() == 'E') {
-      raw.push_back(lx.Advance());
+    if (wrapper.Peek() == 'e' || wrapper.Peek() == 'E') {
+      raw.push_back(wrapper.Advance());
 
-      if (lx.Peek() == '+' || lx.Peek() == '-') {
-        raw.push_back(lx.Advance());
+      if (wrapper.Peek() == '+' || wrapper.Peek() == '-') {
+        raw.push_back(wrapper.Advance());
       }
 
-      if (!IsDigitChar(lx.Peek())) {
+      if (!IsDigitChar(wrapper.Peek())) {
         throw LexerError("Malformed exponent");
       }
 
-      lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
+      wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
 
     long double v = NAN;
@@ -71,21 +72,22 @@ OptToken NumberHandler::Scan(Lexer& lx) {
       throw LexerError(std::string("Malformed float literal: ") + raw);
     }
 
-    return std::make_optional(TokenFactory::MakeFloatLiteral(std::move(raw), v, lx.GetLine(), lx.GetTokenCol()));
+    return std::make_optional(
+        TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol()));
   }
 
-  if (lx.Peek() == 'e' || lx.Peek() == 'E') {
-    raw.push_back(lx.Advance());
+  if (wrapper.Peek() == 'e' || wrapper.Peek() == 'E') {
+    raw.push_back(wrapper.Advance());
 
-    if (lx.Peek() == '+' || lx.Peek() == '-') {
-      raw.push_back(lx.Advance());
+    if (wrapper.Peek() == '+' || wrapper.Peek() == '-') {
+      raw.push_back(wrapper.Advance());
     }
 
-    if (!IsDigitChar(lx.Peek())) {
+    if (!IsDigitChar(wrapper.Peek())) {
       throw LexerError("Malformed exponent");
     }
 
-    lx.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
+    wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     long double v = NAN;
 
     try {
@@ -94,7 +96,8 @@ OptToken NumberHandler::Scan(Lexer& lx) {
       throw LexerError(std::string("Malformed float literal: ") + raw);
     }
 
-    return std::make_optional(TokenFactory::MakeFloatLiteral(std::move(raw), v, lx.GetLine(), lx.GetTokenCol()));
+    return std::make_optional(
+        TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol()));
   }
 
   int64_t vi = 0;
@@ -105,5 +108,5 @@ OptToken NumberHandler::Scan(Lexer& lx) {
     throw LexerError(std::string("Malformed integer literal: ") + raw);
   }
 
-  return std::make_optional(TokenFactory::MakeIntLiteral(std::move(raw), vi, lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(TokenFactory::MakeIntLiteral(std::move(raw), vi, wrapper.GetLine(), wrapper.GetTokenCol()));
 }

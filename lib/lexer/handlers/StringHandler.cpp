@@ -3,26 +3,26 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken StringHandler::Scan(Lexer& lx) {
+OptToken StringHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
   std::string out;
   raw.push_back('"');
 
-  while (!lx.IsAtEnd()) {
-    char c = lx.Advance();
+  while (!wrapper.IsAtEnd()) {
+    char c = wrapper.Advance();
     raw.push_back(c);
 
     if (c == '"') {
       return std::make_optional(
-          TokenFactory::MakeStringLiteral(std::move(raw), std::move(out), lx.GetLine(), lx.GetTokenCol()));
+          TokenFactory::MakeStringLiteral(std::move(raw), std::move(out), wrapper.GetLine(), wrapper.GetTokenCol()));
     }
 
     if (c == '\\') {
-      if (lx.IsAtEnd()) {
+      if (wrapper.IsAtEnd()) {
         throw LexerError("Unterminated string literal (backslash at EOF)");
       }
 
-      char e = lx.Advance();
+      char e = wrapper.Advance();
       raw.push_back(e);
 
       switch (e) {

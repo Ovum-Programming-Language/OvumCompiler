@@ -2,11 +2,10 @@
 #define NEWLINEHANDLER_HPP_
 
 #include "Handler.hpp"
-#include "lib/lexer/Lexer.hpp"
 
 class NewlineHandler : public Handler {
 public:
-  OptToken Scan(Lexer& lx) override;
+  OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
 #endif // NEWLINEHANDLER_HPP_

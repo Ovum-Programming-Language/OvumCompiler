@@ -1,9 +1,9 @@
 #include "WhitespaceHandler.hpp"
 
-OptToken WhitespaceHandler::Scan(Lexer& lx) {
-  while (!lx.IsAtEnd()) {
-    if (char p = lx.Peek(); p == ' ' || p == '\t' || p == '\r') {
-      lx.Advance();
+OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
+  while (!wrapper.IsAtEnd()) {
+    if (char p = wrapper.Peek(); p == ' ' || p == '\t' || p == '\r') {
+      wrapper.Advance();
       continue;
     }
 

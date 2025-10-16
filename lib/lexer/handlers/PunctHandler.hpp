@@ -2,11 +2,10 @@
 #define PUNCTHANDLER_HPP_
 
 #include "Handler.hpp"
-#include "lib/lexer/Lexer.hpp"
 
 class PunctHandler : public Handler {
 public:
-  OptToken Scan(Lexer& lx) override;
+  OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
 #endif // PUNCTHANDLER_HPP_

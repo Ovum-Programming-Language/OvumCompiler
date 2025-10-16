@@ -3,15 +3,15 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken CharHandler::Scan(Lexer& lx) {
+OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
   raw.push_back('\'');
   char val = '\0';
 
-  if (lx.Peek() == '\\') {
-    lx.Advance();
+  if (wrapper.Peek() == '\\') {
+    wrapper.Advance();
     raw.push_back('\\');
-    char e = lx.Advance();
+    char e = wrapper.Advance();
     raw.push_back(e);
     switch (e) {
       case 'n':
@@ -31,17 +31,18 @@ OptToken CharHandler::Scan(Lexer& lx) {
         break;
     }
   } else {
-    char c = lx.Advance();
+    char c = wrapper.Advance();
     raw.push_back(c);
     val = c;
   }
 
-  if (lx.Peek() == '\'') {
-    lx.Advance();
+  if (wrapper.Peek() == '\'') {
+    wrapper.Advance();
     raw.push_back('\'');
   } else {
     throw LexerError("Unterminated char literal");
   }
 
-  return std::make_optional(TokenFactory::MakeCharLiteral(std::move(raw), val, lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(
+      TokenFactory::MakeCharLiteral(std::move(raw), val, wrapper.GetLine(), wrapper.GetTokenCol()));
 }

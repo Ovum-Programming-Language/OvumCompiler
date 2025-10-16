@@ -3,32 +3,33 @@
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 
-OptToken SlashHandler::Scan(Lexer& lx) {
-  if (lx.Peek() == '/') {
+OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
+  if (wrapper.Peek() == '/') {
     std::string txt;
 
-    while (!lx.IsAtEnd() && lx.Peek() != '\n') {
-      txt.push_back(lx.Advance());
+    while (!wrapper.IsAtEnd() && wrapper.Peek() != '\n') {
+      txt.push_back(wrapper.Advance());
     }
 
-    if (lx.IsKeepComments()) {
+    if (wrapper.IsKeepComments()) {
       std::string comment = txt.substr(1, txt.size() - 1);
-      return std::make_optional(TokenFactory::MakeComment(std::move(comment), lx.GetLine(), lx.GetTokenCol()));
+      return std::make_optional(
+          TokenFactory::MakeComment(std::move(comment), wrapper.GetLine(), wrapper.GetTokenCol()));
     }
 
     return std::nullopt;
   }
 
-  if (lx.Peek() == '*') {
-    lx.Advance();
+  if (wrapper.Peek() == '*') {
+    wrapper.Advance();
     std::string txt;
     bool closed = false;
 
-    while (!lx.IsAtEnd()) {
-      char c = lx.Advance();
+    while (!wrapper.IsAtEnd()) {
+      char c = wrapper.Advance();
 
-      if (c == '*' && lx.Peek() == '/') {
-        lx.Advance();
+      if (c == '*' && wrapper.Peek() == '/') {
+        wrapper.Advance();
         closed = true;
         break;
       }
@@ -40,12 +41,12 @@ OptToken SlashHandler::Scan(Lexer& lx) {
       throw LexerError("Unterminated block comment");
     }
 
-    if (lx.IsKeepComments()) {
-      return std::make_optional(TokenFactory::MakeComment(std::move(txt), lx.GetLine(), lx.GetTokenCol()));
+    if (wrapper.IsKeepComments()) {
+      return std::make_optional(TokenFactory::MakeComment(std::move(txt), wrapper.GetLine(), wrapper.GetTokenCol()));
     }
 
     return std::nullopt;
   }
 
-  return std::make_optional(TokenFactory::MakeOperator(std::string(1, '/'), lx.GetLine(), lx.GetTokenCol()));
+  return std::make_optional(TokenFactory::MakeOperator(std::string(1, '/'), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
