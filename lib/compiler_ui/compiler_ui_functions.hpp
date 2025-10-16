@@ -2,6 +2,7 @@
 #define COMPILER_UI_FUNCTIONS_HPP_
 
 #include <cstdint>
+#include <ostream>
 #include <string>
 #include <vector>
 

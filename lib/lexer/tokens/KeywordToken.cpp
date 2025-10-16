@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-KeywordToken::KeywordToken(std::string lex, const TokenPosition& position) : lexeme_(std::move(lex)), position_(position) {
+KeywordToken::KeywordToken(std::string lex, const TokenPosition& position) :
+    lexeme_(std::move(lex)), position_(position) {
 }
 
 std::string KeywordToken::GetStringType() const noexcept {

@@ -58,8 +58,7 @@ public:
   }
 
   static std::unique_ptr<Token> MakeFloatLiteral(std::string raw, long double v, int32_t line, int32_t col) {
-    return std::make_unique<LiteralToken>(
-        std::move(raw), std::make_unique<FloatValue>(v), TokenPosition(line, col));
+    return std::make_unique<LiteralToken>(std::move(raw), std::make_unique<FloatValue>(v), TokenPosition(line, col));
   }
 
   static std::unique_ptr<Token> MakeStringLiteral(std::string raw, std::string s, int32_t line, int32_t col) {

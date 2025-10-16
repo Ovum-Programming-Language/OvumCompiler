@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-CommentToken::CommentToken(std::string txt, const TokenPosition& position) : text_(std::move(txt)), position_(position) {
+CommentToken::CommentToken(std::string txt, const TokenPosition& position) :
+    text_(std::move(txt)), position_(position) {
 }
 
 std::string CommentToken::GetStringType() const noexcept {

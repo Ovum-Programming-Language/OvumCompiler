@@ -4,7 +4,8 @@
 PunctToken::PunctToken(char ch, const TokenPosition& position) : lexeme_(1, ch), position_(position) {
 }
 
-PunctToken::PunctToken(std::string punct, const TokenPosition& position) : lexeme_(std::move(punct)), position_(position) {
+PunctToken::PunctToken(std::string punct, const TokenPosition& position) :
+    lexeme_(std::move(punct)), position_(position) {
 }
 
 std::string PunctToken::GetStringType() const noexcept {

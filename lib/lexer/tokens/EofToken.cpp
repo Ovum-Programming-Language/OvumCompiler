@@ -3,7 +3,7 @@
 #include <sstream>
 
 EofToken::EofToken(const TokenPosition& position) : position_(position) {
-} 
+}
 
 std::string EofToken::GetStringType() const noexcept {
   return "EOF";

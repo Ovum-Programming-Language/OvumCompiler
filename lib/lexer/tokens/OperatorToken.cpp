@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-OperatorToken::OperatorToken(std::string op, const TokenPosition& position) : lexeme_(std::move(op)), position_(position) {
+OperatorToken::OperatorToken(std::string op, const TokenPosition& position) :
+    lexeme_(std::move(op)), position_(position) {
 }
 
 std::string OperatorToken::GetStringType() const noexcept {

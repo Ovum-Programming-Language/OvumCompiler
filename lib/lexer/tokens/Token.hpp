@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 
-#include "TokenVisitor.hpp"
 #include "TokenPosition.hpp"
+#include "TokenVisitor.hpp"
 
 class Token {
 public:
