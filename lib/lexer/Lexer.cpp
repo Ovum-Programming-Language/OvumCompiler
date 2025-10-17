@@ -1,6 +1,7 @@
 #include "Lexer.hpp"
 
 #include "handlers/CharHandler.hpp"
+#include "handlers/ColonHandler.hpp"
 #include "handlers/DefaultHandler.hpp"
 #include "handlers/Handler.hpp"
 #include "handlers/IdentifierHandler.hpp"
@@ -74,14 +75,15 @@ void Lexer::RegisterDefaults() {
   SetHandler((unsigned char) '\'', std::make_unique<CharHandler>());
 
   SetHandler((unsigned char) '/', std::make_unique<SlashHandler>());
+  SetHandler((unsigned char) ':', std::make_unique<ColonHandler>());
 
-  const std::string opchars = "+-*%<>=!&|^~?:.";
+  const std::string opchars = "+-*%<>=!&|^~?.";
 
   for (unsigned char c : opchars) {
     SetHandler(c, std::make_unique<OperatorHandler>());
   }
 
-  const std::string puncts = ",;:(){}[]";
+  const std::string puncts = ",;(){}[]";
 
   for (unsigned char c : puncts) {
     SetHandler(c, std::make_unique<PunctHandler>());
