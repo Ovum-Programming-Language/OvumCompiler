@@ -11,6 +11,6 @@ const std::unordered_set<std::string>& KeywordSet() {
 
 const std::unordered_set<std::string>& MultiOpsSet() {
   static const std::unordered_set<std::string> s = {
-      "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":="};
+      "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":=", "::"};
   return s;
 }
