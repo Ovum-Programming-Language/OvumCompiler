@@ -64,6 +64,7 @@ void Lexer::RegisterDefaults() {
   }
 
   SetHandler((unsigned char) '_', std::make_unique<IdentifierHandler>());
+  SetHandler((unsigned char) '#', std::make_unique<IdentifierHandler>());
 
   for (unsigned char d = '0'; d <= '9'; ++d) {
     SetHandler(d, std::make_unique<NumberHandler>());

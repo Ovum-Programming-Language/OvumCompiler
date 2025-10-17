@@ -3,6 +3,7 @@
 #include <limits>
 #include <cmath>
 
+#include "LexerError.hpp"
 #include "lib/lexer/tokens/TokenFactory.hpp"
 
 OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
@@ -37,6 +38,10 @@ OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
 
   if (s == "xor") {
     return std::make_optional(TokenFactory::MakeOperator(std::move(s), wrapper.GetLine(), wrapper.GetTokenCol()));
+  }
+
+  if (s[0] == '#') {
+    throw LexerError(std::string("Not a keyword, started with #: ") + s);
   }
 
   return std::make_optional(TokenFactory::MakeIdent(std::move(s), wrapper.GetLine(), wrapper.GetTokenCol()));
