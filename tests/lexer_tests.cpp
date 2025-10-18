@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <vector>
 #include <string>
-#include <utility>
-#include "test_suites/LexerUnitTestSuite.hpp"
+#include <vector>
 #include "lib/lexer/Lexer.hpp"
+#include "test_suites/LexerUnitTestSuite.hpp"
 
 TEST(LexerUnitTestSuite, EmptyString) {
   const std::string src = "";
@@ -26,16 +25,16 @@ TEST(LexerUnitTestSuite, SingleCharacter) {
 }
 
 TEST(LexerUnitTestSuite, Keywords) {
-  const std::string src = "fun pure val var class interface implements override if else while for in return break continue unsafe is as typealias";
+  const std::string src =
+      "fun pure val var class interface implements override if else while for in return break continue unsafe is as "
+      "typealias";
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun", "pure", "val", "var", "class", "interface", "implements", "override",
-      "if", "else", "while", "for", "in", "return", "break", "continue",
-      "unsafe", "is", "as", "typealias"
-  };
-  std::vector<std::string> expected_types(20, "KEYWORD");
+      "fun",   "pure", "val", "var",    "class", "interface", "implements", "override", "if", "else",
+      "while", "for",  "in",  "return", "break", "continue",  "unsafe",     "is",       "as", "typealias"};
+  std::vector<std::string> expected_types(expected_lexemes.size(), "KEYWORD");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -45,7 +44,8 @@ TEST(LexerUnitTestSuite, Punctuation) {
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {"{", "}", "(", ")", "[", "]", ",", ":", ";"};
-  std::vector<std::string> expected_types = {"PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT"};
+  std::vector<std::string> expected_types = {
+      "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -54,7 +54,8 @@ TEST(LexerUnitTestSuite, Identifiers) {
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {"abc", "ABC", "_abc", "ovum", "ExampleFundamentals", "Void", "String", "IntArray"};
+  std::vector<std::string> expected_lexemes = {
+      "abc", "ABC", "_abc", "ovum", "ExampleFundamentals", "Void", "String", "IntArray"};
   std::vector<std::string> expected_types = {"IDENT", "IDENT", "IDENT", "IDENT", "IDENT", "IDENT", "IDENT", "IDENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
@@ -65,7 +66,9 @@ TEST(LexerUnitTestSuite, OperatorsSimple) {
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {"+", "-", "*", "/", "%", "<", ">", "!", ".", "?"};
-  std::vector<std::string> expected_types = {"OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR"};
+  std::vector<std::string> expected_types = {
+      "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR",
+      "OPERATOR", "OPERATOR", "OPERATOR"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -75,7 +78,8 @@ TEST(LexerUnitTestSuite, OperatorsMultiChar) {
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {"==", "!=", "<=", ">=", "&&", "||", "=", ":=", "::"};
-  std::vector<std::string> expected_types = {"OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR"};
+  std::vector<std::string> expected_types = {
+      "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR", "OPERATOR"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -115,7 +119,8 @@ TEST(LexerUnitTestSuite, LiteralsFloat) {
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {"3.14", "1e3", ".5", "5.", "2.0E-2"};
-  std::vector<std::string> expected_types = {"LITERAL:Float", "LITERAL:Float", "LITERAL:Float", "LITERAL:Float", "LITERAL:Float"};
+  std::vector<std::string> expected_types = {
+      "LITERAL:Float", "LITERAL:Float", "LITERAL:Float", "LITERAL:Float", "LITERAL:Float"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -220,12 +225,13 @@ TEST(LexerUnitTestSuite, LiteralsFloatSpecial) {
 }
 
 TEST(LexerUnitTestSuite, LiteralsCharEscapes) {
-  const std::string src = "'A' '\\n' '\\t' '\\0' '\\''";
+  const std::string src = R"('A' '\n' '\t' '\0' '\'')";
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {"'A'", "'\\n'", "'\\t'", "'\\0'", "'\\''"};
-  std::vector<std::string> expected_types = {"LITERAL:Char", "LITERAL:Char", "LITERAL:Char", "LITERAL:Char", "LITERAL:Char"};
+  std::vector<std::string> expected_types = {
+      "LITERAL:Char", "LITERAL:Char", "LITERAL:Char", "LITERAL:Char", "LITERAL:Char"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -238,7 +244,6 @@ TEST(LexerUnitTestSuite, WhitespaceSkipping) {
   std::vector<std::string> expected_types = {"KEYWORD", "KEYWORD", "KEYWORD"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
-
 
 // Negative tests
 

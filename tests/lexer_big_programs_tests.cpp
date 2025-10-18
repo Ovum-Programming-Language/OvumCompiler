@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include <vector>
 #include <string>
 #include <utility>
-#include "test_suites/LexerUnitTestSuite.hpp"
+#include <vector>
 #include "lib/lexer/Lexer.hpp"
+#include "test_suites/LexerUnitTestSuite.hpp"
 
 
 TEST(LexerUnitTestSuite, ExampleFundamentals) {
@@ -31,16 +31,14 @@ TEST(LexerUnitTestSuite, ExampleFundamentals) {
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Float","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Char","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Bool","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","KEYWORD","NEWLINE",
-      "IDENT","OPERATOR","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","PUNCT","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",        "PUNCT",        "PUNCT",       "PUNCT",         "IDENT",       "PUNCT",   "NEWLINE",
+      "KEYWORD",  "IDENT",        "PUNCT",        "IDENT",       "OPERATOR",      "LITERAL:Int", "NEWLINE", "KEYWORD",
+      "IDENT",    "PUNCT",        "IDENT",        "OPERATOR",    "LITERAL:Float", "NEWLINE",     "KEYWORD", "IDENT",
+      "PUNCT",    "IDENT",        "OPERATOR",     "LITERAL:Int", "NEWLINE",       "KEYWORD",     "IDENT",   "PUNCT",
+      "IDENT",    "OPERATOR",     "LITERAL:Char", "NEWLINE",     "KEYWORD",       "IDENT",       "PUNCT",   "IDENT",
+      "OPERATOR", "LITERAL:Bool", "NEWLINE",      "KEYWORD",     "IDENT",         "PUNCT",       "IDENT",   "OPERATOR",
+      "KEYWORD",  "NEWLINE",      "IDENT",        "OPERATOR",    "IDENT",         "PUNCT",       "IDENT",   "OPERATOR",
+      "IDENT",    "PUNCT",        "PUNCT",        "PUNCT",       "NEWLINE",       "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, ExampleReferences) {
@@ -70,17 +68,16 @@ val pi: Float = 3.14
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Float","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Char","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Bool","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","KEYWORD","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Float","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",   "PUNCT", "PUNCT", "PUNCT", "IDENT",    "PUNCT",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Float",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Char",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Bool",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "KEYWORD",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
+      "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Float",
+      "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, ExampleNullable) {
@@ -94,21 +91,18 @@ val safeInt: Int? = 42
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun","ExampleNullable","(",")",":","Void","{","\\n",
-      "val","optInt",":","Int","?","=","null","\\n",
-      "val","optStr",":","String","?","=","\"Hello\"","\\n",
-      "val","optArr",":","IntArray","?","=","null","\\n",
-      "val","safeInt",":","Int","?","=","42","\\n",
-      "}"
-  };
+      "fun", "ExampleNullable", "(", ")",        ":", "Void", "{",         "\\n",
+      "val", "optInt",          ":", "Int",      "?", "=",    "null",      "\\n",
+      "val", "optStr",          ":", "String",   "?", "=",    "\"Hello\"", "\\n",
+      "val", "optArr",          ":", "IntArray", "?", "=",    "null",      "\\n",
+      "val", "safeInt",         ":", "Int",      "?", "=",    "42",        "\\n",
+      "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","OPERATOR","KEYWORD","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","OPERATOR","LITERAL:String","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","OPERATOR","KEYWORD","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","OPERATOR","LITERAL:Int","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",       "PUNCT",    "PUNCT",          "IDENT",   "PUNCT",   "NEWLINE", "KEYWORD",
+      "IDENT",    "PUNCT",    "IDENT",       "OPERATOR", "OPERATOR",       "KEYWORD", "NEWLINE", "KEYWORD", "IDENT",
+      "PUNCT",    "IDENT",    "OPERATOR",    "OPERATOR", "LITERAL:String", "NEWLINE", "KEYWORD", "IDENT",   "PUNCT",
+      "IDENT",    "OPERATOR", "OPERATOR",    "KEYWORD",  "NEWLINE",        "KEYWORD", "IDENT",   "PUNCT",   "IDENT",
+      "OPERATOR", "OPERATOR", "LITERAL:Int", "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, ExampleArrays) {
@@ -132,14 +126,13 @@ val emptyList: IntArray = IntArray(0)
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:Int","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:Int","PUNCT","NEWLINE",
-      "IDENT","PUNCT","LITERAL:Int","PUNCT","OPERATOR","LITERAL:Int","NEWLINE",
-      "IDENT","PUNCT","LITERAL:Int","PUNCT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:Int","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",       "PUNCT",   "PUNCT",   "PUNCT",    "IDENT",       "PUNCT",       "NEWLINE",
+      "KEYWORD",     "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "IDENT",       "PUNCT",       "LITERAL:Int",
+      "PUNCT",       "NEWLINE",     "KEYWORD", "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",    "IDENT",
+      "PUNCT",       "LITERAL:Int", "PUNCT",   "NEWLINE", "IDENT",    "PUNCT",       "LITERAL:Int", "PUNCT",
+      "OPERATOR",    "LITERAL:Int", "NEWLINE", "IDENT",   "PUNCT",    "LITERAL:Int", "PUNCT",       "OPERATOR",
+      "LITERAL:Int", "NEWLINE",     "KEYWORD", "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",    "IDENT",
+      "PUNCT",       "LITERAL:Int", "PUNCT",   "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, ExampleObjects) {
@@ -157,29 +150,31 @@ val circle: Circle? = Circle(10.0)
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "interface","IShape","{","fun","Area","(",")",":","float","}","\\n",
-      "class","Circle","implements","IShape","{","\\n",
-      "public","val","Radius",":","float","\\n",
-      "public","fun","Circle","(","r",":","float",")",":","Circle","{","this",".","Radius","=","r","return","this","}","\\n",
-      "public","override","fun","Area","(",")",":","float","{","return","3.14","*","Radius","*","Radius","}","\\n",
-      "}","\\n",
-      "fun","ExampleObjects","(",")",":","Void","{","\\n",
-      "val","shape",":","IShape","=","Circle","(","5.0",")","\\n",
-      "val","circle",":","Circle","?","=","Circle","(","10.0",")","\\n",
-      "}"
-  };
+      "interface", "IShape", "{",     "fun",    "Area",     "(",          ")",      ":",
+      "float",     "}",      "\\n",   "class",  "Circle",   "implements", "IShape", "{",
+      "\\n",       "public", "val",   "Radius", ":",        "float",      "\\n",    "public",
+      "fun",       "Circle", "(",     "r",      ":",        "float",      ")",      ":",
+      "Circle",    "{",      "this",  ".",      "Radius",   "=",          "r",      "return",
+      "this",      "}",      "\\n",   "public", "override", "fun",        "Area",   "(",
+      ")",         ":",      "float", "{",      "return",   "3.14",       "*",      "Radius",
+      "*",         "Radius", "}",     "\\n",    "}",        "\\n",        "fun",    "ExampleObjects",
+      "(",         ")",      ":",     "Void",   "{",        "\\n",        "val",    "shape",
+      ":",         "IShape", "=",     "Circle", "(",        "5.0",        ")",      "\\n",
+      "val",       "circle", ":",     "Circle", "?",        "=",          "Circle", "(",
+      "10.0",      ")",      "\\n",   "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","KEYWORD","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","IDENT","PUNCT","IDENT","NEWLINE",
-      "KEYWORD","KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","PUNCT","IDENT","PUNCT","IDENT","OPERATOR","IDENT","OPERATOR","IDENT","KEYWORD","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","KEYWORD","LITERAL:Float","OPERATOR","IDENT","OPERATOR","IDENT","PUNCT","NEWLINE",
-      "PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:Float","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","OPERATOR","IDENT","PUNCT","LITERAL:Float","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",       "IDENT",   "PUNCT",    "KEYWORD",  "IDENT",    "PUNCT",         "PUNCT",    "PUNCT",
+      "IDENT",         "PUNCT",   "NEWLINE",  "KEYWORD",  "IDENT",    "KEYWORD",       "IDENT",    "PUNCT",
+      "NEWLINE",       "KEYWORD", "KEYWORD",  "IDENT",    "PUNCT",    "IDENT",         "NEWLINE",  "KEYWORD",
+      "KEYWORD",       "IDENT",   "PUNCT",    "IDENT",    "PUNCT",    "IDENT",         "PUNCT",    "PUNCT",
+      "IDENT",         "PUNCT",   "IDENT",    "OPERATOR", "IDENT",    "OPERATOR",      "IDENT",    "KEYWORD",
+      "IDENT",         "PUNCT",   "NEWLINE",  "KEYWORD",  "KEYWORD",  "KEYWORD",       "IDENT",    "PUNCT",
+      "PUNCT",         "PUNCT",   "IDENT",    "PUNCT",    "KEYWORD",  "LITERAL:Float", "OPERATOR", "IDENT",
+      "OPERATOR",      "IDENT",   "PUNCT",    "NEWLINE",  "PUNCT",    "NEWLINE",       "KEYWORD",  "IDENT",
+      "PUNCT",         "PUNCT",   "PUNCT",    "IDENT",    "PUNCT",    "NEWLINE",       "KEYWORD",  "IDENT",
+      "PUNCT",         "IDENT",   "OPERATOR", "IDENT",    "PUNCT",    "LITERAL:Float", "PUNCT",    "NEWLINE",
+      "KEYWORD",       "IDENT",   "PUNCT",    "IDENT",    "OPERATOR", "OPERATOR",      "IDENT",    "PUNCT",
+      "LITERAL:Float", "PUNCT",   "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, ExampleAccess) {
@@ -205,15 +200,12 @@ obj.mutable = 30.0
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Float","NEWLINE",
-      "PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","PUNCT","NEWLINE",
-      "IDENT","OPERATOR","IDENT","OPERATOR","LITERAL:Float","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",         "NEWLINE",       "KEYWORD", "KEYWORD", "IDENT",   "PUNCT",
+      "IDENT",    "OPERATOR", "LITERAL:Int",   "NEWLINE",       "KEYWORD", "KEYWORD", "IDENT",   "PUNCT",
+      "IDENT",    "OPERATOR", "LITERAL:Float", "NEWLINE",       "PUNCT",   "NEWLINE", "KEYWORD", "IDENT",
+      "PUNCT",    "PUNCT",    "PUNCT",         "IDENT",         "PUNCT",   "NEWLINE", "KEYWORD", "IDENT",
+      "PUNCT",    "IDENT",    "OPERATOR",      "IDENT",         "PUNCT",   "PUNCT",   "NEWLINE", "IDENT",
+      "OPERATOR", "IDENT",    "OPERATOR",      "LITERAL:Float", "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, SimpleIf) {
@@ -233,12 +225,13 @@ else { sys::Print("Zero") }
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",        "IDENT",   "PUNCT",   "IDENT",    "PUNCT", "IDENT",    "PUNCT",          "PUNCT",
+      "IDENT",          "PUNCT",   "NEWLINE", "KEYWORD",  "PUNCT", "IDENT",    "OPERATOR",       "LITERAL:Int",
+      "PUNCT",          "PUNCT",   "IDENT",   "OPERATOR", "IDENT", "PUNCT",    "LITERAL:String", "PUNCT",
+      "PUNCT",          "NEWLINE", "KEYWORD", "KEYWORD",  "PUNCT", "IDENT",    "OPERATOR",       "LITERAL:Int",
+      "PUNCT",          "PUNCT",   "IDENT",   "OPERATOR", "IDENT", "PUNCT",    "LITERAL:String", "PUNCT",
+      "PUNCT",          "NEWLINE", "KEYWORD", "PUNCT",    "IDENT", "OPERATOR", "IDENT",          "PUNCT",
+      "LITERAL:String", "PUNCT",   "PUNCT",   "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, BooleanConditions) {
@@ -260,13 +253,16 @@ else { sys::Print("Both false") }
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "KEYWORD","KEYWORD","PUNCT","OPERATOR","IDENT","OPERATOR","IDENT","PUNCT","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","IDENT","PUNCT","LITERAL:String","PUNCT","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",          "IDENT",          "PUNCT", "IDENT",          "PUNCT",   "IDENT",
+      "PUNCT",    "IDENT",    "PUNCT",          "PUNCT",          "IDENT", "PUNCT",          "NEWLINE", "KEYWORD",
+      "PUNCT",    "IDENT",    "OPERATOR",       "IDENT",          "PUNCT", "PUNCT",          "IDENT",   "OPERATOR",
+      "IDENT",    "PUNCT",    "LITERAL:String", "PUNCT",          "PUNCT", "NEWLINE",        "KEYWORD", "KEYWORD",
+      "PUNCT",    "IDENT",    "OPERATOR",       "IDENT",          "PUNCT", "PUNCT",          "IDENT",   "OPERATOR",
+      "IDENT",    "PUNCT",    "LITERAL:String", "PUNCT",          "PUNCT", "NEWLINE",        "KEYWORD", "KEYWORD",
+      "PUNCT",    "OPERATOR", "IDENT",          "OPERATOR",       "IDENT", "PUNCT",          "PUNCT",   "IDENT",
+      "OPERATOR", "IDENT",    "PUNCT",          "LITERAL:String", "PUNCT", "PUNCT",          "NEWLINE", "KEYWORD",
+      "PUNCT",    "IDENT",    "OPERATOR",       "IDENT",          "PUNCT", "LITERAL:String", "PUNCT",   "PUNCT",
+      "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -282,25 +278,28 @@ else { sys::Print("Unknown type") }
   std::vector<std::string> expected_lexemes = {
       "fun", "TypeConditions", "(", "obj", ":", "Object", ")", ":", "Void", "{",
       "\\n",
-      "if", "(", "obj", "is", "String", ")", "{", "val", "str", ":", "String", "?", "=", "obj", "as", "String", "if", "(", "str", "!=", "null", ")", "{", "sys", "::", "Print", "(", "str", ".", "Length", "(", ")", ".", "ToString", "(", ")", ")", "}", "}",
+      "if", "(", "obj", "is", "String", ")", "{", "val", "str", ":", "String", "?", "=", "obj", "as", "String", "if",
+      "(", "str", "!=", "null", ")", "{", "sys", "::", "Print", "(", "str", ".", "Length", "(", ")", ".", "ToString",
+      "(", ")", ")", "}", "}",
       "\\n",
-      "else", "if", "(", "obj", "is", "Int", ")", "{", "val", "num", ":", "Int", "=", "obj", "as", "Int", "sys", "::", "Print", "(", "num", ".", "ToString", "(", ")", ")", "}",
+      "else", "if", "(", "obj", "is", "Int", ")", "{", "val", "num", ":", "Int", "=", "obj", "as", "Int", "sys", "::",
+      "Print", "(", "num", ".", "ToString", "(", ")", ")", "}",
       "\\n",
       "else", "{", "sys", "::", "Print", "(", "\"Unknown type\"", ")", "}",
       "\\n",
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "KEYWORD", "IDENT", "PUNCT", "PUNCT", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "OPERATOR", "IDENT", "KEYWORD", "IDENT", "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "KEYWORD", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "KEYWORD", "PUNCT", "IDENT", "KEYWORD", "IDENT", "PUNCT", "PUNCT", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "KEYWORD", "IDENT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "LITERAL:String", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",   "IDENT",    "PUNCT",          "IDENT",    "PUNCT",   "PUNCT",    "IDENT",
+      "PUNCT",    "NEWLINE",  "KEYWORD", "PUNCT",    "IDENT",          "KEYWORD",  "IDENT",   "PUNCT",    "PUNCT",
+      "KEYWORD",  "IDENT",    "PUNCT",   "IDENT",    "OPERATOR",       "OPERATOR", "IDENT",   "KEYWORD",  "IDENT",
+      "KEYWORD",  "PUNCT",    "IDENT",   "OPERATOR", "KEYWORD",        "PUNCT",    "PUNCT",   "IDENT",    "OPERATOR",
+      "IDENT",    "PUNCT",    "IDENT",   "OPERATOR", "IDENT",          "PUNCT",    "PUNCT",   "OPERATOR", "IDENT",
+      "PUNCT",    "PUNCT",    "PUNCT",   "PUNCT",    "PUNCT",          "NEWLINE",  "KEYWORD", "KEYWORD",  "PUNCT",
+      "IDENT",    "KEYWORD",  "IDENT",   "PUNCT",    "PUNCT",          "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",
+      "OPERATOR", "IDENT",    "KEYWORD", "IDENT",    "IDENT",          "OPERATOR", "IDENT",   "PUNCT",    "IDENT",
+      "OPERATOR", "IDENT",    "PUNCT",   "PUNCT",    "PUNCT",          "PUNCT",    "NEWLINE", "KEYWORD",  "PUNCT",
+      "IDENT",    "OPERATOR", "IDENT",   "PUNCT",    "LITERAL:String", "PUNCT",    "PUNCT",   "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -314,19 +313,15 @@ else { return value }
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun","ElvisInIf","(","opt",":","Int","?",")",":","int","{","\\n",
-      "val","value",":","int","=","opt","?:","0","\\n",
-      "if","(","value",">","10",")","{","return","value","*","2","}","\\n",
-      "else","{","return","value","}","\\n",
-      "}"
-  };
+      "fun",    "ElvisInIf", "(", "opt", ":",  "Int", "?",    ")",  ":",      "int",   "{", "\\n", "val", "value",
+      ":",      "int",       "=", "opt", "?:", "0",   "\\n",  "if", "(",      "value", ">", "10",  ")",   "{",
+      "return", "value",     "*", "2",   "}",  "\\n", "else", "{",  "return", "value", "}", "\\n", "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","OPERATOR","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","PUNCT","KEYWORD","IDENT","OPERATOR","LITERAL:Int","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","KEYWORD","IDENT","PUNCT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",    "PUNCT",       "IDENT", "OPERATOR", "PUNCT",       "PUNCT",
+      "IDENT",    "PUNCT",       "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT", "IDENT",    "OPERATOR",    "IDENT",
+      "OPERATOR", "LITERAL:Int", "NEWLINE", "KEYWORD",  "PUNCT",       "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
+      "PUNCT",    "KEYWORD",     "IDENT",   "OPERATOR", "LITERAL:Int", "PUNCT", "NEWLINE",  "KEYWORD",     "PUNCT",
+      "KEYWORD",  "IDENT",       "PUNCT",   "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 TEST(LexerUnitTestSuite, WhenLike) {
@@ -340,21 +335,18 @@ else return "Other"
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun","WhenLike","(","x",":","int",")",":","String","{","\\n",
-      "if","(","x","==","1",")","return","\"One\"","\\n",
-      "else","if","(","x","==","2",")","return","\"Two\"","\\n",
-      "else","if","(","x",">","10",")","return","\"Big\"","\\n",
-      "else","return","\"Other\"","\\n",
-      "}"
-  };
+      "fun", "WhenLike", "(",       "x",      ":",       "int",    ")",         ":",   "String", "{",  "\\n", "if",
+      "(",   "x",        "==",      "1",      ")",       "return", "\"One\"",   "\\n", "else",   "if", "(",   "x",
+      "==",  "2",        ")",       "return", "\"Two\"", "\\n",    "else",      "if",  "(",      "x",  ">",   "10",
+      ")",   "return",   "\"Big\"", "\\n",    "else",    "return", "\"Other\"", "\\n", "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","KEYWORD","LITERAL:String","NEWLINE",
-      "KEYWORD","KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","KEYWORD","LITERAL:String","NEWLINE",
-      "KEYWORD","KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","KEYWORD","LITERAL:String","NEWLINE",
-      "KEYWORD","KEYWORD","LITERAL:String","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",        "IDENT",       "PUNCT",   "IDENT",          "PUNCT",          "IDENT",   "PUNCT",
+      "PUNCT",          "IDENT",       "PUNCT",   "NEWLINE",        "KEYWORD",        "PUNCT",   "IDENT",
+      "OPERATOR",       "LITERAL:Int", "PUNCT",   "KEYWORD",        "LITERAL:String", "NEWLINE", "KEYWORD",
+      "KEYWORD",        "PUNCT",       "IDENT",   "OPERATOR",       "LITERAL:Int",    "PUNCT",   "KEYWORD",
+      "LITERAL:String", "NEWLINE",     "KEYWORD", "KEYWORD",        "PUNCT",          "IDENT",   "OPERATOR",
+      "LITERAL:Int",    "PUNCT",       "KEYWORD", "LITERAL:String", "NEWLINE",        "KEYWORD", "KEYWORD",
+      "LITERAL:String", "NEWLINE",     "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -391,24 +383,14 @@ return counter
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT", "KEYWORD",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",   "PUNCT",   "IDENT",    "PUNCT",       "IDENT",    "PUNCT",       "PUNCT",
+      "IDENT",       "PUNCT",   "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT",    "IDENT",       "OPERATOR",
+      "LITERAL:Int", "NEWLINE", "KEYWORD", "PUNCT",    "IDENT",       "OPERATOR", "IDENT",       "PUNCT",
+      "PUNCT",       "NEWLINE", "IDENT",   "OPERATOR", "IDENT",       "OPERATOR", "LITERAL:Int", "NEWLINE",
+      "KEYWORD",     "PUNCT",   "IDENT",   "OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT",
+      "KEYWORD",     "NEWLINE", "IDENT",   "OPERATOR", "IDENT",       "PUNCT",    "IDENT",       "OPERATOR",
+      "IDENT",       "PUNCT",   "PUNCT",   "PUNCT",    "NEWLINE",     "PUNCT",    "NEWLINE",     "KEYWORD",
+      "IDENT",       "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -422,19 +404,16 @@ return sum
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun","ForExample","(","arr",":","IntArray",")",":","int","{","\\n",
-      "var","sum",":","int","=","0","\\n",
-      "for","(","num","in","arr",")","{","if","(","num","<","0",")","break","sum","=","sum","+","num","}","\\n",
-      "return","sum","\\n",
-      "}"
-  };
+      "fun", "ForExample", "(", "arr", ":", "IntArray", ")",      ":",   "int", "{",     "\\n",
+      "var", "sum",        ":", "int", "=", "0",        "\\n",    "for", "(",   "num",   "in",
+      "arr", ")",          "{", "if",  "(", "num",      "<",      "0",   ")",   "break", "sum",
+      "=",   "sum",        "+", "num", "}", "\\n",      "return", "sum", "\\n", "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD","IDENT","PUNCT","IDENT","PUNCT","IDENT","PUNCT","PUNCT","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","PUNCT","IDENT","OPERATOR","LITERAL:Int","NEWLINE",
-      "KEYWORD","PUNCT","IDENT","KEYWORD","IDENT","PUNCT","PUNCT","KEYWORD","PUNCT","IDENT","OPERATOR","LITERAL:Int","PUNCT","KEYWORD","IDENT","OPERATOR","IDENT","OPERATOR","IDENT","PUNCT","NEWLINE",
-      "KEYWORD","IDENT","NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",    "PUNCT",       "IDENT",   "PUNCT",   "IDENT",   "PUNCT",    "PUNCT",       "IDENT",
+      "PUNCT",   "NEWLINE",  "KEYWORD",     "IDENT",   "PUNCT",   "IDENT",   "OPERATOR", "LITERAL:Int", "NEWLINE",
+      "KEYWORD", "PUNCT",    "IDENT",       "KEYWORD", "IDENT",   "PUNCT",   "PUNCT",    "KEYWORD",     "PUNCT",
+      "IDENT",   "OPERATOR", "LITERAL:Int", "PUNCT",   "KEYWORD", "IDENT",   "OPERATOR", "IDENT",       "OPERATOR",
+      "IDENT",   "PUNCT",    "NEWLINE",     "KEYWORD", "IDENT",   "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -475,27 +454,17 @@ if (i > 5) break }
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "KEYWORD", "IDENT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "PUNCT", "PUNCT", "KEYWORD", "PUNCT",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT", "KEYWORD",
-      "PUNCT",
-      "NEWLINE",
-      "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",   "PUNCT",    "IDENT",       "PUNCT",    "IDENT",       "PUNCT",   "PUNCT",
+      "IDENT",       "PUNCT",   "NEWLINE",  "KEYWORD",     "PUNCT",    "IDENT",       "KEYWORD", "IDENT",
+      "PUNCT",       "PUNCT",   "NEWLINE",  "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",   "OPERATOR",
+      "LITERAL:Int", "NEWLINE", "KEYWORD",  "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",   "OPERATOR",
+      "IDENT",       "PUNCT",   "PUNCT",    "PUNCT",       "PUNCT",    "NEWLINE",     "KEYWORD", "PUNCT",
+      "IDENT",       "PUNCT",   "IDENT",    "PUNCT",       "OPERATOR", "LITERAL:Int", "PUNCT",   "PUNCT",
+      "KEYWORD",     "PUNCT",   "NEWLINE",  "IDENT",       "OPERATOR", "IDENT",       "PUNCT",   "IDENT",
+      "PUNCT",       "IDENT",   "PUNCT",    "OPERATOR",    "IDENT",    "PUNCT",       "PUNCT",   "PUNCT",
+      "NEWLINE",     "IDENT",   "OPERATOR", "IDENT",       "OPERATOR", "LITERAL:Int", "NEWLINE", "KEYWORD",
+      "PUNCT",       "IDENT",   "OPERATOR", "LITERAL:Int", "PUNCT",    "KEYWORD",     "PUNCT",   "NEWLINE",
+      "PUNCT",       "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -515,21 +484,20 @@ i = i + 1 }})OVUM";
       "\\n",
       "while", "(", "i", "<", "arr", ".", "Length", "(", ")", ")", "{",
       "\\n",
-      "sys", "::", "Print", "(", "(", "i", ".", "ToString", "(", ")", "+", "\": \"", "+", "arr", "[", "i", "]", ".", "ToString", "(", ")", ")", ")",
+      "sys", "::", "Print", "(", "(", "i", ".", "ToString", "(", ")", "+", "\": \"", "+", "arr", "[", "i", "]", ".",
+      "ToString", "(", ")", ")", ")",
       "\\n",
       "i", "=", "i", "+", "1", "}", "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:String", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT", "PUNCT"
-  };
+      "KEYWORD",     "IDENT",          "PUNCT",       "IDENT",   "PUNCT",    "IDENT",    "PUNCT", "PUNCT",
+      "IDENT",       "PUNCT",          "NEWLINE",     "KEYWORD", "IDENT",    "PUNCT",    "IDENT", "OPERATOR",
+      "LITERAL:Int", "NEWLINE",        "KEYWORD",     "PUNCT",   "IDENT",    "OPERATOR", "IDENT", "OPERATOR",
+      "IDENT",       "PUNCT",          "PUNCT",       "PUNCT",   "PUNCT",    "NEWLINE",  "IDENT", "OPERATOR",
+      "IDENT",       "PUNCT",          "PUNCT",       "IDENT",   "OPERATOR", "IDENT",    "PUNCT", "PUNCT",
+      "OPERATOR",    "LITERAL:String", "OPERATOR",    "IDENT",   "PUNCT",    "IDENT",    "PUNCT", "OPERATOR",
+      "IDENT",       "PUNCT",          "PUNCT",       "PUNCT",   "PUNCT",    "NEWLINE",  "IDENT", "OPERATOR",
+      "IDENT",       "OPERATOR",       "LITERAL:Int", "PUNCT",   "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -569,26 +537,17 @@ fromLiteral[1] := 2
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "PUNCT", "LITERAL:Int", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",       "PUNCT",       "PUNCT",   "PUNCT",       "IDENT",       "PUNCT",
+      "NEWLINE", "KEYWORD",     "IDENT",       "PUNCT",   "IDENT",       "OPERATOR",    "IDENT",
+      "PUNCT",   "LITERAL:Int", "PUNCT",       "NEWLINE", "IDENT",       "PUNCT",       "LITERAL:Int",
+      "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE", "IDENT",       "PUNCT",       "LITERAL:Int",
+      "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE", "IDENT",       "PUNCT",       "LITERAL:Int",
+      "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE", "IDENT",       "PUNCT",       "LITERAL:Int",
+      "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE", "KEYWORD",     "IDENT",       "PUNCT",
+      "IDENT",   "OPERATOR",    "IDENT",       "PUNCT",   "LITERAL:Int", "PUNCT",       "NEWLINE",
+      "IDENT",   "PUNCT",       "LITERAL:Int", "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE",
+      "IDENT",   "PUNCT",       "LITERAL:Int", "PUNCT",   "OPERATOR",    "LITERAL:Int", "NEWLINE",
+      "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -596,7 +555,8 @@ TEST(LexerUnitTestSuite, ListIteration) {
   const std::string src = R"OVUM(fun ListIteration(list: IntArray): int {
 var total: int = 0
 var idx: int = 0
-while (idx < list.Length()) { total = total + list[idx] if (list[idx] % 2 == 0) { list[idx] := list[idx] * 2 } idx = idx + 1 }
+while (idx < list.Length()) { total = total + list[idx] if (list[idx] % 2 == 0) { list[idx] := list[idx] * 2 } idx =
+idx + 1 }
 return total
 })OVUM";
   Lexer lexer(src);
@@ -609,25 +569,25 @@ return total
       "\\n",
       "var", "idx", ":", "int", "=", "0",
       "\\n",
-      "while", "(", "idx", "<", "list", ".", "Length", "(", ")", ")", "{", "total", "=", "total", "+", "list", "[", "idx", "]", "if", "(", "list", "[", "idx", "]", "%", "2", "==", "0", ")", "{", "list", "[", "idx", "]", ":=", "list", "[", "idx", "]", "*", "2", "}", "idx", "=", "idx", "+", "1", "}",
+      "while", "(", "idx", "<", "list", ".", "Length", "(", ")", ")", "{", "total", "=", "total", "+", "list", "[",
+      "idx", "]", "if", "(", "list", "[", "idx", "]", "%", "2", "==", "0", ")", "{", "list", "[", "idx", "]", ":=",
+      "list", "[", "idx", "]", "*", "2", "}", "idx", "=", "idx", "+", "1", "}",
       "\\n",
       "return", "total",
       "\\n",
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "KEYWORD", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",       "PUNCT",    "IDENT",       "PUNCT",    "PUNCT",
+      "IDENT",       "PUNCT",    "NEWLINE",     "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",    "OPERATOR",
+      "LITERAL:Int", "NEWLINE",  "KEYWORD",     "IDENT",       "PUNCT",    "IDENT",       "OPERATOR", "LITERAL:Int",
+      "NEWLINE",     "KEYWORD",  "PUNCT",       "IDENT",       "OPERATOR", "IDENT",       "OPERATOR", "IDENT",
+      "PUNCT",       "PUNCT",    "PUNCT",       "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",    "OPERATOR",
+      "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "KEYWORD",  "PUNCT",       "IDENT",    "PUNCT",
+      "IDENT",       "PUNCT",    "OPERATOR",    "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT",    "PUNCT",
+      "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "OPERATOR", "IDENT",       "PUNCT",    "IDENT",
+      "PUNCT",       "OPERATOR", "LITERAL:Int", "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",    "OPERATOR",
+      "LITERAL:Int", "PUNCT",    "NEWLINE",     "KEYWORD",     "IDENT",    "NEWLINE",     "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -643,35 +603,24 @@ return newList
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun", "ListOps", "(", "original", ":", "IntArray", ")", ":", "IntArray", "{",
-      "\\n",
-      "val", "newList", ":", "IntArray", "=", "IntArray", "(", "original", ".", "Length", "(", ")", "+", "1", ")",
-      "\\n",
-      "var", "i", ":", "int", "=", "0",
-      "\\n",
-      "while", "(", "i", "<", "original", ".", "Length", "(", ")", ")", "{", "newList", "[", "i", "]", ":=", "original", "[", "i", "]", "i", "=", "i", "+", "1", "}",
-      "\\n",
-      "newList", "[", "original", ".", "Length", "(", ")", "]", ":=", "100",
-      "\\n",
-      "return", "newList",
-      "\\n",
-      "}"
-  };
+      "fun", "ListOps", "(", "original", ":",   "IntArray", ")",        ":",        "IntArray", "{",      "\\n",
+      "val", "newList", ":", "IntArray", "=",   "IntArray", "(",        "original", ".",        "Length", "(",
+      ")",   "+",       "1", ")",        "\\n", "var",      "i",        ":",        "int",      "=",      "0",
+      "\\n", "while",   "(", "i",        "<",   "original", ".",        "Length",   "(",        ")",      ")",
+      "{",   "newList", "[", "i",        "]",   ":=",       "original", "[",        "i",        "]",      "i",
+      "=",   "i",       "+", "1",        "}",   "\\n",      "newList",  "[",        "original", ".",      "Length",
+      "(",   ")",       "]", ":=",       "100", "\\n",      "return",   "newList",  "\\n",      "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",    "PUNCT",   "IDENT",    "PUNCT",       "PUNCT",
+      "IDENT",       "PUNCT",    "NEWLINE",     "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",
+      "IDENT",       "PUNCT",    "IDENT",       "OPERATOR", "IDENT",   "PUNCT",    "PUNCT",       "OPERATOR",
+      "LITERAL:Int", "PUNCT",    "NEWLINE",     "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",
+      "LITERAL:Int", "NEWLINE",  "KEYWORD",     "PUNCT",    "IDENT",   "OPERATOR", "IDENT",       "OPERATOR",
+      "IDENT",       "PUNCT",    "PUNCT",       "PUNCT",    "PUNCT",   "IDENT",    "PUNCT",       "IDENT",
+      "PUNCT",       "OPERATOR", "IDENT",       "PUNCT",    "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",
+      "IDENT",       "OPERATOR", "LITERAL:Int", "PUNCT",    "NEWLINE", "IDENT",    "PUNCT",       "IDENT",
+      "OPERATOR",    "IDENT",    "PUNCT",       "PUNCT",    "PUNCT",   "OPERATOR", "LITERAL:Int", "NEWLINE",
+      "KEYWORD",     "IDENT",    "NEWLINE",     "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -686,21 +635,19 @@ return null
   std::vector<std::string> expected_lexemes = {
       "fun", "FindInList", "(", "list", ":", "IntArray", ",", "target", ":", "int", ")", ":", "Int", "?", "{",
       "\\n",
-      "for", "(", "num", "in", "list", ")", "{", "if", "(", "num", "==", "target", ")", "{", "return", "Int", "(", "num", ")", "}", "}",
+      "for", "(", "num", "in", "list", ")", "{", "if", "(", "num", "==", "target", ")", "{", "return", "Int",
+      "(", "num", ")", "}", "}",
       "\\n",
       "return", "null",
       "\\n",
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "KEYWORD", "IDENT", "PUNCT", "PUNCT", "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "KEYWORD",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",   "PUNCT",   "IDENT",   "PUNCT",    "IDENT",   "PUNCT",   "IDENT",   "PUNCT",
+      "IDENT",   "PUNCT",   "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",
+      "IDENT",   "KEYWORD", "IDENT",   "PUNCT",   "PUNCT",    "KEYWORD", "PUNCT",   "IDENT",   "OPERATOR",
+      "IDENT",   "PUNCT",   "PUNCT",   "KEYWORD", "IDENT",    "PUNCT",   "IDENT",   "PUNCT",   "PUNCT",
+      "PUNCT",   "NEWLINE", "KEYWORD", "KEYWORD", "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -713,23 +660,14 @@ sys::Print(length.ToString())
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun", "SafeCall", "(", "obj", ":", "String", "?", ")", ":", "Void", "{",
-      "\\n",
-      "val", "length", ":", "int", "=", "obj", "?.", "Length", "(", ")", "?:", "0",
-      "\\n",
-      "sys", "::", "Print", "(", "length", ".", "ToString", "(", ")", ")",
-      "\\n",
-      "}"
-  };
+      "fun",    "SafeCall", "(",   "obj",    ":",   "String",   "?",      ")", ":", "Void", "{", "\\n", "val",
+      "length", ":",        "int", "=",      "obj", "?.",       "Length", "(", ")", "?:",   "0", "\\n", "sys",
+      "::",     "Print",    "(",   "length", ".",   "ToString", "(",      ")", ")", "\\n",  "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT", "PUNCT",    "IDENT",
+      "PUNCT",    "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "IDENT", "OPERATOR", "IDENT",
+      "PUNCT",    "PUNCT",   "OPERATOR", "LITERAL:Int", "NEWLINE", "IDENT",   "OPERATOR", "IDENT", "PUNCT",    "IDENT",
+      "OPERATOR", "IDENT",   "PUNCT",    "PUNCT",       "PUNCT",   "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -754,16 +692,11 @@ return default
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:String",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",        "IDENT",    "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",
+      "PUNCT",          "IDENT",    "PUNCT",    "NEWLINE",     "KEYWORD", "IDENT",   "PUNCT",    "IDENT",
+      "OPERATOR",       "IDENT",    "OPERATOR", "LITERAL:Int", "NEWLINE", "KEYWORD", "IDENT",    "PUNCT",
+      "IDENT",          "OPERATOR", "IDENT",    "OPERATOR",    "IDENT",   "PUNCT",   "PUNCT",    "OPERATOR",
+      "LITERAL:String", "NEWLINE",  "KEYWORD",  "IDENT",       "NEWLINE", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -777,27 +710,22 @@ if (safe == null) { sys::Print("Is null") }
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "fun", "NullChecks", "(", "opt", ":", "Object", "?", ")", ":", "Void", "{",
-      "\\n",
-      "if", "(", "opt", "!=", "null", ")", "{", "sys", "::", "Print", "(", "\"Not null\"", ")", "val", "nonNull", ":", "Object", "=", "opt", "}",
-      "\\n",
-      "val", "safe", ":", "Object", "?", "=", "opt",
-      "\\n",
-      "if", "(", "safe", "==", "null", ")", "{", "sys", "::", "Print", "(", "\"Is null\"", ")", "}",
-      "\\n",
-      "}"
-  };
+      "fun",    "NullChecks", "(",   "opt",   ":",   "Object",       "?",   ")",           ":",
+      "Void",   "{",          "\\n", "if",    "(",   "opt",          "!=",  "null",        ")",
+      "{",      "sys",        "::",  "Print", "(",   "\"Not null\"", ")",   "val",         "nonNull",
+      ":",      "Object",     "=",   "opt",   "}",   "\\n",          "val", "safe",        ":",
+      "Object", "?",          "=",   "opt",   "\\n", "if",           "(",   "safe",        "==",
+      "null",   ")",          "{",   "sys",   "::",  "Print",        "(",   "\"Is null\"", ")",
+      "}",      "\\n",        "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "KEYWORD", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "LITERAL:String", "PUNCT", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "OPERATOR", "IDENT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "KEYWORD", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "LITERAL:String", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",    "PUNCT", "IDENT",   "PUNCT",          "IDENT",    "OPERATOR", "PUNCT",
+      "PUNCT",   "IDENT",    "PUNCT", "NEWLINE", "KEYWORD",        "PUNCT",    "IDENT",    "OPERATOR",
+      "KEYWORD", "PUNCT",    "PUNCT", "IDENT",   "OPERATOR",       "IDENT",    "PUNCT",    "LITERAL:String",
+      "PUNCT",   "KEYWORD",  "IDENT", "PUNCT",   "IDENT",          "OPERATOR", "IDENT",    "PUNCT",
+      "NEWLINE", "KEYWORD",  "IDENT", "PUNCT",   "IDENT",          "OPERATOR", "OPERATOR", "IDENT",
+      "NEWLINE", "KEYWORD",  "PUNCT", "IDENT",   "OPERATOR",       "KEYWORD",  "PUNCT",    "PUNCT",
+      "IDENT",   "OPERATOR", "IDENT", "PUNCT",   "LITERAL:String", "PUNCT",    "PUNCT",    "NEWLINE",
+      "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -828,20 +756,13 @@ val risky: Int = obj as Int
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "KEYWORD", "IDENT", "OPERATOR", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "OPERATOR", "IDENT", "KEYWORD", "IDENT", "OPERATOR",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",    "PUNCT",
+      "IDENT",    "PUNCT",    "NEWLINE",  "KEYWORD",     "PUNCT",   "IDENT",   "KEYWORD",  "IDENT",    "OPERATOR",
+      "PUNCT",    "PUNCT",    "NEWLINE",  "KEYWORD",     "IDENT",   "PUNCT",   "IDENT",    "OPERATOR", "OPERATOR",
+      "IDENT",    "KEYWORD",  "IDENT",    "OPERATOR",    "NEWLINE", "KEYWORD", "IDENT",    "PUNCT",    "IDENT",
+      "OPERATOR", "IDENT",    "OPERATOR", "LITERAL:Int", "NEWLINE", "IDENT",   "OPERATOR", "IDENT",    "PUNCT",
+      "IDENT",    "OPERATOR", "IDENT",    "PUNCT",       "PUNCT",   "PUNCT",   "PUNCT",    "NEWLINE",  "KEYWORD",
+      "IDENT",    "PUNCT",    "IDENT",    "OPERATOR",    "IDENT",   "KEYWORD", "IDENT",    "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -865,27 +786,23 @@ return copy
       "\\n",
       "var", "i", ":", "int", "=", "0",
       "\\n",
-      "while", "(", "i", "<", "src", ".", "Length", "(", ")", ")", "{", "copy", "[", "i", "]", ":=", "src", "[", "i", "]", "i", "=", "i", "+", "1", "}",
+      "while", "(", "i", "<", "src", ".", "Length", "(", ")", ")", "{", "copy", "[", "i", "]", ":=", "src",
+      "[", "i", "]", "i", "=", "i", "+", "1", "}",
       "\\n",
       "return", "copy",
       "\\n",
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "KEYWORD", "PUNCT", "KEYWORD", "KEYWORD",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",    "PUNCT",    "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",    "PUNCT",    "PUNCT",
+      "IDENT",    "OPERATOR", "PUNCT",    "NEWLINE", "KEYWORD",  "PUNCT",       "IDENT",       "OPERATOR", "KEYWORD",
+      "PUNCT",    "KEYWORD",  "KEYWORD",  "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT",       "IDENT",    "OPERATOR",
+      "OPERATOR", "IDENT",    "PUNCT",    "IDENT",   "OPERATOR", "IDENT",       "PUNCT",       "PUNCT",    "PUNCT",
+      "NEWLINE",  "KEYWORD",  "IDENT",    "PUNCT",   "IDENT",    "OPERATOR",    "LITERAL:Int", "NEWLINE",  "KEYWORD",
+      "PUNCT",    "IDENT",    "OPERATOR", "IDENT",   "OPERATOR", "IDENT",       "PUNCT",       "PUNCT",    "PUNCT",
+      "PUNCT",    "IDENT",    "PUNCT",    "IDENT",   "PUNCT",    "OPERATOR",    "IDENT",       "PUNCT",    "IDENT",
+      "PUNCT",    "IDENT",    "OPERATOR", "IDENT",   "OPERATOR", "LITERAL:Int", "PUNCT",       "NEWLINE",  "KEYWORD",
+      "IDENT",    "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -905,7 +822,8 @@ sys::Print(len.ToString())
       "\\n",
       "public", "val", "Inner", ":", "String", "?",
       "\\n",
-      "public", "fun", "Nested", "(", "s", ":", "String", "?", ")", ":", "Nested", "{", "this", ".", "Inner", "=", "s", "return", "this", "}","}",
+      "public", "fun", "Nested", "(", "s", ":", "String", "?", ")", ":", "Nested", "{", "this", ".",
+      "Inner", "=", "s", "return", "this", "}","}",
       "\\n",
       "fun", "ChainSafe", "(", "nested", ":", "Nested", "?", ")", ":", "Void", "{",
       "\\n",
@@ -916,21 +834,14 @@ sys::Print(len.ToString())
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR",
-      "NEWLINE",
-      "KEYWORD", "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "KEYWORD", "IDENT", "PUNCT",
-      "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",  "IDENT",   "PUNCT",    "NEWLINE",  "KEYWORD",     "KEYWORD", "IDENT",    "PUNCT",    "IDENT",
+      "OPERATOR", "NEWLINE", "KEYWORD",  "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",    "PUNCT",    "IDENT",
+      "OPERATOR", "PUNCT",   "PUNCT",    "IDENT",    "PUNCT",       "IDENT",   "OPERATOR", "IDENT",    "OPERATOR",
+      "IDENT",    "KEYWORD", "IDENT",    "PUNCT",    "PUNCT",       "NEWLINE", "KEYWORD",  "IDENT",    "PUNCT",
+      "IDENT",    "PUNCT",   "IDENT",    "OPERATOR", "PUNCT",       "PUNCT",   "IDENT",    "PUNCT",    "NEWLINE",
+      "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",    "OPERATOR",    "IDENT",   "OPERATOR", "IDENT",    "OPERATOR",
+      "IDENT",    "PUNCT",   "PUNCT",    "OPERATOR", "LITERAL:Int", "NEWLINE", "IDENT",    "OPERATOR", "IDENT",
+      "PUNCT",    "IDENT",   "OPERATOR", "IDENT",    "PUNCT",       "PUNCT",   "PUNCT",    "NEWLINE",  "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -944,27 +855,15 @@ return Int(aVal + bVal)
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      "pure", "fun", "SafeAdd", "(", "a", ":", "Int", "?", ",", "b", ":", "Int", "?", ")", ":", "Int", "{",
-      "\\n",
-      "val", "aVal", ":", "int", "=", "a", "?:", "0",
-      "\\n",
-      "val", "bVal", ":", "int", "=", "b", "?:", "0",
-      "\\n",
-      "return", "Int", "(", "aVal", "+", "bVal", ")",
-      "\\n",
-      "}"
-  };
+      "pure", "fun", "SafeAdd", "(",   "a",    ":",   "Int",    "?",   ",", "b",    ":", "Int",  "?",   ")",    ":",
+      "Int",  "{",   "\\n",     "val", "aVal", ":",   "int",    "=",   "a", "?:",   "0", "\\n",  "val", "bVal", ":",
+      "int",  "=",   "b",       "?:",  "0",    "\\n", "return", "Int", "(", "aVal", "+", "bVal", ")",   "\\n",  "}"};
   std::vector<std::string> expected_types = {
-      "KEYWORD", "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "PUNCT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD", "KEYWORD", "IDENT", "PUNCT",    "IDENT",    "PUNCT", "IDENT",    "OPERATOR",    "PUNCT",
+      "IDENT",   "PUNCT",   "IDENT", "OPERATOR", "PUNCT",    "PUNCT", "IDENT",    "PUNCT",       "NEWLINE",
+      "KEYWORD", "IDENT",   "PUNCT", "IDENT",    "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "NEWLINE",
+      "KEYWORD", "IDENT",   "PUNCT", "IDENT",    "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "NEWLINE",
+      "KEYWORD", "IDENT",   "PUNCT", "IDENT",    "OPERATOR", "IDENT", "PUNCT",    "NEWLINE",     "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -991,17 +890,9 @@ val bytes: ByteArray = (ptr as ByteArray)
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "KEYWORD", "PUNCT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "PUNCT", "IDENT", "KEYWORD", "IDENT", "PUNCT",
-      "NEWLINE",
-      "PUNCT",
-      "PUNCT",
-      "PUNCT"
-  };
+      "KEYWORD", "IDENT",   "PUNCT",   "IDENT",   "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",    "PUNCT",    "IDENT",
+      "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",    "IDENT",    "OPERATOR", "KEYWORD",
+      "PUNCT",   "PUNCT",   "NEWLINE", "KEYWORD", "IDENT",   "PUNCT",   "IDENT",    "OPERATOR", "PUNCT",    "IDENT",
+      "KEYWORD", "IDENT",   "PUNCT",   "NEWLINE", "PUNCT",   "PUNCT",   "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
