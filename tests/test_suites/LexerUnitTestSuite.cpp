@@ -16,6 +16,15 @@ std::vector<std::pair<std::string, std::string>> LexerUnitTestSuite::ExtractLexe
   return out;
 }
 
+
+void LexerUnitTestSuite::PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items) {
+  std::cout << "Lexemes and Types:" << std::endl;
+  for (const auto& item : items) {
+    std::cout << item.first << " (" << item.second << ")" << std::endl;
+  }
+  std::cout << "End of output" << std::endl;
+}
+
 void LexerUnitTestSuite::AssertLexemesAndTypesEqual(
     const std::vector<std::pair<std::string, std::string>>& actual,
     const std::vector<std::string>& expected_lexemes,

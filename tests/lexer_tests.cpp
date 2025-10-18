@@ -242,21 +242,13 @@ TEST(LexerUnitTestSuite, WhitespaceSkipping) {
 
 // Negative tests
 
-void PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items) {
-  std::cout << "Lexemes and Types:" << std::endl;
-  for (const auto& item : items) {
-    std::cout << item.first << " (" << item.second << ")" << std::endl;
-  }
-  std::cout << "End of output" << std::endl;
-}
-
 TEST(LexerUnitTestSuite, InvalidCharacter) {
   const std::string src = "fun @main(): Void {}";
   Lexer lexer(src);
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -269,7 +261,7 @@ TEST(LexerUnitTestSuite, InvalidCharacterInIdentifier) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -282,7 +274,7 @@ TEST(LexerUnitTestSuite, InvalidIdentifierStartingWithDigit) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -295,7 +287,7 @@ TEST(LexerUnitTestSuite, InvalidHexNumber) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -308,7 +300,7 @@ TEST(LexerUnitTestSuite, InvalidBinaryNumber) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -321,7 +313,7 @@ TEST(LexerUnitTestSuite, InvalidFloatNumber) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -334,7 +326,7 @@ TEST(LexerUnitTestSuite, InvalidFloatIncompleteExp) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -347,7 +339,7 @@ TEST(LexerUnitTestSuite, UnterminatedString) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -360,7 +352,7 @@ TEST(LexerUnitTestSuite, InvalidEscapeInString) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -373,7 +365,7 @@ TEST(LexerUnitTestSuite, UnterminatedChar) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -386,7 +378,7 @@ TEST(LexerUnitTestSuite, EmptyCharLiteral) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -399,7 +391,7 @@ TEST(LexerUnitTestSuite, MultiCharLiteral) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -412,7 +404,7 @@ TEST(LexerUnitTestSuite, InvalidEscapeInChar) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -425,7 +417,7 @@ TEST(LexerUnitTestSuite, InvalidPreprocessor) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();
@@ -438,7 +430,7 @@ TEST(LexerUnitTestSuite, MultipleErrorsInOneFile) {
   try {
     auto tokens = lexer.Tokenize();
     auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-    PrintLexemesAndTypes(items);
+    LexerUnitTestSuite::PrintLexemesAndTypes(items);
     FAIL() << "No exception thrown";
   } catch (const std::runtime_error& e) {
     SUCCEED();

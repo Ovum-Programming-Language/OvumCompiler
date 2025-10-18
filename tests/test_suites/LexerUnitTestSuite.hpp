@@ -9,6 +9,8 @@ struct LexerUnitTestSuite : public testing::Test {
 
   static std::vector<std::pair<std::string, std::string>> ExtractLexemesAndTypes(const std::vector<TokenPtr>& tokens);
 
+  static void PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items);
+
   static void AssertLexemesAndTypesEqual(
       const std::vector<std::pair<std::string, std::string>>& actual,
       const std::vector<std::string>& expected_lexemes,
