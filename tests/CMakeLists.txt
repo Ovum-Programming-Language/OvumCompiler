@@ -3,9 +3,11 @@ enable_testing()
 add_executable(
         ${PROJECT_NAME}_tests
         main_test.cpp
-        unit_tests.cpp
+        lexer_big_programs_tests.cpp
         test_functions.cpp
         test_suites/ProjectIntegrationTestSuite.cpp
+        test_suites/LexerUnitTestSuite.cpp
+        lexer_tests.cpp
 )
 
 target_link_libraries(
