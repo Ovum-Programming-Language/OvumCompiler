@@ -7,4 +7,4 @@ public:
   OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif //COLONHANDLER_HPP_
+#endif // COLONHANDLER_HPP_
