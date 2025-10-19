@@ -31,7 +31,7 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
       wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
 
-    long double v = NAN;
+    double v = std::nan("");
 
     try {
       v = std::stold(raw);
@@ -64,7 +64,7 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
       wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
     }
 
-    long double v = NAN;
+    double v = std::nan("");
 
     try {
       v = std::stold(raw);
@@ -88,7 +88,7 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     }
 
     wrapper.ConsumeWhile(raw, [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); });
-    long double v = NAN;
+    long double v = std::nan("");
 
     try {
       v = std::stold(raw);

@@ -8,7 +8,7 @@
 
 class FloatValue : public Value {
 public:
-  explicit FloatValue(long double x);
+  explicit FloatValue(double x);
 
   [[nodiscard]] std::unique_ptr<Value> Clone() const override;
 
@@ -17,7 +17,7 @@ public:
   [[nodiscard]] std::string GetTypeName() const override;
 
 private:
-  long double v;
+  double v;
 };
 
 #endif // FLOATVALUE_HPP_

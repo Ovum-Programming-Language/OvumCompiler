@@ -3,13 +3,14 @@
 
 #include <array>
 #include <cstddef>
+#include <memory>
 #include <string_view>
 #include <vector>
 
 #include "SourceCodeWrapper.hpp"
 #include "handlers/Handler.hpp"
 
-constexpr std::size_t kNumAsciiChars = 256;
+constexpr std::size_t kDefaultTokenReserve = 256;
 
 class Lexer {
 public:
@@ -17,19 +18,17 @@ public:
 
   std::vector<TokenPtr> Tokenize();
 
-  void SetHandler(unsigned char c, std::unique_ptr<Handler> handler) {
-    handlers_.at(c) = std::move(handler);
-  }
+  void SetHandler(unsigned char ch, std::unique_ptr<Handler> handler);
 
-  void SetDefaultHandler(std::unique_ptr<Handler> handler) {
-    default_handler_ = std::move(handler);
-  }
+  void SetDefaultHandler(std::unique_ptr<Handler> handler);
 
 private:
-  void RegisterDefaults();
+  static std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> MakeDefaultHandlers();
+
+  static std::unique_ptr<Handler> MakeDefaultHandler();
 
   SourceCodeWrapper wrapper_;
-  std::array<std::unique_ptr<Handler>, kNumAsciiChars> handlers_;
+  std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> handlers_{};
   std::unique_ptr<Handler> default_handler_;
 };
 
