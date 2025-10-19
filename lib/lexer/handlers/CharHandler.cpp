@@ -27,8 +27,7 @@ OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
         val = '\'';
         break;
       default:
-        val = e;
-        break;
+        throw LexerError(std::string("Unknown escape in char literal: \\") + e);
     }
   } else {
     char c = wrapper.Advance();
@@ -36,11 +35,19 @@ OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
     val = c;
   }
 
+  if (wrapper.IsAtEnd()) {
+    throw LexerError("Unterminated char literal");
+  }
+
+  if (wrapper.Peek() == '\n') {
+    throw LexerError("Newline in char literal");
+  }
+
   if (wrapper.Peek() == '\'') {
     wrapper.Advance();
     raw.push_back('\'');
   } else {
-    throw LexerError("Unterminated char literal");
+    throw LexerError("Too many characters in char literal");
   }
 
   return std::make_optional(

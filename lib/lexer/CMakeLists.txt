@@ -4,6 +4,7 @@ add_library(lexer STATIC
         handlers/CharHandler.cpp
         handlers/ColonHandler.cpp
         handlers/DefaultHandler.cpp
+        handlers/DotCompositeHandler.cpp
         handlers/IdentifierHandler.cpp
         handlers/NewlineHandler.cpp
         handlers/NumberHandler.cpp

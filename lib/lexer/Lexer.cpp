@@ -6,6 +6,7 @@
 #include "handlers/CharHandler.hpp"
 #include "handlers/ColonHandler.hpp"
 #include "handlers/DefaultHandler.hpp"
+#include "handlers/DotCompositeHandler.hpp"
 #include "handlers/IdentifierHandler.hpp"
 #include "handlers/NewlineHandler.hpp"
 #include "handlers/NumberHandler.hpp"
@@ -18,7 +19,7 @@
 #include "tokens/TokenFactory.hpp"
 
 namespace {
-constexpr const char* kOperatorChars = "+-*%<>=!&|^~?.";
+constexpr const char* kOperatorChars = "+-*%<>=!&|^~?";
 constexpr const char* kPunctChars = ",;(){}[]";
 } // namespace
 
@@ -82,7 +83,7 @@ std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> Lexer::MakeDefaultHan
     table.at(digit) = std::make_unique<NumberHandler>();
   }
 
-  table.at(static_cast<unsigned char>('.')) = std::make_unique<NumberHandler>();
+  table.at(static_cast<unsigned char>('.')) = std::make_unique<DotCompositeHandler>();
 
   table.at(static_cast<unsigned char>('"')) = std::make_unique<StringHandler>();
   table.at(static_cast<unsigned char>('\'')) = std::make_unique<CharHandler>();
