@@ -2,12 +2,12 @@
 
 OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
   while (!wrapper.IsAtEnd()) {
-    if (char p = wrapper.Peek(); p == ' ' || p == '\t' || p == '\r') {
-      wrapper.Advance();
-      continue;
+    if (char p = wrapper.Peek(); p != ' ' && p != '\t' && p != '\r') {
+      break;
     }
 
-    break;
+    wrapper.Advance();
   }
+
   return std::nullopt;
 }
