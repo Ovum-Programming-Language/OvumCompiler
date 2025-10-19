@@ -1,7 +1,6 @@
 add_library(lexer STATIC
         Lexer.cpp
         SourceCodeWrapper.cpp
-        utils.cpp
         handlers/CharHandler.cpp
         handlers/ColonHandler.cpp
         handlers/DefaultHandler.cpp
