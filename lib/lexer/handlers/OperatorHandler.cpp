@@ -10,7 +10,7 @@ OptToken OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
   if (p != '\0') {
     std::string two = op + p;
 
-    if (wrapper.IsMultiop(two)) {
+    if (wrapper.IsMultiOp(two)) {
       wrapper.Advance();
       op = two;
     }

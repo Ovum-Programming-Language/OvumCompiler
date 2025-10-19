@@ -9,7 +9,7 @@ OptToken ColonHandler::Scan(SourceCodeWrapper& wrapper) {
 
   if (next != '\0') {
     std::string two = op + next;
-    if (wrapper.IsMultiop(two)) {
+    if (wrapper.IsMultiOp(two)) {
       wrapper.Advance();
       op = two;
       return std::make_optional(TokenFactory::MakeOperator(std::move(op), wrapper.GetLine(), wrapper.GetTokenCol()));

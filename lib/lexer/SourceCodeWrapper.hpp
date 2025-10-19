@@ -5,6 +5,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
 class SourceCodeWrapper {
 public:
@@ -34,9 +35,9 @@ public:
 
   [[nodiscard]] bool IsKeepComments() const noexcept;
 
-  [[nodiscard]] bool IsKeyword(std::string_view s) const;
+  [[nodiscard]] static bool IsKeyword(std::string_view s);
 
-  [[nodiscard]] bool IsMultiop(std::string_view s) const;
+  [[nodiscard]] static bool IsMultiOp(std::string_view s);
 
 private:
   std::string_view src_;
@@ -47,6 +48,9 @@ private:
   int32_t line_{1};
   int32_t col_{1};
   int32_t token_col_{1};
+
+  static const std::unordered_set<std::string_view> kKeywords;
+  static const std::unordered_set<std::string_view> kMultiOps;
 };
 
 #endif // SOURCECODEWRAPPER_HPP_

@@ -1,6 +1,13 @@
 #include "SourceCodeWrapper.hpp"
 
-#include "utils.hpp"
+const std::unordered_set<std::string_view> SourceCodeWrapper::kKeywords = {
+    "fun",        "class",   "interface", "var",    "override", "pure",    "if",     "else",      "continue",
+    "break",      "for",     "while",     "return", "unsafe",   "val",     "static", "public",    "private",
+    "implements", "as",      "is",        "in",     "null",     "true",    "false",  "typealias", "destructor",
+    "call",       "#import", "#define",   "#undef", "#ifdef",   "#ifndef", "#else",  "#endif",    "xor"};
+
+const std::unordered_set<std::string_view> SourceCodeWrapper::kMultiOps = {
+    "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":="};
 
 SourceCodeWrapper::SourceCodeWrapper(std::string_view src, bool keep_comments) :
     src_(src), keep_comments_(keep_comments) {
@@ -50,30 +57,24 @@ void SourceCodeWrapper::RetreatOne() {
     return;
   }
 
+  const char was = src_[current_ - 1];
   --current_;
-  int l = 1;
 
-  for (size_t i = 0; i < current_; ++i) {
-    if (src_[i] == '\n') {
-      ++l;
+  if (was == '\n') {
+    line_ = std::max<int32_t>(1, line_ - 1);
+    size_t i = current_;
+    int32_t col = 1;
+
+    while (i > 0 && src_[i - 1] != '\n') {
+      --i;
+      ++col;
     }
+
+    col_ = col;
+    return;
   }
 
-  line_ = l;
-  int col = 1;
-
-  for (size_t i = current_; i > 0; --i) {
-    if (src_[i - 1] == '\n') {
-      col = static_cast<int>(current_ - i + 1);
-      break;
-    }
-
-    if (i == 1) {
-      col = static_cast<int>(current_);
-    }
-  }
-
-  col_ = col;
+  col_ = std::max<int32_t>(1, col_ - 1);
 }
 
 void SourceCodeWrapper::ConsumeWhile(std::string& out, const std::function<bool(char)>& pred) {
@@ -111,10 +112,10 @@ bool SourceCodeWrapper::IsKeepComments() const noexcept {
   return keep_comments_;
 }
 
-bool SourceCodeWrapper::IsKeyword(std::string_view s) const {
-  return KeywordSet().contains(std::string(s));
+bool SourceCodeWrapper::IsKeyword(std::string_view s) {
+  return kKeywords.contains(s);
 }
 
-bool SourceCodeWrapper::IsMultiop(std::string_view s) const {
-  return MultiOpsSet().contains(std::string(s));
+bool SourceCodeWrapper::IsMultiOp(std::string_view s) {
+  return kMultiOps.contains(s);
 }
