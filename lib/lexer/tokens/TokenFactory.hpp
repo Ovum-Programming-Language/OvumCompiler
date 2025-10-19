@@ -26,7 +26,7 @@ std::unique_ptr<Token> MakeEof(int32_t line, int32_t col);
 
 std::unique_ptr<Token> MakeIntLiteral(std::string raw, int64_t v, int32_t line, int32_t col);
 
-std::unique_ptr<Token> MakeFloatLiteral(std::string raw, long double v, int32_t line, int32_t col);
+std::unique_ptr<Token> MakeFloatLiteral(std::string raw, double v, int32_t line, int32_t col);
 
 std::unique_ptr<Token> MakeStringLiteral(std::string raw, std::string s, int32_t line, int32_t col);
 
