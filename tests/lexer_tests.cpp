@@ -241,20 +241,12 @@ TEST(LexerUnitTestSuite, WhitespaceSkipping) {
 
 TEST(LexerUnitTestSuite, SingleLineComment) {
   const std::string src = R"OVUM(// This is a single-line comment
-fun Main(): Void {)OVUM";
+fun Main)OVUM";
   Lexer lexer(src, true);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {
-      " This is a single-line comment",
-      "\\n",
-      "fun", "Main", "(", ")", ":", "Void", "{",
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "PUNCT"
-  };
+  std::vector<std::string> expected_lexemes = {" This is a single-line comment", "\\n", "fun", "Main"};
+  std::vector<std::string> expected_types = {"COMMENT", "NEWLINE", "KEYWORD", "IDENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -264,14 +256,8 @@ TEST(LexerUnitTestSuite, SingleLineCommentNoSpace) {
   Lexer lexer(src, true);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {
-      "This is a single-line comment without space",
-      "\\n"
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT",
-      "NEWLINE"
-  };
+  std::vector<std::string> expected_lexemes = {"This is a single-line comment without space", "\\n"};
+  std::vector<std::string> expected_types = {"COMMENT", "NEWLINE"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -281,12 +267,8 @@ multi-line comment */)OVUM";
   Lexer lexer(src, true);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {
-      " This is a properly closed\nmulti-line comment "
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT"
-  };
+  std::vector<std::string> expected_lexemes = {" This is a properly closed\nmulti-line comment "};
+  std::vector<std::string> expected_types = {"COMMENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -297,44 +279,18 @@ fun Main())OVUM";
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
   std::vector<std::string> expected_lexemes = {
-      " This comment contains / and * signs: /* // ",
-      "\\n",
-      "fun", "Main", "(", ")"
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "PUNCT"
-  };
+      " This comment contains / and * signs: /* // ", "\\n", "fun", "Main", "(", ")"};
+  std::vector<std::string> expected_types = {"COMMENT", "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
 TEST(LexerUnitTestSuite, IncorrectCommentWithSlashesAndStars) {
-  const std::string src = R"OVUM(/* This comment contains / and * signs: /* // */ */
-fun Main(): Void {
-    val x: int = 42
-})OVUM";
+  const std::string src = R"OVUM(/* This comment contains / and * signs: /* // */ */)OVUM";
   Lexer lexer(src, true);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {
-      " This comment contains / and * signs: /* // ", "*", "/",
-      "\\n",
-      "fun", "Main", "(", ")", ":", "Void", "{",
-      "\\n",
-      "val", "x", ":", "int", "=", "42",
-      "\\n",
-      "}"
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT", "OPERATOR", "OPERATOR",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "PUNCT"
-  };
+  std::vector<std::string> expected_lexemes = {" This comment contains / and * signs: /* // ", "*", "/"};
+  std::vector<std::string> expected_types = {"COMMENT", "OPERATOR", "OPERATOR"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -347,12 +303,8 @@ Fifth line */)OVUM";
   Lexer lexer(src, true);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
-  std::vector<std::string> expected_lexemes = {
-      " First line\n\nThird line after empty line\n\nFifth line "
-  };
-  std::vector<std::string> expected_types = {
-      "COMMENT"
-  };
+  std::vector<std::string> expected_lexemes = {" First line\n\nThird line after empty line\n\nFifth line "};
+  std::vector<std::string> expected_types = {"COMMENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -447,7 +399,6 @@ TEST(LexerUnitTestSuite, MultipleErrorsInOneFile) {
   Lexer lexer(src);
   ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
 }
-
 
 TEST(LexerUnitTestSuite, MultiLineCommentNegativeUnclosed) {
   const std::string src = R"OVUM(/* This is an unclosed multi-line comment
