@@ -11,7 +11,7 @@ std::vector<std::pair<std::string, std::string>> LexerUnitTestSuite::ExtractLexe
   std::vector<std::pair<std::string, std::string>> out;
   if (tokens.empty())
     return out;
-  // исключаем последний токен (EOF)
+  // excluding the last token (EOF)
   for (size_t i = 0; i + 1 < tokens.size(); ++i) {
     out.emplace_back(tokens[i]->GetLexeme(), tokens[i]->GetStringType());
   }
