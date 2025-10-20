@@ -41,6 +41,8 @@ OptToken StringHandler::Scan(SourceCodeWrapper& wrapper) {
         case '"':
           out.push_back('"');
           break;
+        case '\0':
+          out.push_back('\0');
         default:
           throw LexerError(std::string("Unknown escape in string literal: \\") + e);
       }
