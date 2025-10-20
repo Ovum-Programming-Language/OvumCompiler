@@ -5,7 +5,6 @@
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/LexerUnitTestSuite.hpp"
 
-
 TEST(LexerUnitTestSuite, ExampleFundamentals) {
   const std::string src = R"OVUM(fun ExampleFundamentals(): Void {
   val i: int = 42
@@ -19,6 +18,7 @@ TEST(LexerUnitTestSuite, ExampleFundamentals) {
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleFundamentals","(",")",":","Void","{","\\n",
       "val","i",":","int","=","42","\\n",
@@ -30,6 +30,7 @@ TEST(LexerUnitTestSuite, ExampleFundamentals) {
       "sys","::", "Print","(","i",".","ToString","(",")",")","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",        "PUNCT",        "PUNCT",       "PUNCT",         "IDENT",       "PUNCT",   "NEWLINE",
       "KEYWORD",  "IDENT",        "PUNCT",        "IDENT",       "OPERATOR",      "LITERAL:Int", "NEWLINE", "KEYWORD",
@@ -55,6 +56,7 @@ val pi: Float = 3.14
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleReferences","(",")",":","Void","{","\\n",
       "val","I",":","Int","=","42","\\n",
@@ -67,6 +69,7 @@ val pi: Float = 3.14
       "val","pi",":","Float","=","3.14","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",   "PUNCT", "PUNCT", "PUNCT", "IDENT",    "PUNCT",
       "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
@@ -90,6 +93,7 @@ val safeInt: Int? = 42
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ExampleNullable", "(", ")",        ":", "Void", "{",         "\\n",
       "val", "optInt",          ":", "Int",      "?", "=",    "null",      "\\n",
@@ -97,6 +101,7 @@ val safeInt: Int? = 42
       "val", "optArr",          ":", "IntArray", "?", "=",    "null",      "\\n",
       "val", "safeInt",         ":", "Int",      "?", "=",    "42",        "\\n",
       "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",       "PUNCT",    "PUNCT",          "IDENT",   "PUNCT",   "NEWLINE", "KEYWORD",
       "IDENT",    "PUNCT",    "IDENT",       "OPERATOR", "OPERATOR",       "KEYWORD", "NEWLINE", "KEYWORD", "IDENT",
@@ -116,6 +121,7 @@ val emptyList: IntArray = IntArray(0)
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleArrays","(",")",":","Void","{","\\n",
       "val","intArr",":","IntArray","=","IntArray","(","5",")","\\n",
@@ -125,6 +131,7 @@ val emptyList: IntArray = IntArray(0)
       "val","emptyList",":","IntArray","=","IntArray","(","0",")","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",     "IDENT",       "PUNCT",   "PUNCT",   "PUNCT",    "IDENT",       "PUNCT",       "NEWLINE",
       "KEYWORD",     "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "IDENT",       "PUNCT",       "LITERAL:Int",
@@ -149,6 +156,7 @@ val circle: Circle? = Circle(10.0)
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "interface", "IShape", "{",     "fun",    "Area",     "(",          ")",      ":",
       "float",     "}",      "\\n",   "class",  "Circle",   "implements", "IShape", "{",
@@ -162,6 +170,7 @@ val circle: Circle? = Circle(10.0)
       ":",         "IShape", "=",     "Circle", "(",        "5.0",        ")",      "\\n",
       "val",       "circle", ":",     "Circle", "?",        "=",          "Circle", "(",
       "10.0",      ")",      "\\n",   "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",       "IDENT",   "PUNCT",    "KEYWORD",  "IDENT",    "PUNCT",         "PUNCT",    "PUNCT",
       "IDENT",         "PUNCT",   "NEWLINE",  "KEYWORD",  "IDENT",    "KEYWORD",       "IDENT",    "PUNCT",
@@ -189,6 +198,7 @@ obj.mutable = 30.0
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "class","ExampleClass","{","\\n",
       "private","val","immutable",":","int","=","10","\\n",
@@ -199,6 +209,7 @@ obj.mutable = 30.0
       "obj",".","mutable","=","30.0","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",         "NEWLINE",       "KEYWORD", "KEYWORD", "IDENT",   "PUNCT",
       "IDENT",    "OPERATOR", "LITERAL:Int",   "NEWLINE",       "KEYWORD", "KEYWORD", "IDENT",   "PUNCT",
@@ -217,6 +228,7 @@ else { sys::Print("Zero") }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","SimpleIf","(","x",":","int",")",":","Void","{","\\n",
       "if","(","x",">","0",")","{","sys","::", "Print","(","\"Positive\"",")","}","\\n",
@@ -224,6 +236,7 @@ else { sys::Print("Zero") }
       "else","{","sys","::", "Print","(","\"Zero\"",")","}","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",        "IDENT",   "PUNCT",   "IDENT",    "PUNCT", "IDENT",    "PUNCT",          "PUNCT",
       "IDENT",          "PUNCT",   "NEWLINE", "KEYWORD",  "PUNCT", "IDENT",    "OPERATOR",       "LITERAL:Int",
@@ -244,6 +257,7 @@ else { sys::Print("Both false") }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","BooleanConditions","(","a",":","bool",",","b",":","bool",")",":","Void","{","\\n",
       "if","(","a","&&","b",")","{","sys","::", "Print","(","\"Both true\"",")","}","\\n",
@@ -252,6 +266,7 @@ else { sys::Print("Both false") }
       "else","{","sys","::", "Print","(","\"Both false\"",")","}","\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",          "IDENT",          "PUNCT", "IDENT",          "PUNCT",   "IDENT",
       "PUNCT",    "IDENT",    "PUNCT",          "PUNCT",          "IDENT", "PUNCT",          "NEWLINE", "KEYWORD",
@@ -275,6 +290,7 @@ else { sys::Print("Unknown type") }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "TypeConditions", "(", "obj", ":", "Object", ")", ":", "Void", "{",
       "\\n",
@@ -289,6 +305,7 @@ else { sys::Print("Unknown type") }
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",   "IDENT",    "PUNCT",          "IDENT",    "PUNCT",   "PUNCT",    "IDENT",
       "PUNCT",    "NEWLINE",  "KEYWORD", "PUNCT",    "IDENT",          "KEYWORD",  "IDENT",   "PUNCT",    "PUNCT",
@@ -312,10 +329,12 @@ else { return value }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "ElvisInIf", "(", "opt", ":",  "Int", "?",    ")",  ":",      "int",   "{", "\\n", "val", "value",
       ":",      "int",       "=", "opt", "?:", "0",   "\\n",  "if", "(",      "value", ">", "10",  ")",   "{",
       "return", "value",     "*", "2",   "}",  "\\n", "else", "{",  "return", "value", "}", "\\n", "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",    "PUNCT",       "IDENT", "OPERATOR", "PUNCT",       "PUNCT",
       "IDENT",    "PUNCT",       "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT", "IDENT",    "OPERATOR",    "IDENT",
@@ -334,11 +353,13 @@ else return "Other"
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "WhenLike", "(",       "x",      ":",       "int",    ")",         ":",   "String", "{",  "\\n", "if",
       "(",   "x",        "==",      "1",      ")",       "return", "\"One\"",   "\\n", "else",   "if", "(",   "x",
       "==",  "2",        ")",       "return", "\"Two\"", "\\n",    "else",      "if",  "(",      "x",  ">",   "10",
       ")",   "return",   "\"Big\"", "\\n",    "else",    "return", "\"Other\"", "\\n", "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",        "IDENT",       "PUNCT",   "IDENT",          "PUNCT",          "IDENT",   "PUNCT",
       "PUNCT",          "IDENT",       "PUNCT",   "NEWLINE",        "KEYWORD",        "PUNCT",   "IDENT",
@@ -363,6 +384,7 @@ return counter
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "WhileExample", "(", "n", ":", "int", ")", ":", "int", "{",
       "\\n",
@@ -382,6 +404,7 @@ return counter
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",     "IDENT",   "PUNCT",   "IDENT",    "PUNCT",       "IDENT",    "PUNCT",       "PUNCT",
       "IDENT",       "PUNCT",   "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT",    "IDENT",       "OPERATOR",
@@ -403,11 +426,13 @@ return sum
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ForExample", "(", "arr", ":", "IntArray", ")",      ":",   "int", "{",     "\\n",
       "var", "sum",        ":", "int", "=", "0",        "\\n",    "for", "(",   "num",   "in",
       "arr", ")",          "{", "if",  "(", "num",      "<",      "0",   ")",   "break", "sum",
       "=",   "sum",        "+", "num", "}", "\\n",      "return", "sum", "\\n", "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",    "PUNCT",       "IDENT",   "PUNCT",   "IDENT",   "PUNCT",    "PUNCT",       "IDENT",
       "PUNCT",   "NEWLINE",  "KEYWORD",     "IDENT",   "PUNCT",   "IDENT",   "OPERATOR", "LITERAL:Int", "NEWLINE",
@@ -431,6 +456,7 @@ if (i > 5) break }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "NestedLoops", "(", "matrix", ":", "IntArrayArray", ")", ":", "Void", "{",
       "\\n",
@@ -453,6 +479,7 @@ if (i > 5) break }
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",     "IDENT",   "PUNCT",    "IDENT",       "PUNCT",    "IDENT",       "PUNCT",   "PUNCT",
       "IDENT",       "PUNCT",   "NEWLINE",  "KEYWORD",     "PUNCT",    "IDENT",       "KEYWORD", "IDENT",
@@ -477,6 +504,7 @@ i = i + 1 }})OVUM";
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ForWithIndex", "(", "arr", ":", "IntArray", ")", ":", "Void", "{",
       "\\n",
@@ -489,6 +517,7 @@ i = i + 1 }})OVUM";
       "\\n",
       "i", "=", "i", "+", "1", "}", "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",     "IDENT",          "PUNCT",       "IDENT",   "PUNCT",    "IDENT",    "PUNCT", "PUNCT",
       "IDENT",       "PUNCT",          "NEWLINE",     "KEYWORD", "IDENT",    "PUNCT",    "IDENT", "OPERATOR",
@@ -515,6 +544,7 @@ fromLiteral[1] := 2
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListCreation", "(", ")", ":", "Void", "{",
       "\\n",
@@ -536,6 +566,7 @@ fromLiteral[1] := 2
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",       "PUNCT",       "PUNCT",   "PUNCT",       "IDENT",       "PUNCT",
       "NEWLINE", "KEYWORD",     "IDENT",       "PUNCT",   "IDENT",       "OPERATOR",    "IDENT",
@@ -562,6 +593,7 @@ return total
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListIteration", "(", "list", ":", "IntArray", ")", ":", "int", "{",
       "\\n",
@@ -578,21 +610,18 @@ return total
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
-      "NEWLINE",
-      "KEYWORD", "IDENT",
-      "NEWLINE",
-      "PUNCT"
-  };
+      "KEYWORD",     "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "IDENT",    "PUNCT",       "PUNCT",
+      "IDENT",       "PUNCT",       "NEWLINE",  "KEYWORD",     "IDENT",       "PUNCT",    "IDENT",       "OPERATOR",
+      "LITERAL:Int", "NEWLINE",     "KEYWORD",  "IDENT",       "PUNCT",       "IDENT",    "OPERATOR",    "LITERAL:Int",
+      "NEWLINE",     "KEYWORD",     "PUNCT",    "IDENT",       "OPERATOR",    "IDENT",    "OPERATOR",    "IDENT",
+      "PUNCT",       "PUNCT",       "PUNCT",    "PUNCT",       "IDENT",       "OPERATOR", "IDENT",       "OPERATOR",
+      "IDENT",       "PUNCT",       "IDENT",    "PUNCT",       "NEWLINE",     "KEYWORD",  "PUNCT",       "IDENT",
+      "PUNCT",       "IDENT",       "PUNCT",    "OPERATOR",    "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT",
+      "PUNCT",       "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "OPERATOR", "IDENT",       "PUNCT",
+      "IDENT",       "PUNCT",       "OPERATOR", "LITERAL:Int", "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",
+      "OPERATOR",    "LITERAL:Int", "PUNCT",    "NEWLINE",     "KEYWORD",     "IDENT",    "NEWLINE",     "PUNCT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
@@ -607,6 +636,7 @@ return newList
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListOps", "(", "original", ":",   "IntArray", ")",        ":",        "IntArray", "{",      "\\n",
       "val", "newList", ":", "IntArray", "=",   "IntArray", "(",        "original", ".",        "Length", "(",
@@ -615,6 +645,7 @@ return newList
       "{",   "newList", "[", "i",        "]",   ":=",       "original", "[",        "i",        "]",      "i",
       "=",   "i",       "+", "1",        "}",   "\\n",      "newList",  "[",        "original", ".",      "Length",
       "(",   ")",       "]", ":=",       "100", "\\n",      "return",   "newList",  "\\n",      "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",    "PUNCT",   "IDENT",    "PUNCT",       "PUNCT",
       "IDENT",       "PUNCT",    "NEWLINE",     "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",
@@ -637,6 +668,7 @@ return null
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "FindInList", "(", "list", ":", "IntArray", ",", "target", ":", "int", ")", ":", "Int", "?", "{",
       "\\n",
@@ -647,6 +679,7 @@ return null
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",   "PUNCT",   "IDENT",   "PUNCT",    "IDENT",   "PUNCT",   "IDENT",   "PUNCT",
       "IDENT",   "PUNCT",   "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",
@@ -664,10 +697,12 @@ sys::Print(length.ToString())
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "SafeCall", "(",   "obj",    ":",   "String",   "?",      ")", ":", "Void", "{", "\\n", "val",
       "length", ":",        "int", "=",      "obj", "?.",       "Length", "(", ")", "?:",   "0", "\\n", "sys",
       "::",     "Print",    "(",   "length", ".",   "ToString", "(",      ")", ")", "\\n",  "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT", "PUNCT",    "IDENT",
       "PUNCT",    "NEWLINE", "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "IDENT", "OPERATOR", "IDENT",
@@ -685,6 +720,7 @@ return default
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ElvisExamples", "(", "optInt", ":", "Int", "?", ")", ":", "int", "{",
       "\\n",
@@ -696,6 +732,7 @@ return default
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",        "IDENT",    "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",
       "PUNCT",          "IDENT",    "PUNCT",    "NEWLINE",     "KEYWORD", "IDENT",   "PUNCT",    "IDENT",
@@ -714,6 +751,7 @@ if (safe == null) { sys::Print("Is null") }
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "NullChecks", "(",   "opt",   ":",   "Object",       "?",   ")",           ":",
       "Void",   "{",          "\\n", "if",    "(",   "opt",          "!=",  "null",        ")",
@@ -722,6 +760,7 @@ if (safe == null) { sys::Print("Is null") }
       "Object", "?",          "=",   "opt",   "\\n", "if",           "(",   "safe",        "==",
       "null",   ")",          "{",   "sys",   "::",  "Print",        "(",   "\"Is null\"", ")",
       "}",      "\\n",        "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",    "PUNCT", "IDENT",   "PUNCT",          "IDENT",    "OPERATOR", "PUNCT",
       "PUNCT",   "IDENT",    "PUNCT", "NEWLINE", "KEYWORD",        "PUNCT",    "IDENT",    "OPERATOR",
@@ -745,6 +784,7 @@ val risky: Int = obj as Int
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "CastNullable", "(", "obj", ":", "Object", "?", ")", ":", "Void", "{",
       "\\n",
@@ -760,6 +800,7 @@ val risky: Int = obj as Int
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",    "IDENT",       "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",    "PUNCT",
       "IDENT",    "PUNCT",    "NEWLINE",  "KEYWORD",     "PUNCT",   "IDENT",   "KEYWORD",  "IDENT",    "OPERATOR",
@@ -782,6 +823,7 @@ return copy
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "CopyNullable", "(", "src", ":", "IntArray", "?", ")", ":", "IntArray", "?", "{",
       "\\n",
@@ -798,6 +840,7 @@ return copy
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",    "PUNCT",    "IDENT",   "PUNCT",    "IDENT",       "OPERATOR",    "PUNCT",    "PUNCT",
       "IDENT",    "OPERATOR", "PUNCT",    "NEWLINE", "KEYWORD",  "PUNCT",       "IDENT",       "OPERATOR", "KEYWORD",
@@ -822,6 +865,7 @@ sys::Print(len.ToString())
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "class", "Nested", "{",
       "\\n",
@@ -838,6 +882,7 @@ sys::Print(len.ToString())
       "\\n",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",   "PUNCT",    "NEWLINE",  "KEYWORD",     "KEYWORD", "IDENT",    "PUNCT",    "IDENT",
       "OPERATOR", "NEWLINE", "KEYWORD",  "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",    "PUNCT",    "IDENT",
@@ -859,10 +904,12 @@ return Int(aVal + bVal)
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "pure", "fun", "SafeAdd", "(",   "a",    ":",   "Int",    "?",   ",", "b",    ":", "Int",  "?",   ")",    ":",
       "Int",  "{",   "\\n",     "val", "aVal", ":",   "int",    "=",   "a", "?:",   "0", "\\n",  "val", "bVal", ":",
       "int",  "=",   "b",       "?:",  "0",    "\\n", "return", "Int", "(", "aVal", "+", "bVal", ")",   "\\n",  "}"};
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "KEYWORD", "IDENT", "PUNCT",    "IDENT",    "PUNCT", "IDENT",    "OPERATOR",    "PUNCT",
       "IDENT",   "PUNCT",   "IDENT", "OPERATOR", "PUNCT",    "PUNCT", "IDENT",    "PUNCT",       "NEWLINE",
@@ -881,6 +928,7 @@ val bytes: ByteArray = (ptr as ByteArray)
   Lexer lexer(src);
   auto tokens = lexer.Tokenize();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "UnsafeNullable", "(", "ptr", ":", "Pointer", "?", ")", ":", "Void", "{",
       "\\n",
@@ -894,6 +942,7 @@ val bytes: ByteArray = (ptr as ByteArray)
       "}",
       "}"
   };
+  // clang-format on
   std::vector<std::string> expected_types = {
       "KEYWORD", "IDENT",   "PUNCT",   "IDENT",   "PUNCT",   "IDENT",   "OPERATOR", "PUNCT",    "PUNCT",    "IDENT",
       "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",   "NEWLINE", "KEYWORD", "PUNCT",    "IDENT",    "OPERATOR", "KEYWORD",
