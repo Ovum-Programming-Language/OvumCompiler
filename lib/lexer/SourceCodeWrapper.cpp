@@ -4,7 +4,7 @@ const std::unordered_set<std::string_view> SourceCodeWrapper::kKeywords = {
     "fun",        "class",   "interface", "var",    "override", "pure",    "if",     "else",      "continue",
     "break",      "for",     "while",     "return", "unsafe",   "val",     "static", "public",    "private",
     "implements", "as",      "is",        "in",     "null",     "true",    "false",  "typealias", "destructor",
-    "call",       "#import", "#define",   "#undef", "#ifdef",   "#ifndef", "#else",  "#endif",    "xor"};
+    "call",       "#import", "#define",   "#undef", "#ifdef",   "#ifndef", "#else",  "#endif"};
 
 const std::unordered_set<std::string_view> SourceCodeWrapper::kMultiOps = {
     "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":="};

@@ -1,6 +1,7 @@
 #include "NumberHandler.hpp"
 
-#include <cmath>
+#include <cctype>
+#include <string>
 
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
@@ -28,7 +29,7 @@ inline bool IsIdentStart(char c) noexcept {
   return std::isalpha(u) != 0 || u == '_';
 }
 
-inline void ParseExponent(SourceCodeWrapper& w, std::string& raw) {
+inline bool ParseExponent(SourceCodeWrapper& w, std::string& raw) {
   if (w.Peek() == 'e' || w.Peek() == 'E') {
     raw.push_back(w.Advance());
 
@@ -41,7 +42,10 @@ inline void ParseExponent(SourceCodeWrapper& w, std::string& raw) {
     }
 
     w.ConsumeWhile(raw, IsDec);
+    return true;
   }
+
+  return false;
 }
 
 inline double ParseDoubleStrict(const std::string& raw) {
@@ -143,7 +147,6 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     }
 
     EnsureNoIdentTail(wrapper, "binary literal");
-
     long long val = 0;
 
     for (size_t i = 2; i < raw.size(); ++i) {
@@ -169,7 +172,13 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     return TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol());
   }
 
-  ParseExponent(wrapper, raw);
+  const bool had_exp = ParseExponent(wrapper, raw);
+
+  if (had_exp) {
+    EnsureNoIdentTail(wrapper, "number");
+    const double v = ParseDoubleStrict(raw);
+    return TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol());
+  }
 
   if (!raw.empty() && (raw.back() == 'e' || raw.back() == 'E' || raw.back() == '+' || raw.back() == '-')) {
     throw LexerError(std::string("Malformed float literal: ") + raw);
