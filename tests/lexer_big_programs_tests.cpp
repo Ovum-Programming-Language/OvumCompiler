@@ -555,8 +555,8 @@ TEST(LexerUnitTestSuite, ListIteration) {
   const std::string src = R"OVUM(fun ListIteration(list: IntArray): int {
 var total: int = 0
 var idx: int = 0
-while (idx < list.Length()) { total = total + list[idx] if (list[idx] % 2 == 0) { list[idx] := list[idx] * 2 } idx =
-idx + 1 }
+while (idx < list.Length()) { total = total + list[idx]
+if (list[idx] % 2 == 0) { list[idx] := list[idx] * 2 } idx = idx + 1 }
 return total
 })OVUM";
   Lexer lexer(src);
@@ -570,7 +570,8 @@ return total
       "var", "idx", ":", "int", "=", "0",
       "\\n",
       "while", "(", "idx", "<", "list", ".", "Length", "(", ")", ")", "{", "total", "=", "total", "+", "list", "[",
-      "idx", "]", "if", "(", "list", "[", "idx", "]", "%", "2", "==", "0", ")", "{", "list", "[", "idx", "]", ":=",
+      "idx", "]", "\\n",
+      "if", "(", "list", "[", "idx", "]", "%", "2", "==", "0", ")", "{", "list", "[", "idx", "]", ":=",
       "list", "[", "idx", "]", "*", "2", "}", "idx", "=", "idx", "+", "1", "}",
       "\\n",
       "return", "total",
@@ -578,16 +579,20 @@ return total
       "}"
   };
   std::vector<std::string> expected_types = {
-      "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",       "PUNCT",    "IDENT",       "PUNCT",    "PUNCT",
-      "IDENT",       "PUNCT",    "NEWLINE",     "KEYWORD",     "IDENT",    "PUNCT",       "IDENT",    "OPERATOR",
-      "LITERAL:Int", "NEWLINE",  "KEYWORD",     "IDENT",       "PUNCT",    "IDENT",       "OPERATOR", "LITERAL:Int",
-      "NEWLINE",     "KEYWORD",  "PUNCT",       "IDENT",       "OPERATOR", "IDENT",       "OPERATOR", "IDENT",
-      "PUNCT",       "PUNCT",    "PUNCT",       "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",    "OPERATOR",
-      "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "KEYWORD",  "PUNCT",       "IDENT",    "PUNCT",
-      "IDENT",       "PUNCT",    "OPERATOR",    "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT",    "PUNCT",
-      "IDENT",       "PUNCT",    "IDENT",       "PUNCT",       "OPERATOR", "IDENT",       "PUNCT",    "IDENT",
-      "PUNCT",       "OPERATOR", "LITERAL:Int", "PUNCT",       "IDENT",    "OPERATOR",    "IDENT",    "OPERATOR",
-      "LITERAL:Int", "PUNCT",    "NEWLINE",     "KEYWORD",     "IDENT",    "NEWLINE",     "PUNCT"};
+      "KEYWORD", "IDENT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "PUNCT", "IDENT", "PUNCT",
+      "NEWLINE",
+      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
+      "NEWLINE",
+      "KEYWORD", "IDENT", "PUNCT", "IDENT", "OPERATOR", "LITERAL:Int",
+      "NEWLINE",
+      "KEYWORD", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "PUNCT", "PUNCT", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT",
+      "NEWLINE",
+      "KEYWORD", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int", "PUNCT", "PUNCT", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "IDENT", "PUNCT", "IDENT", "PUNCT", "OPERATOR", "LITERAL:Int", "PUNCT", "IDENT", "OPERATOR", "IDENT", "OPERATOR", "LITERAL:Int", "PUNCT",
+      "NEWLINE",
+      "KEYWORD", "IDENT",
+      "NEWLINE",
+      "PUNCT"
+  };
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
 
