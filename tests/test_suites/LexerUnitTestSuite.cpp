@@ -19,11 +19,11 @@ std::vector<std::pair<std::string, std::string>> LexerUnitTestSuite::ExtractLexe
 }
 
 void LexerUnitTestSuite::PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items) {
-  std::cout << "Lexemes and Types:" << std::endl;
+  std::cout << "Lexemes and Types:" << '\n';
   for (const auto& item : items) {
-    std::cout << item.first << " (" << item.second << ")" << std::endl;
+    std::cout << item.first << " (" << item.second << ")" << '\n';
   }
-  std::cout << "End of output" << std::endl;
+  std::cout << "End of output" << '\n';
 }
 
 void LexerUnitTestSuite::AssertLexemesAndTypesEqual(const std::vector<std::pair<std::string, std::string>>& actual,
@@ -53,22 +53,22 @@ void LexerUnitTestSuite::AssertLexemesAndTypesEqual(const std::vector<std::pair<
     for (const auto& lex : expected_lexemes) {
       std::cout << lex << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
     std::cout << "Act lex: ";
     for (const auto& item : actual) {
       std::cout << item.first << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
     std::cout << "Exp typ: ";
     for (const auto& sub : expected_type_substrs) {
       std::cout << sub << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
     std::cout << "Act typ: ";
     for (const auto& item : actual) {
       std::cout << item.second << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   ASSERT_EQ(expected_lexemes.size(), expected_type_substrs.size());
