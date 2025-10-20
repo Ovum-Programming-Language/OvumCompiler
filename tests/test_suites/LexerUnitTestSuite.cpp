@@ -1,5 +1,7 @@
 #include "LexerUnitTestSuite.hpp"
 
+#include <iostream>
+
 void LexerUnitTestSuite::SetUp() {
 }
 

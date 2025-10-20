@@ -1,5 +1,7 @@
 #include "lib/lexer/Lexer.hpp"
 
+#include <exception>
+
 #include "compiler_ui_functions.hpp"
 
 int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out, std::ostream& err) {

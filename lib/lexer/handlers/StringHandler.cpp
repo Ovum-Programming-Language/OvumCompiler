@@ -1,5 +1,7 @@
 #include "StringHandler.hpp"
 
+#include <utility>
+
 #include "lib/lexer/LexerError.hpp"
 #include "tokens/TokenFactory.hpp"
 

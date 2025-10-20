@@ -1,5 +1,7 @@
 #include "SourceCodeWrapper.hpp"
 
+#include <algorithm>
+
 const std::unordered_set<std::string_view> SourceCodeWrapper::kKeywords = {
     "fun",        "class",   "interface", "var",    "override", "pure",    "if",     "else",      "continue",
     "break",      "for",     "while",     "return", "unsafe",   "val",     "static", "public",    "private",
