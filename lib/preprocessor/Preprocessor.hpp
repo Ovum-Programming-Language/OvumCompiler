@@ -1,6 +1,7 @@
 #ifndef PREPROCESSOR_HPP_
 #define PREPROCESSOR_HPP_
 
+#include <expected>
 #include <memory>
 #include <vector>
 
