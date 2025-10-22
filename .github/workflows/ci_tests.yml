@@ -211,13 +211,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install clang-tidy
+      - name: Install clang-tidy and GCC 13
         run: |
-          sudo apt-get update && sudo apt-get -y install clang-tidy
+          sudo apt-get update
+          # Install a C++23-capable toolchain and clang-tidy
+          sudo apt-get -y install g++-13 clang-tidy
 
       - name: Create CMake cache
         run: |
-          cmake -S . -B cmake-build-tidy -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          # Force CMake to use GCC 13 so compile_commands.json references a C++23-capable libstdc++
+          cmake -S . -B cmake-build-tidy \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_C_COMPILER=gcc-13
 
       - name: Run clang-tidy
         shell: bash
