@@ -1,7 +1,6 @@
 #ifndef PUNCTTOKEN_HPP_
 #define PUNCTTOKEN_HPP_
 
-#include <memory>
 #include <string>
 
 #include "Token.hpp"
@@ -17,7 +16,7 @@ public:
 
   [[nodiscard]] std::string GetLexeme() const noexcept override;
 
-  [[nodiscard]] std::unique_ptr<Token> Clone() const override;
+  [[nodiscard]] TokenPtr Clone() const override;
 
   void Accept(TokenVisitor& visitor) const override;
 

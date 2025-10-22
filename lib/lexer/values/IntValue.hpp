@@ -1,7 +1,7 @@
 #ifndef INTVALUE_HPP_
 #define INTVALUE_HPP_
 
-#include <cinttypes>
+#include <cstdint>
 #include <memory>
 #include <string>
 

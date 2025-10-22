@@ -10,7 +10,7 @@ class LiteralToken;
 class KeywordToken;
 class IdentToken;
 
-class TokenVisitor {
+class TokenVisitor { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~TokenVisitor() = default;
 

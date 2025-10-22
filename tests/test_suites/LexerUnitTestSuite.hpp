@@ -2,11 +2,9 @@
 #define OVUMC_LEXERUNITTESTSUITE_HPP
 
 #include <gtest/gtest.h>
-#include "lib/lexer/handlers/Handler.hpp"
+#include "lib/lexer/tokens/Token.hpp"
 
 struct LexerUnitTestSuite : public testing::Test {
-  const std::string kTemporaryDirectoryName = "./gtest_tmp";
-
   static std::vector<std::pair<std::string, std::string>> ExtractLexemesAndTypes(const std::vector<TokenPtr>& tokens);
 
   static void PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items);

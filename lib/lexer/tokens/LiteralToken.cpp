@@ -1,5 +1,6 @@
 #include "LiteralToken.hpp"
 
+#include <memory>
 #include <sstream>
 
 LiteralToken::LiteralToken(std::string rawLexeme, std::unique_ptr<Value> value, const TokenPosition& position) :
@@ -22,9 +23,9 @@ Value* LiteralToken::GetValue() noexcept {
   return value_.get();
 }
 
-std::unique_ptr<Token> LiteralToken::Clone() const {
+TokenPtr LiteralToken::Clone() const {
   std::unique_ptr<Value> vcopy = value_ ? value_->Clone() : nullptr;
-  return std::make_unique<LiteralToken>(lexeme_, std::move(vcopy), position_);
+  return std::make_shared<LiteralToken>(lexeme_, std::move(vcopy), position_);
 }
 
 void LiteralToken::Accept(TokenVisitor& visitor) const {

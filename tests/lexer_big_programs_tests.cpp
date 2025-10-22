@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <string>
-#include <utility>
 #include <vector>
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/LexerUnitTestSuite.hpp"

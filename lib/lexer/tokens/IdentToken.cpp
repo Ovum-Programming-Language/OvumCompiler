@@ -13,8 +13,8 @@ std::string IdentToken::GetLexeme() const noexcept {
   return lexeme_;
 }
 
-std::unique_ptr<Token> IdentToken::Clone() const {
-  return std::make_unique<IdentToken>(*this);
+TokenPtr IdentToken::Clone() const {
+  return std::make_shared<IdentToken>(*this);
 }
 
 void IdentToken::Accept(TokenVisitor& visitor) const {

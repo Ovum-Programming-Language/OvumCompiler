@@ -14,8 +14,8 @@ std::string KeywordToken::GetLexeme() const noexcept {
   return lexeme_;
 }
 
-std::unique_ptr<Token> KeywordToken::Clone() const {
-  return std::make_unique<KeywordToken>(*this);
+TokenPtr KeywordToken::Clone() const {
+  return std::make_shared<KeywordToken>(*this);
 }
 
 void KeywordToken::Accept(TokenVisitor& visitor) const {

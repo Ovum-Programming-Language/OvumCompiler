@@ -16,8 +16,8 @@ std::string PunctToken::GetLexeme() const noexcept {
   return lexeme_;
 }
 
-std::unique_ptr<Token> PunctToken::Clone() const {
-  return std::make_unique<PunctToken>(*this);
+TokenPtr PunctToken::Clone() const {
+  return std::make_shared<PunctToken>(*this);
 }
 
 void PunctToken::Accept(TokenVisitor& visitor) const {

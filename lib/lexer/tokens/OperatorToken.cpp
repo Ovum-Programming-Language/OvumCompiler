@@ -14,8 +14,8 @@ std::string OperatorToken::GetLexeme() const noexcept {
   return lexeme_;
 }
 
-std::unique_ptr<Token> OperatorToken::Clone() const {
-  return std::make_unique<OperatorToken>(*this);
+TokenPtr OperatorToken::Clone() const {
+  return std::make_shared<OperatorToken>(*this);
 }
 
 void OperatorToken::Accept(TokenVisitor& visitor) const {

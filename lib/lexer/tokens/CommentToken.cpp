@@ -14,8 +14,8 @@ std::string CommentToken::GetLexeme() const noexcept {
   return text_;
 }
 
-std::unique_ptr<Token> CommentToken::Clone() const {
-  return std::make_unique<CommentToken>(*this);
+TokenPtr CommentToken::Clone() const {
+  return std::make_shared<CommentToken>(*this);
 }
 
 void CommentToken::Accept(TokenVisitor& visitor) const {

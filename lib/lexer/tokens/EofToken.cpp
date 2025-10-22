@@ -13,8 +13,8 @@ std::string EofToken::GetLexeme() const noexcept {
   return "";
 }
 
-std::unique_ptr<Token> EofToken::Clone() const {
-  return std::make_unique<EofToken>(*this);
+TokenPtr EofToken::Clone() const {
+  return std::make_shared<EofToken>(*this);
 }
 
 void EofToken::Accept(TokenVisitor& visitor) const {

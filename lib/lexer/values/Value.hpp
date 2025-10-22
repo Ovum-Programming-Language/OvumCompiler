@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-class Value {
+class Value { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~Value() = default;
 
