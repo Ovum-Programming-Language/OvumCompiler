@@ -20,7 +20,7 @@ public:
 
   Value* GetValue() noexcept;
 
-  [[nodiscard]] std::unique_ptr<Token> Clone() const override;
+  [[nodiscard]] TokenPtr Clone() const override;
 
   void Accept(TokenVisitor& visitor) const override;
 

@@ -7,7 +7,7 @@
 #include "TokenPosition.hpp"
 #include "TokenVisitor.hpp"
 
-class Token {
+class Token { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~Token() = default;
 
@@ -15,7 +15,7 @@ public:
 
   [[nodiscard]] virtual std::string GetLexeme() const = 0;
 
-  [[nodiscard]] virtual std::unique_ptr<Token> Clone() const = 0;
+  [[nodiscard]] virtual std::shared_ptr<Token> Clone() const = 0;
 
   virtual void Accept(TokenVisitor& v) const = 0;
 
@@ -23,5 +23,7 @@ public:
 
   [[nodiscard]] virtual const TokenPosition& GetPosition() const noexcept = 0;
 };
+
+using TokenPtr = std::shared_ptr<Token>;
 
 #endif // TOKEN_HPP_

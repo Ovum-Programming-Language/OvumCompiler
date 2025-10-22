@@ -13,8 +13,8 @@ std::string NewlineToken::GetLexeme() const noexcept {
   return lexeme_;
 }
 
-std::unique_ptr<Token> NewlineToken::Clone() const {
-  return std::make_unique<NewlineToken>(*this);
+TokenPtr NewlineToken::Clone() const {
+  return std::make_shared<NewlineToken>(*this);
 }
 
 void NewlineToken::Accept(TokenVisitor& visitor) const {
