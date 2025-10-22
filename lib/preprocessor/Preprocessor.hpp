@@ -11,7 +11,8 @@ class Preprocessor : public TokenProcessor {
 public:
   Preprocessor(const PreprocessingParameters& parameters);
 
-  [[nodiscard]] std::vector<TokenPtr> Process(const std::vector<TokenPtr>& tokens) const override;
+  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
+      const std::vector<TokenPtr>& tokens) const override;
 
 private:
   PreprocessingParameters parameters_;
