@@ -9,7 +9,7 @@
 
 class Preprocessor : public TokenProcessor {
 public:
-  Preprocessor(const PreprocessingParameters& parameters);
+  Preprocessor(PreprocessingParameters parameters);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) const override;

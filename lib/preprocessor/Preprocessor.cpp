@@ -2,8 +2,8 @@
 
 #include "token_processor_factory.hpp"
 
-Preprocessor::Preprocessor(const PreprocessingParameters& parameters) :
-    parameters_(parameters), token_processors_(TokenProcessorFactory::MakeTokenProcessors()) {
+Preprocessor::Preprocessor(PreprocessingParameters parameters) :
+    parameters_(std::move(parameters)), token_processors_(TokenProcessorFactory::MakeTokenProcessors()) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process(
