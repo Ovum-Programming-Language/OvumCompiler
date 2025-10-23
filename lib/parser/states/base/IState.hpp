@@ -1,8 +1,9 @@
 #ifndef ISTATE_HPP_
 #define ISTATE_HPP_
 
-#include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+class ContextParser; // forward
 
 class IState {
 public:
