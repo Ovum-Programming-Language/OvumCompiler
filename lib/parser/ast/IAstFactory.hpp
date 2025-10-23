@@ -1,5 +1,6 @@
 #ifndef IASTFACTORY_HPP_
 #define IASTFACTORY_HPP_
+
 #include <memory>
 
 #include "nodes/class_members/CallDecl.hpp"
@@ -42,7 +43,7 @@
 #include "nodes/stmts/WhileStmt.hpp"
 
 class IAstFactory {
- public:
+public:
   virtual ~IAstFactory() = default;
 
   virtual std::unique_ptr<Module> MakeModule() = 0;

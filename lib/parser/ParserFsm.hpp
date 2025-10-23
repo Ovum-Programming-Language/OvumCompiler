@@ -4,12 +4,15 @@
 #include <memory>
 
 #include "IParser.hpp"
+#include "ast/IAstFactory.hpp"
+#include "pratt/IExpressionParser.hpp"
+#include "type_parser/ITypeParser.hpp"
 
 class ParserFsm : public IParser {
 public:
-  ParserFsm(std::unique_ptr<class IExpressionParser> expr,
-            std::unique_ptr<class ITypeParser> typep,
-            std::unique_ptr<class IAstFactory> factory);
+  ParserFsm(std::unique_ptr<IExpressionParser> expr,
+            std::unique_ptr<ITypeParser> typep,
+            std::unique_ptr<IAstFactory> factory);
 
   ~ParserFsm() override = default;
 

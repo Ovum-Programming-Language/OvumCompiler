@@ -7,6 +7,7 @@
 
 class PostfixSpec {
 public:
+  PostfixSpec(std::function<bool(const Token&)> match, int bp, bool keyword);
   // TODO: implements getters and setters
 private:
   std::function<bool(const Token&)> match_;

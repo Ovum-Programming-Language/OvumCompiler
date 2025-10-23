@@ -1,5 +1,6 @@
 #ifndef SEVERITY_HPP_
 #define SEVERITY_HPP_
+
 #include "ISeverity.hpp"
 
 class Severity {

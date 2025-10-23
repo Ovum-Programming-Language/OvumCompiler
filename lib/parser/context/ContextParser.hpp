@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "../states/IState.hpp"
 #include "NodeEntry.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/IState.hpp"

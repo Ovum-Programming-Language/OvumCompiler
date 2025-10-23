@@ -1,5 +1,6 @@
 #ifndef FLOATLIT_HPP_
 #define FLOATLIT_HPP_
+
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 
 class FloatLit : public Expr {

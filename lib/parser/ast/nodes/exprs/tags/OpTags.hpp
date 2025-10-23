@@ -1,10 +1,12 @@
 #ifndef OPTAGS_HPP_
 #define OPTAGS_HPP_
+
 #include "IAssignOpTag.hpp"
 #include "IBinaryOpTag.hpp"
 #include "IUnaryOpTag.hpp"
 
 namespace OpTags {
+// binary
 static const IBinaryOpTag& Add();
 static const IBinaryOpTag& Sub();
 static const IBinaryOpTag& Mul();

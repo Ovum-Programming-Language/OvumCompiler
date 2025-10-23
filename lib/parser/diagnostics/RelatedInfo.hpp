@@ -8,7 +8,8 @@
 
 class RelatedInfo {
 public:
-  // TODO: make methods
+  RelatedInfo(std::string&& message, SourceSpan&& span);
+
 private:
   std::string message_;
   std::optional<SourceSpan> where_;

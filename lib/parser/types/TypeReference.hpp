@@ -8,7 +8,7 @@ class TypeReference {
 public:
   TypeReference();
 
-  TypeReference(std::string&& name);
+  explicit TypeReference(std::string&& name);
 
   TypeReference(const TypeReference& ref);
 

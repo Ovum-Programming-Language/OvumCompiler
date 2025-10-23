@@ -1,1 +1,1 @@
-#include "../IntLit.hpp"
+#include "IntLit.hpp"

@@ -3,9 +3,9 @@
 
 #include <memory>
 
+#include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
 
-class Expr;
 class ReturnStmt : public Stmt {
 public:
   void Accept(AstVisitor& v) override;

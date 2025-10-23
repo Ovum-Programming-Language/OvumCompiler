@@ -8,7 +8,7 @@ class IState {
 public:
   virtual ~IState() = default;
   virtual const char* Name() const = 0;
-  virtual bool Step(class ContextParser& ctx, ITokenStream& ts) = 0;
+  virtual bool Step(ContextParser& ctx, ITokenStream& ts) = 0;
 };
 
 #endif // ISTATE_HPP_
