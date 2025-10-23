@@ -12,7 +12,6 @@
 
 class MethodDecl : public Decl {
 public:
-
   void Accept(AstVisitor& v) override;
 
 private:
@@ -24,7 +23,7 @@ private:
   std::string name;
   std::vector<Param> params;
   std::unique_ptr<TypeReference> ret_type;
-  std::unique_ptr<Block> body;  // optional
+  std::unique_ptr<Block> body; // optional
 };
 
 #endif // METHODDECL_HPP_

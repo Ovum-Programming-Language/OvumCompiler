@@ -18,7 +18,7 @@ private:
   std::string name_;
   std::vector<Param> params_;
   std::unique_ptr<TypeReference> return_type_; // optional
-  std::unique_ptr<Block> body_;          // optional
+  std::unique_ptr<Block> body_;                // optional
 };
 
 #endif // FUNCTIONDECL_HPP_
