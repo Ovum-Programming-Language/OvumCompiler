@@ -1,14 +1,14 @@
 add_library(preprocessor STATIC
-    Preprocessor.cpp
-    token_processor_factory.cpp
+        Preprocessor.cpp
+        token_processor_factory.cpp
 )
 
 target_include_directories(preprocessor
-    PUBLIC
-    ${CMAKE_SOURCE_DIR}
+        PUBLIC
+        ${CMAKE_SOURCE_DIR}
 )
 
 target_include_directories(preprocessor
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
