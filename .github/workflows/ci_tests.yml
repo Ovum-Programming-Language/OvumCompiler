@@ -24,7 +24,7 @@ jobs:
       - name: Build main target
         shell: bash
         run: |
-          cmake --build cmake-build-release || echo Built with errors
+          cmake --build cmake-build-release --target ovumc || echo Built with errors
 
       - name: Build tests target
         shell: bash
