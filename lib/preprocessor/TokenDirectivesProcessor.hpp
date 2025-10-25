@@ -19,9 +19,7 @@ public:
       const std::vector<TokenPtr>& tokens) override;
 
 private:
-  std::unordered_map<std::string, std::string> macros_;
-
-  [[nodiscard]] bool is_identifier(const TokenPtr& token) const;
+  std::unordered_map<std::string, std::vector<TokenPtr>> macros_;
 };
 
 #endif // TOKENDIRECTIVESPROCESSOR_HPP_
