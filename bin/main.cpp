@@ -6,4 +6,3 @@ int main(int32_t argc, char** argv) {
   std::vector<std::string> args = std::vector<std::string>(argv, argv + argc);
   return StartCompilerConsoleUI(args, std::cout, std::cerr);
 }
-
