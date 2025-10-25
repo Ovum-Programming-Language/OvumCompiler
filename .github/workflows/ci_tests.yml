@@ -3,47 +3,6 @@ name: "CI tests"
 on: [ push, workflow_dispatch ]
 
 jobs:
-  build-mingw:
-    name: Tests and application run on Windows Latest MinGW
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install MinGW toolchain
-        shell: powershell
-        run: |
-          choco install mingw --yes --no-progress
-          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Create CMake cache
-        run: |
-          cmake -S . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-          cmake -S . -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles"
-
-      - name: Build main target
-        shell: bash
-        run: |
-          cmake --build cmake-build-release --target ovumc || echo Built with errors
-
-      - name: Build tests target
-        shell: bash
-        run: |
-          cmake --build cmake-build-debug --target ovumc_tests || echo Built with errors
-
-      - name: Run program
-        working-directory: .\cmake-build-release
-        shell: bash
-        run: |
-          ./ovumc.exe --help
-
-      - name: Run tests
-        working-directory: .\cmake-build-debug
-        shell: bash
-        run: |
-          # ./ovumc_tests.exe
-          echo "Tests are not run on Windows MinGW due to issues with the test runner"
-
   build-matrix:
     name: Tests and application run on ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
