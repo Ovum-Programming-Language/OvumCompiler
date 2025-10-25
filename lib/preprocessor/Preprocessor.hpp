@@ -6,14 +6,15 @@
 #include <vector>
 
 #include "PreprocessingParameters.hpp"
+#include "TokenDirectivesProcessor.hpp"
+#include "TokenImportProcessor.hpp"
 #include "TokenProcessor.hpp"
 
 class Preprocessor : public TokenProcessor {
 public:
-  Preprocessor(PreprocessingParameters parameters);
+  explicit Preprocessor(PreprocessingParameters parameters);
 
-  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
-      const std::vector<TokenPtr>& tokens) const override;
+  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process();
 
 private:
   PreprocessingParameters parameters_;

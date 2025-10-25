@@ -9,6 +9,7 @@
 struct PreprocessingParameters {
   std::set<std::filesystem::path> include_paths;
   std::unordered_set<std::string> predefined_symbols;
+  std::filesystem::path main_file;
 };
 
 #endif // PREPROCESSINGPARAMETERS_HPP_
