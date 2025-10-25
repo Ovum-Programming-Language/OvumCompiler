@@ -3,14 +3,7 @@
 #include "lib/compiler_ui/compiler_ui_functions.hpp"
 
 int main(int32_t argc, char** argv) {
-  const std::string sample = R"ovum(
-// demo
-fun Main(args: StringArray): Int {
-    val count: Int = args.Length()
-    sys::Print("Args count: " + count.ToString())
-    return 0
+  std::vector<std::string> args = std::vector<std::string>(argv, argv + argc);
+  return StartCompilerConsoleUI(args, std::cout, std::cerr);
 }
-)ovum";
 
-  return StartCompilerConsoleUI({"ovumc", sample}, std::cout, std::cerr);
-}
