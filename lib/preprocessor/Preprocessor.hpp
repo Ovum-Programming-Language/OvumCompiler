@@ -10,7 +10,7 @@
 #include "TokenImportProcessor.hpp"
 #include "TokenProcessor.hpp"
 
-class Preprocessor : public TokenProcessor {
+class Preprocessor {
 public:
   explicit Preprocessor(PreprocessingParameters parameters);
 
