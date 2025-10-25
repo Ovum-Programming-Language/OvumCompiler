@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <string_view>
@@ -62,6 +63,8 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
 
   auto cleaned = remove_imports(concatenated);
 
+  cleaned = remove_extra_eofs(cleaned);
+
   return {std::move(cleaned)};
 }
 
@@ -76,15 +79,15 @@ std::expected<void, PreprocessorError> TokenImportProcessor::gather_dependencies
   size_t i = 0;
   while (i < tokens.size()) {
     const auto& token = tokens[i];
-    if (token->GetStringType() == "#import") {
+    if (token->GetLexeme() == "#import") {
       if (i + 1 >= tokens.size()) {
-        return std::unexpected(InvalidImportError("Missing path after #import at @" +
+        return std::unexpected(InvalidImportError("Missing path after #import at " +
                                                   std::to_string(token->GetPosition().GetLine()) + ":" +
                                                   std::to_string(token->GetPosition().GetColumn())));
       }
       const auto& path_token = tokens[i + 1];
       if (path_token->GetStringType() != "LITERAL:String") {
-        return std::unexpected(InvalidImportError("Expected string literal after #import at @" +
+        return std::unexpected(InvalidImportError("Expected string literal after #import at " +
                                                   std::to_string(token->GetPosition().GetLine()) + ":" +
                                                   std::to_string(token->GetPosition().GetColumn())));
       }
@@ -201,7 +204,7 @@ std::expected<std::vector<std::filesystem::path>, PreprocessorError> TokenImport
   if (order.size() != file_to_tokens_.size()) {
     return std::unexpected(CycleDetectedError("Topological sort failed (cycle)"));
   }
-
+  std::ranges::reverse(order);
   return order;
 }
 
@@ -221,7 +224,7 @@ std::vector<TokenPtr> TokenImportProcessor::remove_imports(const std::vector<Tok
   size_t i = 0;
   while (i < tokens.size()) {
     const auto& token = tokens[i];
-    if (token->GetStringType() == "#import") {
+    if (token->GetLexeme() == "#import") {
       if (i + 1 < tokens.size() && tokens[i + 1]->GetStringType() == "LITERAL:String") {
         i += 2;
       } else {
@@ -233,6 +236,26 @@ std::vector<TokenPtr> TokenImportProcessor::remove_imports(const std::vector<Tok
       ++i;
     }
   }
+  return cleaned;
+}
+
+std::vector<TokenPtr> TokenImportProcessor::remove_extra_eofs(const std::vector<TokenPtr>& tokens) const {
+  if (tokens.empty()) {
+    return {};
+  }
+
+  std::vector<TokenPtr> cleaned;
+  cleaned.reserve(tokens.size());
+
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    const auto& t = tokens[i];
+    if (t->GetStringType() != "EOF") {
+      cleaned.push_back(t);
+    } else if (i == tokens.size() - 1) {
+      cleaned.push_back(t);
+    }
+  }
+
   return cleaned;
 }
 

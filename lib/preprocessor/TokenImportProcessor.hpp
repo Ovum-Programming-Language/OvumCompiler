@@ -56,6 +56,8 @@ private:
 
   [[nodiscard]] std::vector<TokenPtr> remove_imports(const std::vector<TokenPtr>& tokens) const;
 
+  [[nodiscard]] std::vector<TokenPtr> remove_extra_eofs(const std::vector<TokenPtr>& tokens) const;
+
   [[nodiscard]] static std::expected<std::filesystem::path, PreprocessorError> resolve_import_path(
       const std::filesystem::path& current_dir,
       const std::string& import_lexeme,
