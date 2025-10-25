@@ -6,15 +6,16 @@
 #include "compiler_ui_functions.hpp"
 
 int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out, std::ostream& err) {
-  if (args.empty() || args[1] == "--help") {
-    out << "Usage: ovumc <main_file.ovum> [include_path1] [include_path2] ...\n";
-    out << "Example: ovumc sample.ovum /path/to/includes\n";
-    return 0;
-  }
   if (args.size() < 2) {
     err << "Usage: ovumc <main_file.ovum> [include_path1] [include_path2] ...\n";
     err << "Example: ovumc sample.ovum /path/to/includes\n";
     return 1;
+  }
+
+  if (args[1] == "--help") {
+    out << "Usage: ovumc <main_file.ovum> [include_path1] [include_path2] ...\n";
+    out << "Example: ovumc sample.ovum /path/to/includes\n";
+    return 0;
   }
 
   std::filesystem::path main_file = args[1];
