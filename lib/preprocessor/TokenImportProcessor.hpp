@@ -14,14 +14,16 @@
 
 #include "PreprocessingParameters.hpp"
 #include "PreprocessorError.hpp"
+#include "TokenProcessor.hpp"
 #include "lib/lexer/Lexer.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 
-class TokenImportProcessor {
+class TokenImportProcessor : public TokenProcessor {
 public:
   explicit TokenImportProcessor(PreprocessingParameters parameters);
 
-  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process();
+  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
+      const std::vector<TokenPtr>& tokens) override;
 
   [[nodiscard]] const auto& GetFileToTokens() const {
     return file_to_tokens_;
@@ -41,13 +43,14 @@ private:
   [[nodiscard]] static std::expected<std::string, PreprocessorError> ReadFileToString(
       const std::filesystem::path& file);
 
-  void gather_dependencies(const std::filesystem::path& file);
+  [[nodiscard]] std::expected<void, PreprocessorError> gather_dependencies(const std::filesystem::path& file,
+                                                                           const std::vector<TokenPtr>& tokens);
 
   [[nodiscard]] bool detect_cycles(const std::filesystem::path& node,
                                    std::unordered_map<std::filesystem::path, int>& colors,
                                    std::vector<std::filesystem::path>& cycle_path) const;
 
-  [[nodiscard]] std::vector<std::filesystem::path> topological_sort() const;
+  [[nodiscard]] std::expected<std::vector<std::filesystem::path>, PreprocessorError> topological_sort() const;
 
   [[nodiscard]] std::vector<TokenPtr> concatenate_tokens(const std::vector<std::filesystem::path>& order) const;
 

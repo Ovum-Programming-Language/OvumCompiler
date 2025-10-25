@@ -9,7 +9,7 @@ TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std:
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor::Process(
-    std::vector<TokenPtr> tokens) {
+    const std::vector<TokenPtr>& tokens) {
   std::vector<TokenPtr> result;
   size_t i = 0;
   bool skipping = false;
@@ -21,12 +21,14 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
     if (type == "#define") {
       if (i + 2 >= tokens.size()) {
-        throw InvalidImportError("Incomplete #define at line " + std::to_string(t->GetPosition().GetLine()));
+        return std::unexpected(
+            InvalidImportError("Incomplete #define at line " + std::to_string(t->GetPosition().GetLine())));
       }
       const auto& id_token = tokens[i + 1];
       const auto& value_token = tokens[i + 2];
       if (!is_identifier(id_token)) {
-        throw InvalidImportError("Expected identifier after #define at line " + std::to_string(id_token->GetPosition().GetLine()));
+        return std::unexpected(InvalidImportError("Expected identifier after #define at line " +
+                                                  std::to_string(id_token->GetPosition().GetLine())));
       }
       std::string id = id_token->GetLexeme();
       std::string value = value_token->GetLexeme();
@@ -40,11 +42,13 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
     if (type == "#undef") {
       if (i + 1 >= tokens.size()) {
-        throw InvalidImportError("Incomplete #undef at line " + std::to_string(t->GetPosition().GetLine()));
+        return std::unexpected(
+            InvalidImportError("Incomplete #undef at line " + std::to_string(t->GetPosition().GetLine())));
       }
       const auto& id_token = tokens[i + 1];
       if (!is_identifier(id_token)) {
-        throw InvalidImportError("Expected identifier after #undef at line " + std::to_string(id_token->GetPosition().GetLine()));
+        return std::unexpected(InvalidImportError("Expected identifier after #undef at line " +
+                                                  std::to_string(id_token->GetPosition().GetLine())));
       }
       std::string id = id_token->GetLexeme();
 
@@ -57,11 +61,13 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
     if (type == "#ifdef" || type == "#ifndef") {
       if (i + 1 >= tokens.size()) {
-        throw InvalidImportError("Incomplete #" + type.substr(1) + " at line " + std::to_string(t->GetPosition().GetLine()));
+        return std::unexpected(InvalidImportError("Incomplete #" + type.substr(1) + " at line " +
+                                                  std::to_string(t->GetPosition().GetLine())));
       }
       const auto& id_token = tokens[i + 1];
       if (!is_identifier(id_token)) {
-        throw InvalidImportError("Expected identifier after #" + type.substr(1) + " at line " + std::to_string(id_token->GetPosition().GetLine()));
+        return std::unexpected(InvalidImportError("Expected identifier after #" + type.substr(1) + " at line " +
+                                                  std::to_string(id_token->GetPosition().GetLine())));
       }
       std::string id = id_token->GetLexeme();
 
@@ -84,7 +90,8 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
     if (type == "#else") {
       if (skip_level == 0) {
-        throw InvalidImportError("Mismatched #else at line " + std::to_string(t->GetPosition().GetLine()));
+        return std::unexpected(
+            InvalidImportError("Mismatched #else at line " + std::to_string(t->GetPosition().GetLine())));
       }
       if (skip_level == 1 && !skipping) {
         skipping = true;
@@ -95,7 +102,8 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
     if (type == "#endif") {
       if (skip_level == 0) {
-        throw InvalidImportError("Mismatched #endif at line " + std::to_string(t->GetPosition().GetLine()));
+        return std::unexpected(
+            InvalidImportError("Mismatched #endif at line " + std::to_string(t->GetPosition().GetLine())));
       }
       skip_level--;
       if (skip_level == 0) {
@@ -112,7 +120,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
   }
 
   if (skip_level > 0) {
-    throw InvalidImportError("Unmatched #if directive");
+    return std::unexpected(InvalidImportError("Unmatched #if directive"));
   }
 
   return {std::move(result)};
@@ -121,4 +129,3 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 bool TokenDirectivesProcessor::is_identifier(const TokenPtr& token) const {
   return token->GetStringType() == "IDENT";
 }
-

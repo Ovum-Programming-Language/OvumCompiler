@@ -12,7 +12,7 @@ public:
   virtual ~TokenProcessor() = default;
 
   [[nodiscard]] virtual std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
-      const std::vector<TokenPtr>& tokens) const = 0;
+      const std::vector<TokenPtr>& tokens) = 0;
 };
 
 #endif // TOKENPROCESSOR_HPP_

@@ -8,13 +8,15 @@
 #include <vector>
 
 #include "PreprocessorError.hpp"
+#include "TokenProcessor.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 
-class TokenDirectivesProcessor {
+class TokenDirectivesProcessor : public TokenProcessor {
 public:
   explicit TokenDirectivesProcessor(const std::unordered_set<std::string>& predefined_symbols);
 
-  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(std::vector<TokenPtr> tokens);
+  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
+      const std::vector<TokenPtr>& tokens) override;
 
 private:
   std::unordered_map<std::string, std::string> macros_;

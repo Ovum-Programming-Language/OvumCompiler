@@ -4,11 +4,14 @@
 #include <memory>
 #include <vector>
 
+#include "PreprocessingParameters.hpp"
+#include "TokenDirectivesProcessor.hpp"
+#include "TokenImportProcessor.hpp"
 #include "TokenProcessor.hpp"
 
 namespace TokenProcessorFactory {
 
-std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors();
+std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors(PreprocessingParameters parameters);
 
 }; // namespace TokenProcessorFactory
 

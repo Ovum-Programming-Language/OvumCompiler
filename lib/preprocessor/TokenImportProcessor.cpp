@@ -26,12 +26,16 @@ std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToSt
 TokenImportProcessor::TokenImportProcessor(PreprocessingParameters parameters) : parameters_(std::move(parameters)) {
 }
 
-std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process() {
+std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process(
+    const std::vector<TokenPtr>& tokens) {
   file_to_tokens_.clear();
   dep_graph_.clear();
   visited_.clear();
 
-  gather_dependencies(parameters_.main_file);
+  auto dep_result = gather_dependencies(parameters_.main_file, tokens);
+  if (!dep_result) {
+    return std::unexpected(dep_result.error());
+  }
 
   std::unordered_map<std::filesystem::path, int> colors;
   std::vector<std::filesystem::path> cycle_path;
@@ -43,12 +47,16 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
           cycle_str += p.string() + " -> ";
         }
         cycle_str += cycle_path.front().string();
-        throw CycleDetectedError("Cycle detected: " + cycle_str);
+        return std::unexpected(CycleDetectedError("Cycle detected: " + cycle_str));
       }
     }
   }
 
-  auto order = topological_sort();
+  auto order_result = topological_sort();
+  if (!order_result) {
+    return std::unexpected(order_result.error());
+  }
+  auto order = order_result.value();
 
   auto concatenated = concatenate_tokens(order);
 
@@ -57,63 +65,65 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
   return {std::move(cleaned)};
 }
 
-void TokenImportProcessor::gather_dependencies(const std::filesystem::path& file) {
+std::expected<void, PreprocessorError> TokenImportProcessor::gather_dependencies(const std::filesystem::path& file,
+                                                                                 const std::vector<TokenPtr>& tokens) {
   if (visited_.count(file) != 0) {
-    return;
+    return {};
   }
   visited_.insert(file);
+  file_to_tokens_[file] = tokens;
 
-  if (file_to_tokens_.count(file) == 0) {
-    auto content_result = ReadFileToString(file);
-    if (!content_result) {
-      throw content_result.error();
-    }
-    std::string content_str = std::move(content_result.value());
-    std::string_view content_view(content_str);
-
-    Lexer lexer(content_view, false);
-    std::vector<TokenPtr> raw_tokens;
-    try {
-      raw_tokens = lexer.Tokenize();
-    } catch (const PreprocessorError& e) {
-      throw;
-    } catch (const std::exception& e) {
-      throw PreprocessorError("Lexer error for " + file.string() + ": " + e.what());
-    }
-    file_to_tokens_[file] = raw_tokens;
-  }
-
-  const auto& raw_tokens = file_to_tokens_[file];
   size_t i = 0;
-  while (i < raw_tokens.size()) {
-    const auto& token = raw_tokens[i];
+  while (i < tokens.size()) {
+    const auto& token = tokens[i];
     if (token->GetStringType() == "#import") {
-      if (i + 1 >= raw_tokens.size()) {
-        throw InvalidImportError("Missing path after #import at @" + std::to_string(token->GetPosition().GetLine()) +
-                                 ":" + std::to_string(token->GetPosition().GetColumn()));
+      if (i + 1 >= tokens.size()) {
+        return std::unexpected(InvalidImportError("Missing path after #import at @" +
+                                                  std::to_string(token->GetPosition().GetLine()) + ":" +
+                                                  std::to_string(token->GetPosition().GetColumn())));
       }
-      const auto& path_token = raw_tokens[i + 1];
+      const auto& path_token = tokens[i + 1];
       if (path_token->GetStringType() != "LITERAL:String") {
-        throw InvalidImportError("Expected string literal after #import at @" +
-                                 std::to_string(token->GetPosition().GetLine()) + ":" +
-                                 std::to_string(token->GetPosition().GetColumn()));
+        return std::unexpected(InvalidImportError("Expected string literal after #import at @" +
+                                                  std::to_string(token->GetPosition().GetLine()) + ":" +
+                                                  std::to_string(token->GetPosition().GetColumn())));
       }
 
       const std::string& import_lexeme = path_token->GetLexeme();
       auto dep_path_result = resolve_import_path(file.parent_path(), import_lexeme, parameters_.include_paths);
       if (!dep_path_result) {
-        throw FileNotFoundError(import_lexeme);
+        return std::unexpected(FileNotFoundError(import_lexeme));
       }
       const std::filesystem::path& dep_path = dep_path_result.value();
 
       dep_graph_[file].insert(dep_path);
-      gather_dependencies(dep_path);
 
+      if (file_to_tokens_.count(dep_path) == 0) {
+        auto content_result = ReadFileToString(dep_path);
+        if (!content_result) {
+          return std::unexpected(content_result.error());
+        }
+        std::string content_str = std::move(content_result.value());
+        std::string_view content_view(content_str);
+
+        Lexer lexer(content_view, false);
+        std::vector<TokenPtr> raw_tokens;
+        try {
+          raw_tokens = lexer.Tokenize();
+        } catch (const std::exception& e) {
+          return std::unexpected(PreprocessorError("Lexer error for " + dep_path.string() + ": " + e.what()));
+        }
+        auto sub_result = gather_dependencies(dep_path, raw_tokens);
+        if (!sub_result) {
+          return sub_result;
+        }
+      }
       i += 2;
       continue;
     }
     ++i;
   }
+  return {};
 }
 
 bool TokenImportProcessor::detect_cycles(const std::filesystem::path& node,
@@ -141,7 +151,7 @@ bool TokenImportProcessor::detect_cycles(const std::filesystem::path& node,
   return false;
 }
 
-std::vector<std::filesystem::path> TokenImportProcessor::topological_sort() const {
+std::expected<std::vector<std::filesystem::path>, PreprocessorError> TokenImportProcessor::topological_sort() const {
   if (file_to_tokens_.empty()) {
     return {};
   }
@@ -189,7 +199,7 @@ std::vector<std::filesystem::path> TokenImportProcessor::topological_sort() cons
   }
 
   if (order.size() != file_to_tokens_.size()) {
-    throw CycleDetectedError("Topological sort failed (cycle)");
+    return std::unexpected(CycleDetectedError("Topological sort failed (cycle)"));
   }
 
   return order;

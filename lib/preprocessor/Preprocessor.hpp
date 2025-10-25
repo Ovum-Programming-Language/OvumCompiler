@@ -18,10 +18,7 @@ public:
 
 private:
   PreprocessingParameters parameters_;
-
-  std::unique_ptr<TokenDirectivesProcessor> directives_processor_;
-
-  std::unique_ptr<TokenImportProcessor> import_processor_;
+  std::vector<std::unique_ptr<TokenProcessor>> token_processors_;
 };
 
 #endif // PREPROCESSOR_HPP_

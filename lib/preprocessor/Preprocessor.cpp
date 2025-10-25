@@ -1,27 +1,38 @@
 #include <string_view>
+#include <utility>
 #include "Preprocessor.hpp"
 #include "TokenImportProcessor.hpp"
 #include "token_processor_factory.hpp"
 
 Preprocessor::Preprocessor(PreprocessingParameters parameters) :
-    parameters_(std::move(parameters)), import_processor_(std::make_unique<TokenImportProcessor>(parameters_)),
-    directives_processor_(std::make_unique<TokenDirectivesProcessor>(parameters.predefined_symbols)) {
+    parameters_(parameters), token_processors_(TokenProcessorFactory::MakeTokenProcessors(parameters)) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() {
-  auto import_result = import_processor_->Process();
-  if (!import_result) {
-    return import_result;
+  auto file = parameters_.main_file;
+  if (!std::filesystem::exists(file)) {
+    return std::unexpected(FileNotFoundError(file.string()));
   }
 
-  std::vector<TokenPtr> result = std::move(import_result.value());
-
-  auto directives_result = directives_processor_->Process(result);
-  if (!directives_result) {
-    return directives_result;
+  std::ifstream ifs(file, std::ios::binary);
+  if (!ifs.is_open()) {
+    return std::unexpected(FileReadError(file.string(), "Cannot open"));
   }
 
-  result = std::move(directives_result.value());
+  std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+  if (ifs.bad() || ifs.fail()) {
+    return std::unexpected(FileReadError(file.string(), "Read error"));
+  }
 
-  return {std::move(result)};
+  Lexer lexer(content, false);
+  std::vector<TokenPtr> tokens = lexer.Tokenize();
+  for (auto& processor : token_processors_) {
+    auto processor_result = processor->Process(tokens);
+    if (!processor_result) {
+      return processor_result;
+    }
+    tokens = processor_result.value();
+  }
+
+  return {std::move(tokens)};
 }
