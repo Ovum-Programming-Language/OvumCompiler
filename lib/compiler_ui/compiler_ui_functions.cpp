@@ -29,9 +29,8 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
 
   std::unordered_set<std::string> predefined_symbols;
 
-  PreprocessingParameters params{.include_paths = include_paths,
-                                 .predefined_symbols = predefined_symbols,
-                                 .main_file = main_file};
+  PreprocessingParameters params{
+      .include_paths = include_paths, .predefined_symbols = predefined_symbols, .main_file = main_file};
 
   Preprocessor preprocessor(params);
 
