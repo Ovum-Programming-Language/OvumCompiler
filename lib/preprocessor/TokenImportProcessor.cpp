@@ -152,6 +152,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
           return sub_result;
         }
       }
+
       i += 2;
       continue;
     }
@@ -163,6 +164,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
 
 std::vector<TokenPtr> TokenImportProcessor::ConcatenateTokens(const std::vector<std::filesystem::path>& order) const {
   std::vector<TokenPtr> total;
+
   for (const std::filesystem::path& path : order) {
     auto it = file_to_tokens_.find(path);
 
@@ -177,6 +179,7 @@ std::vector<TokenPtr> TokenImportProcessor::ConcatenateTokens(const std::vector<
 std::vector<TokenPtr> TokenImportProcessor::RemoveImports(const std::vector<TokenPtr>& tokens) const {
   std::vector<TokenPtr> cleaned;
   size_t i = 0;
+
   while (i < tokens.size()) {
     const TokenPtr& token = tokens[i];
 
