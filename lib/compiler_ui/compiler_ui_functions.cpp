@@ -21,6 +21,8 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
   std::filesystem::path main_file = args[1];
   std::set<std::filesystem::path> include_paths;
 
+  include_paths.emplace(main_file.parent_path());
+
   for (size_t i = 2; i < args.size(); ++i) {
     include_paths.emplace(args[i]);
   }
