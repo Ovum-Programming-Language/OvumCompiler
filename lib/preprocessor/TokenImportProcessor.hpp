@@ -9,7 +9,7 @@
 
 class TokenImportProcessor : public TokenProcessor {
 public:
-  explicit TokenImportProcessor(PreprocessingParameters parameters);
+  explicit TokenImportProcessor(std::filesystem::path main_file, std::set<std::filesystem::path> include_paths);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) override;
@@ -20,7 +20,8 @@ public:
   GetDepGraph() const;
 
 private:
-  PreprocessingParameters parameters_;
+  std::filesystem::path main_file_;
+  std::set<std::filesystem::path> include_paths_;
 
   std::unordered_map<std::filesystem::path, std::vector<TokenPtr>> file_to_tokens_;
   std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>> dep_graph_;
@@ -45,10 +46,8 @@ private:
 
   [[nodiscard]] std::vector<TokenPtr> RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const;
 
-  [[nodiscard]] static std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
-      const std::filesystem::path& current_dir,
-      const std::string& import_lexeme,
-      const std::set<std::filesystem::path>& include_paths);
+  [[nodiscard]] std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
+      const std::string& import_lexeme);
 };
 
 #endif // TOKENIMPORTPROCESSOR_HPP_

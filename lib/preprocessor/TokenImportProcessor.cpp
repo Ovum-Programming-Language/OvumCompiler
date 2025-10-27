@@ -36,7 +36,9 @@ std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToSt
   return {std::move(content)};
 }
 
-TokenImportProcessor::TokenImportProcessor(PreprocessingParameters parameters) : parameters_(std::move(parameters)) {
+TokenImportProcessor::TokenImportProcessor(std::filesystem::path main_file,
+                                           std::set<std::filesystem::path> include_paths) :
+    main_file_(main_file), include_paths_(std::move(include_paths)) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process(
@@ -45,7 +47,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
   dep_graph_.clear();
   visited_.clear();
 
-  std::expected<void, PreprocessorError> dep_result = GatherDependencies(parameters_.main_file, tokens);
+  std::expected<void, PreprocessorError> dep_result = GatherDependencies(main_file_, tokens);
 
   if (!dep_result) {
     return std::unexpected(dep_result.error());
@@ -89,10 +91,12 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
   if (visited_.count(file) != 0) {
     return {};
   }
+
   visited_.insert(file);
   file_to_tokens_[file] = tokens;
 
   size_t i = 0;
+
   while (i < tokens.size()) {
     const TokenPtr& token = tokens[i];
     if (token->GetLexeme() == "#import") {
@@ -113,7 +117,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
       const std::string& import_lexeme = path_token->GetLexeme();
 
       std::expected<std::filesystem::path, PreprocessorError> dep_path_result =
-          ResolveImportPath(file.parent_path(), import_lexeme, parameters_.include_paths);
+          ResolveImportPath(import_lexeme);
 
       if (!dep_path_result) {
         return std::unexpected(FileNotFoundError(import_lexeme));
@@ -222,6 +226,7 @@ std::expected<std::vector<std::filesystem::path>, PreprocessorError> TokenImport
     order.push_back(u);
 
     auto deps_it = dep_graph_.find(u);
+
     if (deps_it != dep_graph_.end()) {
       for (const std::filesystem::path& v : deps_it->second) {
         auto deg_it = in_degree.find(v);
@@ -303,9 +308,7 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveExtraEofs(const std::vector<To
 }
 
 std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::ResolveImportPath(
-    const std::filesystem::path& current_dir,
-    const std::string& import_lexeme,
-    const std::set<std::filesystem::path>& include_paths) {
+    const std::string& import_lexeme) {
   if (import_lexeme.size() < 2 || import_lexeme[0] != '"' || import_lexeme.back() != import_lexeme[0]) {
     return std::unexpected(InvalidImportError("Invalid quote in " + import_lexeme));
   }
@@ -314,7 +317,7 @@ std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::Re
 
   std::filesystem::path candidate;
 
-  for (const std::filesystem::path& inc : include_paths) {
+  for (const std::filesystem::path& inc : include_paths_) {
     candidate = inc / name;
 
     if (std::filesystem::exists(candidate)) {
