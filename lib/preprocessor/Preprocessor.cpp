@@ -29,11 +29,11 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() 
   std::vector<TokenPtr> tokens = lexer.Tokenize();
 
   for (std::unique_ptr<TokenProcessor>& processor : token_processors_) {
-    std::expected<std::vector<TokenPtr>, PreprocessorError> processor_result = processor->Process(tokens);
+    std::expected<std::vector<TokenPtr>, PreprocessorError> processor_result = std::move(processor->Process(tokens));
     if (!processor_result) {
       return processor_result;
     }
-    tokens = processor_result.value();
+    tokens = std::move(processor_result.value());
   }
 
   return {std::move(tokens)};
