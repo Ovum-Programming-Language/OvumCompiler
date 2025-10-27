@@ -11,7 +11,7 @@
 
 namespace TokenProcessorFactory {
 
-std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors(PreprocessingParameters parameters);
+std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors(const PreprocessingParameters& parameters);
 
 }; // namespace TokenProcessorFactory
 

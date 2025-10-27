@@ -1,13 +1,14 @@
 #include "token_processor_factory.hpp"
 
 std::vector<std::unique_ptr<TokenProcessor>> TokenProcessorFactory::MakeTokenProcessors(
-    PreprocessingParameters parameters) {
+    const PreprocessingParameters& parameters) {
   std::vector<std::unique_ptr<TokenProcessor>> processors;
 
-  auto import_processor = std::make_unique<TokenImportProcessor>(std::move(parameters));
+  std::unique_ptr<TokenImportProcessor> import_processor = std::make_unique<TokenImportProcessor>(parameters);
   processors.push_back(std::move(import_processor));
 
-  auto directives_processor = std::make_unique<TokenDirectivesProcessor>(parameters.predefined_symbols);
+  std::unique_ptr<TokenDirectivesProcessor> directives_processor =
+      std::make_unique<TokenDirectivesProcessor>(parameters.predefined_symbols);
   processors.push_back(std::move(directives_processor));
 
   return processors;

@@ -4,11 +4,13 @@
 #include <expected>
 #include <memory>
 #include <vector>
+#include <fstream>
 
 #include "PreprocessingParameters.hpp"
 #include "TokenDirectivesProcessor.hpp"
 #include "TokenImportProcessor.hpp"
 #include "TokenProcessor.hpp"
+#include "token_processor_factory.hpp"
 
 class Preprocessor {
 public:

@@ -19,31 +19,34 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
   }
 
   std::filesystem::path main_file = args[1];
-
   std::set<std::filesystem::path> include_paths;
+
   for (size_t i = 2; i < args.size(); ++i) {
     include_paths.emplace(args[i]);
   }
 
   std::unordered_set<std::string> predefined_symbols;
 
-  PreprocessingParameters params{.include_paths = std::move(include_paths),
-                                 .predefined_symbols = std::move(predefined_symbols),
-                                 .main_file = std::move(main_file)};
+  PreprocessingParameters params{.include_paths = include_paths,
+                                 .predefined_symbols = predefined_symbols,
+                                 .main_file = main_file};
 
-  Preprocessor preprocessor(std::move(params));
+  Preprocessor preprocessor(params);
 
   auto result = preprocessor.Process();
+
   if (!result) {
     err << result.error().what() << "\n";
     return 1;
   }
 
   const auto& tokens = result.value();
+
   for (const auto& t : tokens) {
     out << t->ToString() << "\n";
   }
 
   out << "\nPreprocessed " << tokens.size() << " tokens successfully.\n";
+
   return 0;
 }

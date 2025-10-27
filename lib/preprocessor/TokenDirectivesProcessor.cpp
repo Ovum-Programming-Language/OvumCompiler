@@ -3,7 +3,7 @@
 #include <sstream>
 
 TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std::string>& predefined_symbols) {
-  for (const auto& sym : predefined_symbols) {
+  for (const std::string& sym : predefined_symbols) {
     macros_[sym];
   }
 }
@@ -11,13 +11,15 @@ TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std:
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor::Process(
     const std::vector<TokenPtr>& tokens) {
   std::vector<TokenPtr> result;
+
   size_t i = 0;
+
   bool skipping = false;
   int skip_level = 0;
   int if_level = 0;
 
   while (i < tokens.size()) {
-    const auto& t = tokens[i];
+    const TokenPtr& t = tokens[i];
     std::string lexeme = t->GetLexeme();
 
     if (lexeme == "#define") {
@@ -25,23 +27,31 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
         return std::unexpected(
             InvalidImportError("Incomplete #define at line " + std::to_string(t->GetPosition().GetLine())));
       }
-      const auto& id_token = tokens[i + 1];
+
+      const TokenPtr& id_token = tokens[i + 1];
+
       if (!(id_token->GetStringType() == "IDENT")) {
         return std::unexpected(InvalidImportError("Expected identifier after #define at line " +
                                                   std::to_string(id_token->GetPosition().GetLine())));
       }
+
       std::string id = id_token->GetLexeme();
 
       size_t start = i + 2;
+
       if (start >= tokens.size()) {
         return std::unexpected(InvalidImportError("No value after #define " + id + " at line " +
                                                   std::to_string(t->GetPosition().GetLine())));
       }
+
       size_t end = start;
+
       while (end < tokens.size() && tokens[end]->GetStringType() != "NEWLINE") {
         ++end;
       }
+
       std::vector<TokenPtr> expansion;
+
       for (size_t k = start; k < end; ++k) {
         expansion.push_back(tokens[k]);
       }
@@ -49,6 +59,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
       if (!skipping) {
         macros_[id] = std::move(expansion);
       }
+
       i = end + 1;
       continue;
     }
@@ -58,16 +69,20 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
         return std::unexpected(
             InvalidImportError("Incomplete #undef at line " + std::to_string(t->GetPosition().GetLine())));
       }
-      const auto& id_token = tokens[i + 1];
+
+      const TokenPtr& id_token = tokens[i + 1];
+
       if (!(id_token->GetStringType() == "IDENT")) {
         return std::unexpected(InvalidImportError("Expected identifier after #undef at line " +
                                                   std::to_string(id_token->GetPosition().GetLine())));
       }
+
       std::string id = id_token->GetLexeme();
 
       if (!skipping) {
         macros_.erase(id);
       }
+
       i += 2;
       continue;
     }
@@ -77,19 +92,24 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
         return std::unexpected(InvalidImportError("Incomplete #" + lexeme.substr(1) + " at line " +
                                                   std::to_string(t->GetPosition().GetLine())));
       }
-      const auto& id_token = tokens[i + 1];
+
+      const TokenPtr& id_token = tokens[i + 1];
+
       if (!(id_token->GetStringType() == "IDENT")) {
         return std::unexpected(InvalidImportError("Expected identifier after #" + lexeme.substr(1) + " at line " +
                                                   std::to_string(id_token->GetPosition().GetLine())));
       }
+
       std::string id = id_token->GetLexeme();
 
       bool cond = macros_.count(id) > 0;
+
       if (lexeme == "#ifndef") {
         cond = !cond;
       }
 
       if_level++;
+
       if (skipping) {
         skip_level++;
       } else {
@@ -98,6 +118,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
           skip_level = 1;
         }
       }
+
       i += 2;
       continue;
     }
@@ -107,11 +128,13 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
         return std::unexpected(
             InvalidImportError("Mismatched #else at line " + std::to_string(t->GetPosition().GetLine())));
       }
+
       if (!skipping) {
         skipping = true;
       } else if (skip_level == 1) {
         skipping = false;
       }
+
       i += 1;
       continue;
     }
@@ -121,14 +144,17 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
         return std::unexpected(
             InvalidImportError("Mismatched #endif at line " + std::to_string(t->GetPosition().GetLine())));
       }
+
       if_level--;
 
       if (skip_level > 0) {
         skip_level--;
       }
+
       if (skip_level == 0) {
         skipping = false;
       }
+
       i += 1;
       continue;
     }
@@ -136,6 +162,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
     if (!skipping) {
       result.push_back(t);
     }
+
     ++i;
   }
 
@@ -144,9 +171,10 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
   }
 
   std::vector<TokenPtr> expanded;
-  for (const auto& tok : result) {
+
+  for (const TokenPtr& tok : result) {
     if (tok->GetStringType() == "IDENT" && macros_.count(tok->GetLexeme()) > 0) {
-      auto& exp_tokens = macros_[tok->GetLexeme()];
+      const std::vector<TokenPtr>& exp_tokens = macros_[tok->GetLexeme()];
       expanded.insert(expanded.end(), exp_tokens.begin(), exp_tokens.end());
     } else {
       expanded.push_back(tok);
