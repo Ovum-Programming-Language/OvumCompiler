@@ -35,4 +35,16 @@ public:
   }
 };
 
+class InvalidDirectiveError : public PreprocessorError {
+public:
+  explicit InvalidDirectiveError(const std::string& msg) : PreprocessorError("Invalid directive: " + msg) {
+  }
+};
+
+class UnmatchedDirectiveError : public PreprocessorError {
+public:
+  explicit UnmatchedDirectiveError(const std::string& msg) : PreprocessorError("Unmatched directive: " + msg) {
+  }
+};
+
 #endif // PREPROCESSORERROR_HPP_
