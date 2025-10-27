@@ -4,7 +4,7 @@
 
 TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std::string>& predefined_symbols) {
   for (const std::string& sym : predefined_symbols) {
-    macros_[sym];
+    defined_symbols_.insert(sym);
   }
 }
 
@@ -81,9 +81,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
     return std::unexpected(UnmatchedDirectiveError("Unmatched #if directive"));
   }
 
-  std::vector<TokenPtr> expanded = ExpandMacros(result);
-
-  return {std::move(expanded)};
+  return {std::move(result)};
 }
 
 std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleDefine(size_t& i,
@@ -103,31 +101,23 @@ std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleDefine(si
 
   std::string id = id_token->GetLexeme();
 
-  size_t start = i + 2;
-
-  if (start >= tokens.size()) {
-    return std::unexpected(InvalidDirectiveError("No value after #define " + id + " at line " +
+  if (i + 2 >= tokens.size()) {
+    if (!skipping) {
+      defined_symbols_.insert(id);
+    }
+    i += 2;
+    return {};
+  } else if (tokens[i + 2]->GetStringType() == "NEWLINE" || tokens[i + 2]->GetStringType() == "EOF" ||
+             tokens[i + 2]->GetLexeme() == ";") {
+    if (!skipping) {
+      defined_symbols_.insert(id);
+    }
+    i += 3;
+    return {};
+  } else {
+    return std::unexpected(InvalidDirectiveError("#define " + id + " has unexpected tokens after identifier at line " +
                                                  std::to_string(tokens[i]->GetPosition().GetLine())));
   }
-
-  size_t end = start;
-
-  while (end < tokens.size() && tokens[end]->GetStringType() != "NEWLINE") {
-    ++end;
-  }
-
-  std::vector<TokenPtr> expansion;
-
-  for (size_t k = start; k < end; ++k) {
-    expansion.push_back(tokens[k]);
-  }
-
-  if (!skipping) {
-    macros_[id] = std::move(expansion);
-  }
-
-  i = end + 1;
-  return {};
 }
 
 std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleUndef(size_t& i,
@@ -147,11 +137,25 @@ std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleUndef(siz
 
   std::string id = id_token->GetLexeme();
 
-  if (!skipping) {
-    macros_.erase(id);
+  if (i + 2 >= tokens.size()) {
+    if (!skipping) {
+      defined_symbols_.erase(id);
+    }
+    i += 2;
+    return {};
   }
 
-  i += 2;
+  if (tokens[i + 2]->GetStringType() != "NEWLINE" && tokens[i + 2]->GetStringType() != "EOF" &&
+      tokens[i + 2]->GetLexeme() != ";") {
+    return std::unexpected(InvalidDirectiveError("#undef " + id + " has unexpected tokens after identifier at line " +
+                                                 std::to_string(tokens[i]->GetPosition().GetLine())));
+  }
+
+  if (!skipping) {
+    defined_symbols_.erase(id);
+  }
+
+  i += 3;
   return {};
 }
 
@@ -173,7 +177,7 @@ std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleIfdefOrIf
 
   std::string id = id_token->GetLexeme();
 
-  bool cond = macros_.count(id) > 0;
+  bool cond = defined_symbols_.count(id) > 0;
 
   if (is_not) {
     cond = !cond;
@@ -230,19 +234,4 @@ std::expected<void, PreprocessorError> TokenDirectivesProcessor::HandleEndif(
 
   i += 1;
   return {};
-}
-
-std::vector<TokenPtr> TokenDirectivesProcessor::ExpandMacros(const std::vector<TokenPtr>& tokens) const {
-  std::vector<TokenPtr> expanded;
-
-  for (const TokenPtr& tok : tokens) {
-    if (tok->GetStringType() == "IDENT" && macros_.count(tok->GetLexeme()) > 0) {
-      const std::vector<TokenPtr>& exp_tokens = macros_.at(tok->GetLexeme());
-      expanded.insert(expanded.end(), exp_tokens.begin(), exp_tokens.end());
-    } else {
-      expanded.push_back(tok);
-    }
-  }
-
-  return expanded;
 }

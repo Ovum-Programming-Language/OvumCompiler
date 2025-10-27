@@ -3,7 +3,6 @@
 
 #include <expected>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -19,7 +18,7 @@ public:
       const std::vector<TokenPtr>& tokens) override;
 
 private:
-  std::unordered_map<std::string, std::vector<TokenPtr>> macros_;
+  std::unordered_set<std::string> defined_symbols_;
 
   [[nodiscard]] std::expected<void, PreprocessorError> HandleDefine(size_t& i,
                                                                     const std::vector<TokenPtr>& tokens,
@@ -41,8 +40,6 @@ private:
 
   [[nodiscard]] std::expected<void, PreprocessorError> HandleEndif(
       size_t& i, const std::vector<TokenPtr>& tokens, bool& skipping, int& skip_level, int& if_level) const;
-
-  [[nodiscard]] std::vector<TokenPtr> ExpandMacros(const std::vector<TokenPtr>& tokens) const;
 };
 
 #endif // TOKENDIRECTIVESPROCESSOR_HPP_
