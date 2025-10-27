@@ -14,7 +14,7 @@
 
 class Preprocessor {
 public:
-  explicit Preprocessor(PreprocessingParameters parameters);
+  explicit Preprocessor(const PreprocessingParameters& parameters);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process();
 

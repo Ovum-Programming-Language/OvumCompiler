@@ -2,7 +2,7 @@
 
 #include "Preprocessor.hpp"
 
-Preprocessor::Preprocessor(PreprocessingParameters parameters) :
+Preprocessor::Preprocessor(const PreprocessingParameters& parameters) :
     parameters_(parameters), token_processors_(TokenProcessorFactory::MakeTokenProcessors(parameters)) {
 }
 
