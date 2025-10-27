@@ -33,8 +33,7 @@ private:
   FileGraph file_graph_;
   std::unordered_set<std::filesystem::path> visited_;
 
-  [[nodiscard]] std::expected<std::string, PreprocessorError> ReadFileToString(
-      const std::filesystem::path& file);
+  [[nodiscard]] std::expected<std::string, PreprocessorError> ReadFileToString(const std::filesystem::path& file);
 
   [[nodiscard]] std::expected<void, PreprocessorError> GatherDependencies(const std::filesystem::path& file,
                                                                           const std::vector<TokenPtr>& tokens);
@@ -46,7 +45,7 @@ private:
   [[nodiscard]] std::vector<TokenPtr> RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const;
 
   [[nodiscard]] std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
-      const std::string& import_lexeme);
+      size_t pos, const std::vector<TokenPtr>& tokens);
 };
 
 #endif // TOKENIMPORTPROCESSOR_HPP_

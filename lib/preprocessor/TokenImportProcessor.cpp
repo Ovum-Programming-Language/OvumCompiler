@@ -101,26 +101,10 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
   while (i < tokens.size()) {
     const TokenPtr& token = tokens[i];
     if (token->GetLexeme() == "#import") {
-      if (i + 1 >= tokens.size()) {
-        return std::unexpected(InvalidImportError("Missing path after #import at " +
-                                                  std::to_string(token->GetPosition().GetLine()) + ":" +
-                                                  std::to_string(token->GetPosition().GetColumn())));
-      }
-
-      const TokenPtr& path_token = tokens[i + 1];
-
-      if (path_token->GetStringType() != "LITERAL:String") {
-        return std::unexpected(InvalidImportError("Expected string literal after #import at " +
-                                                  std::to_string(token->GetPosition().GetLine()) + ":" +
-                                                  std::to_string(token->GetPosition().GetColumn())));
-      }
-
-      const std::string& import_lexeme = path_token->GetLexeme();
-
-      std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(import_lexeme);
+      std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(i, tokens);
 
       if (!dep_path_result) {
-        return std::unexpected(FileNotFoundError(import_lexeme));
+        return std::unexpected(dep_path_result.error());
       }
 
       const std::filesystem::path& dep_path = dep_path_result.value();
@@ -221,7 +205,23 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveExtraEofs(const std::vector<To
 }
 
 std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::ResolveImportPath(
-    const std::string& import_lexeme) {
+    size_t pos, const std::vector<TokenPtr>& tokens) {
+  const TokenPtr& token = tokens[pos];
+  if (pos + 1 >= tokens.size()) {
+    return std::unexpected(InvalidImportError("Missing path after #import at " +
+                                              std::to_string(token->GetPosition().GetLine()) + ":" +
+                                              std::to_string(token->GetPosition().GetColumn())));
+  }
+
+  const TokenPtr& path_token = tokens[pos + 1];
+
+  if (path_token->GetStringType() != "LITERAL:String") {
+    return std::unexpected(InvalidImportError("Expected string literal after #import at " +
+                                              std::to_string(token->GetPosition().GetLine()) + ":" +
+                                              std::to_string(token->GetPosition().GetColumn())));
+  }
+
+  const std::string& import_lexeme = path_token->GetLexeme();
   if (import_lexeme.size() < 2 || import_lexeme[0] != '"' || import_lexeme.back() != import_lexeme[0]) {
     return std::unexpected(InvalidImportError("Invalid quote in " + import_lexeme));
   }
