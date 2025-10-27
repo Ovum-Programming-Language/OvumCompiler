@@ -1,18 +1,18 @@
-#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <queue>
 #include <string_view>
+#include <unordered_set>
 
 #include "TokenImportProcessor.hpp"
 
-const std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>>&
-TokenImportProcessor::GetDepGraph() const {
-  return dep_graph_;
-}
-
 const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImportProcessor::GetFileToTokens() const {
   return file_to_tokens_;
+}
+
+const std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>>&
+TokenImportProcessor::GetDepGraph() const {
+  return file_graph_.GetDepGraph();
 }
 
 std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToString(
@@ -44,7 +44,7 @@ TokenImportProcessor::TokenImportProcessor(std::filesystem::path main_file,
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process(
     const std::vector<TokenPtr>& tokens) {
   file_to_tokens_.clear();
-  dep_graph_.clear();
+  file_graph_.Clear();
   visited_.clear();
 
   std::expected<void, PreprocessorError> dep_result = GatherDependencies(main_file_, tokens);
@@ -53,23 +53,24 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
     return std::unexpected(dep_result.error());
   }
 
-  std::unordered_map<std::filesystem::path, int> colors;
-  std::vector<std::filesystem::path> cycle_path;
-
+  std::unordered_set<std::filesystem::path> nodes;
   for (const auto& [node, _] : file_to_tokens_) {
-    if (colors.find(node) == colors.end()) {
-      if (DetectCycles(node, colors, cycle_path)) {
-        std::string cycle_str;
-        for (const std::filesystem::path& p : cycle_path) {
-          cycle_str += p.string() + " -> ";
-        }
-        cycle_str += cycle_path.front().string();
-        return std::unexpected(CycleDetectedError("Cycle detected: " + cycle_str));
-      }
-    }
+    nodes.insert(node);
   }
 
-  std::expected<std::vector<std::filesystem::path>, PreprocessorError> order_result = TopologicalSort();
+  std::vector<std::filesystem::path> cycle_path;
+
+  if (file_graph_.DetectCycles(nodes, cycle_path)) {
+    std::string cycle_str;
+    for (const std::filesystem::path& p : cycle_path) {
+      cycle_str += p.string() + " -> ";
+    }
+    cycle_str += cycle_path.front().string();
+    return std::unexpected(CycleDetectedError("Cycle detected: " + cycle_str));
+  }
+
+  std::expected<std::vector<std::filesystem::path>, PreprocessorError> order_result =
+      file_graph_.TopologicalSort(nodes);
 
   if (!order_result) {
     return std::unexpected(order_result.error());
@@ -116,8 +117,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
 
       const std::string& import_lexeme = path_token->GetLexeme();
 
-      std::expected<std::filesystem::path, PreprocessorError> dep_path_result =
-          ResolveImportPath(import_lexeme);
+      std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(import_lexeme);
 
       if (!dep_path_result) {
         return std::unexpected(FileNotFoundError(import_lexeme));
@@ -125,7 +125,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
 
       const std::filesystem::path& dep_path = dep_path_result.value();
 
-      dep_graph_[file].insert(dep_path);
+      file_graph_.AddDependency(file, dep_path);
 
       if (file_to_tokens_.count(dep_path) == 0) {
         std::expected<std::string, PreprocessorError> content_result = ReadFileToString(dep_path);
@@ -159,96 +159,6 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
   }
 
   return {};
-}
-
-bool TokenImportProcessor::DetectCycles(const std::filesystem::path& node,
-                                        std::unordered_map<std::filesystem::path, int>& colors,
-                                        std::vector<std::filesystem::path>& cycle_path) const {
-  colors[node] = 1;
-  cycle_path.push_back(node);
-
-  auto it = dep_graph_.find(node);
-
-  if (it != dep_graph_.end()) {
-    for (const auto& neighbor : it->second) {
-      auto color_it = colors.find(neighbor);
-      if (color_it == colors.end()) {
-        if (DetectCycles(neighbor, colors, cycle_path)) {
-          return true;
-        }
-      } else if (color_it->second == 1) {
-        return true;
-      }
-    }
-  }
-
-  colors[node] = 2;
-  cycle_path.pop_back();
-
-  return false;
-}
-
-std::expected<std::vector<std::filesystem::path>, PreprocessorError> TokenImportProcessor::TopologicalSort() const {
-  if (file_to_tokens_.empty()) {
-    return {};
-  }
-
-  std::unordered_map<std::filesystem::path, int> in_degree;
-
-  for (const auto& [u, _] : file_to_tokens_) {
-    in_degree[u] = 0;
-  }
-
-  for (const auto& [u, deps] : dep_graph_) {
-    for (const std::filesystem::path& v : deps) {
-      auto it = in_degree.find(v);
-      if (it != in_degree.end()) {
-        ++(it->second);
-      } else {
-        in_degree[v] = 1;
-      }
-    }
-  }
-
-  std::queue<std::filesystem::path> q;
-
-  for (const auto& [node, deg] : in_degree) {
-    if (deg == 0) {
-      q.push(node);
-    }
-  }
-
-  std::vector<std::filesystem::path> order;
-
-  while (!q.empty()) {
-    std::filesystem::path u = q.front();
-    q.pop();
-    order.push_back(u);
-
-    auto deps_it = dep_graph_.find(u);
-
-    if (deps_it != dep_graph_.end()) {
-      for (const std::filesystem::path& v : deps_it->second) {
-        auto deg_it = in_degree.find(v);
-
-        if (deg_it != in_degree.end()) {
-          --(deg_it->second);
-
-          if (deg_it->second == 0) {
-            q.push(v);
-          }
-        }
-      }
-    }
-  }
-
-  if (order.size() != file_to_tokens_.size()) {
-    return std::unexpected(CycleDetectedError("Topological sort failed (cycle)"));
-  }
-
-  std::ranges::reverse(order);
-
-  return order;
 }
 
 std::vector<TokenPtr> TokenImportProcessor::ConcatenateTokens(const std::vector<std::filesystem::path>& order) const {

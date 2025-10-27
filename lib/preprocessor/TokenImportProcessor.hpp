@@ -1,6 +1,12 @@
 #ifndef TOKENIMPORTPROCESSOR_HPP_
 #define TOKENIMPORTPROCESSOR_HPP_
 
+#include <filesystem>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "FileGraph.hpp"
 #include "PreprocessingParameters.hpp"
 #include "PreprocessorError.hpp"
 #include "TokenProcessor.hpp"
@@ -9,7 +15,7 @@
 
 class TokenImportProcessor : public TokenProcessor {
 public:
-  explicit TokenImportProcessor(std::filesystem::path main_file, std::set<std::filesystem::path> include_paths);
+  TokenImportProcessor(std::filesystem::path main_file, std::set<std::filesystem::path> include_paths);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) override;
@@ -24,21 +30,14 @@ private:
   std::set<std::filesystem::path> include_paths_;
 
   std::unordered_map<std::filesystem::path, std::vector<TokenPtr>> file_to_tokens_;
-  std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>> dep_graph_;
-
+  FileGraph file_graph_;
   std::unordered_set<std::filesystem::path> visited_;
 
-  [[nodiscard]] static std::expected<std::string, PreprocessorError> ReadFileToString(
+  [[nodiscard]] std::expected<std::string, PreprocessorError> ReadFileToString(
       const std::filesystem::path& file);
 
   [[nodiscard]] std::expected<void, PreprocessorError> GatherDependencies(const std::filesystem::path& file,
                                                                           const std::vector<TokenPtr>& tokens);
-
-  [[nodiscard]] bool DetectCycles(const std::filesystem::path& node,
-                                  std::unordered_map<std::filesystem::path, int>& colors,
-                                  std::vector<std::filesystem::path>& cycle_path) const;
-
-  [[nodiscard]] std::expected<std::vector<std::filesystem::path>, PreprocessorError> TopologicalSort() const;
 
   [[nodiscard]] std::vector<TokenPtr> ConcatenateTokens(const std::vector<std::filesystem::path>& order) const;
 

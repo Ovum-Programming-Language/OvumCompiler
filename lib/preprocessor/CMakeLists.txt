@@ -3,6 +3,7 @@ add_library(preprocessor STATIC
         token_processor_factory.cpp
         TokenImportProcessor.cpp
         TokenDirectivesProcessor.cpp
+        FileGraph.cpp
 )
 
 target_include_directories(preprocessor
