@@ -20,6 +20,29 @@ public:
 
 private:
   std::unordered_map<std::string, std::vector<TokenPtr>> macros_;
+
+  [[nodiscard]] std::expected<void, PreprocessorError> HandleDefine(size_t& i,
+                                                                    const std::vector<TokenPtr>& tokens,
+                                                                    bool skipping);
+
+  [[nodiscard]] std::expected<void, PreprocessorError> HandleUndef(size_t& i,
+                                                                   const std::vector<TokenPtr>& tokens,
+                                                                   bool skipping);
+
+  [[nodiscard]] std::expected<void, PreprocessorError> HandleIfdefOrIfndef(size_t& i,
+                                                                           const std::vector<TokenPtr>& tokens,
+                                                                           bool& skipping,
+                                                                           int& skip_level,
+                                                                           int& if_level,
+                                                                           bool is_not) const;
+
+  [[nodiscard]] std::expected<void, PreprocessorError> HandleElse(
+      size_t& i, const std::vector<TokenPtr>& tokens, bool& skipping, int& skip_level, int& if_level) const;
+
+  [[nodiscard]] std::expected<void, PreprocessorError> HandleEndif(
+      size_t& i, const std::vector<TokenPtr>& tokens, bool& skipping, int& skip_level, int& if_level) const;
+
+  [[nodiscard]] std::vector<TokenPtr> ExpandMacros(const std::vector<TokenPtr>& tokens) const;
 };
 
 #endif // TOKENDIRECTIVESPROCESSOR_HPP_
