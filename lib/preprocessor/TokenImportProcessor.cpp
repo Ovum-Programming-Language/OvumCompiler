@@ -2,7 +2,6 @@
 #include <fstream>
 #include <queue>
 #include <string_view>
-#include <unordered_set>
 
 #include "TokenImportProcessor.hpp"
 
@@ -10,7 +9,7 @@ const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImp
   return file_to_tokens_;
 }
 
-const std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>>&
+const std::map<std::filesystem::path, std::set<std::filesystem::path>>&
 TokenImportProcessor::GetDepGraph() const {
   return file_graph_.GetDepGraph();
 }
@@ -53,7 +52,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
     return std::unexpected(dep_result.error());
   }
 
-  std::unordered_set<std::filesystem::path> nodes;
+  std::set<std::filesystem::path> nodes;
   for (const auto& [node, _] : file_to_tokens_) {
     nodes.insert(node);
   }

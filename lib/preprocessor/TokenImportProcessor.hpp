@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <set>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "FileGraph.hpp"
 #include "PreprocessingParameters.hpp"
@@ -22,8 +21,7 @@ public:
 
   [[nodiscard]] const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& GetFileToTokens() const;
 
-  [[nodiscard]] const std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>>&
-  GetDepGraph() const;
+  [[nodiscard]] const std::map<std::filesystem::path, std::set<std::filesystem::path>>& GetDepGraph() const;
 
 private:
   std::filesystem::path main_file_;

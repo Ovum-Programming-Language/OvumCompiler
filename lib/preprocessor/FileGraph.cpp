@@ -10,14 +10,14 @@ void FileGraph::Clear() {
   dep_graph_.clear();
 }
 
-const std::unordered_map<std::filesystem::path, std::unordered_set<std::filesystem::path>>& FileGraph::GetDepGraph()
+const std::map<std::filesystem::path, std::set<std::filesystem::path>>& FileGraph::GetDepGraph()
     const {
   return dep_graph_;
 }
 
-bool FileGraph::DetectCycles(const std::unordered_set<std::filesystem::path>& nodes,
+bool FileGraph::DetectCycles(const std::set<std::filesystem::path>& nodes,
                              std::vector<std::filesystem::path>& cycle_path) const {
-  std::unordered_map<std::filesystem::path, int> colors;
+  std::map<std::filesystem::path, int> colors;
   for (const auto& node : nodes) {
     if (colors.find(node) == colors.end()) {
       if (DfsDetect(node, colors, cycle_path)) {
@@ -29,7 +29,7 @@ bool FileGraph::DetectCycles(const std::unordered_set<std::filesystem::path>& no
 }
 
 bool FileGraph::DfsDetect(const std::filesystem::path& node,
-                          std::unordered_map<std::filesystem::path, int>& colors,
+                          std::map<std::filesystem::path, int>& colors,
                           std::vector<std::filesystem::path>& cycle_path) const {
   colors[node] = 1;
   cycle_path.push_back(node);
@@ -55,12 +55,12 @@ bool FileGraph::DfsDetect(const std::filesystem::path& node,
 }
 
 std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph::TopologicalSort(
-    const std::unordered_set<std::filesystem::path>& nodes) const {
+    const std::set<std::filesystem::path>& nodes) const {
   if (nodes.empty()) {
     return std::vector<std::filesystem::path>{};
   }
 
-  std::unordered_map<std::filesystem::path, int> in_degree;
+  std::map<std::filesystem::path, int> in_degree;
   for (const auto& u : nodes) {
     in_degree[u] = 0;
   }
