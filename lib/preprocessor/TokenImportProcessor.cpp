@@ -36,9 +36,9 @@ std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToSt
   return {std::move(content)};
 }
 
-TokenImportProcessor::TokenImportProcessor(std::filesystem::path main_file,
-                                           std::set<std::filesystem::path> include_paths) :
-    main_file_(main_file), include_paths_(std::move(include_paths)) {
+TokenImportProcessor::TokenImportProcessor(const std::filesystem::path& main_file,
+                                           const std::set<std::filesystem::path>& include_paths) :
+    main_file_(main_file), include_paths_(include_paths) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process(

@@ -15,7 +15,7 @@
 
 class TokenImportProcessor : public TokenProcessor {
 public:
-  TokenImportProcessor(std::filesystem::path main_file, std::set<std::filesystem::path> include_paths);
+  TokenImportProcessor(const std::filesystem::path& main_file, const std::set<std::filesystem::path>& include_paths);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) override;
