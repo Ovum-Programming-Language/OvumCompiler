@@ -1,0 +1,5 @@
+#ifdef TEMP
+INCLUDE 1
+#undef TEMP
+#endif
+INCLUDE 2

@@ -1,0 +1,6 @@
+INCLUDENUM 2
+
+#import "import1.txt"
+#import "import2.txt"
+INCLUDE 1
+INCLUDE 2

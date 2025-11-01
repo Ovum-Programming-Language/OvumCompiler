@@ -1,0 +1,8 @@
+#ifdef PLATFORM_WIN
+#define FEAT_A
+INCLUDE 1
+#else
+#define FEAT_B
+INCLUDE 6
+#endif
+INCLUDE 2

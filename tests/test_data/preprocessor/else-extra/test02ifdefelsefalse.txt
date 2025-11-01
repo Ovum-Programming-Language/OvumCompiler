@@ -1,0 +1,7 @@
+INCLUDENUM 1
+
+#ifdef NOT_DEFINED
+INCLUDE 2
+#else
+INCLUDE 1
+#endif

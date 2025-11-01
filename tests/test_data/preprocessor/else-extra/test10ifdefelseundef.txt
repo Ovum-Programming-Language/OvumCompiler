@@ -1,0 +1,18 @@
+INCLUDENUM 3
+
+#define A
+#undef A
+#ifdef A
+INCLUDE 4
+#else
+INCLUDE 1
+#endif
+
+#define B
+#ifdef B
+INCLUDE 2
+#else
+INCLUDE 5
+#endif
+
+INCLUDE 3

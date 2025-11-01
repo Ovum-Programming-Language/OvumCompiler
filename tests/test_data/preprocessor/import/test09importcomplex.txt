@@ -1,0 +1,11 @@
+INCLUDENUM 4
+
+#define PLATFORM_WIN
+#import "import_platform.txt"
+#ifdef FEAT_A
+INCLUDE 3
+#endif
+#ifdef FEAT_B
+INCLUDE 5
+#endif
+INCLUDE 4

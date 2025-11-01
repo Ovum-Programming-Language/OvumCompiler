@@ -1,0 +1,11 @@
+INCLUDENUM 3
+
+#define A
+#define B
+#ifdef A
+INCLUDE 1
+#ifdef B
+INCLUDE 2
+#endif
+INCLUDE 3
+#endif

@@ -1,0 +1,2 @@
+#import "import_circular1.txt"
+INCLUDE 2

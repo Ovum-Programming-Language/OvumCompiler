@@ -1,0 +1,4 @@
+WAITERROR
+
+#define FEAT_A VALUE
+INCLUDE 1

@@ -1,0 +1,6 @@
+INCLUDENUM 2
+
+#define FEAT_A
+INCLUDE 1
+#define FEAT_A
+INCLUDE 2
