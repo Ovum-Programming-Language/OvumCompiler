@@ -15,6 +15,7 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& i,
     if (next_) {
       return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
     }
+
     return {};
   }
 
@@ -30,5 +31,6 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& i,
   }
 
   ++i;
+
   return {};
 }

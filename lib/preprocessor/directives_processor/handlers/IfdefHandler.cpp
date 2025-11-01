@@ -15,6 +15,7 @@ std::expected<void, PreprocessorError> IfdefHandler::Process(size_t& i,
     if (next_) {
       return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
     }
+
     return {};
   }
 
@@ -24,6 +25,7 @@ std::expected<void, PreprocessorError> IfdefHandler::Process(size_t& i,
   }
 
   const TokenPtr& id_token = tokens[i + 1];
+
   if (id_token->GetStringType() != "IDENT") {
     return std::unexpected(InvalidDirectiveError("Expected identifier after #ifdef at line " +
                                                  std::to_string(id_token->GetPosition().GetLine())));
@@ -44,5 +46,6 @@ std::expected<void, PreprocessorError> IfdefHandler::Process(size_t& i,
   }
 
   i += 2;
+
   return {};
 }

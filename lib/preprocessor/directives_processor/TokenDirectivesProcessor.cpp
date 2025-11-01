@@ -9,6 +9,7 @@ TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std:
   for (const std::string& symbol : predefined_symbols) {
     defined_symbols_.insert(symbol);
   }
+
   directives_chain_ = CreateDirectivesChain();
 }
 
@@ -23,6 +24,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
   while (token_index < tokens.size()) {
     std::expected<void, PreprocessorError> handler_result = directives_chain_->Process(
         token_index, tokens, processed_tokens, defined_symbols_, skipping, skip_level, if_level);
+
     if (!handler_result) {
       return std::unexpected(handler_result.error());
     }

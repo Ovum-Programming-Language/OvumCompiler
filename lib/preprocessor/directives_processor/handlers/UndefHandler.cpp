@@ -15,6 +15,7 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
     if (next_) {
       return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
     }
+
     return {};
   }
 
@@ -24,6 +25,7 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
   }
 
   const TokenPtr& id_token = tokens[i + 1];
+
   if (id_token->GetStringType() != "IDENT") {
     return std::unexpected(InvalidDirectiveError("Expected identifier after #undef at line " +
                                                  std::to_string(id_token->GetPosition().GetLine())));
@@ -35,6 +37,7 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
     if (!skipping) {
       defined_symbols.erase(id);
     }
+
     i += 2;
     return {};
   }
@@ -48,6 +51,8 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
   if (!skipping) {
     defined_symbols.erase(id);
   }
+
   i += 3;
+
   return {};
 }

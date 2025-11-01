@@ -70,9 +70,8 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
     in_degree[node] = 0;
   }
 
-  for (const std::pair<const std::filesystem::path, std::set<std::filesystem::path>>& dependency_entry :
-       dependency_graph_) {
-    for (const std::filesystem::path& vertex_to : dependency_entry.second) {
+  for (const auto& [_, dependencies] : dependency_graph_) {
+    for (const std::filesystem::path& vertex_to : dependencies) {
       auto in_degree_iterator = in_degree.find(vertex_to);
 
       if (in_degree_iterator != in_degree.end()) {
@@ -83,9 +82,7 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
 
   std::queue<std::filesystem::path> nodes_queue;
 
-  for (const std::pair<const std::filesystem::path, int32_t>& degree_entry : in_degree) {
-    const std::filesystem::path& node = degree_entry.first;
-    const int32_t in_degree_value = degree_entry.second;
+  for (const auto& [node, in_degree_value] : in_degree) {
     if (in_degree_value == 0) {
       nodes_queue.push(node);
     }
@@ -97,19 +94,20 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
     std::filesystem::path current_node = nodes_queue.front();
     nodes_queue.pop();
     topological_order.push_back(current_node);
-
     auto dependencies_iterator = dependency_graph_.find(current_node);
 
-    if (dependencies_iterator != dependency_graph_.end()) {
-      for (const std::filesystem::path& adjacent_node : dependencies_iterator->second) {
-        auto degree_iterator = in_degree.find(adjacent_node);
+    if (dependencies_iterator == dependency_graph_.end()) {
+      continue;
+    }
 
-        if (degree_iterator != in_degree.end()) {
-          --(degree_iterator->second);
+    for (const std::filesystem::path& adjacent_node : dependencies_iterator->second) {
+      auto degree_iterator = in_degree.find(adjacent_node);
 
-          if (degree_iterator->second == 0) {
-            nodes_queue.push(adjacent_node);
-          }
+      if (degree_iterator != in_degree.end()) {
+        --(degree_iterator->second);
+
+        if (degree_iterator->second == 0) {
+          nodes_queue.push(adjacent_node);
         }
       }
     }

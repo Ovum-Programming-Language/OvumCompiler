@@ -65,9 +65,11 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
 
   if (file_graph_.DetectCycles(cycle_path)) {
     std::string cycle_str;
+
     for (const std::filesystem::path& p : cycle_path) {
       cycle_str += p.string() + " -> ";
     }
+
     cycle_str += cycle_path.front().string();
     return std::unexpected(CycleDetectedError("Cycle detected: " + cycle_str));
   }
@@ -79,9 +81,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
   }
 
   std::vector<std::filesystem::path> order = order_result.value();
-
   std::vector<TokenPtr> concatenated = ConcatenateTokens(order);
-
   std::vector<TokenPtr> cleaned = RemoveExtraTokens(concatenated);
 
   return {std::move(cleaned)};
@@ -95,11 +95,11 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
 
   visited_.insert(file);
   file_to_tokens_[file] = tokens;
-
-  size_t i = 0;
+  size_t i = 0; // TODO: rename here and after
 
   while (i < tokens.size()) {
     const TokenPtr& token = tokens[i];
+
     if (token->GetLexeme() == "#import") {
       std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(i, tokens);
 
@@ -108,7 +108,6 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
       }
 
       const std::filesystem::path& dep_path = dep_path_result.value();
-
       file_graph_.AddDependency(file, dep_path);
 
       if (file_to_tokens_.count(dep_path) == 0) {
@@ -140,6 +139,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
       i += 2;
       continue;
     }
+
     ++i;
   }
 
@@ -189,6 +189,7 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveExtraTokens(const std::vector<
 std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::ResolveImportPath(
     size_t pos, const std::vector<TokenPtr>& tokens) {
   const TokenPtr& token = tokens[pos];
+
   if (pos + 1 >= tokens.size()) {
     return std::unexpected(InvalidImportError("Missing path after #import at " +
                                               std::to_string(token->GetPosition().GetLine()) + ":" +
@@ -204,12 +205,12 @@ std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::Re
   }
 
   const std::string& import_lexeme = path_token->GetLexeme();
+
   if (import_lexeme.size() < 2 || import_lexeme[0] != '"' || import_lexeme.back() != import_lexeme[0]) {
     return std::unexpected(InvalidImportError("Invalid quote in " + import_lexeme));
   }
 
   std::string name = import_lexeme.substr(1, import_lexeme.size() - 2);
-
   std::filesystem::path candidate;
 
   for (const std::filesystem::path& inc : include_paths_) {

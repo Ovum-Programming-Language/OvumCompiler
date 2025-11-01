@@ -15,6 +15,7 @@ std::expected<void, PreprocessorError> DefineHandler::Process(size_t& i,
     if (next_) {
       return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
     }
+
     return {};
   }
 
@@ -36,17 +37,21 @@ std::expected<void, PreprocessorError> DefineHandler::Process(size_t& i,
     if (!skipping) {
       defined_symbols.insert(id);
     }
+
     i += 2;
+
     return {};
   } else if (tokens[i + 2]->GetStringType() == "NEWLINE" || tokens[i + 2]->GetStringType() == "EOF" ||
              tokens[i + 2]->GetLexeme() == ";") {
     if (!skipping) {
       defined_symbols.insert(id);
     }
+
     i += 3;
+
     return {};
-  } else {
-    return std::unexpected(InvalidDirectiveError("#define " + id + " has unexpected tokens after identifier at line " +
-                                                 std::to_string(tokens[i]->GetPosition().GetLine())));
   }
+
+  return std::unexpected(InvalidDirectiveError("#define " + id + " has unexpected tokens after identifier at line " +
+                                               std::to_string(tokens[i]->GetPosition().GetLine())));
 }

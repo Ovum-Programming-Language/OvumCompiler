@@ -16,6 +16,7 @@ std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& i,
   }
 
   const TokenPtr& token = tokens[i];
+
   if (!skipping) {
     result.push_back(token);
   }
