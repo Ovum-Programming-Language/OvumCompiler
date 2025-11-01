@@ -2,7 +2,6 @@
 #define UNDEF_HANDLER_HPP_
 
 #include <expected>
-#include <memory>
 
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"

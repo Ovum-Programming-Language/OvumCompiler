@@ -1,10 +1,13 @@
+#include "TokenImportProcessor.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <string>
 #include <string_view>
+#include <utility>
 
-#include "TokenImportProcessor.hpp"
+#include "lib/lexer/Lexer.hpp"
 
 const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImportProcessor::GetFileToTokens() const {
   return file_to_tokens_;
@@ -36,9 +39,9 @@ std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToSt
   return {std::move(content)};
 }
 
-TokenImportProcessor::TokenImportProcessor(const std::filesystem::path& main_file,
+TokenImportProcessor::TokenImportProcessor(std::filesystem::path main_file,
                                            const std::set<std::filesystem::path>& include_paths) :
-    main_file_(main_file), include_paths_(include_paths) {
+    main_file_(std::move(main_file)), include_paths_(include_paths) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Process(

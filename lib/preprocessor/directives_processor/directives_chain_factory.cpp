@@ -1,7 +1,15 @@
+#include "directives_chain_factory.hpp"
+
 #include <memory>
 #include <vector>
 
-#include "lib/preprocessor/directives_processor/directives_chain_factory.hpp"
+#include "lib/preprocessor/directives_processor/handlers/DefaultHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/DefineHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/ElseHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/EndifHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/IfdefHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/IfndefHandler.hpp"
+#include "lib/preprocessor/directives_processor/handlers/UndefHandler.hpp"
 
 std::unique_ptr<DirectiveHandler> CreateDirectivesChain() {
   std::vector<std::unique_ptr<DirectiveHandler>> handlers;

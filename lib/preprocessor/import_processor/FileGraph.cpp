@@ -1,10 +1,10 @@
+#include "FileGraph.hpp"
+
 #include <algorithm>
 #include <filesystem>
 #include <queue>
 #include <set>
 #include <vector>
-
-#include "FileGraph.hpp"
 
 void FileGraph::AddDependency(const std::filesystem::path& from_path, const std::filesystem::path& to_path) {
   dependency_graph_[from_path].insert(to_path);

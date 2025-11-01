@@ -7,10 +7,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "directives_chain_factory.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
+#include "lib/preprocessor/directives_processor/handlers/DirectiveHandler.hpp"
 
 class TokenDirectivesProcessor : public TokenProcessor {
 public:

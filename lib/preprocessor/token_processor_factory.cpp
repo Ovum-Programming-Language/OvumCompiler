@@ -1,5 +1,8 @@
 #include "token_processor_factory.hpp"
 
+#include "directives_processor/TokenDirectivesProcessor.hpp"
+#include "import_processor/TokenImportProcessor.hpp"
+
 std::vector<std::unique_ptr<TokenProcessor>> TokenProcessorFactory::MakeTokenProcessors(
     const PreprocessingParameters& parameters) {
   std::vector<std::unique_ptr<TokenProcessor>> processors;

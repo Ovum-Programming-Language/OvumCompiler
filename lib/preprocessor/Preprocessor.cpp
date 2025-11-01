@@ -1,6 +1,10 @@
+#include "Preprocessor.hpp"
+
+#include <fstream>
 #include <utility>
 
-#include "Preprocessor.hpp"
+#include "lib/lexer/Lexer.hpp"
+#include "token_processor_factory.hpp"
 
 Preprocessor::Preprocessor(const PreprocessingParameters& parameters) :
     parameters_(parameters), token_processors_(TokenProcessorFactory::MakeTokenProcessors(parameters)) {

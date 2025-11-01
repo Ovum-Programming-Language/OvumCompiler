@@ -12,6 +12,11 @@
 class DirectiveHandler {
 public:
   virtual ~DirectiveHandler() = default;
+  DirectiveHandler() = default;
+  DirectiveHandler(const DirectiveHandler&) = delete;
+  DirectiveHandler(DirectiveHandler&&) = default;
+  DirectiveHandler& operator=(const DirectiveHandler&) = delete;
+  DirectiveHandler& operator=(DirectiveHandler&&) = default;
 
   [[nodiscard]] virtual std::expected<void, PreprocessorError> Process(size_t& i,
                                                                        const std::vector<TokenPtr>& tokens,
@@ -26,7 +31,7 @@ public:
   }
 
 protected:
-  std::unique_ptr<DirectiveHandler> next_;
+  std::unique_ptr<DirectiveHandler> next_; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
 };
 
 #endif // DIRECTIVE_HANDLER_HPP_

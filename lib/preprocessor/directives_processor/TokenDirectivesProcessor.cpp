@@ -1,8 +1,9 @@
+#include "TokenDirectivesProcessor.hpp"
+
 #include <cstdint>
 
-#include "directives_chain_factory.hpp"
-
 #include "TokenDirectivesProcessor.hpp"
+#include "directives_chain_factory.hpp"
 
 TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std::string>& predefined_symbols) {
   for (const std::string& symbol : predefined_symbols) {

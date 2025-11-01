@@ -10,15 +10,13 @@
 #include <vector>
 
 #include "FileGraph.hpp"
-#include "lib/lexer/Lexer.hpp"
 #include "lib/lexer/tokens/Token.hpp"
-#include "lib/preprocessor/PreprocessingParameters.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
 
 class TokenImportProcessor : public TokenProcessor {
 public:
-  TokenImportProcessor(const std::filesystem::path& main_file, const std::set<std::filesystem::path>& include_paths);
+  TokenImportProcessor(std::filesystem::path main_file, const std::set<std::filesystem::path>& include_paths);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) override;
