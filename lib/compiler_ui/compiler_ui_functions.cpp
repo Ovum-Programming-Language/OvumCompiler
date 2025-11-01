@@ -1,28 +1,50 @@
-#include "lib/lexer/Lexer.hpp"
-
-#include <exception>
-
 #include "compiler_ui_functions.hpp"
+
+#include "lib/preprocessor/Preprocessor.hpp"
 
 int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out, std::ostream& err) {
   if (args.size() < 2) {
-    err << "Insufficient arguments\n";
+    err << "Usage: ovumc <main_file.ovum> [include_path1] [include_path2] ...\n";
+    err << "Example: ovumc sample.ovum /path/to/includes\n";
     return 1;
   }
 
-  const std::string& sample = args[1];
-  Lexer lx(sample, true);
+  if (args[1] == "--help") {
+    out << "Usage: ovumc <main_file.ovum> [include_path1] [include_path2] ...\n";
+    out << "Example: ovumc sample.ovum /path/to/includes\n";
+    return 0;
+  }
 
-  try {
-    auto toks = lx.Tokenize();
+  std::filesystem::path main_file = args[1];
+  std::set<std::filesystem::path> include_paths;
 
-    for (auto& t : toks) {
-      out << t->ToString() << "\n";
-    }
-  } catch (const std::exception& e) {
-    err << "Lexer error: " << e.what() << "\n";
+  include_paths.emplace(main_file.parent_path());
+
+  for (size_t i = 2; i < args.size(); ++i) {
+    include_paths.emplace(args[i]);
+  }
+
+  std::unordered_set<std::string> predefined_symbols;
+
+  ovum::compiler::preprocessor::PreprocessingParameters params{
+      .include_paths = include_paths, .predefined_symbols = predefined_symbols, .main_file = main_file};
+
+  ovum::compiler::preprocessor::Preprocessor preprocessor(params);
+
+  auto result = preprocessor.Process();
+
+  if (!result) {
+    err << result.error().what() << "\n";
     return 1;
   }
+
+  const auto& tokens = result.value();
+
+  for (const auto& t : tokens) {
+    out << t->ToString() << "\n";
+  }
+
+  out << "\nPreprocessed " << tokens.size() << " tokens successfully.\n";
 
   return 0;
 }

@@ -1,5 +1,5 @@
-#ifndef PREPROCESSOR_HPP_
-#define PREPROCESSOR_HPP_
+#ifndef PREPROCESSOR_PREPROCESSOR_HPP_
+#define PREPROCESSOR_PREPROCESSOR_HPP_
 
 #include <expected>
 #include <memory>
@@ -8,16 +8,19 @@
 #include "PreprocessingParameters.hpp"
 #include "TokenProcessor.hpp"
 
-class Preprocessor : public TokenProcessor {
-public:
-  Preprocessor(PreprocessingParameters parameters);
+namespace ovum::compiler::preprocessor {
 
-  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
-      const std::vector<TokenPtr>& tokens) const override;
+class Preprocessor {
+public:
+  explicit Preprocessor(const PreprocessingParameters& parameters);
+
+  [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process();
 
 private:
   PreprocessingParameters parameters_;
   std::vector<std::unique_ptr<TokenProcessor>> token_processors_;
 };
 
-#endif // PREPROCESSOR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_PREPROCESSOR_HPP_
