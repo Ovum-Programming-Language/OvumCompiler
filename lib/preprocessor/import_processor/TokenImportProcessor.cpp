@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
-#include <queue>
 #include <string>
 #include <string_view>
 
@@ -173,11 +172,10 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveExtraTokens(const std::vector<
         ++i;
       }
     } else {
-      if (token->GetStringType() != "EOF") {
-        cleaned.push_back(token);
-      } else if (i == tokens.size() - 1) {
+      if (token->GetStringType() != "EOF" || i == tokens.size() - 1) {
         cleaned.push_back(token);
       }
+
       ++i;
     }
   }

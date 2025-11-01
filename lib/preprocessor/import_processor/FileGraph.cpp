@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <queue>
-#include <ranges>
 #include <set>
 #include <vector>
 
@@ -42,8 +41,7 @@ bool FileGraph::DetectCycleDepthFirst(const std::filesystem::path& node,
   node_colors[node] = 1;
   cycle_path.push_back(node);
 
-  std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator dependency_iterator =
-      dependency_graph_.find(node);
+  auto dependency_iterator = dependency_graph_.find(node);
 
   if (dependency_iterator != dependency_graph_.end()) {
     for (const std::filesystem::path& neighbor : dependency_iterator->second) {
@@ -75,7 +73,7 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
   for (const std::pair<const std::filesystem::path, std::set<std::filesystem::path>>& dependency_entry :
        dependency_graph_) {
     for (const std::filesystem::path& vertex_to : dependency_entry.second) {
-      std::map<std::filesystem::path, int32_t>::iterator in_degree_iterator = in_degree.find(vertex_to);
+      auto in_degree_iterator = in_degree.find(vertex_to);
 
       if (in_degree_iterator != in_degree.end()) {
         ++(in_degree_iterator->second);
@@ -100,12 +98,11 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
     nodes_queue.pop();
     topological_order.push_back(current_node);
 
-    std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator dependencies_iterator =
-        dependency_graph_.find(current_node);
+    auto dependencies_iterator = dependency_graph_.find(current_node);
 
     if (dependencies_iterator != dependency_graph_.end()) {
       for (const std::filesystem::path& adjacent_node : dependencies_iterator->second) {
-        std::map<std::filesystem::path, int32_t>::iterator degree_iterator = in_degree.find(adjacent_node);
+        auto degree_iterator = in_degree.find(adjacent_node);
 
         if (degree_iterator != in_degree.end()) {
           --(degree_iterator->second);
