@@ -1,5 +1,9 @@
 #include "IfndefHandler.hpp"
 
+void IfndefHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
+  next_ = std::move(next);
+}
+
 std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& i,
                                                               const std::vector<TokenPtr>& tokens,
                                                               std::vector<TokenPtr>& result,

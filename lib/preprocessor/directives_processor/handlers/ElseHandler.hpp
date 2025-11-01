@@ -3,6 +3,9 @@
 
 #include <expected>
 
+#include <memory>
+#include <unordered_set>
+
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 
@@ -15,6 +18,11 @@ public:
                                                                bool& skipping,
                                                                int& skip_level,
                                                                int& if_level) override;
+
+  void SetNext(std::unique_ptr<DirectiveHandler> next) override;
+
+private:
+  std::unique_ptr<DirectiveHandler> next_;
 };
 
 #endif // ELSE_HANDLER_HPP_

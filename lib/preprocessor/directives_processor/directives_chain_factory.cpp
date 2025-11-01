@@ -1,7 +1,6 @@
 #include "directives_chain_factory.hpp"
 
 #include <memory>
-#include <vector>
 
 #include "lib/preprocessor/directives_processor/handlers/DefaultHandler.hpp"
 #include "lib/preprocessor/directives_processor/handlers/DefineHandler.hpp"
@@ -12,18 +11,20 @@
 #include "lib/preprocessor/directives_processor/handlers/UndefHandler.hpp"
 
 std::unique_ptr<DirectiveHandler> CreateDirectivesChain() {
-  std::vector<std::unique_ptr<DirectiveHandler>> handlers;
-  handlers.emplace_back(std::make_unique<DefineHandler>());
-  handlers.emplace_back(std::make_unique<UndefHandler>());
-  handlers.emplace_back(std::make_unique<IfdefHandler>());
-  handlers.emplace_back(std::make_unique<IfndefHandler>());
-  handlers.emplace_back(std::make_unique<ElseHandler>());
-  handlers.emplace_back(std::make_unique<EndifHandler>());
-  handlers.emplace_back(std::make_unique<DefaultHandler>());
+  auto define_handler = std::make_unique<DefineHandler>();
+  auto undef_handler = std::make_unique<UndefHandler>();
+  auto ifdef_handler = std::make_unique<IfdefHandler>();
+  auto ifndef_handler = std::make_unique<IfndefHandler>();
+  auto else_handler = std::make_unique<ElseHandler>();
+  auto endif_handler = std::make_unique<EndifHandler>();
+  auto default_handler = std::make_unique<DefaultHandler>();
 
-  for (size_t j = handlers.size(); j-- > 1;) {
-    handlers[j - 1]->SetNext(std::move(handlers[j]));
-  }
+  endif_handler->SetNext(std::move(default_handler));
+  else_handler->SetNext(std::move(endif_handler));
+  ifndef_handler->SetNext(std::move(else_handler));
+  ifdef_handler->SetNext(std::move(ifndef_handler));
+  undef_handler->SetNext(std::move(ifdef_handler));
+  define_handler->SetNext(std::move(undef_handler));
 
-  return std::move(handlers[0]);
+  return std::move(define_handler);
 }

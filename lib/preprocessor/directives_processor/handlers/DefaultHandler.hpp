@@ -1,8 +1,6 @@
 #ifndef DEFAULT_HANDLER_HPP_
 #define DEFAULT_HANDLER_HPP_
 
-#include <expected>
-
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 
@@ -15,6 +13,11 @@ public:
                                                                bool& skipping,
                                                                int& skip_level,
                                                                int& if_level) override;
+
+  void SetNext(std::unique_ptr<DirectiveHandler> next) override;
+
+private:
+  std::unique_ptr<DirectiveHandler> next_;
 };
 
 #endif // DEFAULT_HANDLER_HPP_

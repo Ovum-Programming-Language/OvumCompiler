@@ -1,5 +1,9 @@
 #include "EndifHandler.hpp"
 
+void EndifHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
+  next_ = std::move(next);
+}
+
 std::expected<void, PreprocessorError> EndifHandler::Process(size_t& i,
                                                              const std::vector<TokenPtr>& tokens,
                                                              std::vector<TokenPtr>& result,

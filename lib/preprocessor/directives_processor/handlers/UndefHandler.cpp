@@ -1,5 +1,9 @@
 #include "UndefHandler.hpp"
 
+void UndefHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
+  next_ = std::move(next);
+}
+
 std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
                                                              const std::vector<TokenPtr>& tokens,
                                                              std::vector<TokenPtr>& result,

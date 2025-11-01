@@ -1,5 +1,9 @@
 #include "DefaultHandler.hpp"
 
+void DefaultHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
+  next_ = std::move(next);
+}
+
 std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& i,
                                                                const std::vector<TokenPtr>& tokens,
                                                                std::vector<TokenPtr>& result,
