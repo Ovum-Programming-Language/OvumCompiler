@@ -1,17 +1,20 @@
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <queue>
+#include <string>
 #include <string_view>
 
 #include "TokenImportProcessor.hpp"
 
-const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImportProcessor::GetFileToTokens() const {
+const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>&
+TokenImportProcessor::GetFileToTokens() const {
   return file_to_tokens_;
 }
 
 const std::map<std::filesystem::path, std::set<std::filesystem::path>>&
-TokenImportProcessor::GetDepGraph() const {
-  return file_graph_.GetDepGraph();
+TokenImportProcessor::GetDependencyGraph() const {
+  return file_graph_.GetDependencyGraph();
 }
 
 std::expected<std::string, PreprocessorError> TokenImportProcessor::ReadFileToString(
@@ -59,7 +62,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
 
   std::vector<std::filesystem::path> cycle_path;
 
-  if (file_graph_.DetectCycles(nodes, cycle_path)) {
+  if (file_graph_.DetectCycles(cycle_path)) {
     std::string cycle_str;
     for (const std::filesystem::path& p : cycle_path) {
       cycle_str += p.string() + " -> ";
@@ -69,7 +72,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
   }
 
   std::expected<std::vector<std::filesystem::path>, PreprocessorError> order_result =
-      file_graph_.TopologicalSort(nodes);
+      file_graph_.TopologicalSort();
 
   if (!order_result) {
     return std::unexpected(order_result.error());

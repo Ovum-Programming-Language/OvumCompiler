@@ -1,15 +1,19 @@
 #ifndef TOKENIMPORTPROCESSOR_HPP_
 #define TOKENIMPORTPROCESSOR_HPP_
 
+#include <expected>
 #include <filesystem>
 #include <set>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "FileGraph.hpp"
-#include "PreprocessingParameters.hpp"
-#include "PreprocessorError.hpp"
-#include "TokenProcessor.hpp"
 #include "lib/lexer/Lexer.hpp"
+#include "lib/preprocessor/PreprocessingParameters.hpp"
+#include "lib/preprocessor/PreprocessorError.hpp"
+#include "lib/preprocessor/TokenProcessor.hpp"
 #include "lib/lexer/tokens/Token.hpp"
 
 class TokenImportProcessor : public TokenProcessor {
@@ -21,7 +25,8 @@ public:
 
   [[nodiscard]] const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& GetFileToTokens() const;
 
-  [[nodiscard]] const std::map<std::filesystem::path, std::set<std::filesystem::path>>& GetDepGraph() const;
+  [[nodiscard]] const std::map<std::filesystem::path, std::set<std::filesystem::path>>&
+  GetDependencyGraph() const;
 
 private:
   std::filesystem::path main_file_;
@@ -43,7 +48,7 @@ private:
   [[nodiscard]] std::vector<TokenPtr> RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const;
 
   [[nodiscard]] std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
-      size_t pos, const std::vector<TokenPtr>& tokens);
+    size_t token_index, const std::vector<TokenPtr>& tokens);
 };
 
 #endif // TOKENIMPORTPROCESSOR_HPP_
