@@ -1,5 +1,7 @@
 #include "DefaultHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 void DefaultHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
@@ -25,3 +27,5 @@ std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& i,
 
   return {};
 }
+
+} // namespace ovum::compiler::preprocessor

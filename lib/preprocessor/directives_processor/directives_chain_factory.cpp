@@ -17,7 +17,7 @@ std::unique_ptr<DirectiveHandler> CreateDirectivesChain() {
   auto ifndef_handler = std::make_unique<IfndefHandler>();
   auto else_handler = std::make_unique<ElseHandler>();
   auto endif_handler = std::make_unique<EndifHandler>();
-  auto default_handler = std::make_unique<DefaultHandler>();
+  auto default_handler = std::make_unique<ovum::compiler::preprocessor::DefaultHandler>();
 
   endif_handler->SetNext(std::move(default_handler));
   else_handler->SetNext(std::move(endif_handler));
