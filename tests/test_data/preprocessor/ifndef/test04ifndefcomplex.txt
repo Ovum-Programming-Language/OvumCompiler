@@ -1,10 +1,8 @@
 INCLUDENUM 4
 
-#define A
-#ifdef A
+#ifndef A
 INCLUDE 1
-#define B
-#ifdef B
+#ifndef B
 INCLUDE 2
 #endif
 INCLUDE 3
