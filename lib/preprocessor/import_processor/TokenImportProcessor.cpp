@@ -82,9 +82,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
 
   std::vector<TokenPtr> concatenated = ConcatenateTokens(order);
 
-  std::vector<TokenPtr> cleaned = RemoveImports(concatenated);
-
-  cleaned = RemoveExtraEofs(cleaned);
+  std::vector<TokenPtr> cleaned = RemoveExtraTokens(concatenated);
 
   return {std::move(cleaned)};
 }
@@ -162,7 +160,7 @@ std::vector<TokenPtr> TokenImportProcessor::ConcatenateTokens(const std::vector<
   return total;
 }
 
-std::vector<TokenPtr> TokenImportProcessor::RemoveImports(const std::vector<TokenPtr>& tokens) const {
+std::vector<TokenPtr> TokenImportProcessor::RemoveExtraTokens(const std::vector<TokenPtr>& tokens) const {
   std::vector<TokenPtr> cleaned;
   size_t i = 0;
 
@@ -177,29 +175,12 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveImports(const std::vector<Toke
         ++i;
       }
     } else {
-      cleaned.push_back(token);
+      if (token->GetStringType() != "EOF") {
+        cleaned.push_back(token);
+      } else if (i == tokens.size() - 1) {
+        cleaned.push_back(token);
+      }
       ++i;
-    }
-  }
-
-  return cleaned;
-}
-
-std::vector<TokenPtr> TokenImportProcessor::RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const {
-  if (tokens.empty()) {
-    return {};
-  }
-
-  std::vector<TokenPtr> cleaned;
-  cleaned.reserve(tokens.size());
-
-  for (size_t i = 0; i < tokens.size(); ++i) {
-    const TokenPtr& t = tokens[i];
-
-    if (t->GetStringType() != "EOF") {
-      cleaned.push_back(t);
-    } else if (i == tokens.size() - 1) {
-      cleaned.push_back(t);
     }
   }
 

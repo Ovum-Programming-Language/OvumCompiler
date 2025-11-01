@@ -7,8 +7,7 @@
 
 #include "FileGraph.hpp"
 
-void FileGraph::AddDependency(const std::filesystem::path& from_path,
-                              const std::filesystem::path& to_path) {
+void FileGraph::AddDependency(const std::filesystem::path& from_path, const std::filesystem::path& to_path) {
   dependency_graph_[from_path].insert(to_path);
   nodes_.insert(from_path);
   nodes_.insert(to_path);
@@ -19,8 +18,7 @@ void FileGraph::Clear() {
   nodes_.clear();
 }
 
-const std::map<std::filesystem::path, std::set<std::filesystem::path>>&
-FileGraph::GetDependencyGraph() const {
+const std::map<std::filesystem::path, std::set<std::filesystem::path>>& FileGraph::GetDependencyGraph() const {
   return dependency_graph_;
 }
 
@@ -38,19 +36,18 @@ bool FileGraph::DetectCycles(std::vector<std::filesystem::path>& cycle_path) con
   return false;
 }
 
-bool FileGraph::DetectCycleDepthFirst(
-    const std::filesystem::path& node,
-    std::map<std::filesystem::path, int32_t>& node_colors,
-    std::vector<std::filesystem::path>& cycle_path) const {
+bool FileGraph::DetectCycleDepthFirst(const std::filesystem::path& node,
+                                      std::map<std::filesystem::path, int32_t>& node_colors,
+                                      std::vector<std::filesystem::path>& cycle_path) const {
   node_colors[node] = 1;
   cycle_path.push_back(node);
 
-  std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator
-    dependency_iterator = dependency_graph_.find(node);
+  std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator dependency_iterator =
+      dependency_graph_.find(node);
 
   if (dependency_iterator != dependency_graph_.end()) {
     for (const std::filesystem::path& neighbor : dependency_iterator->second) {
-      std::map<std::filesystem::path, int32_t>::iterator color_iterator = node_colors.find(neighbor);
+      auto color_iterator = node_colors.find(neighbor);
 
       if (color_iterator == node_colors.end()) {
         if (DetectCycleDepthFirst(neighbor, node_colors, cycle_path)) {
@@ -78,8 +75,7 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
   for (const std::pair<const std::filesystem::path, std::set<std::filesystem::path>>& dependency_entry :
        dependency_graph_) {
     for (const std::filesystem::path& vertex_to : dependency_entry.second) {
-    std::map<std::filesystem::path, int32_t>::iterator in_degree_iterator =
-      in_degree.find(vertex_to);
+      std::map<std::filesystem::path, int32_t>::iterator in_degree_iterator = in_degree.find(vertex_to);
 
       if (in_degree_iterator != in_degree.end()) {
         ++(in_degree_iterator->second);
@@ -104,13 +100,12 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
     nodes_queue.pop();
     topological_order.push_back(current_node);
 
-  std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator
-    dependencies_iterator = dependency_graph_.find(current_node);
+    std::map<std::filesystem::path, std::set<std::filesystem::path>>::const_iterator dependencies_iterator =
+        dependency_graph_.find(current_node);
 
     if (dependencies_iterator != dependency_graph_.end()) {
       for (const std::filesystem::path& adjacent_node : dependencies_iterator->second) {
-    std::map<std::filesystem::path, int32_t>::iterator degree_iterator =
-      in_degree.find(adjacent_node);
+        std::map<std::filesystem::path, int32_t>::iterator degree_iterator = in_degree.find(adjacent_node);
 
         if (degree_iterator != in_degree.end()) {
           --(degree_iterator->second);

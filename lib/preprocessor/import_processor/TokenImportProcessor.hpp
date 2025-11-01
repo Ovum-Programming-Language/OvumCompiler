@@ -43,9 +43,7 @@ private:
 
   [[nodiscard]] std::vector<TokenPtr> ConcatenateTokens(const std::vector<std::filesystem::path>& order) const;
 
-  [[nodiscard]] std::vector<TokenPtr> RemoveImports(const std::vector<TokenPtr>& tokens) const;
-
-  [[nodiscard]] std::vector<TokenPtr> RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const;
+  [[nodiscard]] std::vector<TokenPtr> RemoveExtraTokens(const std::vector<TokenPtr>& tokens) const;
 
   [[nodiscard]] std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
     size_t token_index, const std::vector<TokenPtr>& tokens);
