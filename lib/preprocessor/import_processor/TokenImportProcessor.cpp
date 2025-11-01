@@ -7,13 +7,12 @@
 
 #include "TokenImportProcessor.hpp"
 
-const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>&
-TokenImportProcessor::GetFileToTokens() const {
+const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImportProcessor::GetFileToTokens() const {
   return file_to_tokens_;
 }
 
-const std::map<std::filesystem::path, std::set<std::filesystem::path>>&
-TokenImportProcessor::GetDependencyGraph() const {
+const std::map<std::filesystem::path, std::set<std::filesystem::path>>& TokenImportProcessor::GetDependencyGraph()
+    const {
   return file_graph_.GetDependencyGraph();
 }
 
@@ -71,8 +70,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
     return std::unexpected(CycleDetectedError("Cycle detected: " + cycle_str));
   }
 
-  std::expected<std::vector<std::filesystem::path>, PreprocessorError> order_result =
-      file_graph_.TopologicalSort();
+  std::expected<std::vector<std::filesystem::path>, PreprocessorError> order_result = file_graph_.TopologicalSort();
 
   if (!order_result) {
     return std::unexpected(order_result.error());

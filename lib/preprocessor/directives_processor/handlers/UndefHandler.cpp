@@ -1,9 +1,12 @@
 #include "UndefHandler.hpp"
 
-std::expected<void, PreprocessorError> UndefHandler::Process(
-    size_t& i, const std::vector<TokenPtr>& tokens, std::vector<TokenPtr>& result,
-    std::unordered_set<std::string>& defined_symbols, bool& skipping, int& skip_level,
-    int& if_level) {
+std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
+                                                             const std::vector<TokenPtr>& tokens,
+                                                             std::vector<TokenPtr>& result,
+                                                             std::unordered_set<std::string>& defined_symbols,
+                                                             bool& skipping,
+                                                             int& skip_level,
+                                                             int& if_level) {
   if (i >= tokens.size() || tokens[i]->GetLexeme() != "#undef") {
     if (next_) {
       return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
@@ -12,8 +15,8 @@ std::expected<void, PreprocessorError> UndefHandler::Process(
   }
 
   if (i + 1 >= tokens.size()) {
-    return std::unexpected(InvalidDirectiveError("Incomplete #undef at line " +
-                                                 std::to_string(tokens[i]->GetPosition().GetLine())));
+    return std::unexpected(
+        InvalidDirectiveError("Incomplete #undef at line " + std::to_string(tokens[i]->GetPosition().GetLine())));
   }
 
   const TokenPtr& id_token = tokens[i + 1];
