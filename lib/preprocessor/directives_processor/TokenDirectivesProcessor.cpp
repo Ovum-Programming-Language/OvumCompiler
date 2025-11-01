@@ -5,6 +5,8 @@
 #include "TokenDirectivesProcessor.hpp"
 #include "directives_chain_factory.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 TokenDirectivesProcessor::TokenDirectivesProcessor(const std::unordered_set<std::string>& predefined_symbols) {
   for (const std::string& symbol : predefined_symbols) {
     defined_symbols_.insert(symbol);
@@ -36,3 +38,5 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenDirectivesProcessor
 
   return {std::move(processed_tokens)};
 }
+
+} // namespace ovum::compiler::preprocessor

@@ -1,8 +1,10 @@
-#ifndef UNDEF_HANDLER_HPP_
-#define UNDEF_HANDLER_HPP_
+#ifndef PREPROCESSOR_UNDEF_HANDLER_HPP_
+#define PREPROCESSOR_UNDEF_HANDLER_HPP_
 
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class UndefHandler : public DirectiveHandler {
 public:
@@ -20,4 +22,6 @@ private:
   std::unique_ptr<DirectiveHandler> next_;
 };
 
-#endif // UNDEF_HANDLER_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_UNDEF_HANDLER_HPP_

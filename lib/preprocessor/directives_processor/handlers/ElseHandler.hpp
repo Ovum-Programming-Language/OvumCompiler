@@ -1,13 +1,10 @@
-#ifndef ELSE_HANDLER_HPP_
-#define ELSE_HANDLER_HPP_
-
-#include <expected>
-
-#include <memory>
-#include <unordered_set>
+#ifndef PREPROCESSOR_ELSE_HANDLER_HPP_
+#define PREPROCESSOR_ELSE_HANDLER_HPP_
 
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class ElseHandler : public DirectiveHandler {
 public:
@@ -25,4 +22,6 @@ private:
   std::unique_ptr<DirectiveHandler> next_;
 };
 
-#endif // ELSE_HANDLER_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_ELSE_HANDLER_HPP_

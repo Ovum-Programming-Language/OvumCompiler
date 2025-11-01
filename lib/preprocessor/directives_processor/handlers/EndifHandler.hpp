@@ -1,8 +1,10 @@
-#ifndef ENDIF_HANDLER_HPP_
-#define ENDIF_HANDLER_HPP_
+#ifndef PREPROCESSOR_ENDIF_HANDLER_HPP_
+#define PREPROCESSOR_ENDIF_HANDLER_HPP_
 
 #include "DirectiveHandler.hpp"
 #include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class EndifHandler : public DirectiveHandler {
 public:
@@ -20,4 +22,6 @@ private:
   std::unique_ptr<DirectiveHandler> next_;
 };
 
-#endif // ENDIF_HANDLER_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_ENDIF_HANDLER_HPP_

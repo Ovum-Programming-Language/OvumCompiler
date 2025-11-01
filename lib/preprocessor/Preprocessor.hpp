@@ -1,5 +1,5 @@
-#ifndef PREPROCESSOR_HPP_
-#define PREPROCESSOR_HPP_
+#ifndef PREPROCESSOR_PREPROCESSOR_HPP_
+#define PREPROCESSOR_PREPROCESSOR_HPP_
 
 #include <expected>
 #include <memory>
@@ -7,6 +7,8 @@
 
 #include "PreprocessingParameters.hpp"
 #include "TokenProcessor.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class Preprocessor {
 public:
@@ -19,4 +21,6 @@ private:
   std::vector<std::unique_ptr<TokenProcessor>> token_processors_;
 };
 
-#endif // PREPROCESSOR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_PREPROCESSOR_HPP_

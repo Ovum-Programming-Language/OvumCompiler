@@ -9,6 +9,8 @@
 
 #include "lib/lexer/Lexer.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& TokenImportProcessor::GetFileToTokens() const {
   return file_to_tokens_;
 }
@@ -223,3 +225,5 @@ std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::Re
 
   return std::unexpected(PreprocessorError("Import not found: " + name));
 }
+
+} // namespace ovum::compiler::preprocessor

@@ -1,9 +1,6 @@
-#include "lib/lexer/Lexer.hpp"
-#include "lib/preprocessor/Preprocessor.hpp"
-
-#include <exception>
-
 #include "compiler_ui_functions.hpp"
+
+#include "lib/preprocessor/Preprocessor.hpp"
 
 int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostream& out, std::ostream& err) {
   if (args.size() < 2) {
@@ -29,10 +26,10 @@ int32_t StartCompilerConsoleUI(const std::vector<std::string>& args, std::ostrea
 
   std::unordered_set<std::string> predefined_symbols;
 
-  PreprocessingParameters params{
+  ovum::compiler::preprocessor::PreprocessingParameters params{
       .include_paths = include_paths, .predefined_symbols = predefined_symbols, .main_file = main_file};
 
-  Preprocessor preprocessor(params);
+  ovum::compiler::preprocessor::Preprocessor preprocessor(params);
 
   auto result = preprocessor.Process();
 

@@ -1,5 +1,5 @@
-#ifndef FILEGRAPH_HPP_
-#define FILEGRAPH_HPP_
+#ifndef PREPROCESSOR_FILEGRAPH_HPP_
+#define PREPROCESSOR_FILEGRAPH_HPP_
 
 #include <cstdint>
 #include <expected>
@@ -9,6 +9,8 @@
 #include <vector>
 
 #include "lib/preprocessor/PreprocessorError.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class FileGraph {
 public:
@@ -28,4 +30,6 @@ private:
                              std::vector<std::filesystem::path>& cycle_path) const;
 };
 
-#endif // FILEGRAPH_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_FILEGRAPH_HPP_

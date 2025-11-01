@@ -7,8 +7,10 @@
 #include "lib/lexer/Lexer.hpp"
 #include "token_processor_factory.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 Preprocessor::Preprocessor(const PreprocessingParameters& parameters) :
-    parameters_(parameters), token_processors_(TokenProcessorFactory::MakeTokenProcessors(parameters)) {
+    parameters_(parameters), token_processors_(MakeTokenProcessors(parameters)) {
 }
 
 std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() {
@@ -51,3 +53,5 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() 
 
   return {std::move(tokens)};
 }
+
+} // namespace ovum::compiler::preprocessor

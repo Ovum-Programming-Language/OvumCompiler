@@ -1,5 +1,7 @@
 #include "IfdefHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 void IfdefHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
@@ -49,3 +51,5 @@ std::expected<void, PreprocessorError> IfdefHandler::Process(size_t& i,
 
   return {};
 }
+
+} // namespace ovum::compiler::preprocessor

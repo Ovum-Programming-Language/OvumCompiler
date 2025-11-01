@@ -1,5 +1,5 @@
-#ifndef DIRECTIVE_HANDLER_HPP_
-#define DIRECTIVE_HANDLER_HPP_
+#ifndef PREPROCESSOR_DIRECTIVE_HANDLER_HPP_
+#define PREPROCESSOR_DIRECTIVE_HANDLER_HPP_
 
 #include <expected>
 #include <memory>
@@ -9,6 +9,8 @@
 
 #include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class DirectiveHandler { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
@@ -25,4 +27,6 @@ public:
   virtual void SetNext(std::unique_ptr<DirectiveHandler> next) = 0;
 };
 
-#endif // DIRECTIVE_HANDLER_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_DIRECTIVE_HANDLER_HPP_

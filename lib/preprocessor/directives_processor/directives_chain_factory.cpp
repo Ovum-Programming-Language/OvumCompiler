@@ -10,6 +10,8 @@
 #include "lib/preprocessor/directives_processor/handlers/IfndefHandler.hpp"
 #include "lib/preprocessor/directives_processor/handlers/UndefHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 std::unique_ptr<DirectiveHandler> CreateDirectivesChain() {
   auto define_handler = std::make_unique<DefineHandler>();
   auto undef_handler = std::make_unique<UndefHandler>();
@@ -28,3 +30,5 @@ std::unique_ptr<DirectiveHandler> CreateDirectivesChain() {
 
   return std::move(define_handler);
 }
+
+} // namespace ovum::compiler::preprocessor

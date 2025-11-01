@@ -7,10 +7,10 @@
 #include "PreprocessingParameters.hpp"
 #include "TokenProcessor.hpp"
 
-namespace TokenProcessorFactory {
+namespace ovum::compiler::preprocessor {
 
 std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors(const PreprocessingParameters& parameters);
 
-}; // namespace TokenProcessorFactory
+} // namespace ovum::compiler::preprocessor
 
-#endif // TOKEN_PROCESSOR_FACTORY_HPP_
+#endif // PREPROCESSOR_TOKEN_PROCESSOR_FACTORY_HPP_

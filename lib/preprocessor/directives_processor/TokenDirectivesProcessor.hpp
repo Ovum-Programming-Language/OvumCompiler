@@ -1,5 +1,5 @@
-#ifndef TOKENDIRECTIVESPROCESSOR_HPP_
-#define TOKENDIRECTIVESPROCESSOR_HPP_
+#ifndef PREPROCESSOR_TOKENDIRECTIVESPROCESSOR_HPP_
+#define PREPROCESSOR_TOKENDIRECTIVESPROCESSOR_HPP_
 
 #include <expected>
 #include <memory>
@@ -11,6 +11,8 @@
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
 #include "lib/preprocessor/directives_processor/handlers/DirectiveHandler.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class TokenDirectivesProcessor : public TokenProcessor {
 public:
@@ -24,4 +26,6 @@ private:
   std::unique_ptr<DirectiveHandler> directives_chain_;
 };
 
-#endif // TOKENDIRECTIVESPROCESSOR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_TOKENDIRECTIVESPROCESSOR_HPP_

@@ -1,5 +1,5 @@
-#ifndef TOKENIMPORTPROCESSOR_HPP_
-#define TOKENIMPORTPROCESSOR_HPP_
+#ifndef PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_
+#define PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_
 
 #include <expected>
 #include <filesystem>
@@ -13,6 +13,8 @@
 #include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class TokenImportProcessor : public TokenProcessor {
 public:
@@ -46,4 +48,6 @@ private:
       size_t token_index, const std::vector<TokenPtr>& tokens);
 };
 
-#endif // TOKENIMPORTPROCESSOR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_

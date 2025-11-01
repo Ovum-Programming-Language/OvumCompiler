@@ -1,5 +1,7 @@
 #include "DefineHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 void DefineHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
@@ -55,3 +57,5 @@ std::expected<void, PreprocessorError> DefineHandler::Process(size_t& i,
   return std::unexpected(InvalidDirectiveError("#define " + id + " has unexpected tokens after identifier at line " +
                                                std::to_string(tokens[i]->GetPosition().GetLine())));
 }
+
+} // namespace ovum::compiler::preprocessor

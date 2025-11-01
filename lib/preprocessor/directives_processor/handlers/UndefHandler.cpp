@@ -1,5 +1,7 @@
 #include "UndefHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 void UndefHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
@@ -56,3 +58,5 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& i,
 
   return {};
 }
+
+} // namespace ovum::compiler::preprocessor

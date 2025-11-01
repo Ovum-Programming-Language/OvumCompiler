@@ -6,6 +6,8 @@
 #include <set>
 #include <vector>
 
+namespace ovum::compiler::preprocessor {
+
 void FileGraph::AddDependency(const std::filesystem::path& from_path, const std::filesystem::path& to_path) {
   dependency_graph_[from_path].insert(to_path);
   nodes_.insert(from_path);
@@ -120,3 +122,5 @@ std::expected<std::vector<std::filesystem::path>, CycleDetectedError> FileGraph:
   std::ranges::reverse(topological_order);
   return topological_order;
 }
+
+} // namespace ovum::compiler::preprocessor

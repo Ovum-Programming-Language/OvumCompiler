@@ -1,5 +1,7 @@
 #include "ElseHandler.hpp"
 
+namespace ovum::compiler::preprocessor {
+
 void ElseHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
@@ -34,3 +36,5 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& i,
 
   return {};
 }
+
+} // namespace ovum::compiler::preprocessor
