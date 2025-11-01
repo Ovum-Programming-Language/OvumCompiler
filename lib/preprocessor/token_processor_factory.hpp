@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "PreprocessingParameters.hpp"
-#include "TokenDirectivesProcessor.hpp"
-#include "TokenImportProcessor.hpp"
 #include "TokenProcessor.hpp"
+#include "directives_processor/TokenDirectivesProcessor.hpp"
+#include "import_processor/TokenImportProcessor.hpp"
 
 namespace TokenProcessorFactory {
 
