@@ -11,7 +11,7 @@
 #include <gtest/gtest.h>
 #include "lib/preprocessor/Preprocessor.hpp"
 
-using namespace ovum::compiler::preprocessor;
+namespace ovum::compiler::preprocessor {
 
 class PreprocessorUnitTestSuite {
 public:
@@ -19,26 +19,32 @@ public:
     std::string test_name;
     bool passed;
     std::string error_message;
-    std::vector<int> included_numbers;
-    int expected_include_num;
+    std::vector<TokenPtr> actual_tokens;
+    std::vector<TokenPtr> expected_tokens;
   };
 
-  static TestResult RunSingleTest(const std::filesystem::path& test_file_path);
+  static void RunSingleTest(const std::filesystem::path& input_file, 
+                                 const std::filesystem::path& expected_file);
 
 private:
-  static std::pair<bool, int> ParseTestDirectives(const std::filesystem::path& file_path);
+  static std::expected<std::vector<TokenPtr>, std::string> 
+  TokenizeExpectedFile(const std::filesystem::path& file_path);
   
-  static std::vector<int> ExtractIncludedNumbers(const std::vector<TokenPtr>& tokens);
+  static bool CompareTokenSequences(const std::vector<TokenPtr>& actual,
+                                   const std::vector<TokenPtr>& expected);
   
-  static bool ValidateIncludedNumbers(const std::vector<int>& included_numbers, int max_include);
+  static std::string BuildDetailedComparison(const std::vector<TokenPtr>& actual,
+                                            const std::vector<TokenPtr>& expected);
   
-  static bool IsIncludeToken(const TokenPtr& token);
+  static bool TokensEqual(const TokenPtr& a, const TokenPtr& b);
   
-  static bool IsNumberToken(const TokenPtr& token);
-  
-  static int ExtractNumberFromToken(const TokenPtr& token);
+  static std::string TokenToString(const TokenPtr& token);
   
   static std::string GetErrorString(const PreprocessorError& error);
+  
+  static std::string TokensToString(const std::vector<TokenPtr>& tokens);
 };
+
+} // namespace ovum::compiler::preprocessor
 
 #endif // OVUMC_PREPROCESSORUNITTESTSUITE_HPP_
