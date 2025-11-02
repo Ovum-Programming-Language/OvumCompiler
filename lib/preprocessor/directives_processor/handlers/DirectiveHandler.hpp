@@ -16,9 +16,9 @@ class DirectiveHandler { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~DirectiveHandler() = default;
 
-  [[nodiscard]] virtual std::expected<void, PreprocessorError> Process(size_t& i,
+  [[nodiscard]] virtual std::expected<void, PreprocessorError> Process(size_t& position,
                                                                        const std::vector<TokenPtr>& tokens,
-                                                                       std::vector<TokenPtr>& result,
+                                                                       std::vector<TokenPtr>& processed_tokens,
                                                                        std::unordered_set<std::string>& defined_symbols,
                                                                        bool& skipping,
                                                                        int& skip_level,

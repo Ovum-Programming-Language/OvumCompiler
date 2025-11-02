@@ -6,24 +6,24 @@ void DefaultHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
 
-std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& i,
+std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& position,
                                                                const std::vector<TokenPtr>& tokens,
-                                                               std::vector<TokenPtr>& result,
+                                                               std::vector<TokenPtr>& processed_tokens,
                                                                std::unordered_set<std::string>& defined_symbols,
                                                                bool& skipping,
                                                                int& skip_level,
                                                                int& if_level) {
-  if (i >= tokens.size()) {
+  if (position >= tokens.size()) {
     return {};
   }
 
-  const TokenPtr& token = tokens[i];
+  const TokenPtr& token = tokens[position];
 
   if (!skipping) {
-    result.push_back(token);
+    processed_tokens.push_back(token);
   }
 
-  ++i;
+  ++position;
 
   return {};
 }

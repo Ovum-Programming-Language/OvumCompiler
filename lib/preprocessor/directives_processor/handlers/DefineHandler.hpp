@@ -8,9 +8,9 @@ namespace ovum::compiler::preprocessor {
 
 class DefineHandler : public DirectiveHandler {
 public:
-  [[nodiscard]] std::expected<void, PreprocessorError> Process(size_t& i,
+  [[nodiscard]] std::expected<void, PreprocessorError> Process(size_t& position,
                                                                const std::vector<TokenPtr>& tokens,
-                                                               std::vector<TokenPtr>& result,
+                                                               std::vector<TokenPtr>& processed_tokens,
                                                                std::unordered_set<std::string>& defined_symbols,
                                                                bool& skipping,
                                                                int& skip_level,

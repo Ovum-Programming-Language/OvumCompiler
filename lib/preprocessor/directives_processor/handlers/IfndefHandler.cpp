@@ -6,27 +6,27 @@ void IfndefHandler::SetNext(std::unique_ptr<DirectiveHandler> next) {
   next_ = std::move(next);
 }
 
-std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& i,
+std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& position,
                                                               const std::vector<TokenPtr>& tokens,
-                                                              std::vector<TokenPtr>& result,
+                                                              std::vector<TokenPtr>& processed_tokens,
                                                               std::unordered_set<std::string>& defined_symbols,
                                                               bool& skipping,
                                                               int& skip_level,
                                                               int& if_level) {
-  if (i >= tokens.size() || tokens[i]->GetLexeme() != "#ifndef") {
+  if (position >= tokens.size() || tokens[position]->GetLexeme() != "#ifndef") {
     if (next_) {
-      return next_->Process(i, tokens, result, defined_symbols, skipping, skip_level, if_level);
+      return next_->Process(position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level);
     }
 
     return {};
   }
 
-  if (i + 1 >= tokens.size()) {
-    return std::unexpected(
-        InvalidDirectiveError("Incomplete #ifndef at line " + std::to_string(tokens[i]->GetPosition().GetLine())));
+  if (position + 1 >= tokens.size()) {
+    return std::unexpected(InvalidDirectiveError("Incomplete #ifndef at line " +
+                                                 std::to_string(tokens[position]->GetPosition().GetLine())));
   }
 
-  const TokenPtr& id_token = tokens[i + 1];
+  const TokenPtr& id_token = tokens[position + 1];
 
   if (id_token->GetStringType() != "IDENT") {
     return std::unexpected(InvalidDirectiveError("Expected identifier after #ifndef at line " +
@@ -48,7 +48,7 @@ std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& i,
     }
   }
 
-  i += 2;
+  position += 2;
 
   return {};
 }
