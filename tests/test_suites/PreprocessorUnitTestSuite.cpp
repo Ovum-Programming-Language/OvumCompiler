@@ -7,7 +7,7 @@ PreprocessorUnitTestSuite::TestResult PreprocessorUnitTestSuite::RunSingleTest(c
   result.expected_include_num = include_num;
   PreprocessingParameters params;
   params.main_file = test_file_path;
-  params.include_paths = { "../test_data/preprocessor/" };
+  params.include_paths = { std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / "for_import" };
   Preprocessor preprocessor(params);
     
   auto process_result = preprocessor.Process();
