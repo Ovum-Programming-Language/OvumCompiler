@@ -1,6 +1,8 @@
 #ifndef IASSIGNOPTAG_HPP_
 #define IASSIGNOPTAG_HPP_
 
+#include <string>
+
 class IAssignOpTag {
 public:
   virtual ~IAssignOpTag() = default;

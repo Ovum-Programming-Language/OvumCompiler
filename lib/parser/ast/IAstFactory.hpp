@@ -12,7 +12,6 @@
 #include "nodes/decls/FunctionDecl.hpp"
 #include "nodes/decls/GlobalVarDecl.hpp"
 #include "nodes/decls/InterfaceDecl.hpp"
-#include "nodes/decls/Module.hpp"
 #include "nodes/decls/TypeAliasDecl.hpp"
 #include "nodes/exprs/Assign.hpp"
 #include "nodes/exprs/Binary.hpp"

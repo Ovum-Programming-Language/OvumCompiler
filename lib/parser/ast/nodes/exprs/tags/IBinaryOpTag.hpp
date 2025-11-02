@@ -1,6 +1,8 @@
 #ifndef IBINARYOPTAG_HPP_
 #define IBINARYOPTAG_HPP_
 
+#include <string>
+
 class IBinaryOpTag {
 public:
   virtual ~IBinaryOpTag() = default;

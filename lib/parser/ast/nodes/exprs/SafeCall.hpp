@@ -2,6 +2,7 @@
 #define SAFECALL_HPP_
 
 #include <memory>
+#include <vector>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 

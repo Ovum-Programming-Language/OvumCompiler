@@ -2,6 +2,7 @@
 #define INTLIT_HPP_
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+#include <cstdint>
 
 class IntLit : public Expr {
 public:
