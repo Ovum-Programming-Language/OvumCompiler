@@ -11,6 +11,8 @@
 #include <gtest/gtest.h>
 #include "lib/preprocessor/Preprocessor.hpp"
 
+using namespace ovum::compiler::preprocessor;
+
 class PreprocessorUnitTestSuite {
 public:
   struct TestResult {

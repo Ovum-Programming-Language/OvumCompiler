@@ -1,5 +1,7 @@
 #include "PreprocessorUnitTestSuite.hpp"
 
+using namespace ovum::compiler::preprocessor;
+
 PreprocessorUnitTestSuite::TestResult PreprocessorUnitTestSuite::RunSingleTest(const std::filesystem::path& test_file_path) {
   TestResult result;
   result.test_name = test_file_path.filename().string();

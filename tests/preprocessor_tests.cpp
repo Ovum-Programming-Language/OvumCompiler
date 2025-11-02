@@ -6,6 +6,8 @@
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/PreprocessorUnitTestSuite.hpp"
 
+using namespace ovum::compiler::preprocessor;
+
 std::filesystem::path get_test_file_path(const std::string& addition_path, const std::string& filename) {
     return std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / addition_path / filename;
 }

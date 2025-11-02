@@ -1,4 +1,4 @@
 EXPECTERROR
 
-#undef 
+#define 
 INCLUDE 1
