@@ -15,6 +15,7 @@ namespace ovum::compiler::preprocessor {
 class FileGraph {
 public:
   void AddDependency(const std::filesystem::path& from_path, const std::filesystem::path& to_path);
+  void AddNode(const std::filesystem::path& node);
   void Clear();
 
   [[nodiscard]] bool DetectCycles(std::vector<std::filesystem::path>& cycle_path) const;
