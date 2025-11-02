@@ -1,8 +1,8 @@
 #ifndef INTLIT_HPP_
 #define INTLIT_HPP_
 
-#include "lib/parser/ast/nodes/base/Expr.hpp"
 #include <cstdint>
+#include "lib/parser/ast/nodes/base/Expr.hpp"
 
 class IntLit : public Expr {
 public:
