@@ -14,7 +14,8 @@ public:
                                                                std::unordered_set<std::string>& defined_symbols,
                                                                bool& skipping,
                                                                int& skip_level,
-                                                               int& if_level) override;
+                                                               int& if_level,
+                                                               std::vector<bool>& else_seen) override;
 
   void SetNext(std::unique_ptr<DirectiveHandler> next) override;
 
