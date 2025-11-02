@@ -1,7 +1,11 @@
 #include "token_processor_factory.hpp"
 
-std::vector<std::unique_ptr<TokenProcessor>> TokenProcessorFactory::MakeTokenProcessors(
-    const PreprocessingParameters& parameters) {
+#include "directives_processor/TokenDirectivesProcessor.hpp"
+#include "import_processor/TokenImportProcessor.hpp"
+
+namespace ovum::compiler::preprocessor {
+
+std::vector<std::unique_ptr<TokenProcessor>> MakeTokenProcessors(const PreprocessingParameters& parameters) {
   std::vector<std::unique_ptr<TokenProcessor>> processors;
 
   std::unique_ptr<TokenImportProcessor> import_processor =
@@ -14,3 +18,5 @@ std::vector<std::unique_ptr<TokenProcessor>> TokenProcessorFactory::MakeTokenPro
 
   return processors;
 }
+
+} // namespace ovum::compiler::preprocessor

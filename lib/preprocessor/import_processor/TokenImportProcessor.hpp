@@ -1,27 +1,31 @@
-#ifndef TOKENIMPORTPROCESSOR_HPP_
-#define TOKENIMPORTPROCESSOR_HPP_
+#ifndef PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_
+#define PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_
 
+#include <expected>
 #include <filesystem>
 #include <set>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "FileGraph.hpp"
-#include "PreprocessingParameters.hpp"
-#include "PreprocessorError.hpp"
-#include "TokenProcessor.hpp"
-#include "lib/lexer/Lexer.hpp"
 #include "lib/lexer/tokens/Token.hpp"
+#include "lib/preprocessor/PreprocessorError.hpp"
+#include "lib/preprocessor/TokenProcessor.hpp"
+
+namespace ovum::compiler::preprocessor {
 
 class TokenImportProcessor : public TokenProcessor {
 public:
-  TokenImportProcessor(const std::filesystem::path& main_file, const std::set<std::filesystem::path>& include_paths);
+  TokenImportProcessor(std::filesystem::path main_file, const std::set<std::filesystem::path>& include_paths);
 
   [[nodiscard]] std::expected<std::vector<TokenPtr>, PreprocessorError> Process(
       const std::vector<TokenPtr>& tokens) override;
 
   [[nodiscard]] const std::unordered_map<std::filesystem::path, std::vector<TokenPtr>>& GetFileToTokens() const;
 
-  [[nodiscard]] const std::map<std::filesystem::path, std::set<std::filesystem::path>>& GetDepGraph() const;
+  [[nodiscard]] const std::map<std::filesystem::path, std::set<std::filesystem::path>>& GetDependencyGraph() const;
 
 private:
   std::filesystem::path main_file_;
@@ -38,12 +42,12 @@ private:
 
   [[nodiscard]] std::vector<TokenPtr> ConcatenateTokens(const std::vector<std::filesystem::path>& order) const;
 
-  [[nodiscard]] std::vector<TokenPtr> RemoveImports(const std::vector<TokenPtr>& tokens) const;
-
-  [[nodiscard]] std::vector<TokenPtr> RemoveExtraEofs(const std::vector<TokenPtr>& tokens) const;
+  [[nodiscard]] std::vector<TokenPtr> RemoveExtraTokens(const std::vector<TokenPtr>& tokens) const;
 
   [[nodiscard]] std::expected<std::filesystem::path, PreprocessorError> ResolveImportPath(
-      size_t pos, const std::vector<TokenPtr>& tokens);
+      size_t token_index, const std::vector<TokenPtr>& tokens);
 };
 
-#endif // TOKENIMPORTPROCESSOR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_TOKENIMPORTPROCESSOR_HPP_

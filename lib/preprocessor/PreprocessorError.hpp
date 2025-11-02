@@ -1,8 +1,10 @@
-#ifndef PREPROCESSORERROR_HPP_
-#define PREPROCESSORERROR_HPP_
+#ifndef PREPROCESSOR_PREPROCESSORERROR_HPP_
+#define PREPROCESSOR_PREPROCESSORERROR_HPP_
 
 #include <stdexcept>
 #include <string>
+
+namespace ovum::compiler::preprocessor {
 
 class PreprocessorError : public std::runtime_error {
 public:
@@ -47,4 +49,6 @@ public:
   }
 };
 
-#endif // PREPROCESSORERROR_HPP_
+} // namespace ovum::compiler::preprocessor
+
+#endif // PREPROCESSOR_PREPROCESSORERROR_HPP_

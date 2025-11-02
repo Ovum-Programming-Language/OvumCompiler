@@ -1,9 +1,17 @@
 add_library(preprocessor STATIC
         Preprocessor.cpp
         token_processor_factory.cpp
-        TokenImportProcessor.cpp
-        TokenDirectivesProcessor.cpp
-        FileGraph.cpp
+        import_processor/TokenImportProcessor.cpp
+        directives_processor/TokenDirectivesProcessor.cpp
+        import_processor/FileGraph.cpp
+        directives_processor/directives_chain_factory.cpp
+        directives_processor/handlers/DefaultHandler.cpp
+        directives_processor/handlers/DefineHandler.cpp
+        directives_processor/handlers/ElseHandler.cpp
+        directives_processor/handlers/EndifHandler.cpp
+        directives_processor/handlers/UndefHandler.cpp
+        directives_processor/handlers/IfndefHandler.cpp
+        directives_processor/handlers/IfdefHandler.cpp
 )
 
 target_include_directories(preprocessor
