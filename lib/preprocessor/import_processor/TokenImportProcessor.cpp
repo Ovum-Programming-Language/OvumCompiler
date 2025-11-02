@@ -52,6 +52,8 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> TokenImportProcessor::Pr
   file_graph_.Clear();
   visited_.clear();
 
+  file_graph_.AddNode(main_file_);
+
   std::expected<void, PreprocessorError> dep_result = GatherDependencies(main_file_, tokens);
 
   if (!dep_result) {
@@ -97,13 +99,13 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
 
   visited_.insert(file);
   file_to_tokens_[file] = tokens;
-  size_t i = 0; // TODO: rename here and after
+  size_t position = 0;
 
-  while (i < tokens.size()) {
-    const TokenPtr& token = tokens[i];
+  while (position < tokens.size()) {
+    const TokenPtr& token = tokens[position];
 
     if (token->GetLexeme() == "#import") {
-      std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(i, tokens);
+      std::expected<std::filesystem::path, PreprocessorError> dep_path_result = ResolveImportPath(position, tokens);
 
       if (!dep_path_result) {
         return std::unexpected(dep_path_result.error());
@@ -138,11 +140,11 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
         }
       }
 
-      i += 2;
+      position += 2;
       continue;
     }
 
-    ++i;
+    ++position;
   }
 
   return {};

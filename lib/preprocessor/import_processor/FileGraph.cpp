@@ -14,6 +14,10 @@ void FileGraph::AddDependency(const std::filesystem::path& from_path, const std:
   nodes_.insert(to_path);
 }
 
+void FileGraph::AddNode(const std::filesystem::path& node) {
+  nodes_.insert(node);
+}
+
 void FileGraph::Clear() {
   dependency_graph_.clear();
   nodes_.clear();
