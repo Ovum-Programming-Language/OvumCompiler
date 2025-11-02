@@ -6,7 +6,7 @@
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 
-class Branch Branch {
+class Branch {
 public:
   Branch(std::unique_ptr<Expr> condition, std::unique_ptr<Block> then_block);
   Branch(const Branch&) = delete;
