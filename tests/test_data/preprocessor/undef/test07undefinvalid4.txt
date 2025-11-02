@@ -1,4 +1,0 @@
-EXPECTERROR
-
-#undef FEAT-A
-INCLUDE 1

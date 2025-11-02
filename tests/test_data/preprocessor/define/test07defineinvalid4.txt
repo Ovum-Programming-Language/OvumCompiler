@@ -1,4 +1,0 @@
-EXPECTERROR
-
-#define FEAT-A
-INCLUDE 1

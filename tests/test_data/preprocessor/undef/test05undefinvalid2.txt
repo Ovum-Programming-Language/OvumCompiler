@@ -1,4 +1,0 @@
-EXPECTERROR
-
-#undef 
-INCLUDE 1

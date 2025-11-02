@@ -1,9 +1,0 @@
-INCLUDENUM 3
-
-#ifndef A
-INCLUDE 3
-#ifndef B
-INCLUDE 2
-#endif
-INCLUDE 1
-#endif

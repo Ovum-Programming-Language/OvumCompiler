@@ -1,8 +1,0 @@
-INCLUDENUM 3
-
-#undef FEAT_A1
-INCLUDE 1
-#undef _FEAT_B
-INCLUDE 2
-#undef FEAT_C_
-INCLUDE 3

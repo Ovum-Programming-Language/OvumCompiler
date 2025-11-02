@@ -1,6 +1,0 @@
-INCLUDENUM 1
-
-#ifndef NOT_DEFINED
-INCLUDE 1
-#endif
-INCLUDE 2

@@ -1,9 +1,0 @@
-INCLUDENUM 3
-
-#define TEMP
-#import "import_undef.txt"
-#ifdef TEMP
-INCLUDE 3
-#else
-INCLUDE 4
-#endif

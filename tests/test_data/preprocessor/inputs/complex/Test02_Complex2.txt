@@ -1,0 +1,22 @@
+#ifndef INIT
+#define INIT
+#import "import1.txt"
+#endif
+
+#ifdef INIT
+INCLUDE 2
+#endif
+
+#define FEAT_X
+#ifdef FEAT_X
+INCLUDE 3
+#undef FEAT_X
+#endif
+
+#ifdef FEAT_X
+INCLUDE 6
+#else
+INCLUDE 4
+#endif
+
+INCLUDE 5

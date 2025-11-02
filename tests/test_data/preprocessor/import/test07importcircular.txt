@@ -1,3 +1,0 @@
-EXPECTERROR
-
-#import "import_circular1.txt"

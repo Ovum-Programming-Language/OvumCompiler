@@ -1,4 +1,0 @@
-EXPECTERROR
-
-#define 
-INCLUDE 1

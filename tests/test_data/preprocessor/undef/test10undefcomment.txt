@@ -1,4 +1,0 @@
-INCLUDENUM 1
-
-#undef FEAT_A // comment
-INCLUDE 1

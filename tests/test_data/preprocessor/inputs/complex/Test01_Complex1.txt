@@ -1,0 +1,21 @@
+#define A
+#define B
+#import "import1.txt"
+#ifdef A
+INCLUDE 2
+#ifndef C
+INCLUDE 3
+#endif
+#endif
+#ifdef B
+INCLUDE 4
+#else
+INCLUDE 5
+#endif
+INCLUDE 6
+#undef B
+#ifdef B
+INCLUDE 9
+#endif
+INCLUDE 7
+INCLUDE 8

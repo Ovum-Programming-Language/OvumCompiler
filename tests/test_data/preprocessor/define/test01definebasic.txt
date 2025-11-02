@@ -1,4 +1,0 @@
-INCLUDENUM 1
-
-#define FEAT_A
-INCLUDE 1

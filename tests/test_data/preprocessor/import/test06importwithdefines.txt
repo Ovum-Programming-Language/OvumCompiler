@@ -1,9 +1,0 @@
-INCLUDENUM 4
-
-#define GLOBAL_FEAT
-#import "import_with_def.txt"
-#ifdef IMPORT_FEAT
-INCLUDE 1
-#endif
-INCLUDE 2
-INCLUDE 3

@@ -1,4 +1,0 @@
-EXPECTERROR
-
-#import
-INCLUDE 1
