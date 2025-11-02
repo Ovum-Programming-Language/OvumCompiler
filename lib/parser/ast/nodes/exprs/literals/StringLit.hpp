@@ -10,7 +10,7 @@ public:
   void Accept(AstVisitor& v) override;
 
 private:
-  std::u32string value_;
+  std::string value_;
 };
 
 #endif // STRINGLIT_HPP_

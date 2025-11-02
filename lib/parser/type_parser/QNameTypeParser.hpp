@@ -9,15 +9,21 @@
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/types/TypeReference.hpp"
 
-class QNameTypeParser : public ITypeParser {
+class QNameTypeParser final : public ITypeParser {
 public:
-  explicit QNameTypeParser(IAstFactory* factory);
+  explicit QNameTypeParser(IAstFactory& factory) noexcept;
   ~QNameTypeParser() override = default;
 
-  std::unique_ptr<TypeReference> ParseType(ITokenStream& ts, IDiagnosticSink& diags) override;
+  [[nodiscard]] std::unique_ptr<TypeReference> ParseType(ITokenStream& ts, IDiagnosticSink& diags) override;
+
+  QNameTypeParser(const QNameTypeParser&) = delete;
+  QNameTypeParser& operator=(const QNameTypeParser&) = delete;
+
+  QNameTypeParser(QNameTypeParser&&) noexcept = default;
+  QNameTypeParser& operator=(QNameTypeParser&&) noexcept = delete;
 
 private:
-  IAstFactory* factory_;
+  std::shared_ptr<IAstFactory> factory_;
 };
 
 #endif // QNAMETYPEPARSER_HPP_

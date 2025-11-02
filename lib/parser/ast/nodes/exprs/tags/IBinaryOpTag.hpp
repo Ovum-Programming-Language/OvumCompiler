@@ -5,7 +5,7 @@ class IBinaryOpTag {
 public:
   virtual ~IBinaryOpTag() = default;
 
-  virtual const char* Name() const = 0;
+  virtual std::string_view Name() const = 0;
 };
 
 #endif // IBINARYOPTAG_HPP_

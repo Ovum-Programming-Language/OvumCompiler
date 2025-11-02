@@ -2,6 +2,7 @@
 #define VECTORTOKENSTREAM_HPP_
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "ITokenStream.hpp"
@@ -11,27 +12,25 @@ class VectorTokenStream : public ITokenStream {
 public:
   explicit VectorTokenStream(std::vector<TokenPtr> tokens);
 
-  const Token& Peek(std::size_t k = 0) override;
+  const Token& Peek(size_t k = 0) override;
 
   TokenPtr Consume() override;
 
-  std::size_t Position() const override;
+  size_t Position() const override;
 
-  void Rewind(std::size_t n) override;
+  void Rewind(size_t n) override;
 
   bool IsEof() const override;
 
   const Token* LastConsumed() const override;
 
-  const Token* TryPeek(std::size_t k = 0) override;
+  const Token* TryPeek(size_t k = 0) override;
 
-  std::size_t Size() const {
-    return tokens_.size();
-  }
+  size_t Size() const;
 
 private:
   std::vector<TokenPtr> tokens_;
-  std::size_t index_ = 0;
+  size_t index_ = 0;
   const Token* last_ = nullptr;
 };
 

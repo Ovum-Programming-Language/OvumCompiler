@@ -46,11 +46,10 @@ class IAstFactory {
 public:
   virtual ~IAstFactory() = default;
 
-  virtual std::unique_ptr<Module> MakeModule() = 0;
-
   virtual std::unique_ptr<FunctionDecl> MakeFunction() = 0;
   virtual std::unique_ptr<ClassDecl> MakeClass() = 0;
   virtual std::unique_ptr<InterfaceDecl> MakeInterface() = 0;
+  virtual std::unique_ptr<InterfaceMethod> MakeInterfaceMethod() = 0;
   virtual std::unique_ptr<TypeAliasDecl> MakeTypeAlias() = 0;
   virtual std::unique_ptr<GlobalVarDecl> MakeGlobalVar() = 0;
 

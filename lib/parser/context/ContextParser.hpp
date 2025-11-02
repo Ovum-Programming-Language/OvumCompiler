@@ -1,14 +1,20 @@
 #ifndef CONTEXTPARSER_HPP_
 #define CONTEXTPARSER_HPP_
 
+#include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "NodeEntry.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/IState.hpp"
 
-class IExpressionParser; // forward
-class ITypeParser;       // forward
+class AstNode;
+class IExpressionParser;
+class ITypeParser;
+
+template<class T>
+concept AstNodeDerived = std::is_base_of_v<AstNode, T>;
 
 class ContextParser {
 public:
@@ -26,19 +32,17 @@ public:
 
   void PushState(const IState& state);
   void PopState();
-  const IState& CurrentState() const;
+  [[nodiscard]] const IState* CurrentState() const;
 
-  template<class T>
-  T* TopNodeAs() {
-    if (node_stack_.empty()) {
+  template<AstNodeDerived T>
+  [[nodiscard]] T* TopNodeAs() {
+    if (node_stack_.empty())
       return nullptr;
-    }
-
-    return dynamic_cast<T*>(node_stack_.back());
+    return dynamic_cast<T*>(node_stack_.back().GetNode);
   }
 
   void PushNode(std::unique_ptr<AstNode> node);
-  std::unique_ptr<AstNode> PopNode();
+  [[nodiscard]] std::unique_ptr<AstNode> PopNode();
 
 private:
   std::vector<const IState*> state_stack_;

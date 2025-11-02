@@ -8,6 +8,7 @@ public:
   void Accept(AstVisitor& v) override;
 
 private:
-  long long value = 0;
+  int64_t value = 0;
 };
+
 #endif // INTLIT_HPP_

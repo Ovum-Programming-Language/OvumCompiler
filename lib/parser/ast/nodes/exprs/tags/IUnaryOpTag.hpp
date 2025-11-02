@@ -5,7 +5,7 @@ class IUnaryOpTag {
 public:
   virtual ~IUnaryOpTag() = default;
 
-  virtual const char* Name() const = 0;
+  virtual std::string_view Name() const = 0;
 };
 
 #endif // IUNARYOPTAG_HPP_

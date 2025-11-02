@@ -8,7 +8,7 @@ public:
   void Accept(AstVisitor& v) override;
 
 private:
-  long double value = 0.0L;
+  double value = 0.0L;
 };
 
 #endif // FLOATLIT_HPP_

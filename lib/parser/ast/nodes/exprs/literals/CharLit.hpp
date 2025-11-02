@@ -8,7 +8,7 @@ public:
   void Accept(AstVisitor& v) override;
 
 private:
-  char32_t value_ = U'\0';
+  char value_ = '\0';
 };
 
 #endif // CHARLIT_HPP_

@@ -13,7 +13,7 @@ public:
 
   virtual TokenPtr Consume() = 0;
 
-  virtual std::size_t Position() const = 0;
+  virtual size_t Position() const = 0;
 
   virtual void Rewind(std::size_t n) = 0;
 

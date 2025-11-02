@@ -3,7 +3,11 @@
 
 #include <cstddef>
 #include <functional>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <unordered_set>
+#include <vector>
 
 #include "IDiagnosticSink.hpp"
 
@@ -29,10 +33,12 @@ public:
   void SuppressCode(std::string code);
   void SuppressCategory(std::string category);
   void SetGlobalFilter(Predicate p);
+  void ResetGlobalFilter();
   void EnableDeduplication(bool on);
-  void SetCapacity(std::size_t max_total);
-  void SetErrorLimit(std::size_t max_errors);
-  void SetWarningLimit(std::size_t max_warnings);
+
+  void SetCapacity(std::optional<std::size_t> max_total);
+  void SetErrorLimit(std::optional<std::size_t> max_errors);
+  void SetWarningLimit(std::optional<std::size_t> max_warnings);
 
   bool IsSuppressed(const Diagnostic& d) const;
 
@@ -43,12 +49,12 @@ private:
   std::vector<Diagnostic> diags_;
   std::unordered_set<std::string> suppressed_codes_;
   std::unordered_set<std::string> suppressed_categories_;
-  Predicate global_filter_{};
+  std::optional<Predicate> global_filter_;
 
   bool dedup_ = true;
-  std::size_t capacity_ = 0;      // 0 == without limits
-  std::size_t error_limit_ = 0;   // 0 == without limits
-  std::size_t warning_limit_ = 0; // 0 == without limits
+  std::optional<std::size_t> capacity_;
+  std::optional<std::size_t> error_limit_;
+  std::optional<std::size_t> warning_limit_;
 
   std::size_t errors_ = 0;
   std::size_t warnings_ = 0;

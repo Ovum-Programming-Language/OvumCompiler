@@ -45,9 +45,9 @@ public:
   virtual ~AstVisitor() = default;
 
   // Decls
-  virtual void Visit(Module&) = 0;
   virtual void Visit(FunctionDecl&) = 0;
   virtual void Visit(ClassDecl&) = 0;
+  virtual void visit(InterfaceMethod&) = 0;
   virtual void Visit(InterfaceDecl&) = 0;
   virtual void Visit(TypeAliasDecl&) = 0;
   virtual void Visit(GlobalVarDecl&) = 0;

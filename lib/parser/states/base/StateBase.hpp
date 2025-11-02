@@ -6,6 +6,7 @@
 
 class StateBase : IState {
 public:
+  using StepResult = StepResult;
   ~StateBase() override = default;
   static SourceSpan SpanFrom(const Token& token);
   static SourceSpan Union(const SourceSpan& lhs, const SourceSpan& rhs);

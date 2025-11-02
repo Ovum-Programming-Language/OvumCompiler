@@ -7,29 +7,29 @@
 
 namespace OpTags {
 // binary
-static const IBinaryOpTag& Add();
-static const IBinaryOpTag& Sub();
-static const IBinaryOpTag& Mul();
-static const IBinaryOpTag& Div();
-static const IBinaryOpTag& Mod();
-static const IBinaryOpTag& Lt();
-static const IBinaryOpTag& Le();
-static const IBinaryOpTag& Gt();
-static const IBinaryOpTag& Ge();
-static const IBinaryOpTag& Eq();
-static const IBinaryOpTag& Ne();
-static const IBinaryOpTag& And();
-static const IBinaryOpTag& Or();
-static const IBinaryOpTag& Xor();
+const IBinaryOpTag& Add();
+const IBinaryOpTag& Sub();
+const IBinaryOpTag& Mul();
+const IBinaryOpTag& Div();
+const IBinaryOpTag& Mod();
+const IBinaryOpTag& Lt();
+const IBinaryOpTag& Le();
+const IBinaryOpTag& Gt();
+const IBinaryOpTag& Ge();
+const IBinaryOpTag& Eq();
+const IBinaryOpTag& Ne();
+const IBinaryOpTag& And();
+const IBinaryOpTag& Or();
+const IBinaryOpTag& Xor();
 
 // unary
-static const IUnaryOpTag& Neg();
-static const IUnaryOpTag& Plus();
-static const IUnaryOpTag& Not();
+const IUnaryOpTag& Neg();
+const IUnaryOpTag& Plus();
+const IUnaryOpTag& Not();
 
 // assign
-static const IAssignOpTag& RefAssign();  // =
-static const IAssignOpTag& CopyAssign(); // :=
+const IAssignOpTag& RefAssign();  // =
+const IAssignOpTag& CopyAssign(); // :=
 } // namespace OpTags
 
 #endif // OPTAGS_HPP_

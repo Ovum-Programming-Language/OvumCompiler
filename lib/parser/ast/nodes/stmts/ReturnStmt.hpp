@@ -10,8 +10,15 @@ class ReturnStmt : public Stmt {
 public:
   void Accept(AstVisitor& v) override;
 
+  bool HasValue() const noexcept;
+  const Expr* Value() const noexcept;
+  Expr* MutableValue() noexcept;
+  void SetValue(std::unique_ptr<Expr> e);
+  void ResetValue();
+  std::unique_ptr<Expr> ReleaseValue();
+
 private:
-  std::unique_ptr<Expr> value_; // optional
+  std::optional<std::unique_ptr<Expr>> value_;
 };
 
 #endif // RETURNSTMT_HPP_

@@ -5,7 +5,7 @@ class IAssignOpTag {
 public:
   virtual ~IAssignOpTag() = default;
 
-  virtual const char* Name() const = 0;
+  virtual std::string_view Name() const = 0;
 };
 
 #endif // IASSIGNOPTAG_HPP_

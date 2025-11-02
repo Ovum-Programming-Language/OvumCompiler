@@ -6,17 +6,24 @@
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 
-class Branch {
+class Branch Branch {
 public:
-  Branch(std::unique_ptr<Expr> expr, std::unique_ptr<Block> block);
+  Branch(std::unique_ptr<Expr> condition, std::unique_ptr<Block> then_block);
+  Branch(const Branch&) = delete;
+  Branch& operator=(const Branch&) = delete;
+  Branch(Branch&&) noexcept = default;
+  Branch& operator=(Branch&&) noexcept = default;
+  ~Branch() = default;
 
-  [[nodiscard]] std::unique_ptr<Block> GetBlock();
+  const Expr* Condition() const noexcept;
+  Expr* MutableCondition() noexcept;
+  void SetCondition(std::unique_ptr<Expr> e);
+  std::unique_ptr<Expr> ReleaseCondition();
 
-  void AddBlock(std::unique_ptr<Block> block);
-
-  [[nodiscard]] std::unique_ptr<Expr> GetExpr();
-
-  void AddExpr(std::unique_ptr<Expr> expr);
+  const Block* Then() const noexcept;
+  Block* MutableThen() noexcept;
+  void SetThen(std::unique_ptr<Block> b);
+  std::unique_ptr<Block> ReleaseThen();
 
 private:
   std::unique_ptr<Expr> condition_;

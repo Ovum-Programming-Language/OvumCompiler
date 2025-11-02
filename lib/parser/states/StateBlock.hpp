@@ -6,8 +6,8 @@
 
 class StateBlock : public StateBase {
 public:
-  const char* Name() const override;
-  bool Step(ContextParser& ctx, ITokenStream& ts) override;
+  std::string_view Name() const override;
+  StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
 #endif // STATEBLOCK_HPP_
