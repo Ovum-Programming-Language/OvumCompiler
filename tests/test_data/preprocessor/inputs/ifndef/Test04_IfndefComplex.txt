@@ -1,5 +1,3 @@
-INCLUDENUM 4
-
 #ifndef A
 INCLUDE 1
 #ifndef B

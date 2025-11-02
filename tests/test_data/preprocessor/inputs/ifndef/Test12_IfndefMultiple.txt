@@ -1,5 +1,3 @@
-INCLUDENUM 2
-
 #define A
 #define C
 #ifndef A

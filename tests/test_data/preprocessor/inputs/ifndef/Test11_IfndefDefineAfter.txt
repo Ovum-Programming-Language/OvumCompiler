@@ -1,5 +1,3 @@
-INCLUDENUM 2
-
 #ifndef FEAT_A
 INCLUDE 1
 #else
