@@ -1,20 +1,20 @@
+#include <filesystem>
 #include <gtest/gtest.h>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <filesystem>
-#include <iostream>
 #include "lib/lexer/Lexer.hpp"
-#include "test_suites/PreprocessorUnitTestSuite.hpp"
 #include "lib/preprocessor/Preprocessor.hpp"
+#include "test_suites/PreprocessorUnitTestSuite.hpp"
 
 namespace ovum::compiler::preprocessor {
 
 std::filesystem::path get_input_file_path(const std::string& addition_path, const std::string& filename) {
-    return std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / "inputs" / addition_path / filename;
+  return std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / "inputs" / addition_path / filename;
 }
 
 std::filesystem::path get_expected_file_path(const std::string& addition_path, const std::string& filename) {
-    return std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / "results" / addition_path / filename;
+  return std::filesystem::path(TEST_DATA_DIR) / "preprocessor" / "results" / addition_path / filename;
 }
 
 // Define tests

@@ -1,14 +1,6 @@
 #ifndef OVUMC_PREPROCESSORUNITTESTSUITE_HPP_
 #define OVUMC_PREPROCESSORUNITTESTSUITE_HPP_
 
-#include <filesystem>
-#include <fstream>
-#include <expected>
-#include <vector>
-#include <string>
-#include <set>
-#include <unordered_set>
-#include <gtest/gtest.h>
 #include "lib/preprocessor/Preprocessor.hpp"
 
 namespace ovum::compiler::preprocessor {
@@ -23,25 +15,22 @@ public:
     std::vector<TokenPtr> expected_tokens;
   };
 
-  static void RunSingleTest(const std::filesystem::path& input_file, 
-                                 const std::filesystem::path& expected_file);
+  static void RunSingleTest(const std::filesystem::path& input_file, const std::filesystem::path& expected_file);
 
 private:
-  static std::expected<std::vector<TokenPtr>, std::string> 
-  TokenizeExpectedFile(const std::filesystem::path& file_path);
-  
-  static bool CompareTokenSequences(const std::vector<TokenPtr>& actual,
-                                   const std::vector<TokenPtr>& expected);
-  
+  static std::expected<std::vector<TokenPtr>, std::string> TokenizeExpectedFile(const std::filesystem::path& file_path);
+
+  static bool CompareTokenSequences(const std::vector<TokenPtr>& actual, const std::vector<TokenPtr>& expected);
+
   static std::string BuildDetailedComparison(const std::vector<TokenPtr>& actual,
-                                            const std::vector<TokenPtr>& expected);
-  
+                                             const std::vector<TokenPtr>& expected);
+
   static bool TokensEqual(const TokenPtr& a, const TokenPtr& b);
-  
+
   static std::string TokenToString(const TokenPtr& token);
-  
+
   static std::string GetErrorString(const PreprocessorError& error);
-  
+
   static std::string TokensToString(const std::vector<TokenPtr>& tokens);
 };
 
