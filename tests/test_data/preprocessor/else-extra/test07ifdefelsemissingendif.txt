@@ -1,4 +1,4 @@
-WAITERROR
+EXPECTERROR
 
 #define FEAT_A
 #ifdef FEAT_A

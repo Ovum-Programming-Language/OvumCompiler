@@ -1,4 +1,4 @@
-WAITERROR
+EXPECTERROR
 
 #ifndef  
 INCLUDE 1
