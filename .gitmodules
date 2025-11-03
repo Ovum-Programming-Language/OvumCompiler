@@ -1,0 +1,4 @@
+[submodule "tests/test_data/examples"]
+	path = tests/test_data/examples
+	url = https://github.com/Ovum-Programming-Language/OvumExamples
+	branch = main
