@@ -1,8 +1,5 @@
 enable_testing()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_data 
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 add_executable(
         ${PROJECT_NAME}_tests
         main_test.cpp
@@ -23,12 +20,28 @@ target_link_libraries(
         GTest::gtest_main
 )
 
-target_compile_definitions(${PROJECT_NAME}_tests PRIVATE 
-    TEST_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/test_data")
+target_compile_definitions(${PROJECT_NAME}_tests PRIVATE
+        TEST_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}/test_data")
 
 message(STATUS "Tests build type: ${CMAKE_BUILD_TYPE}")
 
 target_include_directories(${PROJECT_NAME}_tests PUBLIC ${PROJECT_SOURCE_DIR})
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}_tests
+    POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E echo "Updating examples submodule..."
+#     COMMAND git -C ${CMAKE_SOURCE_DIR} submodule update --init --recursive tests/test_data/examples
+#     COMMAND git -C ${CMAKE_SOURCE_DIR}/tests/test_data/examples fetch origin master
+#     COMMAND git -C ${CMAKE_SOURCE_DIR}/tests/test_data/examples checkout master
+#     COMMAND git -C ${CMAKE_SOURCE_DIR}/tests/test_data/examples pull origin master
+    COMMAND ${CMAKE_COMMAND} -E echo "Cleaning previous test_data..."
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/test_data
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying test_data..."
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test_data ${CMAKE_CURRENT_BINARY_DIR}/test_data
+    COMMENT "Preparing test_data"
+    VERBATIM
+)
 
 include(GoogleTest)
 
