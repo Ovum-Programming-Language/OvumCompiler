@@ -22,7 +22,8 @@ public:
                                                                        std::unordered_set<std::string>& defined_symbols,
                                                                        bool& skipping,
                                                                        int& skip_level,
-                                                                       int& if_level) = 0;
+                                                                       int& if_level,
+                                                                       std::vector<bool>& else_seen) = 0;
 
   virtual void SetNext(std::unique_ptr<DirectiveHandler> next) = 0;
 };

@@ -12,7 +12,8 @@ std::expected<void, PreprocessorError> DefaultHandler::Process(size_t& position,
                                                                std::unordered_set<std::string>& defined_symbols,
                                                                bool& skipping,
                                                                int& skip_level,
-                                                               int& if_level) {
+                                                               int& if_level,
+                                                               std::vector<bool>& else_seen) {
   if (position >= tokens.size()) {
     return {};
   }

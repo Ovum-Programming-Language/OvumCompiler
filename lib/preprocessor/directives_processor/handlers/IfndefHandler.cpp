@@ -12,10 +12,12 @@ std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& position,
                                                               std::unordered_set<std::string>& defined_symbols,
                                                               bool& skipping,
                                                               int& skip_level,
-                                                              int& if_level) {
+                                                              int& if_level,
+                                                              std::vector<bool>& else_seen) {
   if (position >= tokens.size() || tokens[position]->GetLexeme() != "#ifndef") {
     if (next_) {
-      return next_->Process(position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level);
+      return next_->Process(
+          position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level, else_seen);
     }
 
     return {};
@@ -37,6 +39,7 @@ std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& position,
   bool cond = defined_symbols.count(id) > 0;
   cond = !cond;
 
+  else_seen.push_back(false);
   ++if_level;
 
   if (skipping) {
@@ -48,7 +51,7 @@ std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& position,
     }
   }
 
-  position += 2;
+  position += 3;
 
   return {};
 }

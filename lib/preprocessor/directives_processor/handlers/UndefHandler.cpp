@@ -12,10 +12,12 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& position,
                                                              std::unordered_set<std::string>& defined_symbols,
                                                              bool& skipping,
                                                              int& skip_level,
-                                                             int& if_level) {
+                                                             int& if_level,
+                                                             std::vector<bool>& else_seen) {
   if (position >= tokens.size() || tokens[position]->GetLexeme() != "#undef") {
     if (next_) {
-      return next_->Process(position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level);
+      return next_->Process(
+          position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level, else_seen);
     }
 
     return {};

@@ -12,10 +12,12 @@ std::expected<void, PreprocessorError> EndifHandler::Process(size_t& position,
                                                              std::unordered_set<std::string>& defined_symbols,
                                                              bool& skipping,
                                                              int& skip_level,
-                                                             int& if_level) {
+                                                             int& if_level,
+                                                             std::vector<bool>& else_seen) {
   if (position >= tokens.size() || tokens[position]->GetLexeme() != "#endif") {
     if (next_) {
-      return next_->Process(position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level);
+      return next_->Process(
+          position, tokens, processed_tokens, defined_symbols, skipping, skip_level, if_level, else_seen);
     }
 
     return {};
@@ -27,6 +29,7 @@ std::expected<void, PreprocessorError> EndifHandler::Process(size_t& position,
   }
 
   --if_level;
+  else_seen.pop_back();
 
   if (skip_level > 0) {
     --skip_level;
@@ -36,9 +39,14 @@ std::expected<void, PreprocessorError> EndifHandler::Process(size_t& position,
     skipping = false;
   }
 
-  ++position;
+  if (tokens[position + 1]->GetStringType() == "NEWLINE" || tokens[position + 1]->GetStringType() == "EOF" ||
+      tokens[position + 1]->GetLexeme() == ";") {
+    position += 2;
+    return {};
+  }
 
-  return {};
+  return std::unexpected(InvalidDirectiveError("#endif has unexpected tokens after identifier at line " +
+                                               std::to_string(tokens[position]->GetPosition().GetLine())));
 }
 
 } // namespace ovum::compiler::preprocessor

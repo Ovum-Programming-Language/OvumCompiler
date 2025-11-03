@@ -24,6 +24,7 @@ public:
 private:
   std::unordered_set<std::string> defined_symbols_;
   std::unique_ptr<DirectiveHandler> directives_chain_;
+  std::vector<bool> else_seen_;
 };
 
 } // namespace ovum::compiler::preprocessor
