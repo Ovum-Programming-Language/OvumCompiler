@@ -173,7 +173,11 @@ std::vector<TokenPtr> TokenImportProcessor::RemoveExtraTokens(const std::vector<
 
     if (token->GetLexeme() == "#import") {
       if (i + 1 < tokens.size() && tokens[i + 1]->GetStringType() == "LITERAL:String") {
-        i += 2;
+        if (i + 2 >= tokens.size() || tokens[i + 2]->GetStringType() == "EOF") {
+          i += 2;
+        } else {
+          i += 3;
+        }
       } else {
         cleaned.push_back(token);
         ++i;
@@ -204,6 +208,14 @@ std::expected<std::filesystem::path, PreprocessorError> TokenImportProcessor::Re
 
   if (path_token->GetStringType() != "LITERAL:String") {
     return std::unexpected(InvalidImportError("Expected string literal after #import at " +
+                                              std::to_string(token->GetPosition().GetLine()) + ":" +
+                                              std::to_string(token->GetPosition().GetColumn())));
+  }
+
+  if (pos + 2 >= tokens.size() ||
+      !(tokens[pos + 2]->GetStringType() == "EOF" || tokens[pos + 2]->GetStringType() == "NEWLINE" ||
+        tokens[pos + 2]->GetLexeme() == ";")) {
+    return std::unexpected(InvalidImportError("Unexpected token after #import at " +
                                               std::to_string(token->GetPosition().GetLine()) + ":" +
                                               std::to_string(token->GetPosition().GetColumn())));
   }
