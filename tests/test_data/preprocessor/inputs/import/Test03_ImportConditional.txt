@@ -1,6 +1,0 @@
-#define NEED_IMPORT
-#ifdef NEED_IMPORT
-#import "Import1.txt"
-#endif
-INCLUDE 1
-INCLUDE 2

@@ -581,8 +581,8 @@ TEST(PreprocessorUnitTestSuite, importmultiple) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importconditional) {
-  const std::string file_name = "Test03_ImportConditional.txt";
+TEST(PreprocessorUnitTestSuite, importfromsubdirectory) {
+  const std::string file_name = "Test03_ImportFromSubdirectory.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
@@ -646,15 +646,6 @@ TEST(PreprocessorUnitTestSuite, importcomplex) {
 
 TEST(PreprocessorUnitTestSuite, importinvalid) {
   const std::string file_name = "Test10_ImportInvalid.txt";
-  const std::string dir_name = "import";
-  const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
-  const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
-
-  PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
-}
-
-TEST(PreprocessorUnitTestSuite, importfromsubdirectory) {
-  const std::string file_name = "Test11_ImportFromSubdirectory.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
