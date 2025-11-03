@@ -3,13 +3,16 @@
 #include <expected>
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <set>
 #include <string>
-#include <unordered_set>
 #include <vector>
+
+#include <gtest/gtest.h>
+
 #include "lib/lexer/Lexer.hpp"
 #include "lib/preprocessor/Preprocessor.hpp"
+
+constexpr size_t kMaxTokenSequenceLength = 17;
 
 namespace ovum::compiler::preprocessor {
 
@@ -115,18 +118,18 @@ std::string PreprocessorUnitTestSuite::BuildDetailedComparison(const std::vector
 
     // Actual token
     if (i < actual.size()) {
-      ss << std::setw(17) << TokenToString(actual[i]);
+      ss << std::setw(kMaxTokenSequenceLength) << TokenToString(actual[i]);
     } else {
-      ss << std::setw(17) << "MISSING";
+      ss << std::setw(kMaxTokenSequenceLength) << "MISSING";
     }
 
     ss << " | ";
 
     // Expected token
     if (i < expected.size()) {
-      ss << std::setw(17) << TokenToString(expected[i]);
+      ss << std::setw(kMaxTokenSequenceLength) << TokenToString(expected[i]);
     } else {
-      ss << std::setw(17) << "MISSING";
+      ss << std::setw(kMaxTokenSequenceLength) << "MISSING";
     }
 
     // Mark differences

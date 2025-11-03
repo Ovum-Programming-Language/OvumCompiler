@@ -1,7 +1,13 @@
 #ifndef OVUMC_PREPROCESSORUNITTESTSUITE_HPP_
 #define OVUMC_PREPROCESSORUNITTESTSUITE_HPP_
 
-#include "lib/preprocessor/Preprocessor.hpp"
+#include <expected>
+#include <filesystem>
+#include <string>
+#include <vector>
+
+#include "lib/lexer/tokens/Token.hpp"
+#include "lib/preprocessor/PreprocessorError.hpp"
 
 namespace ovum::compiler::preprocessor {
 
