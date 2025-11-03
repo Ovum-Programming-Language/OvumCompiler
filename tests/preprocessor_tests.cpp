@@ -656,7 +656,7 @@ TEST(PreprocessorUnitTestSuite, ImportInvalid) {
 // Complex tests
 TEST(PreprocessorUnitTestSuite, Complex1) {
   const std::string file_name = "Test01_Complex1.txt";
-  const std::string dir_name = "Complex";
+  const std::string dir_name = "complex";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
 
@@ -665,7 +665,7 @@ TEST(PreprocessorUnitTestSuite, Complex1) {
 
 TEST(PreprocessorUnitTestSuite, Complex2) {
   const std::string file_name = "Test02_Complex2.txt";
-  const std::string dir_name = "Complex";
+  const std::string dir_name = "complex";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
 
