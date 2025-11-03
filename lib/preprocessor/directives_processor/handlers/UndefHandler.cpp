@@ -37,28 +37,22 @@ std::expected<void, PreprocessorError> UndefHandler::Process(size_t& position,
 
   std::string id = id_token->GetLexeme();
 
-  if (position + 2 >= tokens.size()) {
-    if (!skipping) {
-      defined_symbols.erase(id);
-    }
-
-    position += 2;
-    return {};
-  }
-
-  if (tokens[position + 2]->GetStringType() != "NEWLINE" && tokens[position + 2]->GetStringType() != "EOF" &&
-      tokens[position + 2]->GetLexeme() != ";") {
-    return std::unexpected(InvalidDirectiveError("#undef " + id + " has unexpected tokens after identifier at line " +
-                                                 std::to_string(tokens[position]->GetPosition().GetLine())));
-  }
-
   if (!skipping) {
     defined_symbols.erase(id);
   }
 
-  position += 3;
+  if (position + 2 >= tokens.size() || tokens[position + 2]->GetStringType() == "EOF") {
+    position += 2;
 
-  return {};
+    return {};
+  } else if (tokens[position + 2]->GetStringType() == "NEWLINE" || tokens[position + 2]->GetLexeme() == ";") {
+    position += 3;
+
+    return {};
+  }
+
+  return std::unexpected(InvalidDirectiveError("#undef " + id + " has unexpected tokens after identifier at line " +
+                                               std::to_string(tokens[position]->GetPosition().GetLine())));
 }
 
 } // namespace ovum::compiler::preprocessor

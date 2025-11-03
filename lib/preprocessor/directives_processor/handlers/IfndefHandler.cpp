@@ -51,9 +51,18 @@ std::expected<void, PreprocessorError> IfndefHandler::Process(size_t& position,
     }
   }
 
-  position += 3;
+  if (position + 2 >= tokens.size() || tokens[position + 2]->GetStringType() == "EOF") {
+    position += 2;
 
-  return {};
+    return {};
+  } else if (tokens[position + 2]->GetStringType() == "NEWLINE" || tokens[position + 2]->GetLexeme() == ";") {
+    position += 3;
+
+    return {};
+  }
+
+  return std::unexpected(InvalidDirectiveError("#ifndef " + id + " has unexpected tokens after identifier at line " +
+                                               std::to_string(tokens[position]->GetPosition().GetLine())));
 }
 
 } // namespace ovum::compiler::preprocessor
