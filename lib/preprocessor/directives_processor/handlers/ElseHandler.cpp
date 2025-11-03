@@ -38,9 +38,13 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& position,
     skipping = false;
   }
 
-  if (tokens[position + 1]->GetStringType() == "NEWLINE" || tokens[position + 1]->GetStringType() == "EOF" ||
-      tokens[position + 1]->GetLexeme() == ";") {
-    position += 3;
+  if (tokens[position + 1]->GetStringType() == "NEWLINE" || tokens[position + 1]->GetLexeme() == ";") {
+    position += 2;
+
+    return {};
+  } else if (tokens[position + 1]->GetStringType() == "EOF") {
+    ++position;
+
     return {};
   }
 
