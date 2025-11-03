@@ -38,20 +38,29 @@ void PreprocessorUnitTestSuite::RunSingleTest(const std::filesystem::path& input
 
   auto process_result = preprocessor.Process();
 
-  if (!process_result.has_value()) {
-    result.passed = false;
-    result.error_message = "Preprocessing failed: " + GetErrorString(process_result.error());
-    ASSERT_TRUE(false) << "Test " << result.test_name << " failed: " << result.error_message;
-    return;
-  }
+  if (result.expected_tokens[0]->GetLexeme() != "EXPECTERROR") {
+    if (!process_result.has_value()) {
+      result.passed = false;
+      result.error_message = "Preprocessing failed: " + GetErrorString(process_result.error());
+      ASSERT_TRUE(false) << "Test " << result.test_name << " failed: " << result.error_message;
+      return;
+    }
 
-  result.actual_tokens = std::move(process_result.value());
-  result.passed = CompareTokenSequences(result.actual_tokens, result.expected_tokens);
+    result.actual_tokens = std::move(process_result.value());
+    result.passed = CompareTokenSequences(result.actual_tokens, result.expected_tokens);
 
-  if (!result.passed) {
-    result.error_message = "Token sequences do not match";
-    std::string detailed_error = BuildDetailedComparison(result.actual_tokens, result.expected_tokens);
-    ASSERT_TRUE(false) << "Test " << result.test_name << " failed:\n" << detailed_error;
+    if (!result.passed) {
+      result.error_message = "Token sequences do not match";
+      std::string detailed_error = BuildDetailedComparison(result.actual_tokens, result.expected_tokens);
+      ASSERT_TRUE(false) << "Test " << result.test_name << " failed:\n" << detailed_error;
+    }
+  } else {
+    if (process_result.has_value()) {
+      result.passed = false;
+      result.error_message = "Preprocessing failed: result has tokens but must be error";
+      ASSERT_TRUE(false) << "Test " << result.test_name << " failed: " << result.error_message;
+      return;
+    }
   }
 
   return;
@@ -106,26 +115,26 @@ std::string PreprocessorUnitTestSuite::BuildDetailedComparison(const std::vector
 
   size_t max_size = std::max(actual.size(), expected.size());
 
-  ss << "Position | Actual (" << actual.size() << " tokens)         | Expected (" << expected.size() << " tokens)\n";
-  ss << "---------|---------------------------|------------------------------\n";
+  ss << "Pos | Actual (" << actual.size() << " tokens) | Expected (" << expected.size() << " tokens)\n";
+  ss << "----|-------------------|------------------------------\n";
 
   for (size_t i = 0; i < max_size; ++i) {
-    ss << std::setw(8) << i << " | ";
+    ss << std::setw(4) << i << " | ";
 
     // Actual token
     if (i < actual.size()) {
-      ss << std::setw(25) << TokenToString(actual[i]);
+      ss << std::setw(17) << TokenToString(actual[i]);
     } else {
-      ss << std::setw(25) << "MISSING";
+      ss << std::setw(17) << "MISSING";
     }
 
     ss << " | ";
 
     // Expected token
     if (i < expected.size()) {
-      ss << std::setw(25) << TokenToString(expected[i]);
+      ss << std::setw(17) << TokenToString(expected[i]);
     } else {
-      ss << std::setw(25) << "MISSING";
+      ss << std::setw(17) << "MISSING";
     }
 
     // Mark differences
