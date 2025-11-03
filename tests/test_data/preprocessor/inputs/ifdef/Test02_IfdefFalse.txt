@@ -1,0 +1,4 @@
+#ifdef NOT_DEFINED
+INCLUDE 2
+#endif
+INCLUDE 1

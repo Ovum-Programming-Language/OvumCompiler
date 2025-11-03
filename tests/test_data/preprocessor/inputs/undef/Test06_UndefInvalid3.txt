@@ -1,0 +1,2 @@
+#undef 123INVALID
+INCLUDE 1

@@ -1,0 +1,9 @@
+#define PLATFORM_WIN
+#import "ImportPlatform.txt"
+#ifdef FEAT_A
+INCLUDE 3
+#endif
+#ifdef FEAT_B
+INCLUDE 5
+#endif
+INCLUDE 4

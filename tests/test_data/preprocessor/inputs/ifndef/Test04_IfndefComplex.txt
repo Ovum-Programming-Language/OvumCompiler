@@ -1,0 +1,8 @@
+#ifndef A
+INCLUDE 1
+#ifndef B
+INCLUDE 2
+#endif
+INCLUDE 3
+#endif
+INCLUDE 4

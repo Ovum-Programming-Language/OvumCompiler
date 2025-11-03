@@ -1,0 +1,12 @@
+#define A
+#define C
+#ifndef A
+INCLUDE 4
+#endif
+#ifndef B
+INCLUDE 1
+#endif  
+#ifndef C
+INCLUDE 3
+#endif
+INCLUDE 2
