@@ -73,15 +73,7 @@ std::expected<std::vector<TokenPtr>, std::string> PreprocessorUnitTestSuite::Tok
     return std::unexpected("Could not open file: " + file_path.string());
   }
 
-  std::string content;
-  std::string line;
-  while (std::getline(file, line)) {
-    content += line + "\n";
-  }
-
-  if (!content.empty() && content.back() == '\n') {
-    content.pop_back();
-  }
+  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
   Lexer lexer(content, false);
   auto tokens_result = lexer.Tokenize();
