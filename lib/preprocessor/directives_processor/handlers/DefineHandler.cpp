@@ -37,20 +37,15 @@ std::expected<void, PreprocessorError> DefineHandler::Process(size_t& position,
 
   std::string id = id_token->GetLexeme();
 
-  if (position + 2 >= tokens.size()) {
-    if (!skipping) {
-      defined_symbols.insert(id);
-    }
+  if (!skipping) {
+    defined_symbols.insert(id);
+  }
 
+  if (position + 2 >= tokens.size() || tokens[position + 2]->GetStringType() == "EOF") {
     position += 2;
 
     return {};
-  } else if (tokens[position + 2]->GetStringType() == "NEWLINE" || tokens[position + 2]->GetStringType() == "EOF" ||
-             tokens[position + 2]->GetLexeme() == ";") {
-    if (!skipping) {
-      defined_symbols.insert(id);
-    }
-
+  } else if (tokens[position + 2]->GetStringType() == "NEWLINE" || tokens[position + 2]->GetLexeme() == ";") {
     position += 3;
 
     return {};

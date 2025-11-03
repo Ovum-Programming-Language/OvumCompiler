@@ -27,10 +27,10 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& position,
     return std::unexpected(UnmatchedDirectiveError("Mismatched #else at line " +
                                                    std::to_string(tokens[position]->GetPosition().GetLine())));
   }
-  if (else_seen[if_level]) {
+  if (else_seen[if_level - 1]) {
     return std::unexpected(PreprocessorError("Duplicate #else directive in the same #if block"));
   }
-  else_seen[if_level] = true;
+  else_seen[if_level - 1] = true;
 
   if (!skipping) {
     skipping = true;
@@ -38,9 +38,13 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& position,
     skipping = false;
   }
 
-  if (tokens[position + 1]->GetStringType() == "NEWLINE" || tokens[position + 1]->GetStringType() == "EOF" ||
-      tokens[position + 1]->GetLexeme() == ";") {
-    position += 3;
+  if (tokens[position + 1]->GetStringType() == "NEWLINE" || tokens[position + 1]->GetLexeme() == ";") {
+    position += 2;
+
+    return {};
+  } else if (tokens[position + 1]->GetStringType() == "EOF") {
+    ++position;
+
     return {};
   }
 
