@@ -18,7 +18,7 @@ std::filesystem::path get_expected_file_path(const std::string& addition_path, c
 }
 
 // Define tests
-TEST(PreprocessorUnitTestSuite, definebasic) {
+TEST(PreprocessorUnitTestSuite, DefineBasic) {
   const std::string file_name = "Test01_DefineBasic.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -27,7 +27,7 @@ TEST(PreprocessorUnitTestSuite, definebasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, definemultiple) {
+TEST(PreprocessorUnitTestSuite, DefineMultiple) {
   const std::string file_name = "Test02_DefineMultiple.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -36,7 +36,7 @@ TEST(PreprocessorUnitTestSuite, definemultiple) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, defineredefine) {
+TEST(PreprocessorUnitTestSuite, DefineRedefine) {
   const std::string file_name = "Test03_DefineRedefine.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -45,7 +45,7 @@ TEST(PreprocessorUnitTestSuite, defineredefine) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, defineinvalid1) {
+TEST(PreprocessorUnitTestSuite, DefineInvalid1) {
   const std::string file_name = "Test04_DefineInvalid1.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -54,7 +54,7 @@ TEST(PreprocessorUnitTestSuite, defineinvalid1) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, defineinvalid2) {
+TEST(PreprocessorUnitTestSuite, DefineInvalid2) {
   const std::string file_name = "Test05_DefineInvalid2.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -63,7 +63,7 @@ TEST(PreprocessorUnitTestSuite, defineinvalid2) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, defineinvalid3) {
+TEST(PreprocessorUnitTestSuite, DefineInvalid3) {
   const std::string file_name = "Test06_DefineInvalid3.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -72,7 +72,7 @@ TEST(PreprocessorUnitTestSuite, defineinvalid3) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, defineinvalid4) {
+TEST(PreprocessorUnitTestSuite, DefineInvalid4) {
   const std::string file_name = "Test07_DefineInvalid4.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -81,7 +81,7 @@ TEST(PreprocessorUnitTestSuite, defineinvalid4) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, definecomplexname) {
+TEST(PreprocessorUnitTestSuite, DefineComplexName) {
   const std::string file_name = "Test08_DefineComplexName.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -90,7 +90,7 @@ TEST(PreprocessorUnitTestSuite, definecomplexname) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, definespacing) {
+TEST(PreprocessorUnitTestSuite, DefineSpacing) {
   const std::string file_name = "Test09_DefineSpacing.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -99,7 +99,7 @@ TEST(PreprocessorUnitTestSuite, definespacing) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, definecomment) {
+TEST(PreprocessorUnitTestSuite, DefineComment) {
   const std::string file_name = "Test10_DefineComment.txt";
   const std::string dir_name = "define";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -109,7 +109,7 @@ TEST(PreprocessorUnitTestSuite, definecomment) {
 }
 
 // Undef tests
-TEST(PreprocessorUnitTestSuite, undefnonexistent) {
+TEST(PreprocessorUnitTestSuite, UndefNonexistent) {
   const std::string file_name = "Test01_UndefNonexistent.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -118,7 +118,7 @@ TEST(PreprocessorUnitTestSuite, undefnonexistent) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefmultiple) {
+TEST(PreprocessorUnitTestSuite, UndefMultiple) {
   const std::string file_name = "Test02_UndefMultiple.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -127,7 +127,7 @@ TEST(PreprocessorUnitTestSuite, undefmultiple) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefreundef) {
+TEST(PreprocessorUnitTestSuite, UndefReundef) {
   const std::string file_name = "Test03_UndefReundef.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -136,7 +136,7 @@ TEST(PreprocessorUnitTestSuite, undefreundef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefinvalid1) {
+TEST(PreprocessorUnitTestSuite, UndefInvalid1) {
   const std::string file_name = "Test04_UndefInvalid1.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -145,7 +145,7 @@ TEST(PreprocessorUnitTestSuite, undefinvalid1) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefinvalid2) {
+TEST(PreprocessorUnitTestSuite, UndefInvalid2) {
   const std::string file_name = "Test05_UndefInvalid2.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -154,7 +154,7 @@ TEST(PreprocessorUnitTestSuite, undefinvalid2) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefinvalid3) {
+TEST(PreprocessorUnitTestSuite, UndefInvalid3) {
   const std::string file_name = "Test06_UndefInvalid3.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -163,7 +163,7 @@ TEST(PreprocessorUnitTestSuite, undefinvalid3) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefinvalid4) {
+TEST(PreprocessorUnitTestSuite, UndefInvalid4) {
   const std::string file_name = "Test07_UndefInvalid4.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -172,7 +172,7 @@ TEST(PreprocessorUnitTestSuite, undefinvalid4) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefcomplexname) {
+TEST(PreprocessorUnitTestSuite, UndefComplexName) {
   const std::string file_name = "Test08_UndefComplexName.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -181,7 +181,7 @@ TEST(PreprocessorUnitTestSuite, undefcomplexname) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefspacing) {
+TEST(PreprocessorUnitTestSuite, UndefSpacing) {
   const std::string file_name = "Test09_UndefSpacing.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -190,7 +190,7 @@ TEST(PreprocessorUnitTestSuite, undefspacing) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undefcomment) {
+TEST(PreprocessorUnitTestSuite, UndefComment) {
   const std::string file_name = "Test10_UndefComment.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -199,7 +199,7 @@ TEST(PreprocessorUnitTestSuite, undefcomment) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, undeforder) {
+TEST(PreprocessorUnitTestSuite, UndefOrder) {
   const std::string file_name = "Test11_UndefOrder.txt";
   const std::string dir_name = "undef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -209,7 +209,7 @@ TEST(PreprocessorUnitTestSuite, undeforder) {
 }
 
 // Ifdef tests
-TEST(PreprocessorUnitTestSuite, ifdefbasic) {
+TEST(PreprocessorUnitTestSuite, IfdefBasic) {
   const std::string file_name = "Test01_IfdefBasic.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -218,7 +218,7 @@ TEST(PreprocessorUnitTestSuite, ifdefbasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdeffalse) {
+TEST(PreprocessorUnitTestSuite, IfdefFalse) {
   const std::string file_name = "Test02_IfdefFalse.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -227,7 +227,7 @@ TEST(PreprocessorUnitTestSuite, ifdeffalse) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefnested) {
+TEST(PreprocessorUnitTestSuite, IfdefNested) {
   const std::string file_name = "Test03_IfdefNested.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -236,7 +236,7 @@ TEST(PreprocessorUnitTestSuite, ifdefnested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefcomplex) {
+TEST(PreprocessorUnitTestSuite, IfdefComplex) {
   const std::string file_name = "Test04_IfdefComplex.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -245,7 +245,7 @@ TEST(PreprocessorUnitTestSuite, ifdefcomplex) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefempty) {
+TEST(PreprocessorUnitTestSuite, IfdefEmpty) {
   const std::string file_name = "Test05_IfdefEmpty.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -254,7 +254,7 @@ TEST(PreprocessorUnitTestSuite, ifdefempty) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefmissingendif) {
+TEST(PreprocessorUnitTestSuite, IfdefMissingEndif) {
   const std::string file_name = "Test06_IfdefMissingEndif.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -263,7 +263,7 @@ TEST(PreprocessorUnitTestSuite, ifdefmissingendif) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefinvalid) {
+TEST(PreprocessorUnitTestSuite, IfdefInvalid) {
   const std::string file_name = "Test07_IfdefInvalid.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -272,7 +272,7 @@ TEST(PreprocessorUnitTestSuite, ifdefinvalid) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdeforder) {
+TEST(PreprocessorUnitTestSuite, IfdefOrder) {
   const std::string file_name = "Test08_IfdefOrder.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -281,7 +281,7 @@ TEST(PreprocessorUnitTestSuite, ifdeforder) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefundef) {
+TEST(PreprocessorUnitTestSuite, IfdefUndef) {
   const std::string file_name = "Test09_IfdefUndef.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -290,7 +290,7 @@ TEST(PreprocessorUnitTestSuite, ifdefundef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefundeforder) {
+TEST(PreprocessorUnitTestSuite, IfdefUndefOrder) {
   const std::string file_name = "Test10_IfdefUndefOrder.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -299,7 +299,7 @@ TEST(PreprocessorUnitTestSuite, ifdefundeforder) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefdefineafter) {
+TEST(PreprocessorUnitTestSuite, IfdefDefineAfter) {
   const std::string file_name = "Test11_IfdefDefineAfter.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -308,7 +308,7 @@ TEST(PreprocessorUnitTestSuite, ifdefdefineafter) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefmultiple) {
+TEST(PreprocessorUnitTestSuite, IfdefMultiple) {
   const std::string file_name = "Test12_IfdefMultiple.txt";
   const std::string dir_name = "ifdef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -318,7 +318,7 @@ TEST(PreprocessorUnitTestSuite, ifdefmultiple) {
 }
 
 // Ifndef tests
-TEST(PreprocessorUnitTestSuite, ifndefbasic) {
+TEST(PreprocessorUnitTestSuite, IfndefBasic) {
   const std::string file_name = "Test01_IfndefBasic.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -327,7 +327,7 @@ TEST(PreprocessorUnitTestSuite, ifndefbasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndeffalse) {
+TEST(PreprocessorUnitTestSuite, IfndefFalse) {
   const std::string file_name = "Test02_IfndefFalse.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -336,7 +336,7 @@ TEST(PreprocessorUnitTestSuite, ifndeffalse) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefnested) {
+TEST(PreprocessorUnitTestSuite, IfndefNested) {
   const std::string file_name = "Test03_IfndefNested.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -345,7 +345,7 @@ TEST(PreprocessorUnitTestSuite, ifndefnested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefcomplex) {
+TEST(PreprocessorUnitTestSuite, IfndefComplex) {
   const std::string file_name = "Test04_IfndefComplex.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -354,7 +354,7 @@ TEST(PreprocessorUnitTestSuite, ifndefcomplex) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefempty) {
+TEST(PreprocessorUnitTestSuite, IfndefEmpty) {
   const std::string file_name = "Test05_IfndefEmpty.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -363,7 +363,7 @@ TEST(PreprocessorUnitTestSuite, ifndefempty) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefmissingendif) {
+TEST(PreprocessorUnitTestSuite, IfndefMissingendif) {
   const std::string file_name = "Test06_IfndefMissingEndif.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -372,7 +372,7 @@ TEST(PreprocessorUnitTestSuite, ifndefmissingendif) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefinvalid) {
+TEST(PreprocessorUnitTestSuite, IfndefInvalid) {
   const std::string file_name = "Test07_IfndefInvalid.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -381,7 +381,7 @@ TEST(PreprocessorUnitTestSuite, ifndefinvalid) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndeforder) {
+TEST(PreprocessorUnitTestSuite, IfndefOrder) {
   const std::string file_name = "Test08_IfndefOrder.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -390,7 +390,7 @@ TEST(PreprocessorUnitTestSuite, ifndeforder) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefundef) {
+TEST(PreprocessorUnitTestSuite, IfndefUndef) {
   const std::string file_name = "Test09_IfndefUndef.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -399,7 +399,7 @@ TEST(PreprocessorUnitTestSuite, ifndefundef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefundeforder) {
+TEST(PreprocessorUnitTestSuite, IfndefUndefOrder) {
   const std::string file_name = "Test10_IfndefUndefOrder.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -408,7 +408,7 @@ TEST(PreprocessorUnitTestSuite, ifndefundeforder) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefdefineafter) {
+TEST(PreprocessorUnitTestSuite, IfndefDefineAfter) {
   const std::string file_name = "Test11_IfndefDefineAfter.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -417,7 +417,7 @@ TEST(PreprocessorUnitTestSuite, ifndefdefineafter) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefmultiple) {
+TEST(PreprocessorUnitTestSuite, IfndefMultiple) {
   const std::string file_name = "Test12_IfndefMultiple.txt";
   const std::string dir_name = "ifndef";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -427,7 +427,7 @@ TEST(PreprocessorUnitTestSuite, ifndefmultiple) {
 }
 
 // Else-extra tests
-TEST(PreprocessorUnitTestSuite, ifdefelsebasic) {
+TEST(PreprocessorUnitTestSuite, IfdefElseBasic) {
   const std::string file_name = "Test01_IfdefElseBasic.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -436,7 +436,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsebasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelsefalse) {
+TEST(PreprocessorUnitTestSuite, IfdefElseFalse) {
   const std::string file_name = "Test02_IfdefElseFalse.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -445,7 +445,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsefalse) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefelsebasic) {
+TEST(PreprocessorUnitTestSuite, IfndefElseBasic) {
   const std::string file_name = "Test03_IfndefElseBasic.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -454,7 +454,7 @@ TEST(PreprocessorUnitTestSuite, ifndefelsebasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefelsefalse) {
+TEST(PreprocessorUnitTestSuite, IfndefElseFalse) {
   const std::string file_name = "Test04_IfndefElseFalse.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -463,7 +463,7 @@ TEST(PreprocessorUnitTestSuite, ifndefelsefalse) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelsenested) {
+TEST(PreprocessorUnitTestSuite, IfdefElseNested) {
   const std::string file_name = "Test05_IfdefElseNested.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -472,7 +472,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsenested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelsecomplex) {
+TEST(PreprocessorUnitTestSuite, IfdefElseComplex) {
   const std::string file_name = "Test06_IfdefElseComplex.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -481,7 +481,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsecomplex) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelsemissingendif) {
+TEST(PreprocessorUnitTestSuite, IfdefElseMissingEndif) {
   const std::string file_name = "Test07_IfdefElseMissingEndif.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -490,7 +490,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsemissingendif) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelseempty) {
+TEST(PreprocessorUnitTestSuite, IfdefElseEmpty) {
   const std::string file_name = "Test08_IfdefElseEmpty.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -499,7 +499,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelseempty) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelseorder) {
+TEST(PreprocessorUnitTestSuite, IfdefElseOrder) {
   const std::string file_name = "Test09_IfdefElseOrder.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -508,7 +508,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelseorder) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelseundef) {
+TEST(PreprocessorUnitTestSuite, IfdefElseUndef) {
   const std::string file_name = "Test10_IfdefElseUndef.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -517,7 +517,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelseundef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefmultipileelse) {
+TEST(PreprocessorUnitTestSuite, IfdefMultipileElse) {
   const std::string file_name = "Test11_IfdefMultipileElse.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -526,8 +526,8 @@ TEST(PreprocessorUnitTestSuite, ifdefmultipileelse) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelseinnested) {
-  const std::string file_name = "Test12_IfdefElseInnested.txt";
+TEST(PreprocessorUnitTestSuite, IfdefElseInNested) {
+  const std::string file_name = "Test12_IfdefElseInNested.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
@@ -535,8 +535,8 @@ TEST(PreprocessorUnitTestSuite, ifdefelseinnested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifndefelseinnested) {
-  const std::string file_name = "Test13_IfndefElseInnested.txt";
+TEST(PreprocessorUnitTestSuite, IfndefElseInNested) {
+  const std::string file_name = "Test13_IfndefElseInNested.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
@@ -544,7 +544,7 @@ TEST(PreprocessorUnitTestSuite, ifndefelseinnested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelsewithredef) {
+TEST(PreprocessorUnitTestSuite, IfdefElseWithRedef) {
   const std::string file_name = "Test14_IfdefElseWithRedef.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -553,7 +553,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelsewithredef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, ifdefelseedge) {
+TEST(PreprocessorUnitTestSuite, IfdefElseEdge) {
   const std::string file_name = "Test15_IfdefElseEdge.txt";
   const std::string dir_name = "else-extra";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -563,7 +563,7 @@ TEST(PreprocessorUnitTestSuite, ifdefelseedge) {
 }
 
 // Import tests
-TEST(PreprocessorUnitTestSuite, importbasic) {
+TEST(PreprocessorUnitTestSuite, ImportBasic) {
   const std::string file_name = "Test01_ImportBasic.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -572,7 +572,7 @@ TEST(PreprocessorUnitTestSuite, importbasic) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importmultiple) {
+TEST(PreprocessorUnitTestSuite, ImportMultiple) {
   const std::string file_name = "Test02_ImportMultiple.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -581,7 +581,7 @@ TEST(PreprocessorUnitTestSuite, importmultiple) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importfromsubdirectory) {
+TEST(PreprocessorUnitTestSuite, ImportFromSubdirectory) {
   const std::string file_name = "Test03_ImportFromSubdirectory.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -590,7 +590,7 @@ TEST(PreprocessorUnitTestSuite, importfromsubdirectory) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importnested) {
+TEST(PreprocessorUnitTestSuite, ImportNested) {
   const std::string file_name = "Test04_ImportNested.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -599,7 +599,7 @@ TEST(PreprocessorUnitTestSuite, importnested) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importnonexistent) {
+TEST(PreprocessorUnitTestSuite, ImportNonexistent) {
   const std::string file_name = "Test05_ImportNonexistent.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -608,7 +608,7 @@ TEST(PreprocessorUnitTestSuite, importnonexistent) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importwithdefines) {
+TEST(PreprocessorUnitTestSuite, ImportWithDefines) {
   const std::string file_name = "Test06_ImportWithDefines.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -617,7 +617,7 @@ TEST(PreprocessorUnitTestSuite, importwithdefines) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importcircular) {
+TEST(PreprocessorUnitTestSuite, ImportCircular) {
   const std::string file_name = "Test07_ImportCircular.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -626,7 +626,7 @@ TEST(PreprocessorUnitTestSuite, importcircular) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importundef) {
+TEST(PreprocessorUnitTestSuite, ImportUndef) {
   const std::string file_name = "Test08_ImportUndef.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -635,7 +635,7 @@ TEST(PreprocessorUnitTestSuite, importundef) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importcomplex) {
+TEST(PreprocessorUnitTestSuite, ImportComplex) {
   const std::string file_name = "Test09_ImportComplex.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -644,7 +644,7 @@ TEST(PreprocessorUnitTestSuite, importcomplex) {
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, importinvalid) {
+TEST(PreprocessorUnitTestSuite, ImportInvalid) {
   const std::string file_name = "Test10_ImportInvalid.txt";
   const std::string dir_name = "import";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
@@ -654,18 +654,18 @@ TEST(PreprocessorUnitTestSuite, importinvalid) {
 }
 
 // Complex tests
-TEST(PreprocessorUnitTestSuite, complex1) {
+TEST(PreprocessorUnitTestSuite, Complex1) {
   const std::string file_name = "Test01_Complex1.txt";
-  const std::string dir_name = "complex";
+  const std::string dir_name = "Complex";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
 
   PreprocessorUnitTestSuite::RunSingleTest(input_src, expected_src);
 }
 
-TEST(PreprocessorUnitTestSuite, complex2) {
+TEST(PreprocessorUnitTestSuite, Complex2) {
   const std::string file_name = "Test02_Complex2.txt";
-  const std::string dir_name = "complex";
+  const std::string dir_name = "Complex";
   const std::filesystem::path input_src = get_input_file_path(dir_name, file_name);
   const std::filesystem::path expected_src = get_expected_file_path(dir_name, file_name);
 
