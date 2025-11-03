@@ -1,6 +1,6 @@
 #ifndef INIT
 #define INIT
-#import "import1.txt"
+#import "Import1.txt"
 #endif
 
 #ifdef INIT

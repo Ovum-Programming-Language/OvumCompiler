@@ -1,6 +1,6 @@
 #define A
 #define B
-#import "import1.txt"
+#import "Import1.txt"
 #ifdef A
 INCLUDE 2
 #ifndef C
