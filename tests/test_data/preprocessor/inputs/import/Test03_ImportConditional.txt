@@ -1,8 +1,6 @@
-INCLUDENUM 2
-
 #define NEED_IMPORT
 #ifdef NEED_IMPORT
-#import "import1.txt"
+#import "Import1.txt"
 #endif
 INCLUDE 1
 INCLUDE 2

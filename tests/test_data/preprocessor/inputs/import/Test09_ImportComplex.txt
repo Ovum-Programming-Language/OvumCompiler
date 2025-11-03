@@ -1,5 +1,5 @@
 #define PLATFORM_WIN
-#import "import_platform.txt"
+#import "ImportPlatform.txt"
 #ifdef FEAT_A
 INCLUDE 3
 #endif

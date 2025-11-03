@@ -119,7 +119,7 @@ std::string PreprocessorUnitTestSuite::BuildDetailedComparison(const std::vector
   ss << "----|-------------------|------------------------------\n";
 
   for (size_t i = 0; i < max_size; ++i) {
-    ss << std::setw(4) << i << " | ";
+    ss << std::setw(3) << i << " | ";
 
     // Actual token
     if (i < actual.size()) {

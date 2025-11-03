@@ -1,5 +1,5 @@
 #define GLOBAL_FEAT
-#import "import_with_def.txt"
+#import "ImportWithDef.txt"
 #ifdef IMPORT_FEAT
 INCLUDE 1
 #endif
