@@ -27,10 +27,10 @@ std::expected<void, PreprocessorError> ElseHandler::Process(size_t& position,
     return std::unexpected(UnmatchedDirectiveError("Mismatched #else at line " +
                                                    std::to_string(tokens[position]->GetPosition().GetLine())));
   }
-  if (else_seen[if_level]) {
+  if (else_seen[if_level - 1]) {
     return std::unexpected(PreprocessorError("Duplicate #else directive in the same #if block"));
   }
-  else_seen[if_level] = true;
+  else_seen[if_level - 1] = true;
 
   if (!skipping) {
     skipping = true;
