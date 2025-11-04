@@ -1,0 +1,20 @@
+#define X
+#ifdef X
+INCLUDE 1
+#else
+INCLUDE 5
+#endif
+
+#ifdef Y
+INCLUDE 6
+#else
+INCLUDE 2
+#endif
+
+#ifndef Z
+INCLUDE 3
+#else
+INCLUDE 7
+#endif
+
+INCLUDE 4

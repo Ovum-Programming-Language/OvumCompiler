@@ -1,0 +1,7 @@
+#define TEMP
+#import "ImportUndef.txt"
+#ifdef TEMP
+INCLUDE 3
+#else
+INCLUDE 4
+#endif
