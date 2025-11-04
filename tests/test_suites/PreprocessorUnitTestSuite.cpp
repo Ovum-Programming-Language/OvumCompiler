@@ -65,8 +65,6 @@ void PreprocessorUnitTestSuite::RunSingleTest(const std::filesystem::path& input
       return;
     }
   }
-
-  return;
 }
 
 std::expected<std::vector<TokenPtr>, std::string> PreprocessorUnitTestSuite::TokenizeExpectedFile(

@@ -21,7 +21,7 @@ OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
         TokenFactory::MakeFloatLiteral(s, std::nan(""), wrapper.GetLine(), wrapper.GetTokenCol()));
   }
 
-  if (wrapper.IsKeyword(s)) {
+  if (SourceCodeWrapper::IsKeyword(s)) {
     if (s == "true" || s == "false") {
       return std::make_optional(
           TokenFactory::MakeBoolLiteral(s, s == "true", wrapper.GetLine(), wrapper.GetTokenCol()));
