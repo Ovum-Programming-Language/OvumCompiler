@@ -1,6 +1,5 @@
 #include "Preprocessor.hpp"
 
-#include <exception>
 #include <fstream>
 #include <utility>
 
@@ -33,13 +32,13 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() 
   }
 
   lexer::Lexer lexer(content, false);
-  std::vector<TokenPtr> tokens;
+  auto tokens_result = lexer.Tokenize();
 
-  try {
-    tokens = std::move(lexer.Tokenize());
-  } catch (const std::exception& e) {
-    return std::unexpected(PreprocessorError(e.what()));
+  if (!tokens_result) {
+    return std::unexpected(PreprocessorError(tokens_result.error().what()));
   }
+
+  std::vector<TokenPtr> tokens = std::move(tokens_result.value());
 
   for (std::unique_ptr<TokenProcessor>& processor : token_processors_) {
     std::expected<std::vector<TokenPtr>, PreprocessorError> processor_result = std::move(processor->Process(tokens));

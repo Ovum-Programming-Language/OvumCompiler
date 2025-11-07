@@ -2,7 +2,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
   while (!wrapper.IsAtEnd()) {
     if (char p = wrapper.Peek(); p != ' ' && p != '\t' && p != '\r') {
       break;

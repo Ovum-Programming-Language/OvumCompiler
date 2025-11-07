@@ -12,7 +12,7 @@ class DotCompositeHandler : public Handler {
 public:
   DotCompositeHandler();
 
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 
 private:
   std::unique_ptr<NumberHandler> num_;

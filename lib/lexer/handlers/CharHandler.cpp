@@ -5,7 +5,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> CharHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
   raw.push_back('\'');
   char val = '\0';
@@ -32,7 +32,7 @@ OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
         val = '\0';
         break;
       default:
-        throw LexerError(std::string("Unknown escape in char literal: \\") + e);
+        return std::unexpected(LexerError(std::string("Unknown escape in char literal: \\") + e));
     }
   } else {
     char c = wrapper.Advance();
@@ -41,18 +41,18 @@ OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
   }
 
   if (wrapper.IsAtEnd()) {
-    throw LexerError("Unterminated char literal");
+    return std::unexpected(LexerError("Unterminated char literal"));
   }
 
   if (wrapper.Peek() == '\n') {
-    throw LexerError("Newline in char literal");
+    return std::unexpected(LexerError("Newline in char literal"));
   }
 
   if (wrapper.Peek() == '\'') {
     wrapper.Advance();
     raw.push_back('\'');
   } else {
-    throw LexerError("Too many characters in char literal");
+    return std::unexpected(LexerError("Too many characters in char literal"));
   }
 
   return std::make_optional(

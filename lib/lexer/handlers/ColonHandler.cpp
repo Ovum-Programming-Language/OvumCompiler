@@ -3,7 +3,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken ColonHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> ColonHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string op;
   op.push_back(wrapper.CurrentChar());
 

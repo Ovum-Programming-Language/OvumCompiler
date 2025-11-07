@@ -3,10 +3,12 @@
 
 #include <array>
 #include <cstddef>
+#include <expected>
 #include <memory>
 #include <string_view>
 #include <vector>
 
+#include "LexerError.hpp"
 #include "SourceCodeWrapper.hpp"
 #include "handlers/Handler.hpp"
 #include "lib/tokens/Token.hpp"
@@ -21,7 +23,7 @@ class Lexer {
 public:
   explicit Lexer(std::string_view src, bool keep_comments = false);
 
-  std::vector<TokenPtr> Tokenize();
+  std::expected<std::vector<TokenPtr>, LexerError> Tokenize();
 
   void SetHandler(unsigned char ch, std::unique_ptr<Handler> handler);
 

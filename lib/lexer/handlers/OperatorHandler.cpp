@@ -4,7 +4,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string op;
   op.push_back(wrapper.CurrentChar());
   char p = wrapper.Peek();

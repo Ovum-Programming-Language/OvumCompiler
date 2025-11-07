@@ -79,7 +79,11 @@ std::expected<std::vector<TokenPtr>, std::string> PreprocessorUnitTestSuite::Tok
   ovum::compiler::lexer::Lexer lexer(content, false);
   auto tokens_result = lexer.Tokenize();
 
-  return tokens_result;
+  if (!tokens_result) {
+    return std::unexpected("Lexer error: " + std::string(tokens_result.error().what()));
+  }
+
+  return tokens_result.value();
 }
 
 bool PreprocessorUnitTestSuite::CompareTokenSequences(const std::vector<TokenPtr>& actual,

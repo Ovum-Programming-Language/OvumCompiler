@@ -4,7 +4,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken PunctHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> PunctHandler::Scan(SourceCodeWrapper& wrapper) {
   char c = wrapper.CurrentChar();
   return std::make_optional(TokenFactory::MakePunct(c, wrapper.GetLine(), wrapper.GetTokenCol()));
 }

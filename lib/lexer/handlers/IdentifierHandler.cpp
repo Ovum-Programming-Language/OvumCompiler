@@ -8,7 +8,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string s;
   s.push_back(wrapper.CurrentChar());
   wrapper.ConsumeWhile(s, [](char ch) { return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_'; });
@@ -33,7 +33,7 @@ OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
   }
 
   if (s[0] == '#') {
-    throw LexerError(std::string("Not a keyword, started with #: ") + s);
+    return std::unexpected(LexerError(std::string("Not a keyword, started with #: ") + s));
   }
 
   return std::make_optional(TokenFactory::MakeIdent(std::move(s), wrapper.GetLine(), wrapper.GetTokenCol()));

@@ -7,20 +7,20 @@ DotCompositeHandler::DotCompositeHandler() :
     punct_(std::make_unique<PunctHandler>()) {
 }
 
-OptToken DotCompositeHandler::Scan(SourceCodeWrapper& w) {
+std::expected<OptToken, LexerError> DotCompositeHandler::Scan(SourceCodeWrapper& w) {
   if (std::isdigit(static_cast<unsigned char>(w.Peek()))) {
     return num_->Scan(w);
   }
 
-  if (auto t = op_->Scan(w)) {
-    return t;
+  auto op_result = op_->Scan(w);
+  if (!op_result) {
+    return op_result;
+  }
+  if (op_result.value()) {
+    return op_result;
   }
 
-  if (punct_) {
-    return punct_->Scan(w);
-  }
-
-  return std::nullopt;
+  return punct_->Scan(w);
 }
 
 } // namespace ovum::compiler::lexer

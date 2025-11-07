@@ -7,7 +7,7 @@ namespace ovum::compiler::lexer {
 
 class StringHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
 } // namespace ovum::compiler::lexer

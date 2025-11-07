@@ -29,7 +29,7 @@ Lexer::Lexer(std::string_view src, bool keep_comments) :
     wrapper_(src, keep_comments), handlers_(MakeDefaultHandlers()), default_handler_(MakeDefaultHandler()) {
 }
 
-std::vector<TokenPtr> Lexer::Tokenize() {
+std::expected<std::vector<TokenPtr>, LexerError> Lexer::Tokenize() {
   std::vector<TokenPtr> tokens;
   tokens.reserve(kDefaultTokenReserve);
 
@@ -43,7 +43,13 @@ std::vector<TokenPtr> Lexer::Tokenize() {
       current_handler = default_handler_.get();
     }
 
-    OptToken maybe_token = current_handler->Scan(wrapper_);
+    auto maybe_token_result = current_handler->Scan(wrapper_);
+
+    if (!maybe_token_result) {
+      return std::unexpected(maybe_token_result.error());
+    }
+
+    OptToken maybe_token = maybe_token_result.value();
 
     if (maybe_token && *maybe_token) {
       tokens.push_back(std::move(*maybe_token));

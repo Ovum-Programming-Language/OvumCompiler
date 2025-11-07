@@ -5,7 +5,7 @@
 
 namespace ovum::compiler::lexer {
 
-OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> SlashHandler::Scan(SourceCodeWrapper& wrapper) {
   if (wrapper.Peek() == '/') {
     std::string txt;
 
@@ -40,7 +40,7 @@ OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
     }
 
     if (!closed) {
-      throw LexerError("Unterminated block comment");
+      return std::unexpected(LexerError("Unterminated block comment"));
     }
 
     if (wrapper.IsKeepComments()) {

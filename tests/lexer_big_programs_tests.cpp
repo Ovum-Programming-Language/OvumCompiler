@@ -17,8 +17,9 @@ TEST(LexerUnitTestSuite, ExampleFundamentals) {
   sys::Print(i.ToString())
   })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleFundamentals","(",")",":","Void","{","\\n",
@@ -55,8 +56,9 @@ val count: Int = 0
 val pi: Float = 3.14
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleReferences","(",")",":","Void","{","\\n",
@@ -92,8 +94,9 @@ val optArr: IntArray? = null
 val safeInt: Int? = 42
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ExampleNullable", "(", ")",        ":", "Void", "{",         "\\n",
@@ -120,8 +123,9 @@ intArr[1] := 2
 val emptyList: IntArray = IntArray(0)
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","ExampleArrays","(",")",":","Void","{","\\n",
@@ -155,8 +159,9 @@ val shape: IShape = Circle(5.0)
 val circle: Circle? = Circle(10.0)
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "interface", "IShape", "{",     "fun",    "Area",     "(",          ")",      ":",
@@ -197,8 +202,9 @@ val obj: ExampleClass = ExampleClass()
 obj.mutable = 30.0
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "class","ExampleClass","{","\\n",
@@ -227,8 +233,9 @@ else if (x < 0) { sys::Print("Negative") }
 else { sys::Print("Zero") }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","SimpleIf","(","x",":","int",")",":","Void","{","\\n",
@@ -256,8 +263,9 @@ else if (!a ^ b) { sys::Print("Exactly one false") }
 else { sys::Print("Both false") }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun","BooleanConditions","(","a",":","bool",",","b",":","bool",")",":","Void","{","\\n",
@@ -289,8 +297,9 @@ else if (obj is Int) { val num: Int = obj as Int sys::Print(num.ToString()) }
 else { sys::Print("Unknown type") }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "TypeConditions", "(", "obj", ":", "Object", ")", ":", "Void", "{",
@@ -328,8 +337,9 @@ if (value > 10) { return value * 2 }
 else { return value }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "ElvisInIf", "(", "opt", ":",  "Int", "?",    ")",  ":",      "int",   "{", "\\n", "val", "value",
@@ -352,8 +362,9 @@ else if (x > 10) return "Big"
 else return "Other"
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "WhenLike", "(",       "x",      ":",       "int",    ")",         ":",   "String", "{",  "\\n", "if",
@@ -383,8 +394,9 @@ while (counter < n) {
 return counter
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "WhileExample", "(", "n", ":", "int", ")", ":", "int", "{",
@@ -425,8 +437,9 @@ for (num in arr) { if (num < 0) break sum = sum + num }
 return sum
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ForExample", "(", "arr", ":", "IntArray", ")",      ":",   "int", "{",     "\\n",
@@ -455,8 +468,9 @@ if (i > 5) break }
 }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "NestedLoops", "(", "matrix", ":", "IntArrayArray", ")", ":", "Void", "{",
@@ -503,8 +517,9 @@ while (i < arr.Length()) {
 sys::Print((i.ToString() + ": " + arr[i].ToString()))
 i = i + 1 }})OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ForWithIndex", "(", "arr", ":", "IntArray", ")", ":", "Void", "{",
@@ -543,8 +558,9 @@ fromLiteral[0] := 1
 fromLiteral[1] := 2
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListCreation", "(", ")", ":", "Void", "{",
@@ -592,8 +608,9 @@ if (list[idx] % 2 == 0) { list[idx] := list[idx] * 2 } idx = idx + 1 }
 return total
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListIteration", "(", "list", ":", "IntArray", ")", ":", "int", "{",
@@ -635,8 +652,9 @@ newList[original.Length()] := 100
 return newList
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ListOps", "(", "original", ":",   "IntArray", ")",        ":",        "IntArray", "{",      "\\n",
@@ -667,8 +685,9 @@ for (num in list) { if (num == target) { return Int(num) } }
 return null
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "FindInList", "(", "list", ":", "IntArray", ",", "target", ":", "int", ")", ":", "Int", "?", "{",
@@ -696,8 +715,9 @@ val length: int = obj?.Length() ?: 0
 sys::Print(length.ToString())
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "SafeCall", "(",   "obj",    ":",   "String",   "?",      ")", ":", "Void", "{", "\\n", "val",
@@ -719,8 +739,9 @@ val str: String = optInt?.ToString() ?: "Unknown"
 return default
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "ElvisExamples", "(", "optInt", ":", "Int", "?", ")", ":", "int", "{",
@@ -750,8 +771,9 @@ val safe: Object? = opt
 if (safe == null) { sys::Print("Is null") }
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun",    "NullChecks", "(",   "opt",   ":",   "Object",       "?",   ")",           ":",
@@ -783,8 +805,9 @@ sys::Print(value.ToString()) }
 val risky: Int = obj as Int
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "CastNullable", "(", "obj", ":", "Object", "?", ")", ":", "Void", "{",
@@ -822,8 +845,9 @@ while (i < src.Length()) { copy[i] := src[i] i = i + 1 }
 return copy
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "CopyNullable", "(", "src", ":", "IntArray", "?", ")", ":", "IntArray", "?", "{",
@@ -864,8 +888,9 @@ val len: int = nested?.Inner?.Length() ?: 0
 sys::Print(len.ToString())
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "class", "Nested", "{",
@@ -903,8 +928,9 @@ val bVal: int = b ?: 0
 return Int(aVal + bVal)
 })OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "pure", "fun", "SafeAdd", "(",   "a",    ":",   "Int",    "?",   ",", "b",    ":", "Int",  "?",   ")",    ":",
@@ -927,8 +953,9 @@ if (ptr != null) {
 val bytes: ByteArray = (ptr as ByteArray)
 } }})OVUM";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   // clang-format off
   std::vector<std::string> expected_lexemes = {
       "fun", "UnsafeNullable", "(", "ptr", ":", "Pointer", "?", ")", ":", "Void", "{",
