@@ -2,7 +2,7 @@
 #define PREPROCESSOR_ELSE_HANDLER_HPP_
 
 #include "DirectiveHandler.hpp"
-#include "lib/lexer/tokens/Token.hpp"
+#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

@@ -5,9 +5,11 @@
 #include <vector>
 
 #include "PreprocessorError.hpp"
-#include "lib/lexer/tokens/Token.hpp"
+#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
+
+using TokenPtr = ovum::TokenPtr;
 
 class TokenProcessor { // NOLINT(cppcoreguidelines-special-member-functions)
 public:

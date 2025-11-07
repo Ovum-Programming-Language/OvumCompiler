@@ -1,11 +1,15 @@
-#ifndef NUMBERHANDLER_HPP_
-#define NUMBERHANDLER_HPP_
+#ifndef LEXER_NUMBERHANDLER_HPP_
+#define LEXER_NUMBERHANDLER_HPP_
 
 #include "Handler.hpp"
+
+namespace ovum::compiler::lexer {
 
 class NumberHandler : public Handler {
 public:
   OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // NUMBERHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_NUMBERHANDLER_HPP_

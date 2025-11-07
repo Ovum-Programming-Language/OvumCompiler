@@ -1,10 +1,12 @@
-#ifndef DOTCOMPOSITEHANDLER_HPP_
-#define DOTCOMPOSITEHANDLER_HPP_
+#ifndef LEXER_DOTCOMPOSITEHANDLER_HPP_
+#define LEXER_DOTCOMPOSITEHANDLER_HPP_
 
 #include "Handler.hpp"
 #include "NumberHandler.hpp"
 #include "OperatorHandler.hpp"
 #include "PunctHandler.hpp"
+
+namespace ovum::compiler::lexer {
 
 class DotCompositeHandler : public Handler {
 public:
@@ -18,4 +20,6 @@ private:
   std::unique_ptr<PunctHandler> punct_;
 };
 
-#endif // DOTCOMPOSITEHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_DOTCOMPOSITEHANDLER_HPP_

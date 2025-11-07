@@ -4,6 +4,8 @@
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/LexerUnitTestSuite.hpp"
 
+using ovum::compiler::lexer::Lexer;
+
 TEST(LexerUnitTestSuite, ExampleFundamentals) {
   const std::string src = R"OVUM(fun ExampleFundamentals(): Void {
   val i: int = 42

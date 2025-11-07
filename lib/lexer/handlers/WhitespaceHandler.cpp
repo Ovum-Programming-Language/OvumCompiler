@@ -1,5 +1,7 @@
 #include "WhitespaceHandler.hpp"
 
+namespace ovum::compiler::lexer {
+
 OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
   while (!wrapper.IsAtEnd()) {
     if (char p = wrapper.Peek(); p != ' ' && p != '\t' && p != '\r') {
@@ -11,3 +13,5 @@ OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::nullopt;
 }
+
+} // namespace ovum::compiler::lexer

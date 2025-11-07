@@ -13,21 +13,6 @@ add_library(lexer STATIC
         handlers/SlashHandler.cpp
         handlers/StringHandler.cpp
         handlers/WhitespaceHandler.cpp
-        tokens/CommentToken.cpp
-        tokens/EofToken.cpp
-        tokens/IdentToken.cpp
-        tokens/KeywordToken.cpp
-        tokens/LiteralToken.cpp
-        tokens/NewlineToken.cpp
-        tokens/OperatorToken.cpp
-        tokens/PunctToken.cpp
-        values/BoolValue.cpp
-        values/CharValue.cpp
-        values/FloatValue.cpp
-        values/IntValue.cpp
-        values/StringValue.cpp
-        tokens/TokenFactory.cpp
-        tokens/TokenPosition.cpp
 )
 
 target_include_directories(lexer
@@ -38,4 +23,8 @@ target_include_directories(lexer
 target_include_directories(lexer
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(lexer PUBLIC
+        tokens
 )

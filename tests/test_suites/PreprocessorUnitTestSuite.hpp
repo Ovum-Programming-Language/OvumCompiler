@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
+#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

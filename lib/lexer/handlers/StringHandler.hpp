@@ -1,11 +1,15 @@
-#ifndef STRINGHANDLER_H
-#define STRINGHANDLER_H
+#ifndef LEXER_STRINGHANDLER_HPP_
+#define LEXER_STRINGHANDLER_HPP_
 
 #include "Handler.hpp"
+
+namespace ovum::compiler::lexer {
 
 class StringHandler : public Handler {
 public:
   OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // STRINGHANDLER_H
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_STRINGHANDLER_HPP_

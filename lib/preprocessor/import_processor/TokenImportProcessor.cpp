@@ -124,7 +124,7 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
         std::string content_str = std::move(content_result.value());
         std::string_view content_view(content_str);
 
-        Lexer lexer(content_view, false);
+        lexer::Lexer lexer(content_view, false);
         std::vector<TokenPtr> raw_tokens;
 
         try {

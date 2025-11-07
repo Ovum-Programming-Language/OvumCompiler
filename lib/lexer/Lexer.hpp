@@ -1,5 +1,5 @@
-#ifndef LEXER_HPP_
-#define LEXER_HPP_
+#ifndef LEXER_LEXER_HPP_
+#define LEXER_LEXER_HPP_
 
 #include <array>
 #include <cstddef>
@@ -9,6 +9,11 @@
 
 #include "SourceCodeWrapper.hpp"
 #include "handlers/Handler.hpp"
+#include "lib/tokens/Token.hpp"
+
+namespace ovum::compiler::lexer {
+
+using TokenPtr = ovum::TokenPtr;
 
 constexpr std::size_t kDefaultTokenReserve = 256;
 
@@ -32,4 +37,6 @@ private:
   std::unique_ptr<Handler> default_handler_;
 };
 
-#endif // LEXER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_LEXER_HPP_

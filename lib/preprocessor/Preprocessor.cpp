@@ -32,7 +32,7 @@ std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() 
     return std::unexpected(FileReadError(file.string(), "Read error"));
   }
 
-  Lexer lexer(content, false);
+  lexer::Lexer lexer(content, false);
   std::vector<TokenPtr> tokens;
 
   try {

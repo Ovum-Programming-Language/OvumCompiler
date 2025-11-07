@@ -4,6 +4,8 @@
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/LexerUnitTestSuite.hpp"
 
+using ovum::compiler::lexer::Lexer;
+
 TEST(LexerUnitTestSuite, EmptyString) {
   const std::string src = "";
   Lexer lexer(src);

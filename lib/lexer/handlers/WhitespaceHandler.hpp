@@ -1,11 +1,15 @@
-#ifndef WHITESPACEHANDLER_HPP_
-#define WHITESPACEHANDLER_HPP_
+#ifndef LEXER_WHITESPACEHANDLER_HPP_
+#define LEXER_WHITESPACEHANDLER_HPP_
 
 #include "Handler.hpp"
+
+namespace ovum::compiler::lexer {
 
 class WhitespaceHandler : public Handler {
 public:
   OptToken Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // WHITESPACEHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_WHITESPACEHANDLER_HPP_

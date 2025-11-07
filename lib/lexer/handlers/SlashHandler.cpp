@@ -1,7 +1,9 @@
 #include "SlashHandler.hpp"
 
 #include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
   if (wrapper.Peek() == '/') {
@@ -50,3 +52,5 @@ OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::make_optional(TokenFactory::MakeOperator(std::string(1, '/'), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

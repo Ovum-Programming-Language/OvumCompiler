@@ -7,10 +7,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
 #include "lib/preprocessor/directives_processor/handlers/DirectiveHandler.hpp"
+#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

@@ -1,11 +1,13 @@
-#ifndef SOURCECODEWRAPPER_HPP_
-#define SOURCECODEWRAPPER_HPP_
+#ifndef LEXER_SOURCECODEWRAPPER_HPP_
+#define LEXER_SOURCECODEWRAPPER_HPP_
 
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <string_view>
 #include <unordered_set>
+
+namespace ovum::compiler::lexer {
 
 class SourceCodeWrapper {
 public:
@@ -53,4 +55,6 @@ private:
   static const std::unordered_set<std::string_view> kMultiOps;
 };
 
-#endif // SOURCECODEWRAPPER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_SOURCECODEWRAPPER_HPP_

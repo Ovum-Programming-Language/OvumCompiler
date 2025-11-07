@@ -4,7 +4,9 @@
 #include <limits>
 
 #include "LexerError.hpp"
-#include "lib/lexer/tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string s;
@@ -36,3 +38,5 @@ OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::make_optional(TokenFactory::MakeIdent(std::move(s), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

@@ -16,7 +16,9 @@
 #include "handlers/StringHandler.hpp"
 #include "handlers/WhitespaceHandler.hpp"
 
-#include "tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 namespace {
 constexpr const char* kOperatorChars = "+-*%<>=!&|^~?";
@@ -105,3 +107,5 @@ std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> Lexer::MakeDefaultHan
 std::unique_ptr<Handler> Lexer::MakeDefaultHandler() {
   return std::make_unique<DefaultHandler>();
 }
+
+} // namespace ovum::compiler::lexer

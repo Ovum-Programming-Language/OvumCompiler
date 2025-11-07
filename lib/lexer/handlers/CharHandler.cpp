@@ -1,7 +1,9 @@
 #include "CharHandler.hpp"
 
 #include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
@@ -56,3 +58,5 @@ OptToken CharHandler::Scan(SourceCodeWrapper& wrapper) {
   return std::make_optional(
       TokenFactory::MakeCharLiteral(std::move(raw), val, wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

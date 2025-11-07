@@ -1,5 +1,7 @@
 #include "DotCompositeHandler.hpp"
 
+namespace ovum::compiler::lexer {
+
 DotCompositeHandler::DotCompositeHandler() :
     num_(std::make_unique<NumberHandler>()), op_(std::make_unique<OperatorHandler>()),
     punct_(std::make_unique<PunctHandler>()) {
@@ -20,3 +22,5 @@ OptToken DotCompositeHandler::Scan(SourceCodeWrapper& w) {
 
   return std::nullopt;
 }
+
+} // namespace ovum::compiler::lexer

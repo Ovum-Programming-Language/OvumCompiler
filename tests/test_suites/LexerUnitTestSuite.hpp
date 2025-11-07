@@ -2,10 +2,12 @@
 #define OVUMC_LEXERUNITTESTSUITE_HPP
 
 #include <gtest/gtest.h>
-#include "lib/lexer/tokens/Token.hpp"
+#include "lib/tokens/Token.hpp"
 
 struct LexerUnitTestSuite : public testing::Test {
-  static std::vector<std::pair<std::string, std::string>> ExtractLexemesAndTypes(const std::vector<TokenPtr>& tokens);
+public:
+  static std::vector<std::pair<std::string, std::string>> ExtractLexemesAndTypes(
+      const std::vector<ovum::TokenPtr>& tokens);
 
   static void PrintLexemesAndTypes(const std::vector<std::pair<std::string, std::string>>& items);
 

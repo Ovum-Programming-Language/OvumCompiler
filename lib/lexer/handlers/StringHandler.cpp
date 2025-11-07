@@ -3,7 +3,9 @@
 #include <utility>
 
 #include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 OptToken StringHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
@@ -60,3 +62,5 @@ OptToken StringHandler::Scan(SourceCodeWrapper& wrapper) {
 
   throw LexerError("Unterminated string literal (EOF reached)");
 }
+
+} // namespace ovum::compiler::lexer

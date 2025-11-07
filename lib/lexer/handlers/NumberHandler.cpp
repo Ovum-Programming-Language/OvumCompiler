@@ -4,7 +4,9 @@
 #include <string>
 
 #include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+#include "lib/tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 namespace {
 inline constexpr int kHexAlphaOffset = 10;
@@ -189,3 +191,5 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return TokenFactory::MakeIntLiteral(std::move(raw), vi, wrapper.GetLine(), wrapper.GetTokenCol());
 }
+
+} // namespace ovum::compiler::lexer

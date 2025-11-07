@@ -76,7 +76,7 @@ std::expected<std::vector<TokenPtr>, std::string> PreprocessorUnitTestSuite::Tok
 
   std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-  Lexer lexer(content, false);
+  ovum::compiler::lexer::Lexer lexer(content, false);
   auto tokens_result = lexer.Tokenize();
 
   return tokens_result;
