@@ -2,8 +2,9 @@
 
 #include <utility>
 
+#include <tokens/TokenFactory.hpp>
+
 #include "lib/lexer/LexerError.hpp"
-#include "lib/tokens/TokenFactory.hpp"
 
 namespace ovum::compiler::lexer {
 

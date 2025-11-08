@@ -3,6 +3,8 @@
 #include <string>
 #include <utility>
 
+#include <tokens/TokenFactory.hpp>
+
 #include "handlers/CharHandler.hpp"
 #include "handlers/ColonHandler.hpp"
 #include "handlers/DefaultHandler.hpp"
@@ -15,8 +17,6 @@
 #include "handlers/SlashHandler.hpp"
 #include "handlers/StringHandler.hpp"
 #include "handlers/WhitespaceHandler.hpp"
-
-#include "lib/tokens/TokenFactory.hpp"
 
 namespace ovum::compiler::lexer {
 

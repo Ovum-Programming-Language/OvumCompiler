@@ -11,3 +11,12 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(googletest)
+
+# Ovum Common
+FetchContent_Declare(
+    ovumcommon
+    GIT_REPOSITORY https://github.com/Ovum-Programming-Language/OvumCommon.git
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(ovumcommon)

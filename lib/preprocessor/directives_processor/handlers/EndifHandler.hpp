@@ -1,8 +1,9 @@
 #ifndef PREPROCESSOR_ENDIF_HANDLER_HPP_
 #define PREPROCESSOR_ENDIF_HANDLER_HPP_
 
+#include <tokens/Token.hpp>
+
 #include "DirectiveHandler.hpp"
-#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

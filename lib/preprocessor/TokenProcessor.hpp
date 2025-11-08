@@ -4,8 +4,9 @@
 #include <expected>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "PreprocessorError.hpp"
-#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

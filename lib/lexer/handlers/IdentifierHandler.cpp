@@ -3,8 +3,9 @@
 #include <cmath>
 #include <limits>
 
+#include <tokens/TokenFactory.hpp>
+
 #include "LexerError.hpp"
-#include "lib/tokens/TokenFactory.hpp"
 
 namespace ovum::compiler::lexer {
 

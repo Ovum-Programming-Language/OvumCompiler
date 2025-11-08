@@ -2,7 +2,8 @@
 #define OVUMC_LEXERUNITTESTSUITE_HPP
 
 #include <gtest/gtest.h>
-#include "lib/tokens/Token.hpp"
+
+#include <tokens/Token.hpp>
 
 struct LexerUnitTestSuite : public testing::Test {
 public:

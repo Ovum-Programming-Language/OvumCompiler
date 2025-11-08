@@ -9,10 +9,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "FileGraph.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
-#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::preprocessor {
 

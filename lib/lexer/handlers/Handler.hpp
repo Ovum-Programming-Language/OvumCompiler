@@ -4,9 +4,10 @@
 #include <expected>
 #include <optional>
 
+#include <tokens/Token.hpp>
+
 #include "lib/lexer/LexerError.hpp"
 #include "lib/lexer/SourceCodeWrapper.hpp"
-#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::lexer {
 

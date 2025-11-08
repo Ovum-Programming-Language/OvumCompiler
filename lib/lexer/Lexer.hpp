@@ -8,10 +8,11 @@
 #include <string_view>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "LexerError.hpp"
 #include "SourceCodeWrapper.hpp"
 #include "handlers/Handler.hpp"
-#include "lib/tokens/Token.hpp"
 
 namespace ovum::compiler::lexer {
 

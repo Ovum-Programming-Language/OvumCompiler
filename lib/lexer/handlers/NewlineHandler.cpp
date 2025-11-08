@@ -1,6 +1,6 @@
 #include "NewlineHandler.hpp"
 
-#include "lib/tokens/TokenFactory.hpp"
+#include <tokens/TokenFactory.hpp>
 
 namespace ovum::compiler::lexer {
 
