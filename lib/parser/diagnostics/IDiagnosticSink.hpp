@@ -1,9 +1,12 @@
 #ifndef IDIAGNOSTICSINK_HPP_
 #define IDIAGNOSTICSINK_HPP_
 
+#include <cstddef>
 #include <optional>
+#include <string_view>
 
 #include "Diagnostic.hpp"
+#include "lib/parser/tokens/SourceSpan.hpp"
 
 class IDiagnosticSink {
 public:

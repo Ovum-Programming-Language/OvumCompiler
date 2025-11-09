@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string_view>
+
 #include "ISeverity.hpp"
 
 class Severity {

@@ -8,7 +8,7 @@
 class FixIt {
 public:
   FixIt(SourceSpan source_span, std::string replacement);
-  // TODO: make methods
+
 private:
   SourceSpan where_;
   std::string replacement_;
