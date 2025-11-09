@@ -124,14 +124,15 @@ std::expected<void, PreprocessorError> TokenImportProcessor::GatherDependencies(
         std::string content_str = std::move(content_result.value());
         std::string_view content_view(content_str);
 
-        Lexer lexer(content_view, false);
-        std::vector<TokenPtr> raw_tokens;
+        lexer::Lexer lexer(content_view, false);
+        auto raw_tokens_result = lexer.Tokenize();
 
-        try {
-          raw_tokens = lexer.Tokenize();
-        } catch (const std::exception& e) {
-          return std::unexpected(PreprocessorError("Lexer error for " + dep_path.string() + ": " + e.what()));
+        if (!raw_tokens_result) {
+          return std::unexpected(
+              PreprocessorError("Lexer error for " + dep_path.string() + ": " + raw_tokens_result.error().what()));
         }
+
+        std::vector<TokenPtr> raw_tokens = std::move(raw_tokens_result.value());
 
         std::expected<void, PreprocessorError> sub_result = GatherDependencies(dep_path, raw_tokens);
 

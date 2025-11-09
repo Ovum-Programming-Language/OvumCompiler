@@ -1,6 +1,8 @@
 #include "WhitespaceHandler.hpp"
 
-OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
+namespace ovum::compiler::lexer {
+
+std::expected<OptToken, LexerError> WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
   while (!wrapper.IsAtEnd()) {
     if (char p = wrapper.Peek(); p != ' ' && p != '\t' && p != '\r') {
       break;
@@ -11,3 +13,5 @@ OptToken WhitespaceHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::nullopt;
 }
+
+} // namespace ovum::compiler::lexer

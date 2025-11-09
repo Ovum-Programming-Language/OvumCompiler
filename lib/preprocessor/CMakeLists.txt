@@ -26,6 +26,7 @@ target_include_directories(preprocessor
 
 target_link_libraries(preprocessor PUBLIC
         lexer
+        tokens
 )
 
 target_include_directories(preprocessor PUBLIC ${PROJECT_SOURCE_DIR})

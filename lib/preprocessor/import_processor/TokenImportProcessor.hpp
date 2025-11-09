@@ -9,8 +9,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "FileGraph.hpp"
-#include "lib/lexer/tokens/Token.hpp"
 #include "lib/preprocessor/PreprocessorError.hpp"
 #include "lib/preprocessor/TokenProcessor.hpp"
 

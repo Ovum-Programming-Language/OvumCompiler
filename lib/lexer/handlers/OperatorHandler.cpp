@@ -1,8 +1,10 @@
 #include "OperatorHandler.hpp"
 
-#include "lib/lexer/tokens/TokenFactory.hpp"
+#include <tokens/TokenFactory.hpp>
 
-OptToken OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
+namespace ovum::compiler::lexer {
+
+std::expected<OptToken, LexerError> OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string op;
   op.push_back(wrapper.CurrentChar());
   char p = wrapper.Peek();
@@ -18,3 +20,5 @@ OptToken OperatorHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::make_optional(TokenFactory::MakeOperator(std::move(op), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

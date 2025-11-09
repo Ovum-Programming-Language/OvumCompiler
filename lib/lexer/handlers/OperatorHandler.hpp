@@ -1,11 +1,15 @@
-#ifndef OPERATORHANDLER_HPP_
-#define OPERATORHANDLER_HPP_
+#ifndef LEXER_OPERATORHANDLER_HPP_
+#define LEXER_OPERATORHANDLER_HPP_
 
 #include "Handler.hpp"
 
+namespace ovum::compiler::lexer {
+
 class OperatorHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // OPERATORHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_OPERATORHANDLER_HPP_

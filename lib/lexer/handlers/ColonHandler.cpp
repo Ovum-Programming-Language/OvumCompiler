@@ -1,7 +1,10 @@
 #include "ColonHandler.hpp"
-#include "lib/lexer/tokens/TokenFactory.hpp"
 
-OptToken ColonHandler::Scan(SourceCodeWrapper& wrapper) {
+#include <tokens/TokenFactory.hpp>
+
+namespace ovum::compiler::lexer {
+
+std::expected<OptToken, LexerError> ColonHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string op;
   op.push_back(wrapper.CurrentChar());
 
@@ -18,3 +21,5 @@ OptToken ColonHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::make_optional(TokenFactory::MakePunct(':', wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

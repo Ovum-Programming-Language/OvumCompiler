@@ -3,10 +3,13 @@
 #include <cmath>
 #include <limits>
 
-#include "LexerError.hpp"
-#include "lib/lexer/tokens/TokenFactory.hpp"
+#include <tokens/TokenFactory.hpp>
 
-OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
+#include "LexerError.hpp"
+
+namespace ovum::compiler::lexer {
+
+std::expected<OptToken, LexerError> IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string s;
   s.push_back(wrapper.CurrentChar());
   wrapper.ConsumeWhile(s, [](char ch) { return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_'; });
@@ -31,8 +34,10 @@ OptToken IdentifierHandler::Scan(SourceCodeWrapper& wrapper) {
   }
 
   if (s[0] == '#') {
-    throw LexerError(std::string("Not a keyword, started with #: ") + s);
+    return std::unexpected(LexerError(std::string("Not a keyword, started with #: ") + s));
   }
 
   return std::make_optional(TokenFactory::MakeIdent(std::move(s), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

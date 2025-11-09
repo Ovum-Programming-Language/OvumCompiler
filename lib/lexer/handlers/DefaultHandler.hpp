@@ -1,11 +1,15 @@
-#ifndef DEFAULTHANDLER_HPP_
-#define DEFAULTHANDLER_HPP_
+#ifndef LEXER_DEFAULTHANDLER_HPP_
+#define LEXER_DEFAULTHANDLER_HPP_
 
 #include "Handler.hpp"
 
+namespace ovum::compiler::lexer {
+
 class DefaultHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // DEFAULTHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_DEFAULTHANDLER_HPP_
