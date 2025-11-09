@@ -8,7 +8,12 @@
 
 class ExprStmt : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const Expr* Expression() const noexcept;
+  Expr* MutableExpression() noexcept;
+  void SetExpression(std::unique_ptr<Expr> expression);
+  std::unique_ptr<Expr> ReleaseExpression();
 
 private:
   std::unique_ptr<Expr> expr_;

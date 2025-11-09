@@ -15,16 +15,16 @@ public:
     TypeReference type;
   };
 
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
 
   const std::string& Name() const noexcept;
-  void SetName(std::string n);
+  void SetName(std::string new_name);
 
   const std::vector<Param>& Params() const noexcept;
   std::vector<Param>& MutableParams() noexcept;
 
   const TypeReference* ReturnType() const noexcept;
-  void SetReturnType(std::unique_ptr<TypeReference> t);
+  void SetReturnType(std::unique_ptr<TypeReference> type);
 
 private:
   std::string name_;

@@ -9,7 +9,17 @@
 
 class WhileStmt : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const Expr* Condition() const noexcept;
+  Expr* MutableCondition() noexcept;
+  void SetCondition(std::unique_ptr<Expr> condition_expr);
+  std::unique_ptr<Expr> ReleaseCondition();
+
+  const Block* Body() const noexcept;
+  Block* MutableBody() noexcept;
+  void SetBody(std::unique_ptr<Block> body_block);
+  std::unique_ptr<Block> ReleaseBody();
 
 private:
   std::unique_ptr<Expr> cond_;

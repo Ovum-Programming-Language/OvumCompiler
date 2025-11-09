@@ -7,7 +7,10 @@
 
 class IdentRef : public Expr {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const std::string& Name() const noexcept;
+  void SetName(std::string new_name);
 
 private:
   std::string name_;

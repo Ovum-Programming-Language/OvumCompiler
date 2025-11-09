@@ -9,9 +9,31 @@
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/types/Param.hpp"
 
+class TypeReference;
+
 class FunctionDecl : public Decl {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  bool IsPure() const noexcept;
+  void SetPure(bool is_pure) noexcept;
+
+  const std::string& Name() const noexcept;
+  void SetName(std::string new_name);
+
+  const std::vector<Param>& Params() const noexcept;
+  std::vector<Param>& MutableParams() noexcept;
+  void AddParam(Param param);
+
+  const TypeReference* ReturnType() const noexcept;
+  TypeReference* MutableReturnType() noexcept;
+  void SetReturnType(std::unique_ptr<TypeReference> type);
+  std::unique_ptr<TypeReference> ReleaseReturnType();
+
+  const Block* Body() const noexcept;
+  Block* MutableBody() noexcept;
+  void SetBody(std::unique_ptr<Block> block);
+  std::unique_ptr<Block> ReleaseBody();
 
 private:
   bool is_pure_ = false;

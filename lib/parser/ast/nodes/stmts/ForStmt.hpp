@@ -9,7 +9,20 @@
 
 class ForStmt : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const std::string& IteratorName() const noexcept;
+  void SetIteratorName(std::string new_name);
+
+  const Expr* IteratorExpr() const noexcept;
+  Expr* MutableIteratorExpr() noexcept;
+  void SetIteratorExpr(std::unique_ptr<Expr> expression);
+  std::unique_ptr<Expr> ReleaseIteratorExpr();
+
+  const Block* Body() const noexcept;
+  Block* MutableBody() noexcept;
+  void SetBody(std::unique_ptr<Block> body_block);
+  std::unique_ptr<Block> ReleaseBody();
 
 private:
   std::string iter_name_;

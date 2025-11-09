@@ -6,7 +6,10 @@
 
 class IntLit : public Expr {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  int64_t Value() const noexcept;
+  void SetValue(int64_t new_value) noexcept;
 
 private:
   int64_t value = 0;

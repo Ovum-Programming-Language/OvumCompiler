@@ -5,7 +5,10 @@
 
 class BoolLit : public Expr {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  bool Value() const noexcept;
+  void SetValue(bool new_value) noexcept;
 
 private:
   bool value = false;

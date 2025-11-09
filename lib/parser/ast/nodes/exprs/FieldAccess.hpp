@@ -8,7 +8,15 @@
 
 class FieldAccess : public Expr {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const Expr& Object() const noexcept;
+  Expr& MutableObject() noexcept;
+  void SetObject(std::unique_ptr<Expr> new_object);
+  std::unique_ptr<Expr> ReplaceObject(std::unique_ptr<Expr> new_object);
+
+  const std::string& Name() const noexcept;
+  void SetName(std::string new_name);
 
 private:
   std::unique_ptr<Expr> object_;

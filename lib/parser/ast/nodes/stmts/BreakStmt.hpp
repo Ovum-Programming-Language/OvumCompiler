@@ -5,7 +5,7 @@
 
 class BreakStmt : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
 };
 
 #endif // BREAKSTMT_HPP_

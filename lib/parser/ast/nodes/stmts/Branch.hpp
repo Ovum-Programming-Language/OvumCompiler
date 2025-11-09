@@ -17,12 +17,12 @@ public:
 
   const Expr* Condition() const noexcept;
   Expr* MutableCondition() noexcept;
-  void SetCondition(std::unique_ptr<Expr> e);
+  void SetCondition(std::unique_ptr<Expr> expression);
   std::unique_ptr<Expr> ReleaseCondition();
 
   const Block* Then() const noexcept;
   Block* MutableThen() noexcept;
-  void SetThen(std::unique_ptr<Block> b);
+  void SetThen(std::unique_ptr<Block> then_body);
   std::unique_ptr<Block> ReleaseThen();
 
 private:

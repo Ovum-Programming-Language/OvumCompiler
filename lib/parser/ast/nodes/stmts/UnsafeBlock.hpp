@@ -8,7 +8,12 @@
 
 class UnsafeBlock : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  const Block* Body() const noexcept;
+  Block* MutableBody() noexcept;
+  void SetBody(std::unique_ptr<Block> body_block);
+  std::unique_ptr<Block> ReleaseBody();
 
 private:
   std::unique_ptr<Block> body_;

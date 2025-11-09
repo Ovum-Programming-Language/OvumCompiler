@@ -7,7 +7,7 @@ class AstNode {
 public:
   virtual ~AstNode() = default;
 
-  virtual void Accept(AstVisitor& v) = 0;
+  virtual void Accept(AstVisitor& visitor) = 0;
 };
 
 #endif // ASTNODE_HPP_

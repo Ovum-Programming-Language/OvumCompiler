@@ -5,7 +5,7 @@
 
 class ContinueStmt : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
 };
 
 #endif // CONTINUESTMT_HPP_

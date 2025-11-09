@@ -1,6 +1,7 @@
 #ifndef BLOCK_HPP_
 #define BLOCK_HPP_
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -9,11 +10,16 @@
 
 class Block : public Stmt {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
 
   std::vector<std::unique_ptr<Stmt>>& GetStatements();
   const std::vector<std::unique_ptr<Stmt>>& GetStatements() const;
-  void Append(std::unique_ptr<Stmt> s);
+  void Append(std::unique_ptr<Stmt> statement);
+
+  void Insert(std::size_t index, std::unique_ptr<Stmt> statement);
+  std::unique_ptr<Stmt> ReleaseAt(std::size_t index);
+  void Clear() noexcept;
+  std::size_t Size() const noexcept;
 
 private:
   std::vector<std::unique_ptr<Stmt>> stmts_;

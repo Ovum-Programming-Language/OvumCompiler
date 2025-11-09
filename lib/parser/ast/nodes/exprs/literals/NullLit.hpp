@@ -5,7 +5,7 @@
 
 class NullLit : public Expr {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
 };
 
 #endif // NULLLIT_HPP_

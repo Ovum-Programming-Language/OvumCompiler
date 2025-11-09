@@ -10,7 +10,25 @@
 
 class StaticFieldDecl : public Decl {
 public:
-  void Accept(AstVisitor& v) override;
+  void Accept(AstVisitor& visitor) override;
+
+  bool IsPublic() const noexcept;
+  void SetPublic(bool is_public) noexcept;
+
+  bool IsVar() const noexcept;
+  void SetVar(bool is_var) noexcept;
+
+  const std::string& Name() const noexcept;
+  void SetName(std::string new_name);
+
+  const TypeReference& Type() const noexcept;
+  TypeReference& MutableType() noexcept;
+  void SetType(TypeReference type);
+
+  const Expr* Init() const noexcept;
+  Expr* MutableInit() noexcept;
+  void SetInit(std::unique_ptr<Expr> expr);
+  std::unique_ptr<Expr> ReleaseInit();
 
 private:
   bool is_public_ = true;
