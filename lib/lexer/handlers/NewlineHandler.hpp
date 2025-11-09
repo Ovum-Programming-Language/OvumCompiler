@@ -1,11 +1,15 @@
-#ifndef NEWLINEHANDLER_HPP_
-#define NEWLINEHANDLER_HPP_
+#ifndef LEXER_NEWLINEHANDLER_HPP_
+#define LEXER_NEWLINEHANDLER_HPP_
 
 #include "Handler.hpp"
 
+namespace ovum::compiler::lexer {
+
 class NewlineHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // NEWLINEHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_NEWLINEHANDLER_HPP_

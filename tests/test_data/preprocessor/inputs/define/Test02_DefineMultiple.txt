@@ -1,0 +1,4 @@
+#define FEAT_A
+INCLUDE 1
+#define FEAT_B
+INCLUDE 2

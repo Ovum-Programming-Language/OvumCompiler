@@ -1,11 +1,15 @@
-#ifndef PUNCTHANDLER_HPP_
-#define PUNCTHANDLER_HPP_
+#ifndef LEXER_PUNCTHANDLER_HPP_
+#define LEXER_PUNCTHANDLER_HPP_
 
 #include "Handler.hpp"
 
+namespace ovum::compiler::lexer {
+
 class PunctHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // PUNCTHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_PUNCTHANDLER_HPP_

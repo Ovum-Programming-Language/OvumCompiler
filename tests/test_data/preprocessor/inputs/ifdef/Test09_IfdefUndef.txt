@@ -1,0 +1,8 @@
+#define FEAT_A
+#undef FEAT_A
+#ifdef FEAT_A
+INCLUDE 3
+#else
+INCLUDE 1
+#endif
+INCLUDE 2

@@ -1,11 +1,15 @@
-#ifndef IDENTIFIERHANDLER_HPP_
-#define IDENTIFIERHANDLER_HPP_
+#ifndef LEXER_IDENTIFIERHANDLER_HPP_
+#define LEXER_IDENTIFIERHANDLER_HPP_
 
 #include "Handler.hpp"
 
+namespace ovum::compiler::lexer {
+
 class IdentifierHandler : public Handler {
 public:
-  OptToken Scan(SourceCodeWrapper& wrapper) override;
+  std::expected<OptToken, LexerError> Scan(SourceCodeWrapper& wrapper) override;
 };
 
-#endif // IDENTIFIERHANDLER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_IDENTIFIERHANDLER_HPP_

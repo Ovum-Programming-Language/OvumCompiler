@@ -1,9 +1,12 @@
 #include "SlashHandler.hpp"
 
-#include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+#include <tokens/TokenFactory.hpp>
 
-OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
+#include "lib/lexer/LexerError.hpp"
+
+namespace ovum::compiler::lexer {
+
+std::expected<OptToken, LexerError> SlashHandler::Scan(SourceCodeWrapper& wrapper) {
   if (wrapper.Peek() == '/') {
     std::string txt;
 
@@ -38,7 +41,7 @@ OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
     }
 
     if (!closed) {
-      throw LexerError("Unterminated block comment");
+      return std::unexpected(LexerError("Unterminated block comment"));
     }
 
     if (wrapper.IsKeepComments()) {
@@ -50,3 +53,5 @@ OptToken SlashHandler::Scan(SourceCodeWrapper& wrapper) {
 
   return std::make_optional(TokenFactory::MakeOperator(std::string(1, '/'), wrapper.GetLine(), wrapper.GetTokenCol()));
 }
+
+} // namespace ovum::compiler::lexer

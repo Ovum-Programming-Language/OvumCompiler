@@ -3,8 +3,11 @@
 #include <cctype>
 #include <string>
 
+#include <tokens/TokenFactory.hpp>
+
 #include "lib/lexer/LexerError.hpp"
-#include "tokens/TokenFactory.hpp"
+
+namespace ovum::compiler::lexer {
 
 namespace {
 inline constexpr int kHexAlphaOffset = 10;
@@ -29,7 +32,7 @@ inline bool IsIdentStart(char c) noexcept {
   return std::isalpha(u) != 0 || u == '_';
 }
 
-inline bool ParseExponent(SourceCodeWrapper& w, std::string& raw) {
+inline std::expected<bool, LexerError> ParseExponent(SourceCodeWrapper& w, std::string& raw) {
   if (w.Peek() == 'e' || w.Peek() == 'E') {
     raw.push_back(w.Advance());
 
@@ -38,7 +41,7 @@ inline bool ParseExponent(SourceCodeWrapper& w, std::string& raw) {
     }
 
     if (!IsDec(w.Peek())) {
-      throw LexerError("Malformed exponent");
+      return std::unexpected(LexerError("Malformed exponent"));
     }
 
     w.ConsumeWhile(raw, IsDec);
@@ -48,35 +51,37 @@ inline bool ParseExponent(SourceCodeWrapper& w, std::string& raw) {
   return false;
 }
 
-inline double ParseDoubleStrict(const std::string& raw) {
+inline std::expected<double, LexerError> ParseDoubleStrict(const std::string& raw) {
   try {
     return std::stod(raw);
   } catch (...) {
-    throw LexerError(std::string("Malformed float literal: ") + raw);
+    return std::unexpected(LexerError(std::string("Malformed float literal: ") + raw));
   }
 }
 
-inline long long ParseDecIntStrict(const std::string& raw) {
+inline std::expected<long long, LexerError> ParseDecIntStrict(const std::string& raw) {
   try {
     return std::stoll(raw);
   } catch (...) {
-    throw LexerError(std::string("Malformed integer literal: ") + raw);
+    return std::unexpected(LexerError(std::string("Malformed integer literal: ") + raw));
   }
 }
 
-inline void EnsureNoIdentTail(SourceCodeWrapper& w, const char* ctx) {
+inline std::expected<void, LexerError> EnsureNoIdentTail(SourceCodeWrapper& w, const char* ctx) {
   if (IsIdentStart(w.Peek())) {
-    throw LexerError(std::string("Unexpected identifier after ") + ctx);
+    return std::unexpected(LexerError(std::string("Unexpected identifier after ") + ctx));
   }
+  return {};
 }
 
-inline void EnsureNoSecondDotWithDigits(SourceCodeWrapper& w) {
+inline std::expected<void, LexerError> EnsureNoSecondDotWithDigits(SourceCodeWrapper& w) {
   if (w.Peek() == '.' && IsDec(w.Peek(1))) {
-    throw LexerError("Malformed float literal: duplicate decimal point");
+    return std::unexpected(LexerError("Malformed float literal: duplicate decimal point"));
   }
+  return {};
 }
 
-OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
+std::expected<OptToken, LexerError> NumberHandler::Scan(SourceCodeWrapper& wrapper) {
   std::string raw;
   const char first = wrapper.CurrentChar();
 
@@ -88,12 +93,24 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     }
 
     wrapper.ConsumeWhile(raw, IsDec);
-    ParseExponent(wrapper, raw);
-    EnsureNoSecondDotWithDigits(wrapper);
-    EnsureNoIdentTail(wrapper, "number");
-    const double v = ParseDoubleStrict(raw);
+    auto exp_result = ParseExponent(wrapper, raw);
+    if (!exp_result) {
+      return std::unexpected(exp_result.error());
+    }
+    auto dot_result = EnsureNoSecondDotWithDigits(wrapper);
+    if (!dot_result) {
+      return std::unexpected(dot_result.error());
+    }
+    auto ident_result = EnsureNoIdentTail(wrapper, "number");
+    if (!ident_result) {
+      return std::unexpected(ident_result.error());
+    }
+    auto v_result = ParseDoubleStrict(raw);
+    if (!v_result) {
+      return std::unexpected(v_result.error());
+    }
 
-    return TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol());
+    return TokenFactory::MakeFloatLiteral(std::move(raw), v_result.value(), wrapper.GetLine(), wrapper.GetTokenCol());
   }
 
   wrapper.RetreatOne();
@@ -103,16 +120,19 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     raw.push_back(wrapper.Advance());
 
     if (!IsHex(wrapper.Peek())) {
-      throw LexerError("Malformed hex literal: expected hex digit after 0x");
+      return std::unexpected(LexerError("Malformed hex literal: expected hex digit after 0x"));
     }
 
     wrapper.ConsumeWhile(raw, IsHex);
 
     if (wrapper.Peek() == '.') {
-      throw LexerError("Hex literal cannot have decimal point");
+      return std::unexpected(LexerError("Hex literal cannot have decimal point"));
     }
 
-    EnsureNoIdentTail(wrapper, "hex literal");
+    auto ident_result = EnsureNoIdentTail(wrapper, "hex literal");
+    if (!ident_result) {
+      return std::unexpected(ident_result.error());
+    }
 
     long long val = 0;
 
@@ -137,16 +157,19 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
     raw.push_back(wrapper.Advance());
 
     if (!IsBin(wrapper.Peek())) {
-      throw LexerError("Malformed binary literal: expected binary digit after 0b");
+      return std::unexpected(LexerError("Malformed binary literal: expected binary digit after 0b"));
     }
 
     wrapper.ConsumeWhile(raw, IsBin);
 
     if (wrapper.Peek() == '.') {
-      throw LexerError("Binary literal cannot have decimal point");
+      return std::unexpected(LexerError("Binary literal cannot have decimal point"));
     }
 
-    EnsureNoIdentTail(wrapper, "binary literal");
+    auto ident_result = EnsureNoIdentTail(wrapper, "binary literal");
+    if (!ident_result) {
+      return std::unexpected(ident_result.error());
+    }
     long long val = 0;
 
     for (size_t i = 2; i < raw.size(); ++i) {
@@ -165,27 +188,57 @@ OptToken NumberHandler::Scan(SourceCodeWrapper& wrapper) {
       wrapper.ConsumeWhile(raw, IsDec);
     }
 
-    ParseExponent(wrapper, raw);
-    EnsureNoSecondDotWithDigits(wrapper);
-    EnsureNoIdentTail(wrapper, "number");
-    const double v = ParseDoubleStrict(raw);
-    return TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol());
+    auto exp_result = ParseExponent(wrapper, raw);
+    if (!exp_result) {
+      return std::unexpected(exp_result.error());
+    }
+    auto dot_result = EnsureNoSecondDotWithDigits(wrapper);
+    if (!dot_result) {
+      return std::unexpected(dot_result.error());
+    }
+    auto ident_result = EnsureNoIdentTail(wrapper, "number");
+    if (!ident_result) {
+      return std::unexpected(ident_result.error());
+    }
+    auto v_result = ParseDoubleStrict(raw);
+    if (!v_result) {
+      return std::unexpected(v_result.error());
+    }
+    return TokenFactory::MakeFloatLiteral(std::move(raw), v_result.value(), wrapper.GetLine(), wrapper.GetTokenCol());
   }
 
-  const bool had_exp = ParseExponent(wrapper, raw);
+  auto exp_result = ParseExponent(wrapper, raw);
+  if (!exp_result) {
+    return std::unexpected(exp_result.error());
+  }
+  const bool had_exp = exp_result.value();
 
   if (had_exp) {
-    EnsureNoIdentTail(wrapper, "number");
-    const double v = ParseDoubleStrict(raw);
-    return TokenFactory::MakeFloatLiteral(std::move(raw), v, wrapper.GetLine(), wrapper.GetTokenCol());
+    auto ident_result = EnsureNoIdentTail(wrapper, "number");
+    if (!ident_result) {
+      return std::unexpected(ident_result.error());
+    }
+    auto v_result = ParseDoubleStrict(raw);
+    if (!v_result) {
+      return std::unexpected(v_result.error());
+    }
+    return TokenFactory::MakeFloatLiteral(std::move(raw), v_result.value(), wrapper.GetLine(), wrapper.GetTokenCol());
   }
 
   if (!raw.empty() && (raw.back() == 'e' || raw.back() == 'E' || raw.back() == '+' || raw.back() == '-')) {
-    throw LexerError(std::string("Malformed float literal: ") + raw);
+    return std::unexpected(LexerError(std::string("Malformed float literal: ") + raw));
   }
 
-  EnsureNoIdentTail(wrapper, "integer literal");
-  const long long vi = ParseDecIntStrict(raw);
+  auto ident_result = EnsureNoIdentTail(wrapper, "integer literal");
+  if (!ident_result) {
+    return std::unexpected(ident_result.error());
+  }
+  auto vi_result = ParseDecIntStrict(raw);
+  if (!vi_result) {
+    return std::unexpected(vi_result.error());
+  }
 
-  return TokenFactory::MakeIntLiteral(std::move(raw), vi, wrapper.GetLine(), wrapper.GetTokenCol());
+  return TokenFactory::MakeIntLiteral(std::move(raw), vi_result.value(), wrapper.GetLine(), wrapper.GetTokenCol());
 }
+
+} // namespace ovum::compiler::lexer

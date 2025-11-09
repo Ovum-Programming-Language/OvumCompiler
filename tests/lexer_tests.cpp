@@ -4,11 +4,14 @@
 #include "lib/lexer/Lexer.hpp"
 #include "test_suites/LexerUnitTestSuite.hpp"
 
+using ovum::compiler::lexer::Lexer;
+
 TEST(LexerUnitTestSuite, EmptyString) {
   const std::string src = "";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {};
   std::vector<std::string> expected_types = {};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -17,8 +20,9 @@ TEST(LexerUnitTestSuite, EmptyString) {
 TEST(LexerUnitTestSuite, SingleCharacter) {
   const std::string src = "c";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"c"};
   std::vector<std::string> expected_types = {"IDENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -29,8 +33,9 @@ TEST(LexerUnitTestSuite, Keywords) {
       "fun pure val var class interface implements override if else while for in return break continue unsafe is as "
       "typealias";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {
       "fun",   "pure", "val", "var",    "class", "interface", "implements", "override", "if", "else",
       "while", "for",  "in",  "return", "break", "continue",  "unsafe",     "is",       "as", "typealias"};
@@ -41,8 +46,9 @@ TEST(LexerUnitTestSuite, Keywords) {
 TEST(LexerUnitTestSuite, Punctuation) {
   const std::string src = "{ } ( ) [ ] , : ;";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"{", "}", "(", ")", "[", "]", ",", ":", ";"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "PUNCT");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -51,8 +57,9 @@ TEST(LexerUnitTestSuite, Punctuation) {
 TEST(LexerUnitTestSuite, Identifiers) {
   const std::string src = "abc ABC _abc ovum ExampleFundamentals Void String IntArray";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {
       "abc", "ABC", "_abc", "ovum", "ExampleFundamentals", "Void", "String", "IntArray"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "IDENT");
@@ -62,8 +69,9 @@ TEST(LexerUnitTestSuite, Identifiers) {
 TEST(LexerUnitTestSuite, OperatorsSimple) {
   const std::string src = "+ - * / % < > ! . ?";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"+", "-", "*", "/", "%", "<", ">", "!", ".", "?"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "OPERATOR");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -72,8 +80,9 @@ TEST(LexerUnitTestSuite, OperatorsSimple) {
 TEST(LexerUnitTestSuite, OperatorsMultiChar) {
   const std::string src = "== != <= >= && || = := ::";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"==", "!=", "<=", ">=", "&&", "||", "=", ":=", "::"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "OPERATOR");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -82,8 +91,9 @@ TEST(LexerUnitTestSuite, OperatorsMultiChar) {
 TEST(LexerUnitTestSuite, OperatorsNullSafe) {
   const std::string src = "?. ?:";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"?.", "?:"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "OPERATOR");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -92,8 +102,9 @@ TEST(LexerUnitTestSuite, OperatorsNullSafe) {
 TEST(LexerUnitTestSuite, OperatorXor) {
   const std::string src = "^";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"^"};
   std::vector<std::string> expected_types = {"OPERATOR"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -102,8 +113,9 @@ TEST(LexerUnitTestSuite, OperatorXor) {
 TEST(LexerUnitTestSuite, LiteralsInt) {
   const std::string src = "0 42 255";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"0", "42", "255"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Int");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -112,8 +124,9 @@ TEST(LexerUnitTestSuite, LiteralsInt) {
 TEST(LexerUnitTestSuite, LiteralsFloat) {
   const std::string src = "3.14 1e3 .5 5. 2.0E-2";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"3.14", "1e3", ".5", "5.", "2.0E-2"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Float");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -122,8 +135,9 @@ TEST(LexerUnitTestSuite, LiteralsFloat) {
 TEST(LexerUnitTestSuite, LiteralsChar) {
   const std::string src = "'A' '\\n'";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"'A'", "'\\n'"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Char");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -132,8 +146,9 @@ TEST(LexerUnitTestSuite, LiteralsChar) {
 TEST(LexerUnitTestSuite, LiteralsBool) {
   const std::string src = "true false";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"true", "false"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Bool");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -142,8 +157,9 @@ TEST(LexerUnitTestSuite, LiteralsBool) {
 TEST(LexerUnitTestSuite, KeywordNull) {
   const std::string src = "null";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"null"};
   std::vector<std::string> expected_types = {"KEYWORD"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -152,8 +168,9 @@ TEST(LexerUnitTestSuite, KeywordNull) {
 TEST(LexerUnitTestSuite, LiteralsString) {
   const std::string src = R"("hello" "world\n" "")";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {R"("hello")", R"("world\n")", R"("")"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:String");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -162,8 +179,9 @@ TEST(LexerUnitTestSuite, LiteralsString) {
 TEST(LexerUnitTestSuite, Preprocessor) {
   const std::string src = "#import #define #ifdef";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"#import", "#define", "#ifdef"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "KEYWORD");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -172,8 +190,9 @@ TEST(LexerUnitTestSuite, Preprocessor) {
 TEST(LexerUnitTestSuite, Newline) {
   const std::string src = "\n";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"\\n"};
   std::vector<std::string> expected_types = {"NEWLINE"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -182,8 +201,9 @@ TEST(LexerUnitTestSuite, Newline) {
 TEST(LexerUnitTestSuite, LiteralsIntHex) {
   const std::string src = "0x1A 0xFF";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"0x1A", "0xFF"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Int");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -192,8 +212,9 @@ TEST(LexerUnitTestSuite, LiteralsIntHex) {
 TEST(LexerUnitTestSuite, LiteralsIntBinary) {
   const std::string src = "0b1010 0b1111";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"0b1010", "0b1111"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Int");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -202,8 +223,9 @@ TEST(LexerUnitTestSuite, LiteralsIntBinary) {
 TEST(LexerUnitTestSuite, LiteralsIntNegative) {
   const std::string src = "-17 -42";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"-", "17", "-", "42"};
   std::vector<std::string> expected_types = {"OPERATOR", "LITERAL:Int", "OPERATOR", "LITERAL:Int"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -212,8 +234,9 @@ TEST(LexerUnitTestSuite, LiteralsIntNegative) {
 TEST(LexerUnitTestSuite, LiteralsFloatSpecial) {
   const std::string src = "Infinity -Infinity NaN";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"Infinity", "-", "Infinity", "NaN"};
   std::vector<std::string> expected_types = {"LITERAL:Float", "OPERATOR", "LITERAL:Float", "LITERAL:Float"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -222,8 +245,9 @@ TEST(LexerUnitTestSuite, LiteralsFloatSpecial) {
 TEST(LexerUnitTestSuite, LiteralsCharEscapes) {
   const std::string src = R"('A' '\n' '\t' '\0' '\'')";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"'A'", "'\\n'", "'\\t'", "'\\0'", "'\\''"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "LITERAL:Char");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -232,8 +256,9 @@ TEST(LexerUnitTestSuite, LiteralsCharEscapes) {
 TEST(LexerUnitTestSuite, WhitespaceSkipping) {
   const std::string src = "fun   val \t  if";
   Lexer lexer(src);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"fun", "val", "if"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "KEYWORD");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -243,8 +268,9 @@ TEST(LexerUnitTestSuite, SingleLineComment) {
   const std::string src = R"OVUM(// This is a single-line comment
 fun Main)OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {" This is a single-line comment", "\\n", "fun", "Main"};
   std::vector<std::string> expected_types = {"COMMENT", "NEWLINE", "KEYWORD", "IDENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -254,8 +280,9 @@ TEST(LexerUnitTestSuite, SingleLineCommentNoSpace) {
   const std::string src = R"OVUM(//This is a single-line comment without space
 )OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {"This is a single-line comment without space", "\\n"};
   std::vector<std::string> expected_types = {"COMMENT", "NEWLINE"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -265,8 +292,9 @@ TEST(LexerUnitTestSuite, MultiLineCommentPositive) {
   const std::string src = R"OVUM(/* This is a properly closed
 multi-line comment */)OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {" This is a properly closed\nmulti-line comment "};
   std::vector<std::string> expected_types = {"COMMENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -276,8 +304,9 @@ TEST(LexerUnitTestSuite, MultiLineCommentWithSlashesAndStars) {
   const std::string src = R"OVUM(/* This comment contains / and * signs: /* // */
 fun Main())OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {
       " This comment contains / and * signs: /* // ", "\\n", "fun", "Main", "(", ")"};
   std::vector<std::string> expected_types = {"COMMENT", "NEWLINE", "KEYWORD", "IDENT", "PUNCT", "PUNCT"};
@@ -287,8 +316,9 @@ fun Main())OVUM";
 TEST(LexerUnitTestSuite, IncorrectCommentWithSlashesAndStars) {
   const std::string src = R"OVUM(/* This comment contains / and * signs: /* // */ */)OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {" This comment contains / and * signs: /* // ", "*", "/"};
   std::vector<std::string> expected_types = {"COMMENT", "OPERATOR", "OPERATOR"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -301,8 +331,9 @@ Third line after empty line
 
 Fifth line */)OVUM";
   Lexer lexer(src, true);
-  auto tokens = lexer.Tokenize();
-  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens);
+  auto tokens_result = lexer.Tokenize();
+  ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
+  auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {" First line\n\nThird line after empty line\n\nFifth line "};
   std::vector<std::string> expected_types = {"COMMENT"};
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
@@ -313,91 +344,106 @@ Fifth line */)OVUM";
 TEST(LexerUnitTestSuite, InvalidCharacter) {
   const std::string src = "fun @main(): Void {}";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error for invalid character";
 }
 
 TEST(LexerUnitTestSuite, InvalidCharacterInIdentifier) {
   const std::string src = "val name$var: int = 0";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidIdentifierStartingWithDigit) {
   const std::string src = "val 1abc: int = 0";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidHexNumber) {
   const std::string src = "val x: int = 0xG";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidBinaryNumber) {
   const std::string src = "val x: int = 0b2";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidFloatNumber) {
   const std::string src = "val x: float = 1.2.3";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidFloatIncompleteExp) {
   const std::string src = "val x: float = 1e";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, UnterminatedString) {
   const std::string src = R"(val msg: String = "hello)";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidEscapeInString) {
   const std::string src = R"(val msg: String = "\z")";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, UnterminatedChar) {
   const std::string src = "val c: char = 'A";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, EmptyCharLiteral) {
   const std::string src = R"(val c: char = '')";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, MultiCharLiteral) {
   const std::string src = "val c: char = 'AB'";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidEscapeInChar) {
   const std::string src = "val c: char = '\\z'";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, InvalidPreprocessor) {
   const std::string src = "#invalid";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, MultipleErrorsInOneFile) {
   const std::string src = R"(fun main@(): Void { val x = "unclosed; val y = 0xG })";
   Lexer lexer(src);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }
 
 TEST(LexerUnitTestSuite, MultiLineCommentNegativeUnclosed) {
@@ -406,5 +452,6 @@ fun Main(): Void {
     val x: int = 42
 })OVUM";
   Lexer lexer(src, true);
-  ASSERT_THROW(lexer.Tokenize(), std::runtime_error);
+  auto result = lexer.Tokenize();
+  ASSERT_FALSE(result.has_value()) << "Expected lexer error";
 }

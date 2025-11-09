@@ -9,7 +9,7 @@ void LexerUnitTestSuite::TearDown() {
 }
 
 std::vector<std::pair<std::string, std::string>> LexerUnitTestSuite::ExtractLexemesAndTypes(
-    const std::vector<TokenPtr>& tokens) {
+    const std::vector<ovum::TokenPtr>& tokens) {
   std::vector<std::pair<std::string, std::string>> out;
   if (tokens.empty())
     return out;

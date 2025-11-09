@@ -1,24 +1,56 @@
 #include "Preprocessor.hpp"
 
+#include <fstream>
+#include <utility>
+
+#include "lib/lexer/Lexer.hpp"
 #include "token_processor_factory.hpp"
 
-Preprocessor::Preprocessor(PreprocessingParameters parameters) :
-    parameters_(std::move(parameters)), token_processors_(TokenProcessorFactory::MakeTokenProcessors()) {
+namespace ovum::compiler::preprocessor {
+
+Preprocessor::Preprocessor(const PreprocessingParameters& parameters) :
+    parameters_(parameters), token_processors_(MakeTokenProcessors(parameters)) {
 }
 
-std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process(
-    const std::vector<TokenPtr>& tokens) const {
-  std::vector<TokenPtr> result = tokens;
+std::expected<std::vector<TokenPtr>, PreprocessorError> Preprocessor::Process() {
+  std::filesystem::path file = parameters_.main_file;
 
-  for (const auto& processor : token_processors_) {
-    std::expected<std::vector<TokenPtr>, PreprocessorError> processor_result = processor->Process(result);
+  if (!std::filesystem::exists(file)) {
+    return std::unexpected(FileNotFoundError(file.string()));
+  }
 
-    if (!processor_result.has_value()) {
+  std::ifstream file_stream(file, std::ios::binary);
+
+  if (!file_stream.is_open()) {
+    return std::unexpected(FileReadError(file.string(), "Cannot open"));
+  }
+
+  std::string content((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
+
+  if (file_stream.bad() || file_stream.fail()) {
+    return std::unexpected(FileReadError(file.string(), "Read error"));
+  }
+
+  lexer::Lexer lexer(content, false);
+  auto tokens_result = lexer.Tokenize();
+
+  if (!tokens_result) {
+    return std::unexpected(PreprocessorError(tokens_result.error().what()));
+  }
+
+  std::vector<TokenPtr> tokens = std::move(tokens_result.value());
+
+  for (std::unique_ptr<TokenProcessor>& processor : token_processors_) {
+    std::expected<std::vector<TokenPtr>, PreprocessorError> processor_result = std::move(processor->Process(tokens));
+
+    if (!processor_result) {
       return processor_result;
     }
 
-    result = std::move(processor_result.value());
+    tokens = std::move(processor_result.value());
   }
 
-  return {std::move(result)};
+  return {std::move(tokens)};
 }
+
+} // namespace ovum::compiler::preprocessor

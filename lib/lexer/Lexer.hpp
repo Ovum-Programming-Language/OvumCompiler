@@ -1,14 +1,22 @@
-#ifndef LEXER_HPP_
-#define LEXER_HPP_
+#ifndef LEXER_LEXER_HPP_
+#define LEXER_LEXER_HPP_
 
 #include <array>
 #include <cstddef>
+#include <expected>
 #include <memory>
 #include <string_view>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
+#include "LexerError.hpp"
 #include "SourceCodeWrapper.hpp"
 #include "handlers/Handler.hpp"
+
+namespace ovum::compiler::lexer {
+
+using TokenPtr = ovum::TokenPtr;
 
 constexpr std::size_t kDefaultTokenReserve = 256;
 
@@ -16,7 +24,7 @@ class Lexer {
 public:
   explicit Lexer(std::string_view src, bool keep_comments = false);
 
-  std::vector<TokenPtr> Tokenize();
+  std::expected<std::vector<TokenPtr>, LexerError> Tokenize();
 
   void SetHandler(unsigned char ch, std::unique_ptr<Handler> handler);
 
@@ -32,4 +40,6 @@ private:
   std::unique_ptr<Handler> default_handler_;
 };
 
-#endif // LEXER_HPP_
+} // namespace ovum::compiler::lexer
+
+#endif // LEXER_LEXER_HPP_

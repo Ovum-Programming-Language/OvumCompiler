@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+namespace ovum::compiler::lexer {
+
 const std::unordered_set<std::string_view> SourceCodeWrapper::kKeywords = {
     "fun",        "class",   "interface", "var",    "override", "pure",    "if",     "else",      "continue",
     "break",      "for",     "while",     "return", "unsafe",   "val",     "static", "public",    "private",
@@ -121,3 +123,5 @@ bool SourceCodeWrapper::IsKeyword(std::string_view s) {
 bool SourceCodeWrapper::IsMultiOp(std::string_view s) {
   return kMultiOps.contains(s);
 }
+
+} // namespace ovum::compiler::lexer
