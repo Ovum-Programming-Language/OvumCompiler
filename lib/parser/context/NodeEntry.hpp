@@ -7,7 +7,13 @@
 
 class NodeEntry {
 public:
-  std::unique_ptr<NodeEntry> GetNode;
+  NodeEntry() = default;
+  explicit NodeEntry(std::unique_ptr<AstNode> node);
+
+  const AstNode* GetNode() const noexcept;
+  AstNode* MutableNode() noexcept;
+  void SetNode(std::unique_ptr<AstNode> node);
+  std::unique_ptr<AstNode> ReleaseNode();
 
 private:
   std::unique_ptr<AstNode> node_;

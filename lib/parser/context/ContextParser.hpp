@@ -21,28 +21,34 @@ public:
   std::vector<const IState*>& StateStack();
   std::vector<NodeEntry>& NodeStack();
 
-  void SetDiagnostics(IDiagnosticSink* d);
-  [[nodiscard]] IDiagnosticSink* Diags() const;
+  void SetDiagnostics(IDiagnosticSink* diagnostics);
+  IDiagnosticSink* Diags() const;
 
   void SetExpr(IExpressionParser* parser);
-  [[nodiscard]] IExpressionParser* Expr() const;
+  IExpressionParser* Expr() const;
 
   void SetTypeParser(ITypeParser* parser);
-  [[nodiscard]] ITypeParser* TypeParser() const;
+  ITypeParser* TypeParser() const;
 
   void PushState(const IState& state);
   void PopState();
-  [[nodiscard]] const IState* CurrentState() const;
+  const IState* CurrentState() const;
 
   template<AstNodeDerived T>
-  [[nodiscard]] T* TopNodeAs() {
-    if (node_stack_.empty())
+  T* TopNodeAs() {
+    if (node_stack_.empty()) {
       return nullptr;
-    return dynamic_cast<T*>(node_stack_.back().GetNode);
+    }
+
+    return dynamic_cast<T*>(node_stack_.back().MutableNode());
   }
 
   void PushNode(std::unique_ptr<AstNode> node);
-  [[nodiscard]] std::unique_ptr<AstNode> PopNode();
+  std::unique_ptr<AstNode> PopNode();
+
+  bool HasStates() const noexcept;
+  bool HasNodes() const noexcept;
+  void Clear();
 
 private:
   std::vector<const IState*> state_stack_;
