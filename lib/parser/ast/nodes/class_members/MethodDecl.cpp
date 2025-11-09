@@ -1,5 +1,5 @@
-#include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 #include "lib/parser/ast/AstVisitor.hpp"
+#include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 
 #include <utility>
 
