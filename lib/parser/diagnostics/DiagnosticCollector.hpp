@@ -1,5 +1,5 @@
-#ifndef DIAGNOSTICCOLLECTOR_HPP_
-#define DIAGNOSTICCOLLECTOR_HPP_
+#ifndef PARSER_DIAGNOSTICCOLLECTOR_HPP_
+#define PARSER_DIAGNOSTICCOLLECTOR_HPP_
 
 #include <cstddef>
 #include <functional>
@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "IDiagnosticSink.hpp"
+
+namespace ovum::compiler::parser {
 
 class DiagnosticCollector : public IDiagnosticSink {
 public:
@@ -60,4 +62,6 @@ private:
   std::size_t warnings_ = 0;
 };
 
-#endif // DIAGNOSTICCOLLECTOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_DIAGNOSTICCOLLECTOR_HPP_

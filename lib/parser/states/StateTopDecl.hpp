@@ -1,8 +1,10 @@
-#ifndef STATETOPDECL_HPP_
-#define STATETOPDECL_HPP_
+#ifndef PARSER_STATETOPDECL_HPP_
+#define PARSER_STATETOPDECL_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateTopDecl : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATETOPDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATETOPDECL_HPP_

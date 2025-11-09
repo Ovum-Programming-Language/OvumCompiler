@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void FieldAccess::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -33,3 +35,5 @@ const std::string& FieldAccess::Name() const noexcept {
 void FieldAccess::SetName(std::string new_name) {
   name_ = std::move(new_name);
 }
+
+} // namespace ovum::compiler::parser

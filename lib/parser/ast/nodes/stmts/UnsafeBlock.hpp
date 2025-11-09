@@ -1,10 +1,12 @@
-#ifndef UNSAFEBLOCK_HPP_
-#define UNSAFEBLOCK_HPP_
+#ifndef PARSER_UNSAFEBLOCK_HPP_
+#define PARSER_UNSAFEBLOCK_HPP_
 
 #include <memory>
 
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class UnsafeBlock : public Stmt {
 public:
@@ -19,4 +21,6 @@ private:
   std::unique_ptr<Block> body_;
 };
 
-#endif // UNSAFEBLOCK_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_UNSAFEBLOCK_HPP_

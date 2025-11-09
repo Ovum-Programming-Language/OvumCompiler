@@ -1,11 +1,13 @@
-#ifndef BINARY_HPP_
-#define BINARY_HPP_
+#ifndef PARSER_BINARY_HPP_
+#define PARSER_BINARY_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "tags/IBinaryOpTag.hpp"
 #include "tags/OpTags.hpp"
+
+namespace ovum::compiler::parser {
 
 class Binary : public Expr {
 public:
@@ -30,4 +32,6 @@ private:
   std::unique_ptr<Expr> rhs_;
 };
 
-#endif // BINARY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_BINARY_HPP_

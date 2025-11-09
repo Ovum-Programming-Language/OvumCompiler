@@ -1,10 +1,12 @@
-#ifndef NAMESPACEREF_HPP_
-#define NAMESPACEREF_HPP_
+#ifndef PARSER_NAMESPACEREF_HPP_
+#define PARSER_NAMESPACEREF_HPP_
 
 #include <memory>
 #include <string>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class NamespaceRef : public Expr {
 public:
@@ -23,4 +25,6 @@ private:
   std::string name_;
 };
 
-#endif // NAMESPACEREF_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_NAMESPACEREF_HPP_

@@ -1,9 +1,11 @@
-#ifndef ITOKENSTREAM_HPP_
-#define ITOKENSTREAM_HPP_
+#ifndef PARSER_ITOKENSTREAM_HPP_
+#define PARSER_ITOKENSTREAM_HPP_
 
 #include <cstddef>
 
-#include "lib/lexer/tokens/Token.hpp"
+#include <tokens/Token.hpp>
+
+namespace ovum::compiler::parser {
 
 class ITokenStream {
 public:
@@ -20,4 +22,6 @@ public:
   virtual const Token* TryPeek(size_t k = 0) = 0;
 };
 
-#endif // ITOKENSTREAM_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ITOKENSTREAM_HPP_

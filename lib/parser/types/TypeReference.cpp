@@ -5,6 +5,8 @@
 #include <sstream>
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 TypeReference::TypeReference() = default;
 
 TypeReference::TypeReference(std::string name) {
@@ -252,3 +254,5 @@ std::string TypeReference::ArgsToString(const std::vector<TypeReference>& args) 
 void TypeReference::InvalidateResolution() noexcept {
   resolved_.reset();
 }
+
+} // namespace ovum::compiler::parser

@@ -3,6 +3,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void MethodDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -90,3 +92,5 @@ void MethodDecl::SetBody(std::unique_ptr<Block> block) {
 std::unique_ptr<Block> MethodDecl::ReleaseBody() {
   return std::move(body);
 }
+
+} // namespace ovum::compiler::parser

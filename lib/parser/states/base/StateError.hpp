@@ -1,7 +1,9 @@
-#ifndef STATEERROR_HPP_
-#define STATEERROR_HPP_
+#ifndef PARSER_STATEERROR_HPP_
+#define PARSER_STATEERROR_HPP_
 
 #include <string>
+
+namespace ovum::compiler::parser {
 
 class StateError {
 public:
@@ -13,4 +15,6 @@ private:
   std::string message_;
 };
 
-#endif // STATEERROR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEERROR_HPP_

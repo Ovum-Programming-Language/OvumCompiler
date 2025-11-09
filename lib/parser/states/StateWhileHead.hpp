@@ -1,8 +1,10 @@
-#ifndef STATEWHILEHEAD_HPP_
-#define STATEWHILEHEAD_HPP_
+#ifndef PARSER_STATEWHILEHEAD_HPP_
+#define PARSER_STATEWHILEHEAD_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateWhileHead : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEWHILEHEAD_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEWHILEHEAD_HPP_

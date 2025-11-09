@@ -1,8 +1,10 @@
-#ifndef STATEINTERFACEDECL_HPP_
-#define STATEINTERFACEDECL_HPP_
+#ifndef PARSER_STATEINTERFACEDECL_HPP_
+#define PARSER_STATEINTERFACEDECL_HPP_
 
 #include "lib/parser/states/base/StateBase.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateInterfaceDecl : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEINTERFACEDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEINTERFACEDECL_HPP_

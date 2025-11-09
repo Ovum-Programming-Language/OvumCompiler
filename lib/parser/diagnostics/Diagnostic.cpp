@@ -2,17 +2,15 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 Diagnostic::Diagnostic() = default;
 
 Diagnostic::Diagnostic(std::shared_ptr<const ISeverity> sev, std::string code, std::string message) :
     severity_(std::move(sev)), code_(std::move(code)), message_(std::move(message)) {
 }
 
-Diagnostic::Diagnostic(const Diagnostic& other) :
-    severity_(other.severity_), code_(other.code_), message_(other.message_), category_(other.category_),
-    where_(other.where_), notes_(other.notes_), fixes_(other.fixes_), is_fatal_(other.is_fatal_),
-    is_suppressed_(other.is_suppressed_) {
-}
+Diagnostic::Diagnostic(const Diagnostic& other) = default;
 
 Diagnostic::Diagnostic(Diagnostic&& other) noexcept :
     severity_(std::move(other.severity_)), code_(std::move(other.code_)), message_(std::move(other.message_)),
@@ -84,7 +82,7 @@ const std::string& Diagnostic::GetCategory() const noexcept {
   return category_;
 }
 
-void Diagnostic::SetWhere(SourceSpan sp) {
+void Diagnostic::SetWhere(const SourceSpan& sp) {
   where_ = sp;
 }
 void Diagnostic::ResetWhere() {
@@ -127,3 +125,5 @@ void Diagnostic::SetSuppressed(bool on) {
 bool Diagnostic::IsSuppressed() const noexcept {
   return is_suppressed_;
 }
+
+} // namespace ovum::compiler::parser

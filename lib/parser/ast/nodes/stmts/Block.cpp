@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void Block::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -45,3 +47,5 @@ void Block::Clear() noexcept {
 std::size_t Block::Size() const noexcept {
   return stmts_.size();
 }
+
+} // namespace ovum::compiler::parser

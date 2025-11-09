@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void VarDeclStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -51,3 +53,5 @@ void VarDeclStmt::SetInit(std::unique_ptr<Expr> init_expr) {
 std::unique_ptr<Expr> VarDeclStmt::ReleaseInit() {
   return std::move(init_);
 }
+
+} // namespace ovum::compiler::parser

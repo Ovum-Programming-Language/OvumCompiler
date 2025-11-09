@@ -1,9 +1,11 @@
-#ifndef POSTFIXSPEC_HPP_
-#define POSTFIXSPEC_HPP_
+#ifndef PARSER_POSTFIXSPEC_HPP_
+#define PARSER_POSTFIXSPEC_HPP_
 
 #include <functional>
 
-#include "lib/lexer/tokens/Token.hpp"
+#include <tokens/Token.hpp>
+
+namespace ovum::compiler::parser {
 
 class PostfixSpec {
 public:
@@ -15,4 +17,6 @@ private:
   bool keyword = false;
 };
 
-#endif // POSTFIXSPEC_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_POSTFIXSPEC_HPP_

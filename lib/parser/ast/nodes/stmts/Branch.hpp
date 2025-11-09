@@ -1,10 +1,12 @@
-#ifndef BRANCH_HPP_
-#define BRANCH_HPP_
+#ifndef PARSER_BRANCH_HPP_
+#define PARSER_BRANCH_HPP_
 
 #include <memory>
 
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class Branch {
 public:
@@ -30,4 +32,6 @@ private:
   std::unique_ptr<Block> then_block_;
 };
 
-#endif // BRANCH_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_BRANCH_HPP_

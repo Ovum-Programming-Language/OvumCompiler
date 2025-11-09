@@ -1,10 +1,12 @@
-#ifndef TYPETESTIS_HPP_
-#define TYPETESTIS_HPP_
+#ifndef PARSER_TYPETESTIS_HPP_
+#define PARSER_TYPETESTIS_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class TypeTestIs : public Expr {
 public:
@@ -24,4 +26,6 @@ private:
   TypeReference type;
 };
 
-#endif // TYPETESTIS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_TYPETESTIS_HPP_

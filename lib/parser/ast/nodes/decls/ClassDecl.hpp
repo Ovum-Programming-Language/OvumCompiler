@@ -1,5 +1,5 @@
-#ifndef CLASSDECL_HPP_
-#define CLASSDECL_HPP_
+#ifndef PARSER_CLASSDECL_HPP_
+#define PARSER_CLASSDECL_HPP_
 
 #include <memory>
 #include <string>
@@ -7,6 +7,8 @@
 
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class ClassDecl : public Decl {
 public:
@@ -30,4 +32,6 @@ private:
   std::vector<std::unique_ptr<Decl>> members_; // Field/StaticField/Method/Call/Destructor
 };
 
-#endif // CLASSDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CLASSDECL_HPP_

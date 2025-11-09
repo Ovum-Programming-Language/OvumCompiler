@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void ReturnStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -37,3 +39,5 @@ std::unique_ptr<Expr> ReturnStmt::ReleaseValue() {
   value_.reset();
   return out;
 }
+
+} // namespace ovum::compiler::parser

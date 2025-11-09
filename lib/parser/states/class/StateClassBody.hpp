@@ -1,8 +1,10 @@
-#ifndef STATECLASSBODY_HPP_
-#define STATECLASSBODY_HPP_
+#ifndef PARSER_STATECLASSBODY_HPP_
+#define PARSER_STATECLASSBODY_HPP_
 
 #include "lib/parser/states/base/StateBase.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateClassBody : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATECLASSBODY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATECLASSBODY_HPP_

@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void Elvis::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -43,3 +45,5 @@ std::unique_ptr<Expr> Elvis::ReplaceRhs(std::unique_ptr<Expr> new_rhs) {
   rhs_ = std::move(new_rhs);
   return old_rhs;
 }
+
+} // namespace ovum::compiler::parser

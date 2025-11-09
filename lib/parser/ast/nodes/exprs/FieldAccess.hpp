@@ -1,10 +1,12 @@
-#ifndef FIELDACCESS_HPP_
-#define FIELDACCESS_HPP_
+#ifndef PARSER_FIELDACCESS_HPP_
+#define PARSER_FIELDACCESS_HPP_
 
 #include <memory>
 #include <string>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class FieldAccess : public Expr {
 public:
@@ -23,4 +25,6 @@ private:
   std::string name_;
 };
 
-#endif // FIELDACCESS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FIELDACCESS_HPP_

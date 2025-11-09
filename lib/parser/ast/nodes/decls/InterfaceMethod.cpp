@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void InterfaceMethod::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -31,3 +33,5 @@ const TypeReference* InterfaceMethod::ReturnType() const noexcept {
 void InterfaceMethod::SetReturnType(std::unique_ptr<TypeReference> type) {
   ret_type_ = std::move(type);
 }
+
+} // namespace ovum::compiler::parser

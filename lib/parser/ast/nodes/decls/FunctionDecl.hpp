@@ -1,5 +1,5 @@
-#ifndef FUNCTIONDECL_HPP_
-#define FUNCTIONDECL_HPP_
+#ifndef PARSER_FUNCTIONDECL_HPP_
+#define PARSER_FUNCTIONDECL_HPP_
 
 #include <memory>
 #include <string>
@@ -8,6 +8,8 @@
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/types/Param.hpp"
+
+namespace ovum::compiler::parser {
 
 class TypeReference;
 
@@ -43,4 +45,6 @@ private:
   std::unique_ptr<Block> body_;                // optional
 };
 
-#endif // FUNCTIONDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FUNCTIONDECL_HPP_

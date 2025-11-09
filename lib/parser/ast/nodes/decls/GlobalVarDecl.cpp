@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void GlobalVarDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -49,3 +51,5 @@ void GlobalVarDecl::SetInit(std::unique_ptr<Expr> expr) {
 std::unique_ptr<Expr> GlobalVarDecl::ReleaseInit() {
   return std::move(init_);
 }
+
+} // namespace ovum::compiler::parser

@@ -1,5 +1,5 @@
-#ifndef PARSERFSM_HPP_
-#define PARSERFSM_HPP_
+#ifndef PARSER_PARSERFSM_HPP_
+#define PARSER_PARSERFSM_HPP_
 
 #include <memory>
 
@@ -7,6 +7,8 @@
 #include "ast/IAstFactory.hpp"
 #include "pratt/IExpressionParser.hpp"
 #include "type_parser/ITypeParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class ParserFsm : public IParser {
 public:
@@ -24,4 +26,6 @@ private:
   std::unique_ptr<IAstFactory> factory_;
 };
 
-#endif // PARSERFSM_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_PARSERFSM_HPP_

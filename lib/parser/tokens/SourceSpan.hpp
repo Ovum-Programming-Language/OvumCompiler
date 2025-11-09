@@ -1,9 +1,11 @@
-#ifndef SOURCESPAN_HPP_
-#define SOURCESPAN_HPP_
+#ifndef PARSER_SOURCESPAN_HPP_
+#define PARSER_SOURCESPAN_HPP_
+
+#include <tokens/TokenPosition.hpp>
 
 #include "SourceId.hpp"
 
-#include "lib/lexer/tokens/TokenPosition.hpp"
+namespace ovum::compiler::parser {
 
 class SourceSpan {
 public:
@@ -26,4 +28,6 @@ private:
   TokenPosition end_{};
 };
 
-#endif // SOURCESPAN_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_SOURCESPAN_HPP_

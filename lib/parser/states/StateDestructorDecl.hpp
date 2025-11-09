@@ -1,8 +1,10 @@
-#ifndef STATEDESTRUCTORDECL_HPP_
-#define STATEDESTRUCTORDECL_HPP_
+#ifndef PARSER_STATEDESTRUCTORDECL_HPP_
+#define PARSER_STATEDESTRUCTORDECL_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateDestructorDecl : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEDESTRUCTORDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEDESTRUCTORDECL_HPP_

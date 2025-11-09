@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void NamespaceRef::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -33,3 +35,5 @@ const std::string& NamespaceRef::Name() const noexcept {
 void NamespaceRef::SetName(std::string new_name) {
   name_ = std::move(new_name);
 }
+
+} // namespace ovum::compiler::parser

@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void ExprStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -23,3 +25,5 @@ void ExprStmt::SetExpression(std::unique_ptr<Expr> expression) {
 std::unique_ptr<Expr> ExprStmt::ReleaseExpression() {
   return std::move(expr_);
 }
+
+} // namespace ovum::compiler::parser

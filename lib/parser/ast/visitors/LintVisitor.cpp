@@ -32,6 +32,8 @@
 #include "lib/parser/ast/nodes/stmts/UnsafeBlock.hpp"
 #include "lib/parser/ast/nodes/stmts/WhileStmt.hpp"
 
+namespace ovum::compiler::parser {
+
 void LintVisitor::EnterBody() {
   ++nesting_depth_;
 }
@@ -52,7 +54,7 @@ void LintVisitor::LeaveLoop() {
   }
 }
 
-void LintVisitor::CheckNestingDepth(SourceSpan) const {
+void LintVisitor::CheckNestingDepth(const SourceSpan&) const {
   if (opts_.warn_deep_nesting && nesting_depth_ > opts_.max_nesting) {
     sink_.Warn("W0201", "deep nesting");
   }
@@ -157,11 +159,8 @@ void LintVisitor::Visit(Block& node) {
         continue;
       }
 
-      if (dynamic_cast<ReturnStmt*>(stmt.get())) {
-        terminated = true;
-      } else if (dynamic_cast<BreakStmt*>(stmt.get())) {
-        terminated = true;
-      } else if (dynamic_cast<ContinueStmt*>(stmt.get())) {
+      if (dynamic_cast<ReturnStmt*>(stmt.get()) || dynamic_cast<BreakStmt*>(stmt.get()) ||
+          dynamic_cast<ContinueStmt*>(stmt.get())) {
         terminated = true;
       }
     }
@@ -324,3 +323,5 @@ void LintVisitor::Visit(BoolLit& node) {
   (void) node;
   WalkVisitor::Visit(node);
 }
+
+} // namespace ovum::compiler::parser

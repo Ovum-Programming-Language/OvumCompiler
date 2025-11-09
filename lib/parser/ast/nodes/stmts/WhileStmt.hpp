@@ -1,11 +1,13 @@
-#ifndef WHILESTMT_HPP_
-#define WHILESTMT_HPP_
+#ifndef PARSER_WHILESTMT_HPP_
+#define PARSER_WHILESTMT_HPP_
 
 #include <memory>
 
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class WhileStmt : public Stmt {
 public:
@@ -26,4 +28,6 @@ private:
   std::unique_ptr<Block> body_;
 };
 
-#endif // WHILESTMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_WHILESTMT_HPP_

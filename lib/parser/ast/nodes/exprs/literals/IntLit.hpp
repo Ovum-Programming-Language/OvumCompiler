@@ -1,8 +1,10 @@
-#ifndef INTLIT_HPP_
-#define INTLIT_HPP_
+#ifndef PARSER_INTLIT_HPP_
+#define PARSER_INTLIT_HPP_
 
 #include <cstdint>
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class IntLit : public Expr {
 public:
@@ -15,4 +17,6 @@ private:
   int64_t value = 0;
 };
 
-#endif // INTLIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INTLIT_HPP_

@@ -1,8 +1,10 @@
-#ifndef STATESYNCTOSTMTEND_HPP_
-#define STATESYNCTOSTMTEND_HPP_
+#ifndef PARSER_STATESYNCTOSTMTEND_HPP_
+#define PARSER_STATESYNCTOSTMTEND_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateSyncToStmtEnd : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATESYNCTOSTMTEND_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATESYNCTOSTMTEND_HPP_

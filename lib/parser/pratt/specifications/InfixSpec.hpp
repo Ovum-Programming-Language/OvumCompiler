@@ -1,10 +1,13 @@
-#ifndef INFIXSPEC_HPP_
-#define INFIXSPEC_HPP_
+#ifndef PARSER_INFIXSPEC_HPP_
+#define PARSER_INFIXSPEC_HPP_
 
 #include <functional>
 
-#include "lib/lexer/tokens/Token.hpp"
+#include <tokens/Token.hpp>
+
 #include "lib/parser/ast/nodes/exprs/tags/IBinaryOpTag.hpp"
+
+namespace ovum::compiler::parser {
 
 class InfixSpec {
 public:
@@ -19,4 +22,6 @@ private:
   bool is_elvis_ = false;
 };
 
-#endif // INFIXSPEC_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INFIXSPEC_HPP_

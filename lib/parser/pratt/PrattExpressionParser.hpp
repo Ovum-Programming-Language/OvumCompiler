@@ -1,5 +1,5 @@
-#ifndef PRATTEXPRESSIONPARSER_HPP_
-#define PRATTEXPRESSIONPARSER_HPP_
+#ifndef PARSER_PRATTEXPRESSIONPARSER_HPP_
+#define PARSER_PRATTEXPRESSIONPARSER_HPP_
 
 #include <memory>
 #include <vector>
@@ -10,6 +10,8 @@
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class PrattExpressionParser : public IExpressionParser {
 public:
@@ -31,4 +33,6 @@ private:
   std::shared_ptr<IAstFactory> factory_;
 };
 
-#endif // PRATTEXPRESSIONPARSER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_PRATTEXPRESSIONPARSER_HPP_

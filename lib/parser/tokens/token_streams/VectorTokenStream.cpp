@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 VectorTokenStream::VectorTokenStream(std::vector<TokenPtr> tokens) : tokens_(std::move(tokens)) {
 }
 
@@ -68,3 +70,5 @@ const Token* VectorTokenStream::TryPeek(size_t k) {
 size_t VectorTokenStream::Size() const {
   return tokens_.size();
 }
+
+} // namespace ovum::compiler::parser

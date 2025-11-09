@@ -2,6 +2,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 std::vector<const IState*>& ContextParser::StateStack() {
   return state_stack_;
 }
@@ -81,3 +83,5 @@ void ContextParser::Clear() {
   expr_ = nullptr;
   typep_ = nullptr;
 }
+
+} // namespace ovum::compiler::parser

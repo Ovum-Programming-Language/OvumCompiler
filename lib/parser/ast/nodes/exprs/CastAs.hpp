@@ -1,10 +1,12 @@
-#ifndef CASTAS_HPP_
-#define CASTAS_HPP_
+#ifndef PARSER_CASTAS_HPP_
+#define PARSER_CASTAS_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class CastAs : public Expr {
 public:
@@ -24,4 +26,6 @@ private:
   TypeReference type_;
 };
 
-#endif // CASTAS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CASTAS_HPP_

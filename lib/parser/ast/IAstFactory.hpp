@@ -1,5 +1,5 @@
-#ifndef IASTFACTORY_HPP_
-#define IASTFACTORY_HPP_
+#ifndef PARSER_IASTFACTORY_HPP_
+#define PARSER_IASTFACTORY_HPP_
 
 #include <memory>
 
@@ -40,6 +40,8 @@
 #include "nodes/stmts/UnsafeBlock.hpp"
 #include "nodes/stmts/VarDeclStmt.hpp"
 #include "nodes/stmts/WhileStmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class IAstFactory {
 public:
@@ -89,4 +91,6 @@ public:
   virtual std::unique_ptr<NullLit> MakeNull() = 0;
 };
 
-#endif // IASTFACTORY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IASTFACTORY_HPP_

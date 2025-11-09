@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void IndexAccess::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -43,3 +45,5 @@ std::unique_ptr<Expr> IndexAccess::ReplaceIndexExpr(std::unique_ptr<Expr> new_in
   index_ = std::move(new_index);
   return old_index;
 }
+
+} // namespace ovum::compiler::parser

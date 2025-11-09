@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void ForStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -47,3 +49,5 @@ void ForStmt::SetBody(std::unique_ptr<Block> body_block) {
 std::unique_ptr<Block> ForStmt::ReleaseBody() {
   return std::move(body_);
 }
+
+} // namespace ovum::compiler::parser

@@ -1,9 +1,11 @@
-#ifndef ELVIS_HPP_
-#define ELVIS_HPP_
+#ifndef PARSER_ELVIS_HPP_
+#define PARSER_ELVIS_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class Elvis : public Expr {
 public:
@@ -24,4 +26,6 @@ private:
   std::unique_ptr<Expr> rhs_;
 };
 
-#endif // ELVIS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ELVIS_HPP_

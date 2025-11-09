@@ -1,5 +1,7 @@
 #include "Nullable.hpp"
 
+namespace ovum::compiler::parser {
+
 Nullable::Nullable(bool on) noexcept : on_(on) {
 }
 
@@ -18,3 +20,5 @@ void Nullable::Enable() noexcept {
 void Nullable::Disable() noexcept {
   on_ = false;
 }
+
+} // namespace ovum::compiler::parser

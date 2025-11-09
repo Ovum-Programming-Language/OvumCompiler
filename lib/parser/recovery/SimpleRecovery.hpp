@@ -1,7 +1,9 @@
-#ifndef SIMPLERECOVERY_HPP_
-#define SIMPLERECOVERY_HPP_
+#ifndef PARSER_SIMPLERECOVERY_HPP_
+#define PARSER_SIMPLERECOVERY_HPP_
 
 #include "IRecoveryStrategy.hpp"
+
+namespace ovum::compiler::parser {
 
 class SimpleRecovery : IRecoveryStrategy {
 public:
@@ -11,4 +13,6 @@ public:
   void SyncToBlockEnd(ITokenStream& ts) override;
 };
 
-#endif // SIMPLERECOVERY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_SIMPLERECOVERY_HPP_

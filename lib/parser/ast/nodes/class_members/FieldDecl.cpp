@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void FieldDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -59,3 +61,5 @@ void FieldDecl::SetInit(std::unique_ptr<Expr> expr) {
 std::unique_ptr<Expr> FieldDecl::ReleaseInit() {
   return std::move(init_);
 }
+
+} // namespace ovum::compiler::parser

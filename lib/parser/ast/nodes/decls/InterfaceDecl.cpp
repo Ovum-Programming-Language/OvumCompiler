@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void InterfaceDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -35,3 +37,5 @@ std::unique_ptr<InterfaceMethod> InterfaceDecl::ReleaseMember(std::size_t index)
   methods_.erase(methods_.begin() + static_cast<std::ptrdiff_t>(index));
   return old;
 }
+
+} // namespace ovum::compiler::parser

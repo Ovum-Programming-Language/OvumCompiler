@@ -1,5 +1,5 @@
-#ifndef SAFECALL_HPP_
-#define SAFECALL_HPP_
+#ifndef PARSER_SAFECALL_HPP_
+#define PARSER_SAFECALL_HPP_
 
 #include <memory>
 #include <optional>
@@ -8,6 +8,8 @@
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class AstVisitor;
 
@@ -40,4 +42,6 @@ private:
   std::optional<TypeReference> inferred_type_;
 };
 
-#endif // SAFECALL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_SAFECALL_HPP_

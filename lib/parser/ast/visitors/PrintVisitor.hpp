@@ -1,11 +1,13 @@
-#ifndef PRINTVISITOR_HPP_
-#define PRINTVISITOR_HPP_
+#ifndef PARSER_PRINTVISITOR_HPP_
+#define PARSER_PRINTVISITOR_HPP_
 
 #include <ostream>
 #include <sstream>
 #include <string>
 
 #include "lib/parser/ast/AstVisitor.hpp"
+
+namespace ovum::compiler::parser {
 
 class PrintVisitor : public AstVisitor {
 public:
@@ -71,4 +73,6 @@ private:
   bool use_buffer_ = false;
 };
 
-#endif // PRINTVISITOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_PRINTVISITOR_HPP_

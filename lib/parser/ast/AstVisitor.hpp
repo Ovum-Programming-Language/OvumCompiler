@@ -1,5 +1,5 @@
-#ifndef ASTVISITOR_HPP_
-#define ASTVISITOR_HPP_
+#ifndef PARSER_ASTVISITOR_HPP_
+#define PARSER_ASTVISITOR_HPP_
 
 #include "nodes/class_members/CallDecl.hpp"
 #include "nodes/class_members/DestructorDecl.hpp"
@@ -39,6 +39,8 @@
 #include "nodes/stmts/UnsafeBlock.hpp"
 #include "nodes/stmts/VarDeclStmt.hpp"
 #include "nodes/stmts/WhileStmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class AstVisitor {
 public:
@@ -91,4 +93,6 @@ public:
   virtual void Visit(NullLit&) = 0;
 };
 
-#endif // ASTVISITOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ASTVISITOR_HPP_

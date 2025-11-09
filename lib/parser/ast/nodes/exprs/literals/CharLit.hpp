@@ -1,7 +1,9 @@
-#ifndef CHARLIT_HPP_
-#define CHARLIT_HPP_
+#ifndef PARSER_CHARLIT_HPP_
+#define PARSER_CHARLIT_HPP_
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class CharLit : public Expr {
 public:
@@ -14,4 +16,6 @@ private:
   char value_ = '\0';
 };
 
-#endif // CHARLIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CHARLIT_HPP_

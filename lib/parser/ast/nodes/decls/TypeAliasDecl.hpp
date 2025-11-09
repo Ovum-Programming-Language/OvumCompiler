@@ -1,10 +1,12 @@
-#ifndef TYPEALIASDECL_HPP_
-#define TYPEALIASDECL_HPP_
+#ifndef PARSER_TYPEALIASDECL_HPP_
+#define PARSER_TYPEALIASDECL_HPP_
 
 #include <string>
 
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class TypeAliasDecl : public Decl {
 public:
@@ -22,4 +24,6 @@ private:
   TypeReference aliased_type_;
 };
 
-#endif // TYPEALIASDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_TYPEALIASDECL_HPP_

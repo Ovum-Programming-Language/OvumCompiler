@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void WhileStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -39,3 +41,5 @@ void WhileStmt::SetBody(std::unique_ptr<Block> body_block) {
 std::unique_ptr<Block> WhileStmt::ReleaseBody() {
   return std::move(body_);
 }
+
+} // namespace ovum::compiler::parser

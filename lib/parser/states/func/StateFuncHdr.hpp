@@ -1,8 +1,10 @@
-#ifndef STATEFUNCHDR_HPP_
-#define STATEFUNCHDR_HPP_
+#ifndef PARSER_STATEFUNCHDR_HPP_
+#define PARSER_STATEFUNCHDR_HPP_
 
 #include "lib/parser/states/base/StateBase.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateFuncHdr : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEFUNCHDR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEFUNCHDR_HPP_

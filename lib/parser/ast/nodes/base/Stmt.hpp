@@ -1,8 +1,12 @@
-#ifndef STMT_HPP_
-#define STMT_HPP_
+#ifndef PARSER_STMT_HPP_
+#define PARSER_STMT_HPP_
 
 #include "AstNode.hpp"
 
+namespace ovum::compiler::parser {
+
 class Stmt : public AstNode {};
 
-#endif // STMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STMT_HPP_

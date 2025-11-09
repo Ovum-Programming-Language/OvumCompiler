@@ -1,9 +1,11 @@
-#ifndef FIXIT_HPP_
-#define FIXIT_HPP_
+#ifndef PARSER_FIXIT_HPP_
+#define PARSER_FIXIT_HPP_
 
 #include <string>
 
 #include "lib/parser/tokens/SourceSpan.hpp"
+
+namespace ovum::compiler::parser {
 
 class FixIt {
 public:
@@ -14,4 +16,6 @@ private:
   std::string replacement_;
 };
 
-#endif // FIXIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FIXIT_HPP_

@@ -1,7 +1,9 @@
-#ifndef IUNARYOPTAG_HPP_
-#define IUNARYOPTAG_HPP_
+#ifndef PARSER_IUNARYOPTAG_HPP_
+#define PARSER_IUNARYOPTAG_HPP_
 
 #include <string>
+
+namespace ovum::compiler::parser {
 
 class IUnaryOpTag {
 public:
@@ -10,4 +12,6 @@ public:
   virtual std::string_view Name() const = 0;
 };
 
-#endif // IUNARYOPTAG_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IUNARYOPTAG_HPP_

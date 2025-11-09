@@ -1,8 +1,10 @@
-#ifndef STATEVARDECLTAIL_HPP_
-#define STATEVARDECLTAIL_HPP_
+#ifndef PARSER_STATEVARDECLTAIL_HPP_
+#define PARSER_STATEVARDECLTAIL_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateVarDeclTail : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEVARDECLTAIL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEVARDECLTAIL_HPP_

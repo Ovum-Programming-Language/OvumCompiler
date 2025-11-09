@@ -1,11 +1,13 @@
-#ifndef UNARY_HPP_
-#define UNARY_HPP_
+#ifndef PARSER_UNARY_HPP_
+#define PARSER_UNARY_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "tags/IUnaryOpTag.hpp"
 #include "tags/OpTags.hpp"
+
+namespace ovum::compiler::parser {
 
 class Unary : public Expr {
 public:
@@ -24,4 +26,6 @@ private:
   std::unique_ptr<Expr> operand_;
 };
 
-#endif // UNARY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_UNARY_HPP_

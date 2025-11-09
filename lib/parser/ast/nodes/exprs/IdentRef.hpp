@@ -1,9 +1,11 @@
-#ifndef IDENTREF_HPP_
-#define IDENTREF_HPP_
+#ifndef PARSER_IDENTREF_HPP_
+#define PARSER_IDENTREF_HPP_
 
 #include <string>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class IdentRef : public Expr {
 public:
@@ -16,4 +18,6 @@ private:
   std::string name_;
 };
 
-#endif // IDENTREF_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IDENTREF_HPP_

@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void ClassDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -47,3 +49,5 @@ std::unique_ptr<Decl> ClassDecl::ReleaseMember(std::size_t index) {
   members_.erase(members_.begin() + static_cast<std::ptrdiff_t>(index));
   return old;
 }
+
+} // namespace ovum::compiler::parser

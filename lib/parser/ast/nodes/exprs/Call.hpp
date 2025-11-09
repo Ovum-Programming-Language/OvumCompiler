@@ -1,10 +1,12 @@
-#ifndef CALL_HPP_
-#define CALL_HPP_
+#ifndef PARSER_CALL_HPP_
+#define PARSER_CALL_HPP_
 
 #include <memory>
 #include <vector>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class Call : public Expr {
 public:
@@ -25,4 +27,6 @@ private:
   std::vector<std::unique_ptr<Expr>> args_;
 };
 
-#endif // CALL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CALL_HPP_

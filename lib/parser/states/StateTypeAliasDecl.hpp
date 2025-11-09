@@ -1,8 +1,10 @@
-#ifndef STATETYPEALIASDECL_HPP_
-#define STATETYPEALIASDECL_HPP_
+#ifndef PARSER_STATETYPEALIASDECL_HPP_
+#define PARSER_STATETYPEALIASDECL_HPP_
 
 #include "lib/parser/states/base/StateBase.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateTypeAliasDecl : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATETYPEALIASDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATETYPEALIASDECL_HPP_

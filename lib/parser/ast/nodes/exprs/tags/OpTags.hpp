@@ -1,9 +1,11 @@
-#ifndef OPTAGS_HPP_
-#define OPTAGS_HPP_
+#ifndef PARSER_OPTAGS_HPP_
+#define PARSER_OPTAGS_HPP_
 
 #include "IAssignOpTag.hpp"
 #include "IBinaryOpTag.hpp"
 #include "IUnaryOpTag.hpp"
+
+namespace ovum::compiler::parser {
 
 namespace OpTags {
 // binary
@@ -32,4 +34,6 @@ const IAssignOpTag& RefAssign();  // =
 const IAssignOpTag& CopyAssign(); // :=
 } // namespace OpTags
 
-#endif // OPTAGS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_OPTAGS_HPP_

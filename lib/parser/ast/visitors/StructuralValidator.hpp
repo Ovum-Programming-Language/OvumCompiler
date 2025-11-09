@@ -1,8 +1,10 @@
-#ifndef STRUCTURALVALIDATOR_HPP_
-#define STRUCTURALVALIDATOR_HPP_
+#ifndef PARSER_STRUCTURALVALIDATOR_HPP_
+#define PARSER_STRUCTURALVALIDATOR_HPP_
 
 #include "WalkVisitor.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
+
+namespace ovum::compiler::parser {
 
 class StructuralValidator : public WalkVisitor {
 public:
@@ -28,4 +30,6 @@ private:
   IDiagnosticSink& sink_;
 };
 
-#endif // STRUCTURALVALIDATOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STRUCTURALVALIDATOR_HPP_

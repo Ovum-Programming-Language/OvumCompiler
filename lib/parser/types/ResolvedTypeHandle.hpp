@@ -1,7 +1,9 @@
-#ifndef RESOLVEDTYPEHANDLE_HPP_
-#define RESOLVEDTYPEHANDLE_HPP_
+#ifndef PARSER_RESOLVEDTYPEHANDLE_HPP_
+#define PARSER_RESOLVEDTYPEHANDLE_HPP_
 
 #include <string>
+
+namespace ovum::compiler::parser {
 
 class ResolvedTypeHandle {
 public:
@@ -26,4 +28,6 @@ private:
   bool is_interface_ = false;
 };
 
-#endif // RESOLVEDTYPEHANDLE_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_RESOLVEDTYPEHANDLE_HPP_

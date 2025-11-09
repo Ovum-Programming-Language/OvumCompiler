@@ -1,8 +1,10 @@
-#ifndef STATECALLDECLHDR_HPP_
-#define STATECALLDECLHDR_HPP_
+#ifndef PARSER_STATECALLDECLHDR_HPP_
+#define PARSER_STATECALLDECLHDR_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateCallDeclHdr : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATECALLDECLHDR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATECALLDECLHDR_HPP_

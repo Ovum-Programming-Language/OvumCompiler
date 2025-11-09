@@ -1,5 +1,5 @@
-#ifndef QNAMETYPEPARSER_HPP_
-#define QNAMETYPEPARSER_HPP_
+#ifndef PARSER_QNAMETYPEPARSER_HPP_
+#define PARSER_QNAMETYPEPARSER_HPP_
 
 #include <memory>
 
@@ -8,6 +8,8 @@
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class QNameTypeParser final : public ITypeParser {
 public:
@@ -26,4 +28,6 @@ private:
   std::shared_ptr<IAstFactory> factory_;
 };
 
-#endif // QNAMETYPEPARSER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_QNAMETYPEPARSER_HPP_

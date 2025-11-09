@@ -1,9 +1,11 @@
-#ifndef STRINGLIT_HPP_
-#define STRINGLIT_HPP_
+#ifndef PARSER_STRINGLIT_HPP_
+#define PARSER_STRINGLIT_HPP_
 
 #include <string>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class StringLit : public Expr {
 public:
@@ -16,4 +18,6 @@ private:
   std::string value_;
 };
 
-#endif // STRINGLIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STRINGLIT_HPP_

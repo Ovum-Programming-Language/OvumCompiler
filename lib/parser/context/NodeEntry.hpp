@@ -1,9 +1,11 @@
-#ifndef NODEENTRY_HPP_
-#define NODEENTRY_HPP_
+#ifndef PARSER_NODEENTRY_HPP_
+#define PARSER_NODEENTRY_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/AstNode.hpp"
+
+namespace ovum::compiler::parser {
 
 class NodeEntry {
 public:
@@ -19,4 +21,6 @@ private:
   std::unique_ptr<AstNode> node_;
 };
 
-#endif // NODEENTRY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_NODEENTRY_HPP_

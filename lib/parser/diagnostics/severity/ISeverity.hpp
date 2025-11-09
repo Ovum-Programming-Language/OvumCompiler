@@ -1,7 +1,9 @@
-#ifndef ISEVERITY_HPP_
-#define ISEVERITY_HPP_
+#ifndef PARSER_ISEVERITY_HPP_
+#define PARSER_ISEVERITY_HPP_
 
 #include <string_view>
+
+namespace ovum::compiler::parser {
 
 class ISeverity {
 public:
@@ -10,4 +12,6 @@ public:
   virtual int Level() const = 0;
 };
 
-#endif // ISEVERITY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ISEVERITY_HPP_

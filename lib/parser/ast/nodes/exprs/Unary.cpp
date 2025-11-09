@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void Unary::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -33,3 +35,5 @@ std::unique_ptr<Expr> Unary::ReplaceOperand(std::unique_ptr<Expr> new_operand) {
   operand_ = std::move(new_operand);
   return old_operand;
 }
+
+} // namespace ovum::compiler::parser

@@ -1,9 +1,11 @@
-#ifndef INDEXACCESS_HPP_
-#define INDEXACCESS_HPP_
+#ifndef PARSER_INDEXACCESS_HPP_
+#define PARSER_INDEXACCESS_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class IndexAccess : public Expr {
 public:
@@ -24,4 +26,6 @@ private:
   std::unique_ptr<Expr> index_;
 };
 
-#endif // INDEXACCESS_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INDEXACCESS_HPP_

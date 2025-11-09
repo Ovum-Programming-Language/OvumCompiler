@@ -1,7 +1,9 @@
-#ifndef STATEREGISTRY_HPP_
-#define STATEREGISTRY_HPP_
+#ifndef PARSER_STATEREGISTRY_HPP_
+#define PARSER_STATEREGISTRY_HPP_
 
 #include "IState.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateRegistry {
   static const IState& Module();
@@ -42,4 +44,6 @@ class StateRegistry {
   static const IState& SyncToBlockEnd();
 };
 
-#endif // STATEREGISTRY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEREGISTRY_HPP_

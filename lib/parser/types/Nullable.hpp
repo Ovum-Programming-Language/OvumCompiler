@@ -1,5 +1,7 @@
-#ifndef NULLABLE_HPP_
-#define NULLABLE_HPP_
+#ifndef PARSER_NULLABLE_HPP_
+#define PARSER_NULLABLE_HPP_
+
+namespace ovum::compiler::parser {
 
 class Nullable {
 public:
@@ -19,4 +21,6 @@ private:
   bool on_ = false;
 };
 
-#endif // NULLABLE_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_NULLABLE_HPP_

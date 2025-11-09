@@ -1,8 +1,10 @@
-#ifndef STATEGLOBALVARDECL_HPP_
-#define STATEGLOBALVARDECL_HPP_
+#ifndef PARSER_STATEGLOBALVARDECL_HPP_
+#define PARSER_STATEGLOBALVARDECL_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateGlobalVarDecl : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEGLOBALVARDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEGLOBALVARDECL_HPP_

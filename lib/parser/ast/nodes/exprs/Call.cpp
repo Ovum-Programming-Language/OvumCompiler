@@ -3,6 +3,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void Call::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -40,3 +42,5 @@ void Call::AddArg(std::unique_ptr<Expr> new_arg) {
 void Call::ClearArgs() {
   args_.clear();
 }
+
+} // namespace ovum::compiler::parser

@@ -1,8 +1,12 @@
-#ifndef DECL_HPP_
-#define DECL_HPP_
+#ifndef PARSER_DECL_HPP_
+#define PARSER_DECL_HPP_
 
 #include "AstNode.hpp"
 
+namespace ovum::compiler::parser {
+
 class Decl : public AstNode {};
 
-#endif // DECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_DECL_HPP_

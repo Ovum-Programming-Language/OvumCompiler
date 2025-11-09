@@ -1,11 +1,13 @@
-#ifndef RETURNSTMT_HPP_
-#define RETURNSTMT_HPP_
+#ifndef PARSER_RETURNSTMT_HPP_
+#define PARSER_RETURNSTMT_HPP_
 
 #include <memory>
 #include <optional>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class ReturnStmt : public Stmt {
 public:
@@ -22,4 +24,6 @@ private:
   std::optional<std::unique_ptr<Expr>> value_;
 };
 
-#endif // RETURNSTMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_RETURNSTMT_HPP_

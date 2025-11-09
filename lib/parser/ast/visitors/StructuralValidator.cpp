@@ -18,6 +18,8 @@
 #include "lib/parser/ast/nodes/exprs/SafeCall.hpp"
 #include "lib/parser/ast/nodes/exprs/Unary.hpp"
 
+namespace ovum::compiler::parser {
+
 void StructuralValidator::Visit(Module& node) {
   if (node.Name().empty()) {
     sink_.Error("E0001", "module name must not be empty");
@@ -112,3 +114,5 @@ void StructuralValidator::Visit(SafeCall& node) {
   (void) node.MutableObject();
   WalkVisitor::Visit(node);
 }
+
+} // namespace ovum::compiler::parser

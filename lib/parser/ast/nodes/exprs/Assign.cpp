@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void Assign::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -51,3 +53,5 @@ std::unique_ptr<Expr> Assign::ReplaceValue(std::unique_ptr<Expr> new_value) {
   value_ = std::move(new_value);
   return old_value;
 }
+
+} // namespace ovum::compiler::parser

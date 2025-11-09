@@ -1,10 +1,12 @@
-#ifndef RELATEDINFO_HPP_
-#define RELATEDINFO_HPP_
+#ifndef PARSER_RELATEDINFO_HPP_
+#define PARSER_RELATEDINFO_HPP_
 
 #include <optional>
 #include <string>
 
 #include "lib/parser/tokens/SourceSpan.hpp"
+
+namespace ovum::compiler::parser {
 
 class RelatedInfo {
 public:
@@ -15,4 +17,6 @@ private:
   std::optional<SourceSpan> where_;
 };
 
-#endif // RELATEDINFO_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_RELATEDINFO_HPP_

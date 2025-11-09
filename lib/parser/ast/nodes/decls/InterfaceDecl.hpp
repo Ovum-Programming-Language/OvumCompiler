@@ -1,5 +1,5 @@
-#ifndef INTERFACEDECL_HPP_
-#define INTERFACEDECL_HPP_
+#ifndef PARSER_INTERFACEDECL_HPP_
+#define PARSER_INTERFACEDECL_HPP_
 
 #include <memory>
 #include <string>
@@ -7,6 +7,8 @@
 
 #include "InterfaceMethod.hpp"
 #include "lib/parser/ast/nodes/base/Decl.hpp"
+
+namespace ovum::compiler::parser {
 
 class InterfaceDecl : public Decl {
 public:
@@ -26,4 +28,6 @@ private:
   std::vector<std::unique_ptr<InterfaceMethod>> methods_;
 };
 
-#endif // INTERFACEDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INTERFACEDECL_HPP_

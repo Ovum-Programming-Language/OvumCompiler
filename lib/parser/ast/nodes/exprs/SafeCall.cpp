@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void SafeCall::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -61,3 +63,5 @@ void SafeCall::SetInferredType(TypeReference inferred) {
 const std::optional<TypeReference>& SafeCall::InferredType() const noexcept {
   return inferred_type_;
 }
+
+} // namespace ovum::compiler::parser

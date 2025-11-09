@@ -1,5 +1,7 @@
-#ifndef ASTNODE_HPP_
-#define ASTNODE_HPP_
+#ifndef PARSER_ASTNODE_HPP_
+#define PARSER_ASTNODE_HPP_
+
+namespace ovum::compiler::parser {
 
 class AstVisitor; // forward
 
@@ -12,4 +14,6 @@ public:
   virtual void Accept(AstVisitor& visitor) = 0;
 };
 
-#endif // ASTNODE_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ASTNODE_HPP_

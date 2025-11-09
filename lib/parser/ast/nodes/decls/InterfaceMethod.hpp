@@ -1,5 +1,5 @@
-#ifndef INTERFACEMETHOD_HPP_
-#define INTERFACEMETHOD_HPP_
+#ifndef PARSER_INTERFACEMETHOD_HPP_
+#define PARSER_INTERFACEMETHOD_HPP_
 
 #include <memory>
 #include <vector>
@@ -7,6 +7,8 @@
 #include "lib/parser/ast/nodes/base/AstNode.hpp"
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class InterfaceMethod : public Decl {
 public:
@@ -32,4 +34,6 @@ private:
   std::unique_ptr<TypeReference> ret_type_;
 };
 
-#endif // INTERFACEMETHOD_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INTERFACEMETHOD_HPP_

@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void CallDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -59,3 +61,5 @@ void CallDecl::SetBody(std::unique_ptr<Block> block) {
 std::unique_ptr<Block> CallDecl::ReleaseBody() {
   return std::move(body_);
 }
+
+} // namespace ovum::compiler::parser

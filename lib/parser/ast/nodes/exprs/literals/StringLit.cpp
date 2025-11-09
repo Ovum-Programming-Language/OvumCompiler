@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void StringLit::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -15,3 +17,5 @@ const std::string& StringLit::Value() const noexcept {
 void StringLit::SetValue(std::string new_value) {
   value_ = std::move(new_value);
 }
+
+} // namespace ovum::compiler::parser

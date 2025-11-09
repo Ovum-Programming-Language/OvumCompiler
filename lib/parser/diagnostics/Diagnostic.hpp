@@ -1,5 +1,5 @@
-#ifndef DIAGNOSTIC_HPP_
-#define DIAGNOSTIC_HPP_
+#ifndef PARSER_DIAGNOSTIC_HPP_
+#define PARSER_DIAGNOSTIC_HPP_
 
 #include <memory>
 #include <optional>
@@ -11,6 +11,8 @@
 #include "RelatedInfo.hpp"
 #include "lib/parser/tokens/SourceSpan.hpp"
 #include "severity/ISeverity.hpp"
+
+namespace ovum::compiler::parser {
 
 class Diagnostic {
 public:
@@ -64,4 +66,6 @@ private:
   bool is_suppressed_ = false;
 };
 
-#endif // DIAGNOSTIC_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_DIAGNOSTIC_HPP_

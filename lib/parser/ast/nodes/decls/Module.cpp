@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void Module::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -19,7 +21,7 @@ const SourceId& Module::Source() const noexcept {
 }
 
 void Module::SetSource(SourceId id) {
-  source_ = id;
+  source_ = std::move(id);
 }
 
 const std::vector<std::unique_ptr<Decl>>& Module::Decls() const noexcept {
@@ -40,6 +42,8 @@ std::unique_ptr<Decl> Module::ReleaseDecl(std::size_t index) {
   }
 
   auto old = std::move(decls_[index]);
-  decls_.erase(decls_.begin() + index);
+  decls_.erase(decls_.begin() + static_cast<std::ptrdiff_t>(index));
   return std::move(old);
 }
+
+} // namespace ovum::compiler::parser

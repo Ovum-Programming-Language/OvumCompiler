@@ -1,8 +1,10 @@
-#ifndef IOPERATORRESOLVER_HPP_
-#define IOPERATORRESOLVER_HPP_
+#ifndef PARSER_IOPERATORRESOLVER_HPP_
+#define PARSER_IOPERATORRESOLVER_HPP_
 
 #include <functional>
 #include <optional>
+
+namespace ovum::compiler::parser {
 
 class Token;
 class IUnaryOpTag;
@@ -19,4 +21,6 @@ public:
   virtual bool IsContinuation(const Token& t) const = 0;
 };
 
-#endif // IOPERATORRESOLVER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IOPERATORRESOLVER_HPP_

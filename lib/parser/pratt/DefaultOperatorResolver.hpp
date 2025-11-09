@@ -1,5 +1,5 @@
-#ifndef DEFAULTOPERATORRESOLVER_HPP_
-#define DEFAULTOPERATORRESOLVER_HPP_
+#ifndef PARSER_DEFAULTOPERATORRESOLVER_HPP_
+#define PARSER_DEFAULTOPERATORRESOLVER_HPP_
 
 #include <functional>
 #include <optional>
@@ -9,6 +9,8 @@
 #include "lib/parser/ast/nodes/exprs/tags/IUnaryOpTag.hpp"
 #include "specifications/InfixSpec.hpp"
 #include "specifications/PostfixSpec.hpp"
+
+namespace ovum::compiler::parser {
 
 class DefaultOperatorResolver : public IOperatorResolver {
 public:
@@ -24,4 +26,6 @@ private:
   std::vector<PostfixSpec> postfix_;
 };
 
-#endif // DEFAULTOPERATORRESOLVER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_DEFAULTOPERATORRESOLVER_HPP_

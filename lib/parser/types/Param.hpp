@@ -1,9 +1,11 @@
-#ifndef PARAM_HPP_
-#define PARAM_HPP_
+#ifndef PARSER_PARAM_HPP_
+#define PARSER_PARAM_HPP_
 
 #include <string>
 
 #include "TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class Param {
 public:
@@ -18,4 +20,6 @@ private:
   TypeReference reference_;
 };
 
-#endif // PARAM_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_PARAM_HPP_

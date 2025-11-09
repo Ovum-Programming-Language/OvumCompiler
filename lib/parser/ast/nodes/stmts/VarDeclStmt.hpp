@@ -1,5 +1,5 @@
-#ifndef VARDECLSTMT_HPP_
-#define VARDECLSTMT_HPP_
+#ifndef PARSER_VARDECLSTMT_HPP_
+#define PARSER_VARDECLSTMT_HPP_
 
 #include <memory>
 #include <string>
@@ -7,6 +7,8 @@
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class VarDeclStmt : public Stmt {
 public:
@@ -34,4 +36,6 @@ private:
   std::unique_ptr<Expr> init_;
 };
 
-#endif // VARDECLSTMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_VARDECLSTMT_HPP_

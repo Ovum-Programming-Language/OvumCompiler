@@ -4,6 +4,8 @@
 
 #include "lib/parser/diagnostics/severity/Severity.hpp"
 
+namespace ovum::compiler::parser {
+
 void DiagnosticCollector::Report(Diagnostic d) {
   bool suppressed = !ShouldKeep(d);
   d.SetSuppressed(suppressed);
@@ -152,3 +154,5 @@ bool DiagnosticCollector::IsDuplicate(const Diagnostic& d) const {
   }
   return false;
 }
+
+} // namespace ovum::compiler::parser

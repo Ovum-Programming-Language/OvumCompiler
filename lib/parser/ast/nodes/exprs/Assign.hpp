@@ -1,11 +1,13 @@
-#ifndef ASSIGN_HPP_
-#define ASSIGN_HPP_
+#ifndef PARSER_ASSIGN_HPP_
+#define PARSER_ASSIGN_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "tags/IAssignOpTag.hpp"
 #include "tags/OpTags.hpp"
+
+namespace ovum::compiler::parser {
 
 class Assign : public Expr {
 public:
@@ -30,4 +32,6 @@ private:
   std::unique_ptr<Expr> value_;
 };
 
-#endif // ASSIGN_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ASSIGN_HPP_

@@ -45,6 +45,8 @@
 #include "lib/parser/ast/nodes/stmts/VarDeclStmt.hpp"
 #include "lib/parser/ast/nodes/stmts/WhileStmt.hpp"
 
+namespace ovum::compiler::parser {
+
 void WalkVisitor::Visit(Module& node) {
   for (auto& decl_ptr : node.MutableDecls()) {
     decl_ptr->Accept(*this);
@@ -268,3 +270,5 @@ void WalkVisitor::Visit(BoolLit& node) {
 void WalkVisitor::Visit(NullLit& node) {
   (void) node;
 }
+
+} // namespace ovum::compiler::parser

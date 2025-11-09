@@ -1,5 +1,5 @@
-#ifndef BLOCK_HPP_
-#define BLOCK_HPP_
+#ifndef PARSER_BLOCK_HPP_
+#define PARSER_BLOCK_HPP_
 
 #include <cstddef>
 #include <memory>
@@ -7,6 +7,8 @@
 
 #include "lib/parser/ast/nodes/base/AstNode.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class Block : public Stmt {
 public:
@@ -25,4 +27,6 @@ private:
   std::vector<std::unique_ptr<Stmt>> stmts_;
 };
 
-#endif // BLOCK_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_BLOCK_HPP_

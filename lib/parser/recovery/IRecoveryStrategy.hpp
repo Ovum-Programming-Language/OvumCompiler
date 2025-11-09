@@ -1,7 +1,9 @@
-#ifndef IRECOVERYSTRATEGY_HPP_
-#define IRECOVERYSTRATEGY_HPP_
+#ifndef PARSER_IRECOVERYSTRATEGY_HPP_
+#define PARSER_IRECOVERYSTRATEGY_HPP_
 
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+
+namespace ovum::compiler::parser {
 
 class IRecoveryStrategy {
 public:
@@ -11,4 +13,6 @@ public:
   virtual void SyncToBlockEnd(ITokenStream& ts) = 0;
 };
 
-#endif // IRECOVERYSTRATEGY_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IRECOVERYSTRATEGY_HPP_

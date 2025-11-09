@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void TypeTestIs::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -37,3 +39,5 @@ TypeReference& TypeTestIs::MutableType() noexcept {
 void TypeTestIs::SetType(TypeReference new_type) {
   type = std::move(new_type);
 }
+
+} // namespace ovum::compiler::parser

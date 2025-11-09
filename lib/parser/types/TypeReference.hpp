@@ -1,5 +1,5 @@
-#ifndef TYPEREFERENCE_HPP_
-#define TYPEREFERENCE_HPP_
+#ifndef PARSER_TYPEREFERENCE_HPP_
+#define PARSER_TYPEREFERENCE_HPP_
 
 #include <memory>
 #include <string>
@@ -8,6 +8,8 @@
 
 #include "Nullable.hpp"
 #include "ResolvedTypeHandle.hpp"
+
+namespace ovum::compiler::parser {
 
 class TypeReference {
 public:
@@ -72,4 +74,6 @@ private:
   std::unique_ptr<ResolvedTypeHandle> resolved_;
 };
 
-#endif // TYPEREFERENCE_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_TYPEREFERENCE_HPP_

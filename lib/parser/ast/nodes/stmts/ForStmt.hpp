@@ -1,11 +1,13 @@
-#ifndef FORSTMT_HPP_
-#define FORSTMT_HPP_
+#ifndef PARSER_FORSTMT_HPP_
+#define PARSER_FORSTMT_HPP_
 
 #include <memory>
 #include <string>
 
 #include "Block.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class ForStmt : public Stmt {
 public:
@@ -30,4 +32,6 @@ private:
   std::unique_ptr<Block> body_;
 };
 
-#endif // FORSTMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FORSTMT_HPP_

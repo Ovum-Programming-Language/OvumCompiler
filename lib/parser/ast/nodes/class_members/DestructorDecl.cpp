@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void DestructorDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -31,3 +33,5 @@ void DestructorDecl::SetBody(std::unique_ptr<Block> block) {
 std::unique_ptr<Block> DestructorDecl::ReleaseBody() {
   return std::move(body_);
 }
+
+} // namespace ovum::compiler::parser

@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void FunctionDecl::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -64,3 +66,5 @@ void FunctionDecl::SetBody(std::unique_ptr<Block> block) {
 std::unique_ptr<Block> FunctionDecl::ReleaseBody() {
   return std::move(body_);
 }
+
+} // namespace ovum::compiler::parser

@@ -1,5 +1,5 @@
-#ifndef FIELDDECL_HPP_
-#define FIELDDECL_HPP_
+#ifndef PARSER_FIELDDECL_HPP_
+#define PARSER_FIELDDECL_HPP_
 
 #include <memory>
 #include <string>
@@ -7,6 +7,8 @@
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class FieldDecl : public Decl {
 public:
@@ -38,4 +40,6 @@ private:
   std::unique_ptr<Expr> init_; // optional
 };
 
-#endif // FIELDDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FIELDDECL_HPP_

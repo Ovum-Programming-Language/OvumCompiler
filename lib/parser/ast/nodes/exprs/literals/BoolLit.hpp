@@ -1,7 +1,9 @@
-#ifndef BOOLLIT_HPP_
-#define BOOLLIT_HPP_
+#ifndef PARSER_BOOLLIT_HPP_
+#define PARSER_BOOLLIT_HPP_
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class BoolLit : public Expr {
 public:
@@ -14,4 +16,6 @@ private:
   bool value = false;
 };
 
-#endif // BOOLLIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_BOOLLIT_HPP_

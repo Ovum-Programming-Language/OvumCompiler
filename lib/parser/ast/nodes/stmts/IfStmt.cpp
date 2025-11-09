@@ -4,6 +4,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void IfStmt::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -47,3 +49,5 @@ bool IfStmt::HasElse() const noexcept {
 bool IfStmt::Empty() const noexcept {
   return branches_.empty() && !else_block_;
 }
+
+} // namespace ovum::compiler::parser

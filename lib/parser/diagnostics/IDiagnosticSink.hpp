@@ -1,5 +1,5 @@
-#ifndef IDIAGNOSTICSINK_HPP_
-#define IDIAGNOSTICSINK_HPP_
+#ifndef PARSER_IDIAGNOSTICSINK_HPP_
+#define PARSER_IDIAGNOSTICSINK_HPP_
 
 #include <cstddef>
 #include <optional>
@@ -7,6 +7,8 @@
 
 #include "Diagnostic.hpp"
 #include "lib/parser/tokens/SourceSpan.hpp"
+
+namespace ovum::compiler::parser {
 
 class IDiagnosticSink {
 public:
@@ -24,4 +26,6 @@ public:
   virtual void Error(std::string_view code, std::string_view msg, std::optional<SourceSpan> where = std::nullopt) = 0;
 };
 
-#endif // IDIAGNOSTICSINK_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IDIAGNOSTICSINK_HPP_

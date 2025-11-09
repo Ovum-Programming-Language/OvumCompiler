@@ -1,7 +1,9 @@
-#ifndef CONSTWALKVISITOR_HPP_
-#define CONSTWALKVISITOR_HPP_
+#ifndef PARSER_CONSTWALKVISITOR_HPP_
+#define PARSER_CONSTWALKVISITOR_HPP_
 
 #include "lib/parser/ast/AstVisitor.hpp"
+
+namespace ovum::compiler::parser {
 
 class ConstWalkVisitor : public AstVisitor {
 public:
@@ -51,4 +53,6 @@ public:
   void Visit(NullLit& node) override;
 };
 
-#endif // CONSTWALKVISITOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CONSTWALKVISITOR_HPP_

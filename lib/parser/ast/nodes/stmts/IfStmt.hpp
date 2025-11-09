@@ -1,5 +1,5 @@
-#ifndef IFSTMT_HPP_
-#define IFSTMT_HPP_
+#ifndef PARSER_IFSTMT_HPP_
+#define PARSER_IFSTMT_HPP_
 
 #include <memory>
 #include <vector>
@@ -8,6 +8,8 @@
 #include "Branch.hpp"
 #include "lib/parser/ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
 
 class IfStmt : public Stmt {
 public:
@@ -31,4 +33,6 @@ private:
   std::unique_ptr<Block> else_block_;
 };
 
-#endif // IFSTMT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IFSTMT_HPP_

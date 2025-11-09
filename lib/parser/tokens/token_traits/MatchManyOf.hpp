@@ -1,11 +1,14 @@
-#ifndef MATCHMANYOF_HPP_
-#define MATCHMANYOF_HPP_
+#ifndef PARSER_MATCHMANYOF_HPP_
+#define PARSER_MATCHMANYOF_HPP_
 
 #include <memory>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "ITokenMatcher.hpp"
-#include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::parser {
 
 class MatchAnyOf : public ITokenMatcher {
 public:
@@ -17,4 +20,6 @@ private:
   std::vector<std::unique_ptr<ITokenMatcher>> ms_;
 };
 
-#endif // MATCHMANYOF_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_MATCHMANYOF_HPP_

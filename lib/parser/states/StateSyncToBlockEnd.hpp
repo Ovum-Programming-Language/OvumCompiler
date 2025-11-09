@@ -1,8 +1,10 @@
-#ifndef STATESYNCTOBLOCKEND_HPP_
-#define STATESYNCTOBLOCKEND_HPP_
+#ifndef PARSER_STATESYNCTOBLOCKEND_HPP_
+#define PARSER_STATESYNCTOBLOCKEND_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateSyncToBlockEnd : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATESYNCTOBLOCKEND_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATESYNCTOBLOCKEND_HPP_

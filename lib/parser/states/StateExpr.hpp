@@ -1,8 +1,10 @@
-#ifndef STATEEXPR_HPP_
-#define STATEEXPR_HPP_
+#ifndef PARSER_STATEEXPR_HPP_
+#define PARSER_STATEEXPR_HPP_
 
 #include "base/StateBase.hpp"
 #include "lib/parser/context/ContextParser.hpp"
+
+namespace ovum::compiler::parser {
 
 class StateExpr : public StateBase {
 public:
@@ -10,4 +12,6 @@ public:
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
 };
 
-#endif // STATEEXPR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_STATEEXPR_HPP_

@@ -2,118 +2,120 @@
 
 #include <string_view>
 
+namespace ovum::compiler::parser {
+
 namespace {
 
 struct BinaryAdd : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "add";
   }
 };
 
 struct BinarySub : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "sub";
   }
 };
 
 struct BinaryMul : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "mul";
   }
 };
 
 struct BinaryDiv : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "div";
   }
 };
 
 struct BinaryMod : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "mod";
   }
 };
 
 struct BinaryLt : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "lt";
   }
 };
 
 struct BinaryLe : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "le";
   }
 };
 
 struct BinaryGt : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "gt";
   }
 };
 
 struct BinaryGe : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "ge";
   }
 };
 
 struct BinaryEq : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "eq";
   }
 };
 
 struct BinaryNe : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "ne";
   }
 };
 
 struct BinaryAnd : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "and";
   }
 };
 
 struct BinaryOr : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "or";
   }
 };
 
 struct BinaryXor : IBinaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "xor";
   }
 };
 
 struct UnaryNeg : IUnaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "neg";
   }
 };
 
 struct UnaryPlus : IUnaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "plus";
   }
 };
 
 struct UnaryNot : IUnaryOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "not";
   }
 };
 
 struct AssignRef : IAssignOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return "=";
   }
 };
 
 struct AssignCopy : IAssignOpTag {
-  std::string_view Name() const override {
+  [[nodiscard]] std::string_view Name() const override {
     return ":=";
   }
 };
@@ -218,3 +220,5 @@ const IAssignOpTag& CopyAssign() {
 }
 
 } // namespace OpTags
+
+} // namespace ovum::compiler::parser

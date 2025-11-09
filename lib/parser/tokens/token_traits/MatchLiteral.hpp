@@ -1,12 +1,17 @@
-#ifndef MATCHLITERAL_HPP_
-#define MATCHLITERAL_HPP_
+#ifndef PARSER_MATCHLITERAL_HPP_
+#define PARSER_MATCHLITERAL_HPP_
+
+#include <tokens/Token.hpp>
 
 #include "ITokenMatcher.hpp"
-#include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::parser {
 
 class MatchLiteral : public ITokenMatcher {
 public:
   bool Match(const Token& tok) const override;
 };
 
-#endif // MATCHLITERAL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_MATCHLITERAL_HPP_

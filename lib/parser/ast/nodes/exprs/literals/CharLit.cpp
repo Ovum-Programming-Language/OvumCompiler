@@ -2,6 +2,8 @@
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
+namespace ovum::compiler::parser {
+
 void CharLit::Accept(AstVisitor& visitor) {
   visitor.Visit(*this);
 }
@@ -13,3 +15,5 @@ char CharLit::Value() const noexcept {
 void CharLit::SetValue(char new_value) noexcept {
   value_ = new_value;
 }
+
+} // namespace ovum::compiler::parser

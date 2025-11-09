@@ -1,7 +1,9 @@
-#ifndef FLOATLIT_HPP_
-#define FLOATLIT_HPP_
+#ifndef PARSER_FLOATLIT_HPP_
+#define PARSER_FLOATLIT_HPP_
 
 #include "lib/parser/ast/nodes/base/Expr.hpp"
+
+namespace ovum::compiler::parser {
 
 class FloatLit : public Expr {
 public:
@@ -14,4 +16,6 @@ private:
   double value = 0.0;
 };
 
-#endif // FLOATLIT_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_FLOATLIT_HPP_

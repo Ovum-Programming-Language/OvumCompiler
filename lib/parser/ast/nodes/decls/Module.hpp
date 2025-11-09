@@ -1,5 +1,5 @@
-#ifndef MODULE_HPP_
-#define MODULE_HPP_
+#ifndef PARSER_MODULE_HPP_
+#define PARSER_MODULE_HPP_
 
 #include <memory>
 #include <string>
@@ -8,6 +8,8 @@
 #include "lib/parser/ast/nodes/base/AstNode.hpp"
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/tokens/SourceId.hpp"
+
+namespace ovum::compiler::parser {
 
 class Module : public AstNode {
 public:
@@ -30,4 +32,6 @@ private:
   std::vector<std::unique_ptr<Decl>> decls_;
 };
 
-#endif // MODULE_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_MODULE_HPP_

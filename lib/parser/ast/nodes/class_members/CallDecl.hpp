@@ -1,5 +1,5 @@
-#ifndef CALLDECL_HPP_
-#define CALLDECL_HPP_
+#ifndef PARSER_CALLDECL_HPP_
+#define PARSER_CALLDECL_HPP_
 
 #include <memory>
 #include <vector>
@@ -8,6 +8,8 @@
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/types/Param.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class CallDecl : public Decl {
 public:
@@ -37,4 +39,6 @@ private:
   std::unique_ptr<Block> body_;
 };
 
-#endif // CALLDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CALLDECL_HPP_

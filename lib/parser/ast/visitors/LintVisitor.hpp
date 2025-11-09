@@ -1,5 +1,5 @@
-#ifndef LINTVISITOR_HPP_
-#define LINTVISITOR_HPP_
+#ifndef PARSER_LINTVISITOR_HPP_
+#define PARSER_LINTVISITOR_HPP_
 
 #include <cstddef>
 #include <string>
@@ -7,6 +7,8 @@
 #include "WalkVisitor.hpp"
 
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
+
+namespace ovum::compiler::parser {
 
 struct LintOptions {
   std::size_t max_block_len = 200;
@@ -65,7 +67,7 @@ private:
   void LeaveBody();
   void EnterLoop();
   void LeaveLoop();
-  void CheckNestingDepth(SourceSpan where_hint = {}) const;
+  void CheckNestingDepth(const SourceSpan& where_hint = {}) const;
 
   IDiagnosticSink& sink_;
   LintOptions opts_;
@@ -73,4 +75,6 @@ private:
   std::size_t nesting_depth_ = 0;
 };
 
-#endif // LINTVISITOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_LINTVISITOR_HPP_

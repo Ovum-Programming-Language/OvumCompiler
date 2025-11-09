@@ -2,6 +2,8 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 Branch::Branch(std::unique_ptr<Expr> condition, std::unique_ptr<Block> then_block) :
     condition_(std::move(condition)), then_block_(std::move(then_block)) {
 }
@@ -37,3 +39,5 @@ void Branch::SetThen(std::unique_ptr<Block> then_body) {
 std::unique_ptr<Block> Branch::ReleaseThen() {
   return std::move(then_block_);
 }
+
+} // namespace ovum::compiler::parser

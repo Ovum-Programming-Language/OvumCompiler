@@ -1,12 +1,15 @@
-#ifndef VECTORTOKENSTREAM_HPP_
-#define VECTORTOKENSTREAM_HPP_
+#ifndef PARSER_VECTORTOKENSTREAM_HPP_
+#define PARSER_VECTORTOKENSTREAM_HPP_
 
 #include <cstddef>
 #include <cstdint>
 #include <vector>
 
+#include <tokens/Token.hpp>
+
 #include "ITokenStream.hpp"
-#include "lib/lexer/tokens/Token.hpp"
+
+namespace ovum::compiler::parser {
 
 class VectorTokenStream : public ITokenStream {
 public:
@@ -34,4 +37,6 @@ private:
   const Token* last_ = nullptr;
 };
 
-#endif // VECTORTOKENSTREAM_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_VECTORTOKENSTREAM_HPP_

@@ -1,5 +1,5 @@
-#ifndef METHODDECL_HPP_
-#define METHODDECL_HPP_
+#ifndef PARSER_METHODDECL_HPP_
+#define PARSER_METHODDECL_HPP_
 
 #include <memory>
 #include <string>
@@ -9,6 +9,8 @@
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/types/Param.hpp"
 #include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
 
 class MethodDecl : public Decl {
 public:
@@ -55,4 +57,6 @@ private:
   std::unique_ptr<Block> body; // optional
 };
 
-#endif // METHODDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_METHODDECL_HPP_

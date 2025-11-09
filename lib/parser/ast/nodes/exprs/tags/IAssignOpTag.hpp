@@ -1,7 +1,9 @@
-#ifndef IASSIGNOPTAG_HPP_
-#define IASSIGNOPTAG_HPP_
+#ifndef PARSER_IASSIGNOPTAG_HPP_
+#define PARSER_IASSIGNOPTAG_HPP_
 
 #include <string>
+
+namespace ovum::compiler::parser {
 
 class IAssignOpTag {
 public:
@@ -10,4 +12,6 @@ public:
   virtual std::string_view Name() const = 0;
 };
 
-#endif // IASSIGNOPTAG_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_IASSIGNOPTAG_HPP_

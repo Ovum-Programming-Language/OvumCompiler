@@ -1,5 +1,5 @@
-#ifndef CONTEXTPARSER_HPP_
-#define CONTEXTPARSER_HPP_
+#ifndef PARSER_CONTEXTPARSER_HPP_
+#define PARSER_CONTEXTPARSER_HPP_
 
 #include <memory>
 #include <type_traits>
@@ -8,6 +8,8 @@
 #include "NodeEntry.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/IState.hpp"
+
+namespace ovum::compiler::parser {
 
 class AstNode;
 class IExpressionParser;
@@ -58,4 +60,6 @@ private:
   ITypeParser* typep_ = nullptr;
 };
 
-#endif // CONTEXTPARSER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_CONTEXTPARSER_HPP_

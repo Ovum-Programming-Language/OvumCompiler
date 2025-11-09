@@ -1,7 +1,9 @@
-#ifndef ITOKENMATCHER_HPP_
-#define ITOKENMATCHER_HPP_
+#ifndef PARSER_ITOKENMATCHER_HPP_
+#define PARSER_ITOKENMATCHER_HPP_
 
-#include "lib/lexer/tokens/Token.hpp"
+#include <tokens/Token.hpp>
+
+namespace ovum::compiler::parser {
 
 class ITokenMatcher {
 public:
@@ -10,4 +12,6 @@ public:
   virtual bool Match(const Token& t) const = 0;
 };
 
-#endif // ITOKENMATCHER_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_ITOKENMATCHER_HPP_

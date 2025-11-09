@@ -4,8 +4,10 @@
 
 #include <utility>
 
+namespace ovum::compiler::parser {
+
 void TypeAliasDecl::Accept(AstVisitor& visitor) {
-  v.Visit(*this);
+  visitor.Visit(*this);
 }
 
 const std::string& TypeAliasDecl::Name() const noexcept {
@@ -27,3 +29,5 @@ TypeReference& TypeAliasDecl::MutableAliasedType() noexcept {
 void TypeAliasDecl::SetAliasedType(TypeReference type) {
   aliased_type_ = std::move(type);
 }
+
+} // namespace ovum::compiler::parser

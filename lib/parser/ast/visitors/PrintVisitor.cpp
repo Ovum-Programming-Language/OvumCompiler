@@ -16,6 +16,8 @@
 
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 
+namespace ovum::compiler::parser {
+
 PrintVisitor::PrintVisitor(std::ostream& output) : out_(&output) {
 }
 
@@ -415,3 +417,5 @@ void PrintVisitor::Visit(BoolLit& node) {
 void PrintVisitor::Visit(NullLit& node) {
   WriteLine("NullLit");
 }
+
+} // namespace ovum::compiler::parser

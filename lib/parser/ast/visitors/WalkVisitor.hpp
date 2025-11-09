@@ -1,7 +1,9 @@
-#ifndef WALKVISITOR_HPP_
-#define WALKVISITOR_HPP_
+#ifndef PARSER_WALKVISITOR_HPP_
+#define PARSER_WALKVISITOR_HPP_
 
 #include "lib/parser/ast/AstVisitor.hpp"
+
+namespace ovum::compiler::parser {
 
 class WalkVisitor : public AstVisitor {
 public:
@@ -51,4 +53,6 @@ public:
   void Visit(NullLit& node) override;
 };
 
-#endif // WALKVISITOR_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_WALKVISITOR_HPP_

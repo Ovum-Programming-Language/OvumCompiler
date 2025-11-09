@@ -1,9 +1,11 @@
-#ifndef SOURCEID_HPP_
-#define SOURCEID_HPP_
+#ifndef PARSER_SOURCEID_HPP_
+#define PARSER_SOURCEID_HPP_
 
 #include <cstdint>
 #include <string>
 #include <string_view>
+
+namespace ovum::compiler::parser {
 
 class SourceId {
 public:
@@ -23,4 +25,6 @@ private:
   std::string path_;
 };
 
-#endif // SOURCEID_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_SOURCEID_HPP_

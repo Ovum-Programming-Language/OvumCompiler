@@ -1,10 +1,12 @@
-#ifndef DESTRUCTORDECL_HPP_
-#define DESTRUCTORDECL_HPP_
+#ifndef PARSER_DESTRUCTORDECL_HPP_
+#define PARSER_DESTRUCTORDECL_HPP_
 
 #include <memory>
 
 #include "lib/parser/ast/nodes/base/Decl.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
+
+namespace ovum::compiler::parser {
 
 class DestructorDecl : public Decl {
 public:
@@ -23,4 +25,6 @@ private:
   std::unique_ptr<Block> body_;
 };
 
-#endif // DESTRUCTORDECL_HPP_
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_DESTRUCTORDECL_HPP_
