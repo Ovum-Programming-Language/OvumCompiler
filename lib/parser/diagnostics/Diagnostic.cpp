@@ -82,8 +82,8 @@ const std::string& Diagnostic::GetCategory() const noexcept {
   return category_;
 }
 
-void Diagnostic::SetWhere(const SourceSpan& sp) {
-  where_ = sp;
+void Diagnostic::SetWhere(SourceSpan sp) {
+  where_ = std::move(sp);
 }
 void Diagnostic::ResetWhere() {
   where_.reset();

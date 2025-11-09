@@ -4,7 +4,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "FixIt.hpp"
@@ -25,34 +24,34 @@ public:
   ~Diagnostic();
 
   void SetSeverity(std::shared_ptr<const ISeverity> sev);
-  const std::shared_ptr<const ISeverity>& GetSeverity() const noexcept;
+  [[nodiscard]] const std::shared_ptr<const ISeverity>& GetSeverity() const noexcept;
 
   void SetCode(std::string c);
-  const std::string& GetCode() const noexcept;
+  [[nodiscard]] const std::string& GetCode() const noexcept;
 
   void SetMessage(std::string m);
-  const std::string& GetMessage() const noexcept;
+  [[nodiscard]] const std::string& GetMessage() const noexcept;
 
   void SetCategory(std::string cat);
-  const std::string& GetCategory() const noexcept;
+  [[nodiscard]] const std::string& GetCategory() const noexcept;
 
   void SetWhere(SourceSpan sp);
   void ResetWhere();
-  const std::optional<SourceSpan>& GetWhere() const noexcept;
+  [[nodiscard]] const std::optional<SourceSpan>& GetWhere() const noexcept;
 
   void AddNote(RelatedInfo note);
   void ClearNotes();
-  const std::vector<RelatedInfo>& GetNotes() const noexcept;
+  [[nodiscard]] const std::vector<RelatedInfo>& GetNotes() const noexcept;
 
   void AddFix(FixIt fix);
   void ClearFixes();
-  const std::vector<FixIt>& GetFixes() const noexcept;
+  [[nodiscard]] const std::vector<FixIt>& GetFixes() const noexcept;
 
   void SetFatal(bool on);
-  bool IsFatal() const noexcept;
+  [[nodiscard]] bool IsFatal() const noexcept;
 
   void SetSuppressed(bool on);
-  bool IsSuppressed() const noexcept;
+  [[nodiscard]] bool IsSuppressed() const noexcept;
 
 private:
   std::shared_ptr<const ISeverity> severity_;
