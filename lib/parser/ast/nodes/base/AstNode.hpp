@@ -7,6 +7,8 @@ class AstNode {
 public:
   virtual ~AstNode() = default;
 
+  // TODO: add positions......
+
   virtual void Accept(AstVisitor& visitor) = 0;
 };
 
