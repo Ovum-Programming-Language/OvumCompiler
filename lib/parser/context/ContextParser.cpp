@@ -50,7 +50,6 @@ const IState* ContextParser::CurrentState() const {
   if (state_stack_.empty()) {
     return nullptr;
   }
-
   return state_stack_.back();
 }
 
@@ -62,10 +61,9 @@ std::unique_ptr<AstNode> ContextParser::PopNode() {
   if (node_stack_.empty()) {
     return nullptr;
   }
-
-  auto out = node_stack_.back().ReleaseNode();
+  auto node = node_stack_.back().ReleaseNode();
   node_stack_.pop_back();
-  return out;
+  return node;
 }
 
 bool ContextParser::HasStates() const noexcept {
@@ -79,9 +77,14 @@ bool ContextParser::HasNodes() const noexcept {
 void ContextParser::Clear() {
   state_stack_.clear();
   node_stack_.clear();
-  diags_ = nullptr;
-  expr_ = nullptr;
-  typep_ = nullptr;
+}
+
+void ContextParser::SetFactory(IAstFactory* factory) {
+  factory_ = factory;
+}
+
+IAstFactory* ContextParser::Factory() const {
+  return factory_;
 }
 
 } // namespace ovum::compiler::parser

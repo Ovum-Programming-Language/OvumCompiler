@@ -6,10 +6,11 @@
 
 namespace ovum::compiler::parser {
 
-class StateBase : IState {
+class StateBase : public IState {
 public:
-  using StepResult = StepResult;
+  using StepResult = IState::StepResult;
   ~StateBase() override = default;
+
   static SourceSpan SpanFrom(const Token& token);
   static SourceSpan Union(const SourceSpan& lhs, const SourceSpan& rhs);
 };

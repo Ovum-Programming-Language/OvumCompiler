@@ -6,6 +6,7 @@
 namespace ovum::compiler::parser {
 
 class StateRegistry {
+public:
   static const IState& Module();
   static const IState& TopDecl();
 
@@ -16,6 +17,7 @@ class StateRegistry {
   static const IState& ClassHdr();
   static const IState& ClassBody();
   static const IState& ClassMember();
+
   static const IState& InterfaceHdr();
   static const IState& InterfaceBody();
   static const IState& SignatureDecl();

@@ -14,6 +14,7 @@ namespace ovum::compiler::parser {
 class AstNode;
 class IExpressionParser;
 class ITypeParser;
+class IAstFactory; // forward
 
 template<class T>
 concept AstNodeDerived = std::is_base_of_v<AstNode, T>;
@@ -31,6 +32,9 @@ public:
 
   void SetTypeParser(ITypeParser* parser);
   ITypeParser* TypeParser() const;
+
+  void SetFactory(IAstFactory* factory);
+  IAstFactory* Factory() const;
 
   void PushState(const IState& state);
   void PopState();
@@ -58,6 +62,7 @@ private:
   IDiagnosticSink* diags_ = nullptr;
   IExpressionParser* expr_ = nullptr;
   ITypeParser* typep_ = nullptr;
+  IAstFactory* factory_ = nullptr;
 };
 
 } // namespace ovum::compiler::parser

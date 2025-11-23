@@ -5,12 +5,16 @@
 
 namespace ovum::compiler::parser {
 
-class SimpleRecovery : IRecoveryStrategy {
+class SimpleRecovery : public IRecoveryStrategy {
 public:
   ~SimpleRecovery() override = default;
 
   void SyncToStmtEnd(ITokenStream& ts) override;
   void SyncToBlockEnd(ITokenStream& ts) override;
+
+  void SyncToStatementEnd(ITokenStream& ts) {
+    SyncToStmtEnd(ts);
+  } // alias
 };
 
 } // namespace ovum::compiler::parser

@@ -16,7 +16,7 @@ public:
 
   virtual ~IState() = default;
   virtual std::string_view Name() const = 0;
-  virtual StepResult TryStep(ContextParser& ctx, ITokenStream& ts) = 0;
+  virtual StepResult TryStep(ContextParser& ctx, ITokenStream& ts) const = 0;
 };
 
 } // namespace ovum::compiler::parser

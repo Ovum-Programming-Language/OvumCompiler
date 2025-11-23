@@ -9,7 +9,7 @@ namespace ovum::compiler::parser {
 class StateClassBody : public StateBase {
 public:
   std::string_view Name() const override;
-  StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
+  StepResult TryStep(ContextParser& ctx, ITokenStream& ts) const override;
 };
 
 } // namespace ovum::compiler::parser

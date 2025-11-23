@@ -1,15 +1,14 @@
 #ifndef PARSER_STATEMODULE_HPP_
 #define PARSER_STATEMODULE_HPP_
 
-#include "base/StateBase.hpp"
-#include "lib/parser/context/ContextParser.hpp"
+#include "lib/parser/states/base/StateBase.hpp"
 
 namespace ovum::compiler::parser {
 
 class StateModule : public StateBase {
 public:
   std::string_view Name() const override;
-  StepResult TryStep(ContextParser& ctx, ITokenStream& ts) override;
+  StepResult TryStep(ContextParser& context, ITokenStream& token_stream) const override;
 };
 
 } // namespace ovum::compiler::parser
