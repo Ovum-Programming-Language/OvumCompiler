@@ -1,0 +1,8 @@
+#ifndef CONTINUESTMTBUILDER_HPP_
+#define CONTINUESTMTBUILDER_HPP_
+
+class ContinueStmtBuilder {
+
+};
+
+#endif // CONTINUESTMTBUILDER_HPP_

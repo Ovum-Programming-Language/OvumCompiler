@@ -1,0 +1,8 @@
+#ifndef VARDECLSTMTBUILDER_HPP_
+#define VARDECLSTMTBUILDER_HPP_
+
+class VarDeclStmtBuilder {
+
+};
+
+#endif // VARDECLSTMTBUILDER_HPP_

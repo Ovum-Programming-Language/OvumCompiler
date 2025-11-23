@@ -1,9 +1,8 @@
 #ifndef PARSER_SOURCESPAN_HPP_
 #define PARSER_SOURCESPAN_HPP_
 
-#include <tokens/TokenPosition.hpp>
-
 #include "SourceId.hpp"
+#include "tokens/TokenPosition.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -18,14 +17,14 @@ public:
 
   [[nodiscard]] bool IsValid() const noexcept;
   void Normalize() noexcept;
-  [[nodiscard]] static SourceSpan SinglePoint(SourceId id, TokenPosition p);
 
+  [[nodiscard]] static SourceSpan SinglePoint(SourceId id, TokenPosition point);
   [[nodiscard]] static SourceSpan Union(const SourceSpan& a, const SourceSpan& b);
 
 private:
   SourceId id_;
-  TokenPosition begin_{};
-  TokenPosition end_{};
+  TokenPosition begin_;
+  TokenPosition end_;
 };
 
 } // namespace ovum::compiler::parser

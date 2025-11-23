@@ -1,0 +1,8 @@
+#ifndef UNSAFEBLOCKBUILDER_HPP_
+#define UNSAFEBLOCKBUILDER_HPP_
+
+class UnsafeBlockBuilder {
+
+};
+
+#endif // UNSAFEBLOCKBUILDER_HPP_

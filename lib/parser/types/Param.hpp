@@ -11,9 +11,9 @@ class Param {
 public:
   Param(std::string name, TypeReference typeReference);
 
-  [[nodiscard]] std::string GetName();
+  [[nodiscard]] const std::string& GetName();
 
-  [[nodiscard]] TypeReference GetType();
+  [[nodiscard]] const TypeReference& GetType();
 
 private:
   std::string name_;
