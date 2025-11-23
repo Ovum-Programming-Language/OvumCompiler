@@ -4,20 +4,18 @@
 #include <memory>
 #include <vector>
 
-#include <tokens/Token.hpp>
-
 #include "ITokenMatcher.hpp"
+#include "tokens/Token.hpp"
 
 namespace ovum::compiler::parser {
 
 class MatchAnyOf : public ITokenMatcher {
 public:
-  explicit MatchAnyOf(std::vector<std::unique_ptr<ITokenMatcher>> ms);
-
-  bool Match(const Token& tok) const override;
+  explicit MatchAnyOf(std::vector<std::unique_ptr<ITokenMatcher>> matchers);
+  bool TryMatch(const Token& token) const override;
 
 private:
-  std::vector<std::unique_ptr<ITokenMatcher>> ms_;
+  std::vector<std::unique_ptr<ITokenMatcher>> matchers_;
 };
 
 } // namespace ovum::compiler::parser

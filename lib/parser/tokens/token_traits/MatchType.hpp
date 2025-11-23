@@ -3,17 +3,15 @@
 
 #include <string_view>
 
-#include <tokens/Token.hpp>
-
 #include "ITokenMatcher.hpp"
+#include "tokens/Token.hpp"
 
 namespace ovum::compiler::parser {
 
 class MatchType : public ITokenMatcher {
 public:
   explicit MatchType(std::string_view type_name);
-
-  bool Match(const Token& tok) const override;
+  bool TryMatch(const Token& token) const override;
 
 private:
   std::string_view type_;

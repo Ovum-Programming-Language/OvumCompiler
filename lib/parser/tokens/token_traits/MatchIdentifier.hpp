@@ -1,15 +1,14 @@
 #ifndef PARSER_MATCHIDENTIFIER_HPP_
 #define PARSER_MATCHIDENTIFIER_HPP_
 
-#include <tokens/Token.hpp>
-
+#include "tokens/Token.hpp"
 #include "ITokenMatcher.hpp"
 
 namespace ovum::compiler::parser {
 
 class MatchIdentifier : public ITokenMatcher {
 public:
-  bool Match(const Token& tok) const override;
+  bool TryMatch(const Token& token) const override;
 };
 
 } // namespace ovum::compiler::parser
