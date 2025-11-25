@@ -4,12 +4,11 @@
 #include <functional>
 #include <optional>
 
-namespace ovum::compiler::parser {
+#include "lib/parser/ast/nodes/exprs/tags/IUnaryOpTag.hpp"
+#include "specifications/InfixSpec.hpp"
+#include "specifications/PostfixSpec.hpp"
 
-class Token;
-class IUnaryOpTag;
-class InfixSpec;
-class PostfixSpec;
+namespace ovum::compiler::parser {
 
 class IOperatorResolver {
 public:

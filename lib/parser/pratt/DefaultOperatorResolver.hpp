@@ -9,6 +9,7 @@
 #include "lib/parser/ast/nodes/exprs/tags/IUnaryOpTag.hpp"
 #include "specifications/InfixSpec.hpp"
 #include "specifications/PostfixSpec.hpp"
+#include "tokens/Token.hpp"
 
 namespace ovum::compiler::parser {
 
