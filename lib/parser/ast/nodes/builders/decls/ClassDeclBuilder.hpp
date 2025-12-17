@@ -15,6 +15,8 @@ public:
   ClassDeclBuilder& WithName(std::string name);
   ClassDeclBuilder& AddImplements(TypeReference iface);
   ClassDeclBuilder& AddMember(std::unique_ptr<Decl> member);
+  ClassDeclBuilder& WithImplements(std::vector<TypeReference> implements);
+  ClassDeclBuilder& WithMembers(std::vector<std::unique_ptr<Decl>> members);
 };
 
 } // namespace ovum::compiler::parser

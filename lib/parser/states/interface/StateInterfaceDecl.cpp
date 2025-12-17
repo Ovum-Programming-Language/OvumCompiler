@@ -1,3 +1,280 @@
 #include "StateInterfaceDecl.hpp"
 
-namespace ovum::compiler::parser {} // namespace ovum::compiler::parser
+#include <memory>
+#include <string>
+
+#include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
+#include "lib/parser/ast/nodes/decls/InterfaceMethod.hpp"
+#include "lib/parser/context/ContextParser.hpp"
+#include "lib/parser/diagnostics/IDiagnosticSink.hpp"
+#include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+#include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
+#include "lib/parser/types/Param.hpp"
+
+namespace ovum::compiler::parser {
+
+namespace {
+
+void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+  while (!ts.IsEof()) {
+    const Token& t = ts.Peek();
+    const std::string type = t.GetStringType();
+    if (type == "COMMENT") {
+      ts.Consume();
+      continue;
+    }
+    if (skip_newlines && type == "NEWLINE") {
+      ts.Consume();
+      continue;
+    }
+    break;
+  }
+}
+
+bool IsIdentifier(const Token& token) {
+  MatchIdentifier matcher;
+  return matcher.TryMatch(token);
+}
+
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
+                           std::string_view code, std::string_view message) {
+  SkipTrivia(ts);
+  if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
+    if (ctx.Diags() != nullptr) {
+      const Token* tok = ts.TryPeek();
+      if (tok != nullptr) {
+        SourceSpan span = StateBase::SpanFrom(*tok);
+        ctx.Diags()->Error(code, message, span);
+      } else {
+        ctx.Diags()->Error(code, message);
+      }
+    }
+    return "";
+  }
+  std::string name = ts.Consume()->GetLexeme();
+  return name;
+}
+
+std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
+  if (ctx.TypeParser() == nullptr) {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_TYPE_PARSER", "type parser not available");
+    }
+    return nullptr;
+  }
+  return ctx.TypeParser()->ParseType(ts, *ctx.Diags());
+}
+
+void ConsumeTerminators(ITokenStream& ts) {
+  SkipTrivia(ts, false);
+  while (!ts.IsEof()) {
+    const Token& t = ts.Peek();
+    const std::string type = t.GetStringType();
+    if (type == "NEWLINE") {
+      ts.Consume();
+      continue;
+    }
+    if (t.GetLexeme() == ";") {
+      ts.Consume();
+      continue;
+    }
+    break;
+  }
+}
+
+}  // namespace
+
+std::string_view StateInterfaceDecl::Name() const {
+  return "InterfaceDecl";
+}
+
+IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
+  SkipTrivia(ts);
+
+  InterfaceDecl* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
+  if (interface_decl == nullptr) {
+    return std::unexpected(StateError("expected InterfaceDecl node on stack"));
+  }
+
+  if (ts.IsEof()) {
+    return std::unexpected(StateError("unexpected end of file in interface declaration"));
+  }
+
+  const Token& start = ts.Peek();
+  std::string lex = start.GetLexeme();
+  SourceSpan span = StateBase::SpanFrom(start);
+
+  // Check for call
+  if (lex == "call") {
+    ts.Consume();
+    SkipTrivia(ts);
+    
+    if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
+      if (ctx.Diags() != nullptr) {
+        ctx.Diags()->Error("P_CALL_PARAMS_OPEN", "expected '(' after 'call'");
+      }
+      return std::unexpected(StateError("expected '(' after 'call'"));
+    }
+    ts.Consume();
+
+    // Parse parameters
+    std::vector<InterfaceMethod::Param> params;
+    SkipTrivia(ts);
+    if (!ts.IsEof() && ts.Peek().GetLexeme() != ")") {
+      while (true) {
+        bool is_var = false;
+        if (!ts.IsEof() && ts.Peek().GetLexeme() == "var") {
+          ts.Consume();
+          is_var = true;
+          SkipTrivia(ts);
+        }
+
+        std::string name = ReadIdentifier(ctx, ts, "P_PARAM_NAME", "expected parameter name");
+        if (name.empty()) {
+          break;
+        }
+
+        SkipTrivia(ts);
+        if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
+          if (ctx.Diags() != nullptr) {
+            ctx.Diags()->Error("P_PARAM_COLON", "expected ':' after parameter name");
+          }
+          break;
+        }
+        ts.Consume();
+
+        SkipTrivia(ts);
+        auto type = ParseType(ctx, ts);
+        if (type == nullptr) {
+          break;
+        }
+
+        params.push_back({name, std::move(*type)});
+
+        SkipTrivia(ts);
+        if (ts.IsEof() || ts.Peek().GetLexeme() != ",") {
+          break;
+        }
+        ts.Consume();
+        SkipTrivia(ts);
+      }
+    }
+
+    SkipTrivia(ts);
+    if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
+      if (ctx.Diags() != nullptr) {
+        ctx.Diags()->Error("P_CALL_PARAMS_CLOSE", "expected ')' after parameters");
+      }
+      return std::unexpected(StateError("expected ')' after parameters"));
+    }
+    ts.Consume();
+
+    std::unique_ptr<TypeReference> return_type = nullptr;
+    SkipTrivia(ts);
+    if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
+      ts.Consume();
+      SkipTrivia(ts);
+      return_type = ParseType(ctx, ts);
+    }
+
+    auto method = ctx.Factory()->MakeInterfaceMethod("call", std::move(params), std::move(return_type), span);
+    interface_decl->AddMember(std::move(method));
+    ConsumeTerminators(ts);
+    return false;
+  }
+
+  // Method declaration (fun)
+  if (lex != "fun") {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_INTERFACE_METHOD", "expected 'fun' or 'call' in interface");
+    }
+    return std::unexpected(StateError("expected 'fun' or 'call' in interface"));
+  }
+  ts.Consume();
+
+  SkipTrivia(ts);
+  std::string name = ReadIdentifier(ctx, ts, "P_METHOD_NAME", "expected method name");
+  if (name.empty()) {
+    return std::unexpected(StateError("expected method name"));
+  }
+
+  SkipTrivia(ts);
+  if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_METHOD_PARAMS_OPEN", "expected '(' after method name");
+    }
+    return std::unexpected(StateError("expected '(' after method name"));
+  }
+  ts.Consume();
+
+  // Parse parameters
+  std::vector<InterfaceMethod::Param> params;
+  SkipTrivia(ts);
+  if (!ts.IsEof() && ts.Peek().GetLexeme() != ")") {
+    while (true) {
+      bool is_var = false;
+      if (!ts.IsEof() && ts.Peek().GetLexeme() == "var") {
+        ts.Consume();
+        is_var = true;
+        SkipTrivia(ts);
+      }
+
+      std::string param_name = ReadIdentifier(ctx, ts, "P_PARAM_NAME", "expected parameter name");
+      if (param_name.empty()) {
+        break;
+      }
+
+      SkipTrivia(ts);
+      if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
+        if (ctx.Diags() != nullptr) {
+          ctx.Diags()->Error("P_PARAM_COLON", "expected ':' after parameter name");
+        }
+        break;
+      }
+      ts.Consume();
+
+      SkipTrivia(ts);
+      auto type = ParseType(ctx, ts);
+      if (type == nullptr) {
+        break;
+      }
+
+      params.push_back({param_name, std::move(*type)});
+
+      SkipTrivia(ts);
+      if (ts.IsEof() || ts.Peek().GetLexeme() != ",") {
+        break;
+      }
+      ts.Consume();
+      SkipTrivia(ts);
+    }
+  }
+
+  SkipTrivia(ts);
+  if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_METHOD_PARAMS_CLOSE", "expected ')' after parameters");
+    }
+    return std::unexpected(StateError("expected ')' after parameters"));
+  }
+  ts.Consume();
+
+  std::unique_ptr<TypeReference> return_type = nullptr;
+  SkipTrivia(ts);
+  if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
+    ts.Consume();
+    SkipTrivia(ts);
+    return_type = ParseType(ctx, ts);
+  }
+
+  if (ts.LastConsumed() != nullptr) {
+    span = StateBase::Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
+  }
+  auto method = ctx.Factory()->MakeInterfaceMethod(std::move(name), std::move(params),
+                                                   std::move(return_type), span);
+  interface_decl->AddMember(std::move(method));
+  ConsumeTerminators(ts);
+  return false;
+}
+
+}  // namespace ovum::compiler::parser

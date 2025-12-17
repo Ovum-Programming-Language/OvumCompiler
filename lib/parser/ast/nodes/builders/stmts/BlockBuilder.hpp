@@ -11,6 +11,7 @@ namespace ovum::compiler::parser {
 class BlockBuilder : public NodeBuilderBase<Block> {
 public:
   BlockBuilder& Append(std::unique_ptr<Stmt> statement);
+  BlockBuilder& WithStatements(std::vector<std::unique_ptr<Stmt>> statements);
 };
 
 } // namespace ovum::compiler::parser

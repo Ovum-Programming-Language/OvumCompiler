@@ -12,4 +12,8 @@ DestructorDeclBuilder& DestructorDeclBuilder::WithBody(std::unique_ptr<Block> bo
   return *this;
 }
 
+DestructorDeclBuilder& DestructorDeclBuilder::WithIsPublic(bool is_public) {
+  return WithPublic(is_public);
+}
+
 } // namespace ovum::compiler::parser

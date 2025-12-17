@@ -14,7 +14,9 @@ namespace ovum::compiler::parser {
 class CallDeclBuilder : public NodeBuilderBase<CallDecl> {
 public:
   CallDeclBuilder& WithPublic(bool is_public);
+  CallDeclBuilder& WithIsPublic(bool is_public);
   CallDeclBuilder& AddParam(Param parameter);
+  CallDeclBuilder& WithParams(std::vector<Param> params);
   CallDeclBuilder& WithReturnType(std::unique_ptr<TypeReference> type);
   CallDeclBuilder& WithBody(std::unique_ptr<Block> body);
 };

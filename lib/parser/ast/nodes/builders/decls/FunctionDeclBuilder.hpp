@@ -17,6 +17,7 @@ public:
   FunctionDeclBuilder& WithPure(bool is_pure);
   FunctionDeclBuilder& WithName(std::string name);
   FunctionDeclBuilder& AddParam(Param parameter);
+  FunctionDeclBuilder& WithParams(std::vector<Param> params);
   FunctionDeclBuilder& WithReturnType(std::unique_ptr<TypeReference> type);
   FunctionDeclBuilder& WithBody(std::unique_ptr<Block> body);
 };

@@ -12,6 +12,13 @@ InterfaceMethodBuilder& InterfaceMethodBuilder::AddParam(InterfaceMethod::Param 
   return *this;
 }
 
+InterfaceMethodBuilder& InterfaceMethodBuilder::WithParams(std::vector<InterfaceMethod::Param> params) {
+  for (auto& param : params) {
+    node_->MutableParams().push_back(std::move(param));
+  }
+  return *this;
+}
+
 InterfaceMethodBuilder& InterfaceMethodBuilder::WithReturnType(std::unique_ptr<TypeReference> type) {
   node_->SetReturnType(std::move(type));
   return *this;

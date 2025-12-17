@@ -17,4 +17,11 @@ ModuleBuilder& ModuleBuilder::AddDecl(std::unique_ptr<Decl> declaration) {
   return *this;
 }
 
+ModuleBuilder& ModuleBuilder::WithDecls(std::vector<std::unique_ptr<Decl>> decls) {
+  for (auto& decl : decls) {
+    node_->AddDecl(std::move(decl));
+  }
+  return *this;
+}
+
 } // namespace ovum::compiler::parser

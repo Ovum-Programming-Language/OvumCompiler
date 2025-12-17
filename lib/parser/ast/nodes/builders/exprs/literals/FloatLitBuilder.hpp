@@ -9,6 +9,7 @@ namespace ovum::compiler::parser {
 class FloatLitBuilder : public NodeBuilderBase<FloatLit> {
 public:
   FloatLitBuilder& WithValue(double value);
+  FloatLitBuilder& WithValue(long double value);
 };
 
 } // namespace ovum::compiler::parser

@@ -27,4 +27,12 @@ StaticFieldDeclBuilder& StaticFieldDeclBuilder::WithInit(std::unique_ptr<Expr> i
   return *this;
 }
 
+StaticFieldDeclBuilder& StaticFieldDeclBuilder::WithIsPublic(bool is_public) {
+  return WithPublic(is_public);
+}
+
+StaticFieldDeclBuilder& StaticFieldDeclBuilder::WithIsVar(bool is_var) {
+  return WithVar(is_var);
+}
+
 } // namespace ovum::compiler::parser

@@ -15,11 +15,16 @@ namespace ovum::compiler::parser {
 class MethodDeclBuilder : public NodeBuilderBase<MethodDecl> {
 public:
   MethodDeclBuilder& WithPublic(bool is_public);
+  MethodDeclBuilder& WithIsPublic(bool is_public);
   MethodDeclBuilder& WithOverride(bool is_override);
+  MethodDeclBuilder& WithIsOverride(bool is_override);
   MethodDeclBuilder& WithStatic(bool is_static);
+  MethodDeclBuilder& WithIsStatic(bool is_static);
   MethodDeclBuilder& WithPure(bool is_pure);
+  MethodDeclBuilder& WithIsPure(bool is_pure);
   MethodDeclBuilder& WithName(std::string name);
   MethodDeclBuilder& AddParam(Param parameter);
+  MethodDeclBuilder& WithParams(std::vector<Param> params);
   MethodDeclBuilder& WithReturnType(std::unique_ptr<TypeReference> type);
   MethodDeclBuilder& WithBody(std::unique_ptr<Block> body);
 };

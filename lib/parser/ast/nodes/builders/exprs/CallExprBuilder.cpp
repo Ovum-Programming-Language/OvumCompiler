@@ -12,4 +12,11 @@ CallExprBuilder& CallExprBuilder::AddArg(std::unique_ptr<Expr> argument) {
   return *this;
 }
 
+CallExprBuilder& CallExprBuilder::WithArgs(std::vector<std::unique_ptr<Expr>> args) {
+  for (auto& arg : args) {
+    node_->AddArg(std::move(arg));
+  }
+  return *this;
+}
+
 } // namespace ovum::compiler::parser

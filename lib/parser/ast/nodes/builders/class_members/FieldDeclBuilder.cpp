@@ -27,4 +27,12 @@ FieldDeclBuilder& FieldDeclBuilder::WithInit(std::unique_ptr<Expr> init) {
   return *this;
 }
 
+FieldDeclBuilder& FieldDeclBuilder::WithIsPublic(bool is_public) {
+  return WithPublic(is_public);
+}
+
+FieldDeclBuilder& FieldDeclBuilder::WithIsVar(bool is_var) {
+  return WithVar(is_var);
+}
+
 } // namespace ovum::compiler::parser

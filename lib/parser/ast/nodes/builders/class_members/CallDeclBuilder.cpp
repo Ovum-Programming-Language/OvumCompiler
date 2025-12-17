@@ -7,8 +7,19 @@ CallDeclBuilder& CallDeclBuilder::WithPublic(bool is_public) {
   return *this;
 }
 
+CallDeclBuilder& CallDeclBuilder::WithIsPublic(bool is_public) {
+  return WithPublic(is_public);
+}
+
 CallDeclBuilder& CallDeclBuilder::AddParam(Param parameter) {
   node_->MutableParams().push_back(std::move(parameter));
+  return *this;
+}
+
+CallDeclBuilder& CallDeclBuilder::WithParams(std::vector<Param> params) {
+  for (auto& param : params) {
+    node_->MutableParams().push_back(std::move(param));
+  }
   return *this;
 }
 

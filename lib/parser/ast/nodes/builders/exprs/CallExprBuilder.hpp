@@ -12,6 +12,7 @@ class CallExprBuilder : public NodeBuilderBase<Call> {
 public:
   CallExprBuilder& WithCallee(std::unique_ptr<Expr> callee);
   CallExprBuilder& AddArg(std::unique_ptr<Expr> argument);
+  CallExprBuilder& WithArgs(std::vector<std::unique_ptr<Expr>> args);
 };
 
 } // namespace ovum::compiler::parser

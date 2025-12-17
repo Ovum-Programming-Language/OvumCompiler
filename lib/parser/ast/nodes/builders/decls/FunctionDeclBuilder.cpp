@@ -17,6 +17,13 @@ FunctionDeclBuilder& FunctionDeclBuilder::AddParam(Param parameter) {
   return *this;
 }
 
+FunctionDeclBuilder& FunctionDeclBuilder::WithParams(std::vector<Param> params) {
+  for (auto& param : params) {
+    node_->MutableParams().push_back(std::move(param));
+  }
+  return *this;
+}
+
 FunctionDeclBuilder& FunctionDeclBuilder::WithReturnType(std::unique_ptr<TypeReference> type) {
   node_->SetReturnType(std::move(type));
   return *this;

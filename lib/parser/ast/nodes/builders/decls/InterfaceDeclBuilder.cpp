@@ -8,7 +8,14 @@ InterfaceDeclBuilder& InterfaceDeclBuilder::WithName(std::string name) {
 }
 
 InterfaceDeclBuilder& InterfaceDeclBuilder::AddMethod(std::unique_ptr<InterfaceMethod> method) {
-  node_->MutableMembers().push_back(std::move(method));
+  node_->AddMember(std::move(method));
+  return *this;
+}
+
+InterfaceDeclBuilder& InterfaceDeclBuilder::WithMethods(std::vector<std::unique_ptr<InterfaceMethod>> methods) {
+  for (auto& method : methods) {
+    node_->AddMethod(std::move(method));
+  }
   return *this;
 }
 

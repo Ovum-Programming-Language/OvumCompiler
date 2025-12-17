@@ -14,6 +14,7 @@ namespace ovum::compiler::parser {
 class GlobalVarDeclBuilder : public NodeBuilderBase<GlobalVarDecl> {
 public:
   GlobalVarDeclBuilder& WithVar(bool is_var);
+  GlobalVarDeclBuilder& WithIsVar(bool is_var);
   GlobalVarDeclBuilder& WithName(std::string name);
   GlobalVarDeclBuilder& WithType(TypeReference type);
   GlobalVarDeclBuilder& WithInit(std::unique_ptr<Expr> init);

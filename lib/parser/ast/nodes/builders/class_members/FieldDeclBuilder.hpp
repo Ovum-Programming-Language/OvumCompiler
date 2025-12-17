@@ -14,7 +14,9 @@ namespace ovum::compiler::parser {
 class FieldDeclBuilder : public NodeBuilderBase<FieldDecl> {
 public:
   FieldDeclBuilder& WithPublic(bool is_public);
+  FieldDeclBuilder& WithIsPublic(bool is_public);
   FieldDeclBuilder& WithVar(bool is_var);
+  FieldDeclBuilder& WithIsVar(bool is_var);
   FieldDeclBuilder& WithName(std::string name);
   FieldDeclBuilder& WithType(TypeReference type);
   FieldDeclBuilder& WithInit(std::unique_ptr<Expr> init);

@@ -14,6 +14,7 @@ class InterfaceDeclBuilder : public NodeBuilderBase<InterfaceDecl> {
 public:
   InterfaceDeclBuilder& WithName(std::string name);
   InterfaceDeclBuilder& AddMethod(std::unique_ptr<InterfaceMethod> method);
+  InterfaceDeclBuilder& WithMethods(std::vector<std::unique_ptr<InterfaceMethod>> methods);
 };
 
 } // namespace ovum::compiler::parser

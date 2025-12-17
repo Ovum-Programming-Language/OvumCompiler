@@ -16,6 +16,7 @@ public:
   ModuleBuilder& WithName(std::string name);
   ModuleBuilder& WithSource(SourceId id);
   ModuleBuilder& AddDecl(std::unique_ptr<Decl> declaration);
+  ModuleBuilder& WithDecls(std::vector<std::unique_ptr<Decl>> decls);
 };
 
 } // namespace ovum::compiler::parser

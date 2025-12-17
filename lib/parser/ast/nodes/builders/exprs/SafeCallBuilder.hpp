@@ -14,6 +14,8 @@ public:
   SafeCallBuilder& WithObject(std::unique_ptr<Expr> object);
   SafeCallBuilder& WithMethod(std::string method);
   SafeCallBuilder& AddArg(std::unique_ptr<Expr> argument);
+  SafeCallBuilder& WithArgs(std::vector<std::unique_ptr<Expr>> args);
+  SafeCallBuilder& WithInferredType(std::optional<TypeReference> inferred_type);
   SafeCallBuilder& ClearArgs();
 };
 

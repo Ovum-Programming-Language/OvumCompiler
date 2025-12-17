@@ -20,7 +20,8 @@ public:
 
   static const IState& InterfaceHdr();
   static const IState& InterfaceBody();
-  static const IState& SignatureDecl();
+  static const IState& InterfaceDecl();
+  static const IState& SignatureDecl();  // Alias for InterfaceDecl
 
   static const IState& TypeAliasDecl();
   static const IState& GlobalVarDecl();

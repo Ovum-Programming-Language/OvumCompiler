@@ -22,4 +22,8 @@ GlobalVarDeclBuilder& GlobalVarDeclBuilder::WithInit(std::unique_ptr<Expr> init)
   return *this;
 }
 
+GlobalVarDeclBuilder& GlobalVarDeclBuilder::WithIsVar(bool is_var) {
+  return WithVar(is_var);
+}
+
 } // namespace ovum::compiler::parser

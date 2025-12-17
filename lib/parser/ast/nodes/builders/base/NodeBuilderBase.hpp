@@ -32,6 +32,10 @@ public:
     return std::move(node_);
   }
 
+  std::unique_ptr<T> Build() {
+    return Finish();
+  }
+
   T* Raw() {
     return node_.get();
   }

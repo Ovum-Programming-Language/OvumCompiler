@@ -17,6 +17,21 @@ SafeCallBuilder& SafeCallBuilder::AddArg(std::unique_ptr<Expr> argument) {
   return *this;
 }
 
+SafeCallBuilder& SafeCallBuilder::WithArgs(std::vector<std::unique_ptr<Expr>> args) {
+  node_->ClearArgs();
+  for (auto& arg : args) {
+    node_->AddArg(std::move(arg));
+  }
+  return *this;
+}
+
+SafeCallBuilder& SafeCallBuilder::WithInferredType(std::optional<TypeReference> inferred_type) {
+  if (inferred_type.has_value()) {
+    node_->SetInferredType(inferred_type.value());
+  }
+  return *this;
+}
+
 SafeCallBuilder& SafeCallBuilder::ClearArgs() {
   node_->ClearArgs();
   return *this;

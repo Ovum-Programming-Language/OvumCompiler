@@ -10,6 +10,7 @@ add_executable(
         lexer_tests.cpp
         test_suites/PreprocessorUnitTestSuite.cpp
         preprocessor_tests.cpp
+        parser_bytecode_tests.cpp
 )
 
 target_link_libraries(
@@ -17,6 +18,7 @@ target_link_libraries(
         compiler_ui
         lexer
         preprocessor
+        parser
         GTest::gtest_main
 )
 

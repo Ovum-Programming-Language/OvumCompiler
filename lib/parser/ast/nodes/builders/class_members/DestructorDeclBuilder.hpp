@@ -12,6 +12,7 @@ namespace ovum::compiler::parser {
 class DestructorDeclBuilder : public NodeBuilderBase<DestructorDecl> {
 public:
   DestructorDeclBuilder& WithPublic(bool is_public);
+  DestructorDeclBuilder& WithIsPublic(bool is_public);
   DestructorDeclBuilder& WithBody(std::unique_ptr<Block> body);
 };
 
