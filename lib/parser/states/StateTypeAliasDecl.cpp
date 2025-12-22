@@ -3,12 +3,14 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/ast/nodes/decls/TypeAliasDecl.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
+#include "type_parser/ITypeParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -35,8 +37,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -71,7 +72,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateTypeAliasDecl::Name() const {
   return "TypeAliasDecl";
@@ -82,38 +83,38 @@ IState::StepResult StateTypeAliasDecl::TryStep(ContextParser& ctx, ITokenStream&
 
   Module* module = ctx.TopNodeAs<Module>();
   if (module == nullptr) {
-    return std::unexpected(StateError("expected Module node on stack"));
+    return std::unexpected(StateError(std::string_view("expected Module node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in type alias"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in type alias")));
   }
 
   const Token& start = ts.Peek();
   if (start.GetLexeme() != "typealias") {
-    return std::unexpected(StateError("expected 'typealias' keyword"));
+    return std::unexpected(StateError(std::string_view("expected 'typealias' keyword")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   std::string name = ReadIdentifier(ctx, ts, "P_TYPEALIAS_NAME", "expected type alias name");
   if (name.empty()) {
-    return std::unexpected(StateError("expected type alias name"));
+    return std::unexpected(StateError(std::string_view("expected type alias name")));
   }
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "=") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_TYPEALIAS_EQ", "expected '=' after type alias name");
+      ctx.Diags()->Error("P_TYPEALIAS_EQ", std::string_view("expected '=' after type alias name"));
     }
-    return std::unexpected(StateError("expected '=' after type alias name"));
+    return std::unexpected(StateError(std::string_view("expected '=' after type alias name")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   auto aliased_type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
   if (aliased_type == nullptr) {
-    return std::unexpected(StateError("failed to parse aliased type"));
+    return std::unexpected(StateError(std::string_view("failed to parse aliased type")));
   }
 
   SourceSpan span = StateBase::SpanFrom(start);
@@ -127,4 +128,4 @@ IState::StepResult StateTypeAliasDecl::TryStep(ContextParser& ctx, ITokenStream&
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

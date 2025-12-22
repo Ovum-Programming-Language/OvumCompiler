@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
 #include "lib/parser/ast/nodes/decls/InterfaceMethod.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -10,6 +11,7 @@
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
 #include "lib/parser/types/Param.hpp"
+#include "type_parser/ITypeParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -36,8 +38,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -82,7 +83,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateInterfaceDecl::Name() const {
   return "InterfaceDecl";
@@ -93,11 +94,11 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
 
   InterfaceDecl* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
   if (interface_decl == nullptr) {
-    return std::unexpected(StateError("expected InterfaceDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected InterfaceDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in interface declaration"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in interface declaration")));
   }
 
   const Token& start = ts.Peek();
@@ -108,12 +109,12 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   if (lex == "call") {
     ts.Consume();
     SkipTrivia(ts);
-    
+
     if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
       if (ctx.Diags() != nullptr) {
-        ctx.Diags()->Error("P_CALL_PARAMS_OPEN", "expected '(' after 'call'");
+        ctx.Diags()->Error("P_CALL_PARAMS_OPEN", std::string_view("expected '(' after 'call'"));
       }
-      return std::unexpected(StateError("expected '(' after 'call'"));
+      return std::unexpected(StateError(std::string_view("expected '(' after 'call'")));
     }
     ts.Consume();
 
@@ -163,9 +164,9 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
       if (ctx.Diags() != nullptr) {
-        ctx.Diags()->Error("P_CALL_PARAMS_CLOSE", "expected ')' after parameters");
+        ctx.Diags()->Error("P_CALL_PARAMS_CLOSE", std::string_view("expected ')' after parameters"));
       }
-      return std::unexpected(StateError("expected ')' after parameters"));
+      return std::unexpected(StateError(std::string_view("expected ')' after parameters")));
     }
     ts.Consume();
 
@@ -186,24 +187,24 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   // Method declaration (fun)
   if (lex != "fun") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_INTERFACE_METHOD", "expected 'fun' or 'call' in interface");
+      ctx.Diags()->Error("P_INTERFACE_METHOD", std::string_view("expected 'fun' or 'call' in interface"));
     }
-    return std::unexpected(StateError("expected 'fun' or 'call' in interface"));
+    return std::unexpected(StateError(std::string_view("expected 'fun' or 'call' in interface")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   std::string name = ReadIdentifier(ctx, ts, "P_METHOD_NAME", "expected method name");
   if (name.empty()) {
-    return std::unexpected(StateError("expected method name"));
+    return std::unexpected(StateError(std::string_view("expected method name")));
   }
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_METHOD_PARAMS_OPEN", "expected '(' after method name");
+      ctx.Diags()->Error("P_METHOD_PARAMS_OPEN", std::string_view("expected '(' after method name"));
     }
-    return std::unexpected(StateError("expected '(' after method name"));
+    return std::unexpected(StateError(std::string_view("expected '(' after method name")));
   }
   ts.Consume();
 
@@ -253,9 +254,9 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_METHOD_PARAMS_CLOSE", "expected ')' after parameters");
+      ctx.Diags()->Error("P_METHOD_PARAMS_CLOSE", std::string_view("expected ')' after parameters"));
     }
-    return std::unexpected(StateError("expected ')' after parameters"));
+    return std::unexpected(StateError(std::string_view("expected ')' after parameters")));
   }
   ts.Consume();
 
@@ -270,11 +271,10 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   if (ts.LastConsumed() != nullptr) {
     span = StateBase::Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
   }
-  auto method = ctx.Factory()->MakeInterfaceMethod(std::move(name), std::move(params),
-                                                   std::move(return_type), span);
+  auto method = ctx.Factory()->MakeInterfaceMethod(std::move(name), std::move(params), std::move(return_type), span);
   interface_decl->AddMember(std::move(method));
   ConsumeTerminators(ts);
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

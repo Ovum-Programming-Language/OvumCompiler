@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/ast/nodes/stmts/UnsafeBlock.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -29,7 +30,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateUnsafeBlock::Name() const {
   return "UnsafeBlock";
@@ -40,25 +41,25 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
 
   Block* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
-    return std::unexpected(StateError("expected Block node on stack"));
+    return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in unsafe block"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in unsafe block")));
   }
 
   const Token& start = ts.Peek();
   if (start.GetLexeme() != "unsafe") {
-    return std::unexpected(StateError("expected 'unsafe' keyword"));
+    return std::unexpected(StateError(std::string_view("expected 'unsafe' keyword")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_UNSAFE_BLOCK", "expected '{' after 'unsafe'");
+      ctx.Diags()->Error("P_UNSAFE_BLOCK", std::string_view("expected '{' after 'unsafe'"));
     }
-    return std::unexpected(StateError("expected '{' after 'unsafe'"));
+    return std::unexpected(StateError(std::string_view("expected '{' after 'unsafe'")));
   }
 
   ts.Consume();
@@ -66,12 +67,11 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
   ctx.PushNode(std::unique_ptr<AstNode>(unsafe_body.get()));
 
   SourceSpan span = StateBase::SpanFrom(start);
-  auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(std::unique_ptr<Block>(unsafe_body), span);
-  unsafe_body.release();
+  auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(std::move(unsafe_body), span);
 
   block->Append(std::move(unsafe_stmt));
   ctx.PushState(StateRegistry::Block());
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

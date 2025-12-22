@@ -12,6 +12,7 @@
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
 #include "lib/parser/tokens/token_traits/MatchLexeme.hpp"
 #include "lib/parser/types/Param.hpp"
+#include "type_parser/ITypeParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -38,8 +39,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -67,7 +67,7 @@ std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
   return ctx.TypeParser()->ParseType(ts, *ctx.Diags());
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateFuncParams::Name() const {
   return "FuncParams";
@@ -80,20 +80,21 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   FunctionDecl* func = ctx.TopNodeAs<FunctionDecl>();
   MethodDecl* method = ctx.TopNodeAs<MethodDecl>();
   CallDecl* call = ctx.TopNodeAs<CallDecl>();
-  
+
   if (func == nullptr && method == nullptr && call == nullptr) {
-    return std::unexpected(StateError("expected FunctionDecl, MethodDecl, or CallDecl node on stack"));
+    return std::unexpected(
+        StateError(std::string_view("expected FunctionDecl, MethodDecl, or CallDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in function parameters"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in function parameters")));
   }
 
   const Token& tok = ts.Peek();
   if (tok.GetLexeme() == ")") {
     ts.Consume();
     SkipTrivia(ts);
-    
+
     // Check for return type
     if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
       ts.Consume();
@@ -168,14 +169,14 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_FUN_PARAMS_CLOSE", "expected ')' after parameters");
+      ctx.Diags()->Error("P_FUN_PARAMS_CLOSE", std::string_view("expected ')' after parameters"));
     }
-    return std::unexpected(StateError("expected ')' after parameters"));
+    return std::unexpected(StateError(std::string_view("expected ')' after parameters")));
   }
 
   ts.Consume();
   SkipTrivia(ts);
-  
+
   // Check for return type
   if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
     ts.Consume();
@@ -197,4 +198,4 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

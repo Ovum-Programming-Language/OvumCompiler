@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -36,8 +37,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -55,7 +55,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
   return name;
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateInterfaceHdr::Name() const {
   return "InterfaceHdr";
@@ -65,19 +65,19 @@ IState::StepResult StateInterfaceHdr::TryStep(ContextParser& ctx, ITokenStream& 
   SkipTrivia(ts);
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in interface header"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in interface header")));
   }
 
   const Token& start = ts.Peek();
   if (start.GetLexeme() != "interface") {
-    return std::unexpected(StateError("expected 'interface' keyword"));
+    return std::unexpected(StateError(std::string_view("expected 'interface' keyword")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   std::string name = ReadIdentifier(ctx, ts, "P_INTERFACE_NAME", "expected interface name");
   if (name.empty()) {
-    return std::unexpected(StateError("expected interface name"));
+    return std::unexpected(StateError(std::string_view("expected interface name")));
   }
 
   SourceSpan span = StateBase::SpanFrom(start);
@@ -89,11 +89,11 @@ IState::StepResult StateInterfaceHdr::TryStep(ContextParser& ctx, ITokenStream& 
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_INTERFACE_BODY", "expected '{' for interface body");
     }
-    return std::unexpected(StateError("expected '{' for interface body"));
+    return std::unexpected(StateError(std::string_view("expected '{' for interface body")));
   }
 
   ctx.PushState(StateRegistry::InterfaceBody());
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

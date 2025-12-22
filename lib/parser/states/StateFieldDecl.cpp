@@ -11,7 +11,7 @@ std::string_view StateFieldDecl::Name() const {
 
 IState::StepResult StateFieldDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   // This state is not used - field declarations are handled directly in StateClassMember
-  return std::unexpected(StateError("StateFieldDecl should not be called"));
+  return std::unexpected(StateError(std::string_view("StateFieldDecl should not be called")));
 }
 
 }  // namespace ovum::compiler::parser

@@ -11,7 +11,7 @@ std::string_view StateGlobalVarDecl::Name() const {
 
 IState::StepResult StateGlobalVarDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   // This state is not used - global variable declarations are handled directly in StateTopDecl
-  return std::unexpected(StateError("StateGlobalVarDecl should not be called"));
+  return std::unexpected(StateError(std::string_view("StateGlobalVarDecl should not be called")));
 }
 
 }  // namespace ovum::compiler::parser

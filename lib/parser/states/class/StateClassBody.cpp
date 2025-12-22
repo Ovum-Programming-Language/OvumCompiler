@@ -40,11 +40,11 @@ IState::StepResult StateClassBody::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
-    return std::unexpected(StateError("expected ClassDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in class body"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in class body")));
   }
 
   const Token& tok = ts.Peek();

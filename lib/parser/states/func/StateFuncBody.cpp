@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
@@ -38,7 +39,7 @@ SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
   return StateBase::Union(a, b);
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateFuncBody::Name() const {
   return "FuncBody";
@@ -51,13 +52,14 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
   FunctionDecl* func = ctx.TopNodeAs<FunctionDecl>();
   MethodDecl* method = ctx.TopNodeAs<MethodDecl>();
   CallDecl* call = ctx.TopNodeAs<CallDecl>();
-  
+
   if (func == nullptr && method == nullptr && call == nullptr) {
-    return std::unexpected(StateError("expected FunctionDecl, MethodDecl, or CallDecl node on stack"));
+    return std::unexpected(
+        StateError(std::string_view("expected FunctionDecl, MethodDecl, or CallDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in function body"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in function body")));
   }
 
   const Token& tok = ts.Peek();
@@ -65,7 +67,7 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
     // Declaration without body
     ts.Consume();
     auto decl_node = ctx.PopNode();
-    
+
     if (func != nullptr) {
       Module* module = ctx.TopNodeAs<Module>();
       if (module != nullptr) {
@@ -90,9 +92,9 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
   }
 
   if (ctx.Diags() != nullptr) {
-    ctx.Diags()->Error("P_FUN_BODY", "expected '{' or ';' for function body");
+    ctx.Diags()->Error("P_FUN_BODY", std::string_view("expected '{' or ';' for function body"));
   }
-  return std::unexpected(StateError("expected '{' or ';' for function body"));
+  return std::unexpected(StateError(std::string_view("expected '{' or ';' for function body")));
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

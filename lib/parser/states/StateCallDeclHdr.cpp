@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -30,7 +31,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateCallDeclHdr::Name() const {
   return "CallDeclHdr";
@@ -41,15 +42,15 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
 
   ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
-    return std::unexpected(StateError("expected ClassDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in call declaration"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in call declaration")));
   }
 
   const Token& start = ts.Peek();
-  
+
   // Check for access modifier
   bool is_public = true;
   if (start.GetLexeme() == "public" || start.GetLexeme() == "private") {
@@ -57,12 +58,12 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "call") {
-      return std::unexpected(StateError("expected 'call' after access modifier"));
+      return std::unexpected(StateError(std::string_view("expected 'call' after access modifier")));
     }
   }
 
   if (ts.Peek().GetLexeme() != "call") {
-    return std::unexpected(StateError("expected 'call' keyword"));
+    return std::unexpected(StateError(std::string_view("expected 'call' keyword")));
   }
   ts.Consume();
 
@@ -71,7 +72,7 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_CALL_PARAMS_OPEN", "expected '(' after 'call'");
     }
-    return std::unexpected(StateError("expected '(' after 'call'"));
+    return std::unexpected(StateError(std::string_view("expected '(' after 'call'")));
   }
 
   SourceSpan span = StateBase::SpanFrom(start);
@@ -82,4 +83,4 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

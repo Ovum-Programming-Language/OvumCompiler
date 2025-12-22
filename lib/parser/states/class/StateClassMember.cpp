@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
@@ -14,6 +15,8 @@
 #include "lib/parser/states/base/StateRegistry.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
+#include "pratt/IExpressionParser.hpp"
+#include "type_parser/ITypeParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -40,8 +43,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -76,7 +78,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateClassMember::Name() const {
   return "ClassMember";
@@ -87,11 +89,11 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
   ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
-    return std::unexpected(StateError("expected ClassDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in class member"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in class member")));
   }
 
   const Token& start = ts.Peek();
@@ -105,7 +107,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file after access modifier"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file after access modifier")));
     }
     lex = ts.Peek().GetLexeme();
   }
@@ -115,9 +117,9 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file after 'static'"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file after 'static'")));
     }
-    
+
     // Access modifier after static
     if (ts.Peek().GetLexeme() == "public" || ts.Peek().GetLexeme() == "private") {
       is_public = (ts.Peek().GetLexeme() == "public");
@@ -126,7 +128,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     }
 
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file in static field"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file in static field")));
     }
 
     bool is_var = false;
@@ -138,22 +140,22 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
     std::string name = ReadIdentifier(ctx, ts, "P_STATIC_FIELD_NAME", "expected static field name");
     if (name.empty()) {
-      return std::unexpected(StateError("expected static field name"));
+      return std::unexpected(StateError(std::string_view("expected static field name")));
     }
 
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
       if (ctx.Diags() != nullptr) {
-        ctx.Diags()->Error("P_STATIC_FIELD_COLON", "expected ':' after static field name");
+        ctx.Diags()->Error("P_STATIC_FIELD_COLON", std::string_view("expected ':' after static field name"));
       }
-      return std::unexpected(StateError("expected ':' after static field name"));
+      return std::unexpected(StateError(std::string_view("expected ':' after static field name")));
     }
     ts.Consume();
 
     SkipTrivia(ts);
     auto type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
     if (type == nullptr) {
-      return std::unexpected(StateError("failed to parse static field type"));
+      return std::unexpected(StateError(std::string_view("failed to parse static field type")));
     }
 
     std::unique_ptr<Expr> init = nullptr;
@@ -165,8 +167,8 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     }
 
     span = StateBase::Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
-    auto field = ctx.Factory()->MakeStaticField(is_public, is_var, std::move(name), std::move(*type),
-                                                std::move(init), span);
+    auto field =
+        ctx.Factory()->MakeStaticField(is_public, is_var, std::move(name), std::move(*type), std::move(init), span);
     class_decl->AddMember(std::move(field));
     ConsumeTerminators(ts);
     return false;
@@ -192,7 +194,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file after 'override'"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file after 'override'")));
     }
     lex = ts.Peek().GetLexeme();
   }
@@ -201,7 +203,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
-      return std::unexpected(StateError("expected 'fun' after 'pure'"));
+      return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
     }
     lex = "fun";
   }
@@ -217,27 +219,27 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     ts.Consume();
     SkipTrivia(ts);
   } else {
-    return std::unexpected(StateError("expected class member"));
+    return std::unexpected(StateError(std::string_view("expected class member")));
   }
 
   std::string name = ReadIdentifier(ctx, ts, "P_FIELD_NAME", "expected field name");
   if (name.empty()) {
-    return std::unexpected(StateError("expected field name"));
+    return std::unexpected(StateError(std::string_view("expected field name")));
   }
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_FIELD_COLON", "expected ':' after field name");
+      ctx.Diags()->Error("P_FIELD_COLON", std::string_view("expected ':' after field name"));
     }
-    return std::unexpected(StateError("expected ':' after field name"));
+    return std::unexpected(StateError(std::string_view("expected ':' after field name")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   auto type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
   if (type == nullptr) {
-    return std::unexpected(StateError("failed to parse field type"));
+    return std::unexpected(StateError(std::string_view("failed to parse field type")));
   }
 
   std::unique_ptr<Expr> init = nullptr;
@@ -249,11 +251,10 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
   }
 
   span = StateBase::Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
-  auto field = ctx.Factory()->MakeField(is_public, is_var, std::move(name), std::move(*type),
-                                        std::move(init), span);
+  auto field = ctx.Factory()->MakeField(is_public, is_var, std::move(name), std::move(*type), std::move(init), span);
   class_decl->AddMember(std::move(field));
   ConsumeTerminators(ts);
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

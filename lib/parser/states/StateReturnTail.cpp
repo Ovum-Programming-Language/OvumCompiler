@@ -2,11 +2,13 @@
 
 #include <memory>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/ast/nodes/stmts/ReturnStmt.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+#include "pratt/IExpressionParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -55,7 +57,7 @@ std::unique_ptr<Expr> ParseExpression(ContextParser& ctx, ITokenStream& ts) {
   return ctx.Expr()->Parse(ts, *ctx.Diags());
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateReturnTail::Name() const {
   return "ReturnTail";
@@ -66,18 +68,18 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
 
   Block* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
-    return std::unexpected(StateError("expected Block node on stack"));
+    return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in return statement"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in return statement")));
   }
 
   const Token& start = ts.Peek();
   SourceSpan span = StateBase::SpanFrom(start);
 
   SkipTrivia(ts);
-  
+
   // Check if there's a return value
   if (ts.IsEof() || (ts.Peek().GetLexeme() == ";" || ts.Peek().GetStringType() == "NEWLINE")) {
     // Return without value
@@ -90,7 +92,7 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
   // Return with value
   auto expr = ParseExpression(ctx, ts);
   if (expr == nullptr) {
-    return std::unexpected(StateError("failed to parse return expression"));
+    return std::unexpected(StateError(std::string_view("failed to parse return expression")));
   }
 
   span = StateBase::Union(span, expr->Span());
@@ -100,4 +102,4 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

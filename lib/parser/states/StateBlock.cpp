@@ -48,12 +48,12 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
   SkipTrivia(ts);
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in block"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in block")));
   }
 
   Block* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
-    return std::unexpected(StateError("expected Block node on stack"));
+    return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
   const Token& tok = ts.Peek();

@@ -11,7 +11,7 @@ std::string_view StateVarDeclTail::Name() const {
 
 IState::StepResult StateVarDeclTail::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   // This state is not used - variable declarations are handled directly in StateStmt
-  return std::unexpected(StateError("StateVarDeclTail should not be called"));
+  return std::unexpected(StateError(std::string_view("StateVarDeclTail should not be called")));
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

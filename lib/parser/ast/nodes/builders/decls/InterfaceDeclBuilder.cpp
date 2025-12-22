@@ -14,7 +14,7 @@ InterfaceDeclBuilder& InterfaceDeclBuilder::AddMethod(std::unique_ptr<InterfaceM
 
 InterfaceDeclBuilder& InterfaceDeclBuilder::WithMethods(std::vector<std::unique_ptr<InterfaceMethod>> methods) {
   for (auto& method : methods) {
-    node_->AddMethod(std::move(method));
+    AddMethod(std::move(method));
   }
   return *this;
 }

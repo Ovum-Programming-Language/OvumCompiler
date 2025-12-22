@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -37,8 +38,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -56,7 +56,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
   return name;
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateMethodHdr::Name() const {
   return "MethodHdr";
@@ -67,88 +67,88 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
-    return std::unexpected(StateError("expected ClassDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in method header"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in method header")));
   }
 
   const Token& start = ts.Peek();
-  
+
   // Check for access modifier, override, pure, static
   bool is_public = true;
   bool is_override = false;
   bool is_pure = false;
   bool is_static = false;
-  
+
   std::string lex = start.GetLexeme();
   if (lex == "public" || lex == "private") {
     is_public = (lex == "public");
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file after access modifier"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file after access modifier")));
     }
     lex = ts.Peek().GetLexeme();
   }
-  
+
   if (lex == "override") {
     is_override = true;
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
-      return std::unexpected(StateError("unexpected end of file after 'override'"));
+      return std::unexpected(StateError(std::string_view("unexpected end of file after 'override'")));
     }
     lex = ts.Peek().GetLexeme();
   }
-  
+
   if (lex == "pure") {
     is_pure = true;
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
-      return std::unexpected(StateError("expected 'fun' after 'pure'"));
+      return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
     }
     lex = "fun";
   }
-  
+
   if (lex == "static") {
     is_static = true;
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
-      return std::unexpected(StateError("expected 'fun' after 'static'"));
+      return std::unexpected(StateError(std::string_view("expected 'fun' after 'static'")));
     }
     lex = "fun";
   }
 
   if (lex != "fun") {
-    return std::unexpected(StateError("expected 'fun' keyword"));
+    return std::unexpected(StateError(std::string_view("expected 'fun' keyword")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   std::string name = ReadIdentifier(ctx, ts, "P_METHOD_NAME", "expected method name");
   if (name.empty()) {
-    return std::unexpected(StateError("expected method name"));
+    return std::unexpected(StateError(std::string_view("expected method name")));
   }
 
   SourceSpan span = StateBase::SpanFrom(start);
-  auto method = ctx.Factory()->MakeMethod(is_public, is_override, is_static, is_pure,
-                                          std::move(name), {}, nullptr, nullptr, span);
+  auto method = ctx.Factory()->MakeMethod(
+      is_public, is_override, is_static, is_pure, std::move(name), {}, nullptr, nullptr, span);
   ctx.PushNode(std::unique_ptr<AstNode>(method.get()));
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_METHOD_PARAMS_OPEN", "expected '(' after method name");
+      ctx.Diags()->Error("P_METHOD_PARAMS_OPEN", std::string_view("expected '(' after method name"));
     }
-    return std::unexpected(StateError("expected '(' after method name"));
+    return std::unexpected(StateError(std::string_view("expected '(' after method name")));
   }
 
   ctx.PushState(StateRegistry::FuncParams());
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

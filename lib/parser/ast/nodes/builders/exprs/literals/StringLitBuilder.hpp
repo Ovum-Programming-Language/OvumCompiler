@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "NodeBuilderBase.hpp"
 #include "lib/parser/ast/nodes/builders/base/NodeBuilderBase.hpp"
 #include "lib/parser/ast/nodes/exprs/literals/StringLit.hpp"
 

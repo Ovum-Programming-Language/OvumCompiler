@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "ast/IAstFactory.hpp"
+#include "ast/nodes/base/Expr.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
@@ -9,6 +11,9 @@
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
 #include "lib/parser/tokens/token_traits/MatchLexeme.hpp"
+#include "pratt/IExpressionParser.hpp"
+#include "type_parser/ITypeParser.hpp"
+#include "types/TypeReference.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -35,8 +40,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-void ReportUnexpected(IDiagnosticSink* diags, std::string_view code,
-                      std::string_view message, const Token* tok) {
+void ReportUnexpected(IDiagnosticSink* diags, std::string_view code, std::string_view message, const Token* tok) {
   if (diags == nullptr || tok == nullptr) {
     return;
   }
@@ -44,8 +48,7 @@ void ReportUnexpected(IDiagnosticSink* diags, std::string_view code,
   diags->Error(code, message, span);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     const Token* tok = ts.TryPeek();
@@ -93,7 +96,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateStmt::Name() const {
   return "Stmt";
@@ -108,7 +111,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
 
   Block* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
-    return std::unexpected(StateError("expected Block node on stack"));
+    return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
   const Token& tok = ts.Peek();
@@ -170,7 +173,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
     SkipTrivia(ts);
     if (ts.IsEof()) {
       ReportUnexpected(ctx.Diags(), "P_VAR_NAME", "expected variable name", ts.TryPeek());
-      return std::unexpected(StateError("expected variable name"));
+      return std::unexpected(StateError(std::string_view("expected variable name")));
     }
     lex = ts.Peek().GetLexeme();
   }
@@ -178,38 +181,37 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   if (IsIdentifier(ts.Peek())) {
     std::string name = ts.Consume()->GetLexeme();
     SkipTrivia(ts);
-    
+
     if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
       // Variable declaration
       ts.Consume();
       SkipTrivia(ts);
-      
+
       auto type = ParseType(ctx, ts);
       if (type == nullptr) {
-        return std::unexpected(StateError("failed to parse type"));
+        return std::unexpected(StateError(std::string_view("failed to parse type")));
       }
 
       SkipTrivia(ts);
       if (ts.IsEof() || ts.Peek().GetLexeme() != "=") {
         ReportUnexpected(ctx.Diags(), "P_VAR_INIT", "expected '=' for variable", ts.TryPeek());
-        return std::unexpected(StateError("expected '=' for variable"));
+        return std::unexpected(StateError(std::string_view("expected '=' for variable")));
       }
       ts.Consume();
 
       SkipTrivia(ts);
       auto init = ParseExpression(ctx, ts);
       if (init == nullptr) {
-        return std::unexpected(StateError("failed to parse initialization expression"));
+        return std::unexpected(StateError(std::string_view("failed to parse initialization expression")));
       }
 
       SourceSpan span = StateBase::Union(StateBase::SpanFrom(tok), init->Span());
-      auto stmt = ctx.Factory()->MakeVarDeclStmt(is_var, std::move(name), std::move(*type),
-                                                  std::move(init), span);
+      auto stmt = ctx.Factory()->MakeVarDeclStmt(is_var, std::move(name), std::move(*type), std::move(init), span);
       block->Append(std::move(stmt));
       ConsumeTerminators(ts);
       return false;
     }
-    
+
     // Expression statement - put identifier back
     ts.Rewind(1);
   }
@@ -217,7 +219,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   // Expression statement
   auto expr = ParseExpression(ctx, ts);
   if (expr == nullptr) {
-    return std::unexpected(StateError("failed to parse expression"));
+    return std::unexpected(StateError(std::string_view("failed to parse expression")));
   }
 
   SourceSpan span = expr->Span();
@@ -227,4 +229,4 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

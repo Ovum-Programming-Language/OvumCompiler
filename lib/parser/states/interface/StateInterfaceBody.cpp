@@ -29,7 +29,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateInterfaceBody::Name() const {
   return "InterfaceBody";
@@ -40,11 +40,11 @@ IState::StepResult StateInterfaceBody::TryStep(ContextParser& ctx, ITokenStream&
 
   InterfaceDecl* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
   if (interface_decl == nullptr) {
-    return std::unexpected(StateError("expected InterfaceDecl node on stack"));
+    return std::unexpected(StateError(std::string_view("expected InterfaceDecl node on stack")));
   }
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in interface body"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in interface body")));
   }
 
   const Token& tok = ts.Peek();
@@ -63,4 +63,4 @@ IState::StepResult StateInterfaceBody::TryStep(ContextParser& ctx, ITokenStream&
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

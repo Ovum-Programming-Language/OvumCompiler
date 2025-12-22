@@ -488,9 +488,9 @@ std::unique_ptr<Expr> PrattExpressionParser::MakeInfix(const InfixSpec& spec,
                                                        std::unique_ptr<Expr> lhs,
                                                        std::unique_ptr<Expr> rhs) {
   if (spec.IsElvis()) {
-    return factory_->MakeElvis(std::move(lhs), std::move(rhs));
+    return factory_->MakeElvis(std::move(lhs), std::move(rhs), SourceSpan::Union(lhs->Span(), rhs->Span()));
   }
-  return factory_->MakeBinary(*spec.Tag(), std::move(lhs), std::move(rhs));
+  return factory_->MakeBinary(*spec.Tag(), std::move(lhs), std::move(rhs), SourceSpan::Union(lhs->Span(), rhs->Span()));
 }
 
 } // namespace ovum::compiler::parser

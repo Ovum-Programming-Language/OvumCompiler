@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/FunctionDecl.hpp"
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -37,8 +38,7 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
-                           std::string_view code, std::string_view message) {
+std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
@@ -56,7 +56,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts,
   return name;
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateFuncHdr::Name() const {
   return "FuncHdr";
@@ -66,7 +66,7 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
   SkipTrivia(ts);
 
   if (ts.IsEof()) {
-    return std::unexpected(StateError("unexpected end of file in function header"));
+    return std::unexpected(StateError(std::string_view("unexpected end of file in function header")));
   }
 
   // Check if we already have a function node
@@ -75,7 +75,7 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
     // Create new function node
     bool is_pure = false;
     const Token& start = ts.Peek();
-    
+
     // Check for 'pure' keyword (should have been consumed by StateTopDecl)
     // But we handle it here too for safety
     if (start.GetLexeme() == "pure") {
@@ -84,29 +84,28 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
       SkipTrivia(ts);
       if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
         if (ctx.Diags() != nullptr) {
-          ctx.Diags()->Error("P_PURE_FUN", "expected 'fun' after 'pure'");
+          ctx.Diags()->Error("P_PURE_FUN", std::string_view("expected 'fun' after 'pure'"));
         }
-        return std::unexpected(StateError("expected 'fun' after 'pure'"));
+        return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
       }
     }
 
     if (ts.Peek().GetLexeme() != "fun") {
       if (ctx.Diags() != nullptr) {
-        ctx.Diags()->Error("P_FUN_KEYWORD", "expected 'fun' keyword");
+        ctx.Diags()->Error("P_FUN_KEYWORD", std::string_view("expected 'fun' keyword"));
       }
-      return std::unexpected(StateError("expected 'fun' keyword"));
+      return std::unexpected(StateError(std::string_view("expected 'fun' keyword")));
     }
     ts.Consume();
 
     SkipTrivia(ts);
-    std::string name = ReadIdentifier(ctx, ts, "P_FUN_NAME", "expected function name");
+    std::string name = ReadIdentifier(ctx, ts, "P_FUN_NAME", std::string_view("expected function name"));
     if (name.empty()) {
-      return std::unexpected(StateError("expected function name"));
+      return std::unexpected(StateError(std::string_view("expected function name")));
     }
 
     SourceSpan span = StateBase::SpanFrom(start);
-    auto func_node = ctx.Factory()->MakeFunction(is_pure, std::move(name), {}, nullptr, nullptr,
-                                                 span);
+    auto func_node = ctx.Factory()->MakeFunction(is_pure, std::move(name), {}, nullptr, nullptr, span);
     ctx.PushNode(std::unique_ptr<AstNode>(func_node.get()));
     func = func_node.get();
   }
@@ -114,13 +113,13 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
     if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_FUN_PARAMS_OPEN", "expected '(' after function name");
+      ctx.Diags()->Error("P_FUN_PARAMS_OPEN", std::string_view("expected '(' after function name"));
     }
-    return std::unexpected(StateError("expected '(' after function name"));
+    return std::unexpected(StateError(std::string_view("expected '(' after function name")));
   }
 
   ctx.PushState(StateRegistry::FuncParams());
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser
