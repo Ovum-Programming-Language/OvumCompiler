@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/literals/NullLit.hpp"
+#include "NullLit.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

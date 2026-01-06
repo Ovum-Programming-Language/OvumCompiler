@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/Unary.hpp"
+#include "Unary.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

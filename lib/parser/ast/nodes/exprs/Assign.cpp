@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/Assign.hpp"
+#include "Assign.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

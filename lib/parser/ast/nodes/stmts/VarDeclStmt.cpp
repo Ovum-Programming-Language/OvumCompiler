@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/VarDeclStmt.hpp"
+#include "VarDeclStmt.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/BreakStmt.hpp"
+#include "BreakStmt.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

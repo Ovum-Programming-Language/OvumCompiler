@@ -1,5 +1,6 @@
+#include "Call.hpp"
+
 #include "lib/parser/ast/AstVisitor.hpp"
-#include "lib/parser/ast/nodes/exprs/Call.hpp"
 
 #include <utility>
 

@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/Binary.hpp"
+#include "Binary.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

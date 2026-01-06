@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/FieldAccess.hpp"
+#include "FieldAccess.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

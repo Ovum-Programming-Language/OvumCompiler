@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/IndexAccess.hpp"
+#include "IndexAccess.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

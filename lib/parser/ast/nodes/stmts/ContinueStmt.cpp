@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/ContinueStmt.hpp"
+#include "ContinueStmt.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

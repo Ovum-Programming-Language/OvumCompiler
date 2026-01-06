@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/decls/TypeAliasDecl.hpp"
+#include "TypeAliasDecl.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

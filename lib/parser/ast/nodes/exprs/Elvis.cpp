@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/Elvis.hpp"
+#include "Elvis.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

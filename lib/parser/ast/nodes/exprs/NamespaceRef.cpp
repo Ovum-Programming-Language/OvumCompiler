@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/NamespaceRef.hpp"
+#include "NamespaceRef.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

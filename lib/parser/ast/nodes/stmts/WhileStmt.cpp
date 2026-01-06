@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/WhileStmt.hpp"
+#include "WhileStmt.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

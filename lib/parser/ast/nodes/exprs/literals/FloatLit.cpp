@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/literals/FloatLit.hpp"
+#include "FloatLit.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

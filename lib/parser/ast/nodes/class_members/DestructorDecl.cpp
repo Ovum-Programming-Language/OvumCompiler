@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
+#include "DestructorDecl.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

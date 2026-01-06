@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/SafeCall.hpp"
+#include "SafeCall.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

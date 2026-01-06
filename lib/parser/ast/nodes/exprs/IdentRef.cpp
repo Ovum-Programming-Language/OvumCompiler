@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/IdentRef.hpp"
+#include "IdentRef.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

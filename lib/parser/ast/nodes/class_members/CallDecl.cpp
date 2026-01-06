@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
+#include "CallDecl.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

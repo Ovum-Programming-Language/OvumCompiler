@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/UnsafeBlock.hpp"
+#include "UnsafeBlock.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

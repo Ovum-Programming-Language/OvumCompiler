@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
+#include "FieldDecl.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
