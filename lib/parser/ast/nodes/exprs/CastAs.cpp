@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/CastAs.hpp"
+#include "CastAs.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

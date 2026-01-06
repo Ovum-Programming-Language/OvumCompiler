@@ -1,4 +1,4 @@
-#include "lib/parser/types/Param.hpp"
+#include "Param.hpp"
 
 namespace ovum::compiler::parser {
 

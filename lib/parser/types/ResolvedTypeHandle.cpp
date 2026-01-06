@@ -1,4 +1,4 @@
-#include "lib/parser/types/ResolvedTypeHandle.hpp"
+#include "ResolvedTypeHandle.hpp"
 
 #include <string_view>
 

@@ -22,12 +22,5 @@ target_link_libraries(parser PUBLIC
     tokens
 )
 
-# Add OvumVM execution_tree if available
-if(EXISTS ${CMAKE_SOURCE_DIR}/OvumVM/lib/execution_tree/CMakeLists.txt)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/OvumVM/lib/execution_tree ${CMAKE_BINARY_DIR}/OvumVM/lib/execution_tree)
-    target_link_libraries(parser PUBLIC execution_tree)
-    target_include_directories(parser PUBLIC ${CMAKE_SOURCE_DIR}/OvumVM)
-endif()
-
 target_include_directories(parser PUBLIC ${PROJECT_SOURCE_DIR})
 

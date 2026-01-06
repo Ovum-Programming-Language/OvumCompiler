@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/stmts/Branch.hpp"
+#include "Branch.hpp"
 
 #include <utility>
 

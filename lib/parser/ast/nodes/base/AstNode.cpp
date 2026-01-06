@@ -1,4 +1,6 @@
-#include "lib/parser/ast/nodes/base/AstNode.hpp"
+#include <algorithm>
+
+#include "AstNode.hpp"
 
 namespace ovum::compiler::parser {
 const SourceSpan& AstNode::Span() const noexcept {

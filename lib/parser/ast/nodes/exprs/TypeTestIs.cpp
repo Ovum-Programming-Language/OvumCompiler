@@ -1,4 +1,4 @@
-#include "lib/parser/ast/nodes/exprs/TypeTestIs.hpp"
+#include "TypeTestIs.hpp"
 
 #include "lib/parser/ast/AstVisitor.hpp"
 

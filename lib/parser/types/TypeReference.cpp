@@ -1,4 +1,4 @@
-#include "lib/parser/types/TypeReference.hpp"
+#include "TypeReference.hpp"
 
 #include <algorithm>
 #include <cstddef>
