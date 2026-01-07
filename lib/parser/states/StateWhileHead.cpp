@@ -99,7 +99,7 @@ IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   ts.Consume();
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::unique_ptr<AstNode>(body.get()));
+  ctx.PushNode(std::move(body));
 
   SourceSpan span = StateBase::Union(StateBase::SpanFrom(start), condition->Span());
   auto while_stmt = ctx.Factory()->MakeWhileStmt(std::move(condition), std::move(body), span);

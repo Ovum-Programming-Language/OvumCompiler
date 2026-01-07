@@ -51,7 +51,7 @@ std::unique_ptr<InterfaceDecl> BuilderAstFactory::MakeInterface(std::string name
 }
 
 std::unique_ptr<InterfaceMethod> BuilderAstFactory::MakeInterfaceMethod(std::string name,
-                                                                        std::vector<InterfaceMethod::Param> params,
+                                                                        std::vector<Param> params,
                                                                         std::unique_ptr<TypeReference> return_type,
                                                                         SourceSpan span) {
   auto b = ParserBuilder::Make<InterfaceMethod>();

@@ -183,7 +183,7 @@ std::unique_ptr<Block> ParseBlock(ContextParser& ctx, ITokenStream& ts) {
   ts.Consume();
 
   auto block = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::unique_ptr<AstNode>(block.get()));
+  ctx.PushNode(std::move(block));
   ctx.PushState(StateRegistry::Block());
   return nullptr; // Will be popped later
 }

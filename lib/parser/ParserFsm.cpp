@@ -15,7 +15,7 @@ namespace ovum::compiler::parser {
 
 ParserFsm::ParserFsm(std::unique_ptr<IExpressionParser> expr,
                      std::unique_ptr<ITypeParser> typep,
-                     std::unique_ptr<IAstFactory> factory) :
+                     std::shared_ptr<IAstFactory> factory) :
     expr_parser_(std::move(expr)), type_parser_(std::move(typep)), factory_(std::move(factory)) {
 }
 
@@ -31,6 +31,7 @@ std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& token_stream, IDiagnostic
   context.PushState(StateRegistry::Module());
 
   while (const IState* state = context.CurrentState()) {
+    auto name = state->Name();
     auto step = state->TryStep(context, token_stream);
 
     if (!step.has_value()) {

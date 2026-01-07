@@ -29,7 +29,7 @@ const Token& VectorTokenStream::Peek(size_t k) {
 TokenPtr VectorTokenStream::Consume() {
   if (index_ < tokens_.size()) {
     last_ = tokens_[index_].get();
-    return std::move(tokens_[index_++]);
+    return tokens_[index_++];
   }
 
   last_ = nullptr;
@@ -51,7 +51,7 @@ void VectorTokenStream::Rewind(size_t n) {
 }
 
 bool VectorTokenStream::IsEof() const {
-  return index_ >= tokens_.size();
+  return index_ >= tokens_.size() - 1;
 }
 
 const Token* VectorTokenStream::LastConsumed() const {

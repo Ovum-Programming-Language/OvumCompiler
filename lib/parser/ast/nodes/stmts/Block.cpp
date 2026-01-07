@@ -1,6 +1,6 @@
 #include "Block.hpp"
 
-#include "lib/parser/ast/AstVisitor"
+#include "lib/parser/ast/AstVisitor.hpp"
 
 #include <utility>
 

@@ -15,14 +15,14 @@ class CallDecl : public Decl {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  bool IsPublic() const noexcept;
+  [[nodiscard]] bool IsPublic() const noexcept;
   void SetPublic(bool v) noexcept;
 
-  const std::vector<Param>& Params() const noexcept;
+  [[nodiscard]] const std::vector<Param>& Params() const noexcept;
   std::vector<Param>& MutableParams() noexcept;
   void AddParam(Param param);
 
-  const TypeReference* ReturnType() const noexcept;
+  [[nodiscard]] const TypeReference* ReturnType() const noexcept;
   TypeReference* MutableReturnType() noexcept;
   void SetReturnType(std::unique_ptr<TypeReference> type);
   std::unique_ptr<TypeReference> ReleaseReturnType();

@@ -82,7 +82,7 @@ public:
                                                        SourceSpan span) = 0;
 
   virtual std::unique_ptr<InterfaceMethod> MakeInterfaceMethod(std::string name,
-                                                               std::vector<InterfaceMethod::Param> params,
+                                                               std::vector<Param> params,
                                                                std::unique_ptr<TypeReference> return_type,
                                                                SourceSpan span) = 0;
 

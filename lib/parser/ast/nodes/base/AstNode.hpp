@@ -11,7 +11,7 @@ class AstNode {
 public:
   virtual ~AstNode() = default;
 
-  const SourceSpan& Span() const noexcept;
+  [[nodiscard]] const SourceSpan& Span() const noexcept;
   void SetSpan(SourceSpan span);
   void SetSpanParts(SourceId id, TokenPosition begin, TokenPosition end);
   void UnionSpan(const SourceSpan& other);

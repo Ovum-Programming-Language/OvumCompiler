@@ -18,11 +18,11 @@ void InterfaceMethod::SetName(std::string new_name) {
   name_ = std::move(new_name);
 }
 
-const std::vector<InterfaceMethod::Param>& InterfaceMethod::Params() const noexcept {
+const std::vector<Param>& InterfaceMethod::Params() const noexcept {
   return params_;
 }
 
-std::vector<InterfaceMethod::Param>& InterfaceMethod::MutableParams() noexcept {
+std::vector<Param>& InterfaceMethod::MutableParams() noexcept {
   return params_;
 }
 

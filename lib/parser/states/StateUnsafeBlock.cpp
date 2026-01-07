@@ -64,7 +64,7 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
 
   ts.Consume();
   auto unsafe_body = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::unique_ptr<AstNode>(unsafe_body.get()));
+  ctx.PushNode(std::move(unsafe_body));
 
   SourceSpan span = StateBase::SpanFrom(start);
   auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(std::move(unsafe_body), span);

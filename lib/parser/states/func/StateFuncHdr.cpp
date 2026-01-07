@@ -70,7 +70,7 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
   }
 
   // Check if we already have a function node
-  FunctionDecl* func = ctx.TopNodeAs<FunctionDecl>();
+  auto* func = ctx.TopNodeAs<FunctionDecl>();
   if (func == nullptr) {
     // Create new function node
     bool is_pure = false;
@@ -106,8 +106,7 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
 
     SourceSpan span = StateBase::SpanFrom(start);
     auto func_node = ctx.Factory()->MakeFunction(is_pure, std::move(name), {}, nullptr, nullptr, span);
-    ctx.PushNode(std::unique_ptr<AstNode>(func_node.get()));
-    func = func_node.get();
+    ctx.PushNode(std::move(func_node));
   }
 
   SkipTrivia(ts);
@@ -118,6 +117,11 @@ IState::StepResult StateFuncHdr::TryStep(ContextParser& ctx, ITokenStream& ts) c
     return std::unexpected(StateError(std::string_view("expected '(' after function name")));
   }
 
+  if (ts.Peek().GetLexeme() == "(") {
+    ts.Consume();
+  }
+
+  ctx.PopState();
   ctx.PushState(StateRegistry::FuncParams());
   return true;
 }

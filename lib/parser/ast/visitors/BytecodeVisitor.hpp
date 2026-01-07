@@ -1,26 +1,18 @@
 #ifndef PARSER_BYTECODEVISITOR_HPP_
 #define PARSER_BYTECODEVISITOR_HPP_
 
-#include <memory>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "lib/parser/ast/AstVisitor.hpp"
 
-namespace ovum::vm::execution_tree {
-class Block;
-class Function;
-class FunctionRepository;
-class IExecutable;
-}  // namespace ovum::vm::execution_tree
-
 namespace ovum::compiler::parser {
 
 class BytecodeVisitor : public AstVisitor {
 public:
-  explicit BytecodeVisitor(ovum::vm::execution_tree::FunctionRepository& function_repository);
-
+  explicit BytecodeVisitor(std::ostream& output);
   ~BytecodeVisitor() override = default;
 
   // Decls
@@ -69,41 +61,58 @@ public:
   void Visit(BoolLit& node) override;
   void Visit(NullLit& node) override;
 
-  // Get generated functions
-  [[nodiscard]] std::vector<std::unique_ptr<ovum::vm::execution_tree::Function>> ReleaseFunctions();
-
 private:
-  ovum::vm::execution_tree::FunctionRepository& function_repository_;
+  std::ostream& output_;
 
-  std::unique_ptr<ovum::vm::execution_tree::Block> current_block_;
+  int indent_level_{0};
+  static constexpr const char* kIndent = "  ";
+
   std::string current_class_name_;
   std::vector<std::string> current_namespace_;
 
-  // Variable tracking
   std::unordered_map<std::string, size_t> local_variables_;
   std::unordered_map<std::string, size_t> static_variables_;
   size_t next_local_index_{0};
   size_t next_static_index_{0};
 
-  // Helper methods
-  void PushCommand(std::unique_ptr<ovum::vm::execution_tree::IExecutable> cmd);
+  std::unordered_map<std::string, std::string> function_name_map_;
+  size_t next_function_id_;
+
+  std::vector<Expr*> pending_init_static_;
+  std::vector<std::string> pending_init_static_names_;
+  std::unordered_map<std::string, std::string> method_name_map_;
+  std::unordered_map<std::string, std::vector<std::pair<std::string, TypeReference>>> class_fields_;
+
+  void EmitIndent();
+  void EmitCommand(const std::string& command);
+  void EmitCommandWithInt(const std::string& command, int64_t value);
+  void EmitCommandWithFloat(const std::string& command, double value);
+  void EmitCommandWithBool(const std::string& command, bool value);
+  void EmitCommandWithString(const std::string& command, const std::string& value);
+
+  void EmitBlockStart();
+  void EmitBlockEnd();
+
   std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
-  std::string GenerateMethodId(const std::string& class_name, const std::string& method_name,
-                               const std::vector<Param>& params, bool is_constructor, bool is_destructor);
+
+  std::string GenerateMethodId(const std::string& class_name,
+                               const std::string& method_name,
+                               const std::vector<Param>& params,
+                               bool is_constructor,
+                               bool is_destructor);
+
   std::string GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params);
   std::string GenerateDestructorId(const std::string& class_name);
   std::string TypeToMangledName(const TypeReference& type);
   void VisitExpression(Expr* expr);
   void VisitStatement(Stmt* stmt);
   void VisitBlock(Block* block);
-  std::unique_ptr<ovum::vm::execution_tree::Block> CreateBlock();
-  void SetCurrentBlock(std::unique_ptr<ovum::vm::execution_tree::Block> block);
+
   size_t GetLocalIndex(const std::string& name);
   size_t GetStaticIndex(const std::string& name);
   void ResetLocalVariables();
 };
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser
 
-#endif  // PARSER_BYTECODEVISITOR_HPP_
-
+#endif // PARSER_BYTECODEVISITOR_HPP_

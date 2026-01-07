@@ -125,11 +125,11 @@ void DiagnosticCollector::SetWarningLimit(std::optional<std::size_t> max_warning
 }
 
 bool DiagnosticCollector::IsSuppressed(const Diagnostic& d) const {
-  if (!d.GetCode().empty() && suppressed_codes_.count(d.GetCode()) > 0) {
+  if (!d.GetCode().empty() && suppressed_codes_.contains(d.GetCode())) {
     return true;
   }
 
-  if (!d.GetCategory().empty() && suppressed_categories_.count(d.GetCategory()) > 0) {
+  if (!d.GetCategory().empty() && suppressed_categories_.contains(d.GetCategory())) {
     return true;
   }
 

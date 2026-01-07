@@ -97,8 +97,9 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
   }
 
   const Token& start = ts.Peek();
+  const size_t start_index = ts.Position();
   std::string lex = start.GetLexeme();
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
 
   // Check for access modifier
   bool is_public = true;
@@ -205,9 +206,11 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
       return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
     }
-    lex = "fun";
   }
+
   if (lex == "fun") {
+    ts.Rewind(ts.Position() - start_index);
+    ctx.PopState();
     ctx.PushState(StateRegistry::MethodHdr());
     return true;
   }

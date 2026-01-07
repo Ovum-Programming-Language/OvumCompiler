@@ -86,7 +86,8 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
     // Function with body - create block and push it
     ts.Consume();
     auto block = ctx.Factory()->MakeBlock({}, StateBase::SpanFrom(tok));
-    ctx.PushNode(std::unique_ptr<AstNode>(block.get()));
+    ctx.PopState();
+    ctx.PushNode(std::move(block));
     ctx.PushState(StateRegistry::Block());
     return true;
   }

@@ -25,20 +25,20 @@ public:
   std::vector<NodeEntry>& NodeStack();
 
   void SetDiagnostics(IDiagnosticSink* diagnostics);
-  IDiagnosticSink* Diags() const;
+  [[nodiscard]] IDiagnosticSink* Diags() const;
 
   void SetExpr(IExpressionParser* parser);
-  IExpressionParser* Expr() const;
+  [[nodiscard]] IExpressionParser* Expr() const;
 
   void SetTypeParser(ITypeParser* parser);
-  ITypeParser* TypeParser() const;
+  [[nodiscard]] ITypeParser* TypeParser() const;
 
   void SetFactory(IAstFactory* factory);
-  IAstFactory* Factory() const;
+  [[nodiscard]] IAstFactory* Factory() const;
 
   void PushState(const IState& state);
   void PopState();
-  const IState* CurrentState() const;
+  [[nodiscard]] const IState* CurrentState() const;
 
   template<AstNodeDerived T>
   T* TopNodeAs() {
@@ -46,14 +46,19 @@ public:
       return nullptr;
     }
 
-    return dynamic_cast<T*>(node_stack_.back().MutableNode());
+    AstNode* base = node_stack_.back().MutableNode();
+    if (!base) {
+      return nullptr;
+    }
+
+    return dynamic_cast<T*>(base);
   }
 
   void PushNode(std::unique_ptr<AstNode> node);
   std::unique_ptr<AstNode> PopNode();
 
-  bool HasStates() const noexcept;
-  bool HasNodes() const noexcept;
+  [[nodiscard]] bool HasStates() const noexcept;
+  [[nodiscard]] bool HasNodes() const noexcept;
   void Clear();
 
 private:

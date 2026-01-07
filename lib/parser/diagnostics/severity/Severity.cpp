@@ -27,20 +27,21 @@ private:
 };
 } // namespace
 
-const std::shared_ptr<const ISeverity>& Severity::Note() {
+std::shared_ptr<const ISeverity> Severity::Note() {
   static const auto kInst = std::make_shared<const SimpleSeverity>("note", 10);
   return kInst;
 }
 
-const std::shared_ptr<const ISeverity>& Severity::Warning() {
+std::shared_ptr<const ISeverity> Severity::Warning() {
   static const auto kInst = std::make_shared<const SimpleSeverity>("warning", 20);
   return kInst;
 }
 
-const std::shared_ptr<const ISeverity>& Severity::Error() {
+std::shared_ptr<const ISeverity> Severity::Error() {
   static const auto kInst = std::make_shared<const SimpleSeverity>("error", 30);
   return kInst;
 }
+
 
 std::shared_ptr<const ISeverity> Severity::Custom(std::string_view name, int level) {
   return std::make_shared<const SimpleSeverity>(std::string{name}, level);

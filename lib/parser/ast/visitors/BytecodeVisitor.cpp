@@ -1,745 +1,873 @@
-// #include "BytecodeVisitor.hpp"
+#include "BytecodeVisitor.hpp"
 
-// #include <algorithm>
-// #include <sstream>
-// #include <string>
-// #include <vector>
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-// #include "lib/parser/ast/nodes/base/Expr.hpp"
-// #include "lib/parser/ast/nodes/base/Stmt.hpp"
-// #include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
-// #include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
-// #include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
-// #include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
-// #include "lib/parser/ast/nodes/class_members/StaticFieldDecl.hpp"
-// #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
-// #include "lib/parser/ast/nodes/decls/FunctionDecl.hpp"
-// #include "lib/parser/ast/nodes/decls/GlobalVarDecl.hpp"
-// #include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
-// #include "lib/parser/ast/nodes/decls/InterfaceMethod.hpp"
-// #include "lib/parser/ast/nodes/decls/Module.hpp"
-// #include "lib/parser/ast/nodes/decls/TypeAliasDecl.hpp"
-// #include "lib/parser/ast/nodes/exprs/Binary.hpp"
-// #include "lib/parser/ast/nodes/exprs/Unary.hpp"
-// #include "lib/parser/ast/nodes/exprs/Assign.hpp"
-// #include "lib/parser/ast/nodes/exprs/Call.hpp"
-// #include "lib/parser/ast/nodes/exprs/FieldAccess.hpp"
-// #include "lib/parser/ast/nodes/exprs/IndexAccess.hpp"
-// #include "lib/parser/ast/nodes/exprs/NamespaceRef.hpp"
-// #include "lib/parser/ast/nodes/exprs/SafeCall.hpp"
-// #include "lib/parser/ast/nodes/exprs/Elvis.hpp"
-// #include "lib/parser/ast/nodes/exprs/CastAs.hpp"
-// #include "lib/parser/ast/nodes/exprs/TypeTestIs.hpp"
-// #include "lib/parser/ast/nodes/exprs/IdentRef.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/IntLit.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/FloatLit.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/StringLit.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/CharLit.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/BoolLit.hpp"
-// #include "lib/parser/ast/nodes/exprs/literals/NullLit.hpp"
-// #include "lib/parser/ast/nodes/stmts/Block.hpp"
-// #include "lib/parser/ast/nodes/stmts/VarDeclStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/ExprStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/ReturnStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/BreakStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/ContinueStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/IfStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/WhileStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/ForStmt.hpp"
-// #include "lib/parser/ast/nodes/stmts/UnsafeBlock.hpp"
-// #include "lib/parser/ast/nodes/exprs/tags/OpTags.hpp"
-// #include "lib/parser/types/TypeReference.hpp"
-// #include "lib/execution_tree/Block.hpp"
-// #include "lib/execution_tree/Command.hpp"
-// #include "lib/execution_tree/Function.hpp"
-// #include "lib/execution_tree/command_factory.hpp"
-// #include "lib/execution_tree/BytecodeCommands.hpp"
-// #include "lib/execution_tree/IFunctionExecutable.hpp"
-// #include "lib/execution_tree/ConditionalExecution.hpp"
-// #include "lib/execution_tree/IfMultibranch.hpp"
-// #include "lib/execution_tree/WhileExecution.hpp"
-// #include "lib/runtime/FunctionId.hpp"
+#include "lib/parser/ast/nodes/base/Expr.hpp"
+#include "lib/parser/ast/nodes/base/Stmt.hpp"
+#include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
+#include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
+#include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
+#include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
+#include "lib/parser/ast/nodes/class_members/StaticFieldDecl.hpp"
+#include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
+#include "lib/parser/ast/nodes/decls/FunctionDecl.hpp"
+#include "lib/parser/ast/nodes/decls/GlobalVarDecl.hpp"
+#include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
+#include "lib/parser/ast/nodes/decls/InterfaceMethod.hpp"
+#include "lib/parser/ast/nodes/decls/Module.hpp"
+#include "lib/parser/ast/nodes/decls/TypeAliasDecl.hpp"
+#include "lib/parser/ast/nodes/exprs/Assign.hpp"
+#include "lib/parser/ast/nodes/exprs/Binary.hpp"
+#include "lib/parser/ast/nodes/exprs/Call.hpp"
+#include "lib/parser/ast/nodes/exprs/CastAs.hpp"
+#include "lib/parser/ast/nodes/exprs/Elvis.hpp"
+#include "lib/parser/ast/nodes/exprs/FieldAccess.hpp"
+#include "lib/parser/ast/nodes/exprs/IdentRef.hpp"
+#include "lib/parser/ast/nodes/exprs/IndexAccess.hpp"
+#include "lib/parser/ast/nodes/exprs/NamespaceRef.hpp"
+#include "lib/parser/ast/nodes/exprs/SafeCall.hpp"
+#include "lib/parser/ast/nodes/exprs/TypeTestIs.hpp"
+#include "lib/parser/ast/nodes/exprs/Unary.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/BoolLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/CharLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/FloatLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/IntLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/NullLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/StringLit.hpp"
+#include "lib/parser/ast/nodes/stmts/Block.hpp"
+#include "lib/parser/ast/nodes/stmts/BreakStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/ContinueStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/ExprStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/ForStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/IfStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/ReturnStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/UnsafeBlock.hpp"
+#include "lib/parser/ast/nodes/stmts/VarDeclStmt.hpp"
+#include "lib/parser/ast/nodes/stmts/WhileStmt.hpp"
+#include "lib/parser/types/TypeReference.hpp"
 
-// namespace ovum::compiler::parser {
+namespace ovum::compiler::parser {
 
-// BytecodeVisitor::BytecodeVisitor(ovum::vm::execution_tree::FunctionRepository& function_repository)
-//     : function_repository_(function_repository) {
-// }
+namespace {
+// helper: simple size heuristic for field layout (matches examples: int/float/object -> 8)
+size_t FieldSizeForType(const TypeReference& t) {
+  (void) t;
+  return 8;
+}
 
-// void BytecodeVisitor::Visit(Module& node) {
-//   current_namespace_.clear();
-//   for (auto& decl : node.MutableDecls()) {
-//     decl->Accept(*this);
-//   }
-// }
+// helper: normalize string for printing (no quotes inside)
+std::string EscapeStringForEmit(const std::string& s) {
+  // minimal escaping only for double quotes
+  std::string out;
+  out.reserve(s.size());
+  for (char c : s) {
+    if (c == '"') {
+      out.push_back('\\');
+      out.push_back('"');
+    } else {
+      out.push_back(c);
+    }
+  }
+  return out;
+}
+} // namespace
 
-// void BytecodeVisitor::Visit(FunctionDecl& node) {
-//   ResetLocalVariables();
-  
-//   // Register parameters as local variables
-//   size_t param_index = 0;
-//   for (const auto& param : node.Params()) {
-//     local_variables_[param.Name()] = param_index++;
-//   }
-  
-//   // Create function body block
-//   auto body_block = CreateBlock();
-//   SetCurrentBlock(std::move(body_block));
-  
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-  
-//   // Create function
-//   std::string func_id = GenerateFunctionId(node.Name(), node.Params());
-//   auto func_body = std::move(current_block_);
-//   auto func = std::make_unique<ovum::vm::execution_tree::Function>(
-//       ovum::vm::runtime::FunctionId(func_id), node.Params().size(), std::move(func_body));
-  
-//   // Register function in repository (takes ownership)
-//   function_repository_.Add(std::move(func));
-// }
+BytecodeVisitor::BytecodeVisitor(std::ostream& output) : output_(output), next_function_id_(0) {
+  pending_init_static_ = {};
+}
 
-// void BytecodeVisitor::Visit(ClassDecl& node) {
-//   std::string prev_class = current_class_name_;
-//   current_class_name_ = node.Name();
-  
-//   for (auto& member : node.MutableMembers()) {
-//     member->Accept(*this);
-//   }
-  
-//   current_class_name_ = prev_class;
-// }
+void BytecodeVisitor::EmitIndent() {
+  for (int i = 0; i < indent_level_; ++i) {
+    output_ << kIndent;
+  }
+}
 
-// void BytecodeVisitor::Visit(InterfaceMethod& node) {
-//   // Interface methods are just declarations, no implementation
-// }
+void BytecodeVisitor::EmitCommand(const std::string& command) {
+  EmitIndent();
+  output_ << command << "\n";
+}
 
-// void BytecodeVisitor::Visit(InterfaceDecl& node) {
-//   // Interfaces are just declarations
-// }
+void BytecodeVisitor::EmitCommandWithInt(const std::string& command, int64_t value) {
+  EmitIndent();
+  output_ << command << " " << value << "\n";
+}
 
-// void BytecodeVisitor::Visit(TypeAliasDecl& node) {
-//   // Type aliases are compile-time only
-// }
+void BytecodeVisitor::EmitCommandWithFloat(const std::string& command, double value) {
+  EmitIndent();
+  output_ << command << " " << value << "\n";
+}
 
-// void BytecodeVisitor::Visit(GlobalVarDecl& node) {
-//   // Global variables are handled separately
-//   if (node.Init() != nullptr) {
-//     node.Init()->Accept(*this);
-//     // Store in static variable
-//     size_t static_index = GetStaticIndex(node.Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("SetStatic", static_cast<int64_t>(static_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+void BytecodeVisitor::EmitCommandWithBool(const std::string& command, bool value) {
+  EmitIndent();
+  output_ << command << " " << (value ? "true" : "false") << "\n";
+}
 
-// void BytecodeVisitor::Visit(FieldDecl& node) {
-//   // Fields are part of class structure, handled during class construction
-// }
+void BytecodeVisitor::EmitCommandWithString(const std::string& command, const std::string& value) {
+  EmitIndent();
+  output_ << command << " \"" << EscapeStringForEmit(value) << "\"\n";
+}
 
-// void BytecodeVisitor::Visit(StaticFieldDecl& node) {
-//   // Static fields are handled like global variables
-//   if (node.Init() != nullptr) {
-//     node.Init()->Accept(*this);
-//     size_t static_index = GetStaticIndex(node.Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("SetStatic", static_cast<int64_t>(static_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+void BytecodeVisitor::EmitBlockStart() {
+  EmitIndent();
+  output_ << "{\n";
+  indent_level_++;
+}
 
-// void BytecodeVisitor::Visit(MethodDecl& node) {
-//   ResetLocalVariables();
-  
-//   // Register 'this' as local 0 if not static
-//   if (!node.IsStatic()) {
-//     local_variables_["this"] = 0;
-//   }
-  
-//   // Register parameters
-//   size_t param_index = node.IsStatic() ? 0 : 1;
-//   for (const auto& param : node.Params()) {
-//     local_variables_[param.Name()] = param_index++;
-//   }
-  
-//   // Create method body block
-//   auto body_block = CreateBlock();
-//   SetCurrentBlock(std::move(body_block));
-  
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-  
-//   // Create method function
-//   std::string method_id = GenerateMethodId(current_class_name_, node.Name(), node.Params(), false, false);
-//   auto method_body = std::move(current_block_);
-//   auto method = std::make_unique<ovum::vm::execution_tree::Function>(
-//       ovum::vm::runtime::FunctionId(method_id), node.Params().size() + (node.IsStatic() ? 0 : 1),
-//       std::move(method_body));
-  
-//   // Register method in repository (takes ownership)
-//   function_repository_.Add(std::move(method));
-// }
+void BytecodeVisitor::EmitBlockEnd() {
+  indent_level_--;
+  EmitIndent();
+  output_ << "}\n";
+}
 
-// void BytecodeVisitor::Visit(CallDecl& node) {
-//   ResetLocalVariables();
-  
-//   // Register 'this' as local 0
-//   local_variables_["this"] = 0;
-  
-//   // Register parameters
-//   size_t param_index = 1;
-//   for (const auto& param : node.Params()) {
-//     local_variables_[param.Name()] = param_index++;
-//   }
-  
-//   // Create call body block
-//   auto body_block = CreateBlock();
-//   SetCurrentBlock(std::move(body_block));
-  
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-  
-//   // Create call function
-//   std::string call_id = GenerateMethodId(current_class_name_, "call", node.Params(), false, false);
-//   auto call_body = std::move(current_block_);
-//   auto call_func = std::make_unique<ovum::vm::execution_tree::Function>(
-//       ovum::vm::runtime::FunctionId(call_id), node.Params().size() + 1, std::move(call_body));
-  
-//   // Register call function in repository (takes ownership)
-//   function_repository_.Add(std::move(call_func));
-// }
+void BytecodeVisitor::Visit(Module& node) {
+  // First pass: register function/method names and collect static initializers
+  // We need function registry so that later Call nodes can emit mangled names.
+  function_name_map_.clear();
+  method_name_map_.clear();
+  class_fields_.clear();
+  pending_init_static_.clear();
 
-// void BytecodeVisitor::Visit(DestructorDecl& node) {
-//   ResetLocalVariables();
-  
-//   // Register 'this' as local 0
-//   local_variables_["this"] = 0;
-  
-//   // Create destructor body block
-//   auto body_block = CreateBlock();
-//   SetCurrentBlock(std::move(body_block));
-  
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-  
-//   // Create destructor function
-//   std::string destructor_id = GenerateDestructorId(current_class_name_);
-//   auto destructor_body = std::move(current_block_);
-//   auto destructor = std::make_unique<ovum::vm::execution_tree::Function>(
-//       ovum::vm::runtime::FunctionId(destructor_id), 1, std::move(destructor_body));
-  
-//   // Register destructor in repository (takes ownership)
-//   function_repository_.Add(std::move(destructor));
-// }
+  // scan declarations to register names and collect static inits
+  for (auto& decl : node.MutableDecls()) {
+    // function declarations
+    if (auto* f = dynamic_cast<FunctionDecl*>(decl.get())) {
+      std::string mangled = GenerateFunctionId(f->Name(), f->Params());
+      function_name_map_[f->Name()] = mangled;
+    }
+    // class declarations: register methods and collect fields
+    if (auto* c = dynamic_cast<ClassDecl*>(decl.get())) {
+      std::string class_name = c->Name();
+      // collect fields and method mangles
+      std::vector<std::pair<std::string, TypeReference>> fields;
+      for (auto& m : c->MutableMembers()) {
+        if (auto* fd = dynamic_cast<FieldDecl*>(m.get())) {
+          fields.emplace_back(fd->Name(), fd->Type()); // assumes FieldDecl has GetType()
+        }
+        if (auto* sd = dynamic_cast<StaticFieldDecl*>(m.get())) {
+          // static field initializer -> add to pending_init_static_
+          if (sd->MutableInit() != nullptr) {
+            pending_init_static_.push_back(sd->MutableInit());
+            pending_init_static_names_.push_back(sd->Name());
+          }
+        }
+        if (auto* md = dynamic_cast<MethodDecl*>(m.get())) {
+          std::string mid = GenerateMethodId(class_name, md->Name(), md->Params(), false, false);
+          method_name_map_[class_name + "::" + md->Name()] = mid;
+        }
+        if (auto* cd = dynamic_cast<CallDecl*>(m.get())) {
+          std::string ctor = GenerateConstructorId(class_name, cd->Params());
+          method_name_map_[class_name + "::<ctor>"] = ctor;
+        }
+      }
+      class_fields_[class_name] = fields;
+    }
+    // global/static var declarations to init-static
+    if (auto* gv = dynamic_cast<GlobalVarDecl*>(decl.get())) {
+      if (gv->MutableInit() != nullptr) {
+        pending_init_static_.push_back(gv->MutableInit());
+        pending_init_static_names_.push_back(gv->Name());
+      }
+    }
+  }
 
-// void BytecodeVisitor::Visit(Block& node) {
-//   for (auto& stmt : node.MutableStatements()) {
-//     stmt->Accept(*this);
-//   }
-// }
+  // Emit a single init-static block even if empty (match examples)
+  EmitIndent();
+  output_ << "init-static {\n";
+  indent_level_++;
+  if (!pending_init_static_.empty()) {
+    for (size_t i = 0; i < pending_init_static_.size(); ++i) {
+      // Evaluate initializer expression and SetStatic with assigned index
+      pending_init_static_[i]->Accept(*this);
+      EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(pending_init_static_names_[i])));
+    }
+  }
+  indent_level_--;
+  EmitIndent();
+  output_ << "}\n\n";
 
-// void BytecodeVisitor::Visit(VarDeclStmt& node) {
-//   if (node.Init() != nullptr) {
-//     node.Init()->Accept(*this);
-//     size_t local_index = GetLocalIndex(node.Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("SetLocal", static_cast<int64_t>(local_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+  // Second pass: actually emit declarations (functions, classes, etc.)
+  for (auto& decl : node.MutableDecls()) {
+    decl->Accept(*this);
+  }
+}
 
-// void BytecodeVisitor::Visit(ExprStmt& node) {
-//   if (node.Expr() != nullptr) {
-//     node.Expr()->Accept(*this);
-//     // Pop result if expression has side effects
-//     auto pop_cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("Pop");
-//     if (pop_cmd.has_value()) {
-//       PushCommand(std::move(pop_cmd.value()));
-//     }
-//   }
-// }
+// --------------------------- Functions / Methods / Constructors ---------------------------
 
-// void BytecodeVisitor::Visit(ReturnStmt& node) {
-//   if (node.Value() != nullptr) {
-//     node.Value()->Accept(*this);
-//   }
-//   auto return_cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("Return");
-//   if (return_cmd.has_value()) {
-//     PushCommand(std::move(return_cmd.value()));
-//   }
-// }
+void BytecodeVisitor::Visit(FunctionDecl& node) {
+  ResetLocalVariables();
+  for (auto& param : node.MutableParams()) {
+    GetLocalIndex(param.GetName());
+  }
 
-// void BytecodeVisitor::Visit(BreakStmt& node) {
-//   // Break is handled by loop constructs
-//   // TODO: Implement break handling
-// }
+  // register in function map (if not already)
+  std::string mangled = GenerateFunctionId(node.Name(), node.Params());
 
-// void BytecodeVisitor::Visit(ContinueStmt& node) {
-//   // Continue is handled by loop constructs
-//   // TODO: Implement continue handling
-// }
+  // Emit function declaration
+  output_ << "function:" << node.Params().size() << " " << mangled << " ";
+  EmitBlockStart();
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+  EmitBlockEnd();
+  output_ << "\n";
+}
 
-// void BytecodeVisitor::Visit(IfStmt& node) {
-//   auto if_multibranch = std::make_unique<ovum::vm::execution_tree::IfMultibranch>();
-  
-//   // Process all branches
-//   for (const auto& branch : node.Branches()) {
-//     // Create condition block
-//     auto cond_block = CreateBlock();
-//     auto prev_block = std::move(current_block_);
-//     SetCurrentBlock(std::move(cond_block));
-//     branch.Condition()->Accept(*this);
-//     auto cond_block_final = std::move(current_block_);
-    
-//     // Create body block
-//     auto body_block = CreateBlock();
-//     SetCurrentBlock(std::move(body_block));
-//     branch.Body()->Accept(*this);
-//     auto body_block_final = std::move(current_block_);
-    
-//     // Create conditional execution
-//     auto conditional = std::make_unique<ovum::vm::execution_tree::ConditionalExecution>(
-//         std::move(cond_block_final), std::move(body_block_final));
-//     if_multibranch->AddBranch(std::move(conditional));
-    
-//     SetCurrentBlock(std::move(prev_block));
-//   }
-  
-//   // Process else block if present
-//   if (node.ElseBlock() != nullptr) {
-//     auto else_block = CreateBlock();
-//     auto prev_block = std::move(current_block_);
-//     SetCurrentBlock(std::move(else_block));
-//     node.ElseBlock()->Accept(*this);
-//     auto else_block_final = std::move(current_block_);
-//     if_multibranch->SetElseBlock(std::move(else_block_final));
-//     SetCurrentBlock(std::move(prev_block));
-//   }
-  
-//   // Add if statement to current block
-//   PushCommand(std::move(if_multibranch));
-// }
+void BytecodeVisitor::Visit(MethodDecl& node) {
+  ResetLocalVariables();
+  for (auto& param : node.MutableParams()) {
+    GetLocalIndex(param.GetName());
+  }
 
-// void BytecodeVisitor::Visit(WhileStmt& node) {
-//   // Create condition block
-//   auto cond_block = CreateBlock();
-//   auto prev_block = std::move(current_block_);
-//   SetCurrentBlock(std::move(cond_block));
-//   if (node.Condition() != nullptr) {
-//     node.Condition()->Accept(*this);
-//   }
-//   auto cond_block_final = std::move(current_block_);
-  
-//   // Create body block
-//   auto body_block = CreateBlock();
-//   SetCurrentBlock(std::move(body_block));
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-//   auto body_block_final = std::move(current_block_);
-  
-//   // Create while execution
-//   auto while_exec = std::make_unique<ovum::vm::execution_tree::WhileExecution>(
-//       std::move(cond_block_final), std::move(body_block_final));
-  
-//   SetCurrentBlock(std::move(prev_block));
-//   PushCommand(std::move(while_exec));
-// }
+  std::string method_id = GenerateMethodId(current_class_name_, node.Name(), node.Params(), false, false);
+  // register mapping class::name -> mangled
+  method_name_map_[current_class_name_ + "::" + node.Name()] = method_id;
 
-// void BytecodeVisitor::Visit(ForStmt& node) {
-//   // TODO: Implement for loop
-//   if (node.IterExpr() != nullptr) {
-//     node.IterExpr()->Accept(*this);
-//   }
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-// }
+  output_ << "function:" << node.Params().size() << " " << method_id << " ";
+  EmitBlockStart();
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+  EmitBlockEnd();
+  output_ << "\n";
+}
 
-// void BytecodeVisitor::Visit(UnsafeBlock& node) {
-//   if (node.Body() != nullptr) {
-//     node.Body()->Accept(*this);
-//   }
-// }
+void BytecodeVisitor::Visit(CallDecl& node) {
+  ResetLocalVariables();
+  for (auto& param : node.Params()) {
+    GetLocalIndex(param.GetName());
+  }
 
-// void BytecodeVisitor::Visit(Binary& node) {
-//   // Push operands right-to-left
-//   node.Rhs().Accept(*this);
-//   node.Lhs().Accept(*this);
-  
-//   // Determine operation based on operator and type
-//   std::string op_name = node.Op().Name();
-  
-//   // Map operator to bytecode command
-//   // This is simplified - in real implementation, we'd need type information
-//   if (op_name == "+") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntAdd");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "-") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntSubtract");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "*") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntMultiply");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "/") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntDivide");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "%") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntModulo");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "<") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntLessThan");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "<=") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntLessEqual");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == ">") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntGreaterThan");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == ">=") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntGreaterEqual");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "==") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntEqual");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "!=") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntNotEqual");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "&&") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("BoolAnd");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "||") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("BoolOr");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+  std::string call_id = GenerateConstructorId(current_class_name_, node.Params());
+  // store constructor mapping as Class::<ctor>
+  method_name_map_[current_class_name_ + "::<ctor>"] = call_id;
 
-// void BytecodeVisitor::Visit(Unary& node) {
-//   node.Operand().Accept(*this);
-  
-//   std::string op_name = node.Op().Name();
-  
-//   if (op_name == "-") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("IntNegate");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else if (op_name == "!") {
-//     auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("BoolNot");
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+  output_ << "function:" << node.Params().size() << " " << call_id << " ";
+  EmitBlockStart();
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+  EmitBlockEnd();
+  output_ << "\n";
+}
 
-// void BytecodeVisitor::Visit(Assign& node) {
-//   // Evaluate value first
-//   node.Value().Accept(*this);
-  
-//   // Then assign to target
-//   // TODO: Handle different assignment types (reference vs copy)
-//   if (auto* ident = dynamic_cast<IdentRef*>(&node.Target())) {
-//     size_t local_index = GetLocalIndex(ident->Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("SetLocal", static_cast<int64_t>(local_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+void BytecodeVisitor::Visit(InterfaceDecl& node) {
+  for (auto& m : node.MutableMembers()) {
+    m->Accept(*this);
+  }
+}
 
-// void BytecodeVisitor::Visit(Call& node) {
-//   // Push arguments right-to-left
-//   for (auto it = node.Args().rbegin(); it != node.Args().rend(); ++it) {
-//     (*it)->Accept(*this);
-//   }
-  
-//   // Call function
-//   // TODO: Determine function name from callee
-//   if (auto* ident = dynamic_cast<IdentRef*>(node.Callee())) {
-//     std::string func_name = ident->Name();
-//     auto cmd = ovum::vm::execution_tree::CreateStringCommandByName("Call", func_name);
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+void BytecodeVisitor::Visit(InterfaceMethod& node) {
+  std::string id = GenerateMethodId(
+      /* class_name */ "",
+      node.Name(),
+      node.MutableParams(),
+      /* is_constructor */ false,
+      /* is_destructor */ false);
 
-// void BytecodeVisitor::Visit(FieldAccess& node) {
-//   node.Object().Accept(*this);
-//   // TODO: Implement field access
-// }
+  method_name_map_[node.Name()] = id;
+}
 
-// void BytecodeVisitor::Visit(IndexAccess& node) {
-//   node.IndexExpr().Accept(*this);
-//   node.Object().Accept(*this);
-//   // TODO: Implement index access
-// }
+void BytecodeVisitor::Visit(TypeAliasDecl&) {
+}
 
-// void BytecodeVisitor::Visit(NamespaceRef& node) {
-//   node.NamespaceExpr().Accept(*this);
-//   // TODO: Implement namespace reference
-// }
+void BytecodeVisitor::Visit(GlobalVarDecl& node) {
+  std::size_t index = GetStaticIndex(node.Name());
 
-// void BytecodeVisitor::Visit(SafeCall& node) {
-//   // Push arguments right-to-left
-//   for (auto it = node.Args().rbegin(); it != node.Args().rend(); ++it) {
-//     (*it)->Accept(*this);
-//   }
-  
-//   node.Object().Accept(*this);
-  
-//   auto cmd = ovum::vm::execution_tree::CreateStringCommandByName("SafeCall", node.Method());
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  if (node.MutableInit()) {
+    node.MutableInit()->Accept(*this);
+    EmitCommandWithInt("SetStatic", static_cast<int64_t>(index));
+  }
+}
 
-// void BytecodeVisitor::Visit(Elvis& node) {
-//   node.Lhs().Accept(*this);
-//   // TODO: Check for null and use rhs if null
-//   node.Rhs().Accept(*this);
-//   auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("NullCoalesce");
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+void BytecodeVisitor::Visit(FieldDecl&) {
+}
 
-// void BytecodeVisitor::Visit(CastAs& node) {
-//   node.Expr().Accept(*this);
-//   // TODO: Implement type casting
-// }
+void BytecodeVisitor::Visit(StaticFieldDecl& node) {
+  if (node.MutableInit()) {
+    pending_init_static_.push_back(node.MutableInit());
+    pending_init_static_names_.push_back(node.Name());
+  }
+}
 
-// void BytecodeVisitor::Visit(TypeTestIs& node) {
-//   node.Expr().Accept(*this);
-//   std::string type_name = TypeToMangledName(node.Type());
-//   auto cmd = ovum::vm::execution_tree::CreateStringCommandByName("IsType", type_name);
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+void BytecodeVisitor::Visit(DestructorDecl& node) {
+  ResetLocalVariables();
 
-// void BytecodeVisitor::Visit(IdentRef& node) {
-//   // Check if it's a local variable first
-//   if (local_variables_.find(node.Name()) != local_variables_.end()) {
-//     size_t local_index = GetLocalIndex(node.Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("LoadLocal", static_cast<int64_t>(local_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   } else {
-//     // Assume it's a global/static variable
-//     size_t static_index = GetStaticIndex(node.Name());
-//     auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("LoadStatic", static_cast<int64_t>(static_index));
-//     if (cmd.has_value()) {
-//       PushCommand(std::move(cmd.value()));
-//     }
-//   }
-// }
+  std::string destructor_id = GenerateDestructorId(current_class_name_);
+  method_name_map_[current_class_name_ + "::<dtor>"] = destructor_id;
 
-// void BytecodeVisitor::Visit(IntLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("PushInt", node.Value());
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  output_ << "function:0 " << destructor_id << " ";
+  EmitBlockStart();
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+  EmitBlockEnd();
+  output_ << "\n";
+}
 
-// void BytecodeVisitor::Visit(FloatLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateFloatCommandByName("PushFloat", node.Value());
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+void BytecodeVisitor::Visit(ClassDecl& node) {
+  // collect fields and interfaces to build vtable
+  std::string prev_class = current_class_name_;
+  current_class_name_ = node.Name();
 
-// void BytecodeVisitor::Visit(StringLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateStringCommandByName("PushString", node.Value());
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  // Collect fields
+  std::vector<std::pair<std::string, TypeReference>> fields;
+  std::vector<std::pair<std::string, std::string>> method_map; // methodName -> mangled
 
-// void BytecodeVisitor::Visit(CharLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateIntegerCommandByName("PushChar", static_cast<int64_t>(node.Value()));
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  for (auto& member : node.MutableMembers()) {
+    if (auto* fd = dynamic_cast<FieldDecl*>(member.get())) {
+      fields.emplace_back(fd->Name(), fd->Type());
+    }
+    if (auto* ifm = dynamic_cast<InterfaceMethod*>(member.get())) {
+      // interface methods in class? often not present in members; skip
+      (void) ifm;
+    }
+    if (auto* md = dynamic_cast<MethodDecl*>(member.get())) {
+      std::string mid = GenerateMethodId(node.Name(), md->Name(), md->Params(), false, false);
+      method_map.emplace_back(md->Name(), mid);
+      method_name_map_[node.Name() + "::" + md->Name()] = mid;
+    }
+    if (auto* cd = dynamic_cast<CallDecl*>(member.get())) {
+      std::string ce = GenerateConstructorId(node.Name(), cd->Params());
+      method_map.emplace_back(std::string("constructor"), ce);
+      method_name_map_[node.Name() + "::<ctor>"] = ce;
+    }
+    if (auto* sfd = dynamic_cast<StaticFieldDecl*>(member.get())) {
+      // static field handled in module init-phase earlier
+      if (sfd->MutableInit() != nullptr) {
+        pending_init_static_.push_back(sfd->MutableInit());
+        pending_init_static_names_.push_back(sfd->Name());
+      }
+    }
+  }
 
-// void BytecodeVisitor::Visit(BoolLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateBooleanCommandByName("PushBool", node.Value());
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  // compute size: 4 (vtable idx) + 4 (badge) + sum(field sizes)
+  size_t header = 4 + 4;
+  size_t fields_size = 0;
+  for (auto& f : fields) {
+    fields_size += FieldSizeForType(f.second);
+  }
+  size_t total_size = header + fields_size;
 
-// void BytecodeVisitor::Visit(NullLit& node) {
-//   auto cmd = ovum::vm::execution_tree::CreateSimpleCommandByName("PushNull");
-//   if (cmd.has_value()) {
-//     PushCommand(std::move(cmd.value()));
-//   }
-// }
+  // Emit vtable block
+  EmitIndent();
+  output_ << "vtable " << node.Name() << " {\n";
+  indent_level_++;
+  EmitIndent();
+  output_ << "size: " << total_size << "\n";
 
-// std::vector<std::unique_ptr<ovum::vm::execution_tree::Function>> BytecodeVisitor::ReleaseFunctions() {
-//   // Functions are owned by function_repository_, so return empty vector
-//   // In a real implementation, you might want to extract functions from repository
-//   return {};
-// }
+  if (!node.MutableImplements().empty()) {
+    EmitIndent();
+    output_ << "interfaces {\n";
+    indent_level_++;
+    for (const auto& iface : node.MutableImplements()) {
+      EmitIndent();
+      output_ << iface.SimpleName() << "\n";
+    }
+    indent_level_--;
+    EmitIndent();
+    output_ << "}\n";
+  } else {
+    // empty interfaces block omitted in your examples, but keep consistent
+  }
 
-// void BytecodeVisitor::PushCommand(std::unique_ptr<ovum::vm::execution_tree::IExecutable> cmd) {
-//   if (current_block_ != nullptr) {
-//     current_block_->AddStatement(std::move(cmd));
-//   }
-// }
+  // methods
+  EmitIndent();
+  output_ << "methods {\n";
+  indent_level_++;
+  for (auto& m : method_map) {
+    EmitIndent();
+    output_ << m.first << ": " << m.second << "\n";
+  }
+  indent_level_--;
+  EmitIndent();
+  output_ << "}\n";
 
-// std::string BytecodeVisitor::GenerateFunctionId(const std::string& name, const std::vector<Param>& params) {
-//   std::ostringstream oss;
-//   oss << name << "(";
-//   for (size_t i = 0; i < params.size(); ++i) {
-//     if (i > 0) {
-//       oss << ",";
-//     }
-//     oss << TypeToMangledName(params[i].Type());
-//   }
-//   oss << ")";
-//   return oss.str();
-// }
+  // vartable (fields)
+  EmitIndent();
+  output_ << "vartable {\n";
+  indent_level_++;
+  // compute offsets: after header
+  size_t offset = header;
+  for (auto& f : fields) {
+    EmitIndent();
+    // format type@offset — we show "Object" for user-defined if ambiguous
+    std::string tname = TypeToMangledName(f.second);
+    output_ << f.first << ": " << tname << "@" << offset << "\n";
+    offset += FieldSizeForType(f.second);
+  }
+  indent_level_--;
+  EmitIndent();
+  output_ << "}\n";
 
-// std::string BytecodeVisitor::GenerateMethodId(const std::string& class_name, const std::string& method_name,
-//                                               const std::vector<Param>& params, bool is_constructor,
-//                                               bool is_destructor) {
-//   std::ostringstream oss;
-//   oss << class_name << "::" << method_name << "(";
-//   for (size_t i = 0; i < params.size(); ++i) {
-//     if (i > 0) {
-//       oss << ",";
-//     }
-//     oss << TypeToMangledName(params[i].Type());
-//   }
-//   oss << ")";
-//   return oss.str();
-// }
+  indent_level_--;
+  EmitIndent();
+  output_ << "}\n\n";
 
-// std::string BytecodeVisitor::GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params) {
-//   return GenerateMethodId(class_name, class_name, params, true, false);
-// }
+  // Emit members (methods/constructors/destructors) bodies
+  for (auto& member : node.MutableMembers()) {
+    member->Accept(*this);
+  }
 
-// std::string BytecodeVisitor::GenerateDestructorId(const std::string& class_name) {
-//   return class_name + "::~" + class_name + "()";
-// }
+  current_class_name_ = prev_class;
+}
 
-// std::string BytecodeVisitor::TypeToMangledName(const TypeReference& type) {
-//   std::ostringstream oss;
-//   const auto& qname = type.QualifiedName();
-//   for (size_t i = 0; i < qname.size(); ++i) {
-//     if (i > 0) {
-//       oss << ".";
-//     }
-//     oss << qname[i];
-//   }
-  
-//   if (type.Arity() > 0) {
-//     oss << "<";
-//     for (size_t i = 0; i < type.Arity(); ++i) {
-//       if (i > 0) {
-//         oss << ",";
-//       }
-//       oss << TypeToMangledName(type.TypeArguments()[i]);
-//     }
-//     oss << ">";
-//   }
-  
-//   if (type.IsNullable()) {
-//     oss << "?";
-//   }
-  
-//   return oss.str();
-// }
+// --------------------------- Statements / Blocks ---------------------------
 
-// void BytecodeVisitor::VisitExpression(Expr* expr) {
-//   if (expr != nullptr) {
-//     expr->Accept(*this);
-//   }
-// }
+void BytecodeVisitor::Visit(Block& node) {
+  for (auto& stmt : node.GetStatements()) {
+    stmt->Accept(*this);
+  }
+}
 
-// void BytecodeVisitor::VisitStatement(Stmt* stmt) {
-//   if (stmt != nullptr) {
-//     stmt->Accept(*this);
-//   }
-// }
+void BytecodeVisitor::Visit(VarDeclStmt& node) {
+  if (node.MutableInit() != nullptr) {
+    node.MutableInit()->Accept(*this);
+    EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(node.Name())));
+  }
+}
 
-// void BytecodeVisitor::VisitBlock(Block* block) {
-//   if (block != nullptr) {
-//     block->Accept(*this);
-//   }
-// }
+void BytecodeVisitor::Visit(ExprStmt& node) {
+  if (node.MutableExpression() != nullptr) {
+    node.MutableExpression()->Accept(*this);
+  }
+  // expression statement result must be popped
+  EmitCommand("Pop");
+}
 
-// std::unique_ptr<ovum::vm::execution_tree::Block> BytecodeVisitor::CreateBlock() {
-//   return std::make_unique<ovum::vm::execution_tree::Block>();
-// }
+void BytecodeVisitor::Visit(ReturnStmt& node) {
+  if (node.MutableValue() != nullptr) {
+    node.MutableValue()->Accept(*this);
+  }
+  EmitCommand("Return");
+}
 
-// void BytecodeVisitor::SetCurrentBlock(std::unique_ptr<ovum::vm::execution_tree::Block> block) {
-//   current_block_ = std::move(block);
-// }
+void BytecodeVisitor::Visit(BreakStmt& /*node*/) {
+  EmitCommand("Break");
+}
 
-// size_t BytecodeVisitor::GetLocalIndex(const std::string& name) {
-//   auto it = local_variables_.find(name);
-//   if (it != local_variables_.end()) {
-//     return it->second;
-//   }
-//   // If not found, allocate new index
-//   size_t index = next_local_index_++;
-//   local_variables_[name] = index;
-//   return index;
-// }
+void BytecodeVisitor::Visit(ContinueStmt& /*node*/) {
+  EmitCommand("Continue");
+}
 
-// size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
-//   auto it = static_variables_.find(name);
-//   if (it != static_variables_.end()) {
-//     return it->second;
-//   }
-//   // If not found, allocate new index
-//   size_t index = next_static_index_++;
-//   static_variables_[name] = index;
-//   return index;
-// }
+void BytecodeVisitor::Visit(IfStmt& node) {
+  auto& branches = node.MutableBranches();
+  for (size_t i = 0; i < branches.size(); ++i) {
+    if (i > 0) {
+      EmitIndent();
+      output_ << "else ";
+    }
+    EmitIndent();
+    output_ << "if ";
+    EmitBlockStart();
+    branches[i].MutableCondition()->Accept(*this);
+    EmitBlockEnd();
 
-// void BytecodeVisitor::ResetLocalVariables() {
-//   local_variables_.clear();
-//   next_local_index_ = 0;
-// }
+    EmitIndent();
+    output_ << "then ";
+    EmitBlockStart();
+    branches[i].MutableThen()->Accept(*this);
+    EmitBlockEnd();
+  }
 
-// }  // namespace ovum::compiler::parser
+  if (node.MutableElseBlock() != nullptr) {
+    EmitIndent();
+    output_ << "else ";
+    EmitBlockStart();
+    node.MutableElseBlock()->Accept(*this);
+    EmitBlockEnd();
+  }
+}
 
+void BytecodeVisitor::Visit(WhileStmt& node) {
+  EmitIndent();
+  output_ << "while ";
+  EmitBlockStart();
+  if (node.MutableCondition() != nullptr) {
+    node.MutableCondition()->Accept(*this);
+  }
+  EmitBlockEnd();
+
+  EmitIndent();
+  output_ << "then ";
+  EmitBlockStart();
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+  EmitBlockEnd();
+}
+
+void BytecodeVisitor::Visit(ForStmt& node) {
+  if (node.MutableIteratorExpr() != nullptr) {
+    node.MutableIteratorExpr()->Accept(*this);
+  }
+  // TODO: Lower for -> while
+}
+
+void BytecodeVisitor::Visit(UnsafeBlock& node) {
+  if (node.MutableBody() != nullptr) {
+    node.MutableBody()->Accept(*this);
+  }
+}
+
+// --------------------------- Expressions ---------------------------
+
+void BytecodeVisitor::Visit(Binary& node) {
+  // push rhs then lhs (right-to-left)
+  node.MutableRhs().Accept(*this);
+  node.MutableLhs().Accept(*this);
+
+  const auto& op = node.Op();
+
+  if (&op == &OpTags::Add()) {
+    EmitCommand("IntAdd");
+  } else if (&op == &OpTags::Sub()) {
+    EmitCommand("IntSubtract");
+  } else if (&op == &OpTags::Mul()) {
+    EmitCommand("IntMultiply");
+  } else if (&op == &OpTags::Div()) {
+    EmitCommand("IntDivide");
+  } else if (&op == &OpTags::Mod()) {
+    EmitCommand("IntModulo");
+  } else if (&op == &OpTags::Lt()) {
+    EmitCommand("IntLessThan");
+  } else if (&op == &OpTags::Le()) {
+    EmitCommand("IntLessEqual");
+  } else if (&op == &OpTags::Gt()) {
+    EmitCommand("IntGreaterThan");
+  } else if (&op == &OpTags::Ge()) {
+    EmitCommand("IntGreaterEqual");
+  } else if (&op == &OpTags::Eq()) {
+    EmitCommand("IntEqual");
+  } else if (&op == &OpTags::Ne()) {
+    EmitCommand("IntNotEqual");
+  } else if (&op == &OpTags::And()) {
+    EmitCommand("BoolAnd");
+  } else if (&op == &OpTags::Or()) {
+    EmitCommand("BoolOr");
+  } else if (&op == &OpTags::Xor()) {
+    EmitCommand("IntXor");
+  } else {
+    EmitCommand("UnsupportedBinaryOp");
+  }
+}
+
+void BytecodeVisitor::Visit(Unary& node) {
+  node.MutableOperand().Accept(*this);
+
+  const auto& op = node.Op();
+
+  if (&op == &OpTags::Neg()) {
+    EmitCommand("IntNegate");
+  } else if (&op == &OpTags::Plus()) {
+    // unary plus — no-op
+  } else if (&op == &OpTags::Not()) {
+    EmitCommand("BoolNot");
+  } else {
+    EmitCommand("UnsupportedUnaryOp");
+  }
+}
+
+void BytecodeVisitor::Visit(Assign& node) {
+  // value first
+  node.MutableValue().Accept(*this);
+
+  const auto& op = node.Kind();
+
+  if (&op == &OpTags::CopyAssign()) {
+    // currently no special instructions — emit 'Copy' placeholder if required
+    EmitCommand("Copy");
+  }
+
+  // target
+  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
+    EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
+  } else if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableTarget())) {
+    // object, value already on stack? ensure order: value is on top currently,
+    // we need object beneath it. So emit object first then Swap (to have object, value).
+    field_access->MutableObject().Accept(*this);
+    // Stack now: object, value -> need order: object, value for SetField
+    // But we currently have value (from earlier) above object; simpler: after object accept,
+    // emit Swap to put object under value if required.
+    EmitCommand("Swap");
+    // placeholder field index resolution
+    int field_index = 0;
+    EmitCommandWithInt("SetField", field_index);
+  } else if (auto* index_access = dynamic_cast<IndexAccess*>(&node.MutableTarget())) {
+    index_access->MutableObject().Accept(*this);
+    index_access->MutableIndexExpr().Accept(*this);
+    // order: object, index, value expected -> we currently have value on top; rotate to place value last
+    // We will emit SetIndex (placeholder)
+    EmitCommand("SetIndex");
+  } else {
+    EmitCommand("UnsupportedAssignTarget");
+  }
+}
+
+void BytecodeVisitor::Visit(Call& node) {
+  // Push arguments right-to-left
+  auto& args = node.MutableArgs();
+  for (auto it = args.rbegin(); it != args.rend(); ++it) {
+    (*it)->Accept(*this);
+  }
+
+  // If callee is simple identifier and we have a registered mangled name, use it.
+  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableCallee())) {
+    auto it = function_name_map_.find(ident->Name());
+    if (it != function_name_map_.end()) {
+      EmitCommandWithString("Call", it->second);
+      return;
+    }
+    // fallback to name as-is
+    EmitCommandWithString("Call", ident->Name());
+    return;
+  }
+
+  // If callee is FieldAccess (a.method), call virtual
+  if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableCallee())) {
+    // emit object, then call virtual method by method name or mangled if available
+    field_access->MutableObject().Accept(*this);
+
+    // try to find class of object? We don't have runtime type resolution here.
+    // But if FieldAccess::Name() equals a known method name for current class, use that.
+    std::string method_name = field_access->Name();
+    // Try to find mangled in method_name_map_ by scanning for pattern "*::method_name"
+    std::string found_mangled;
+    for (const auto& kv : method_name_map_) {
+      // kv.first is like "Class::method" or "Class::<ctor>"
+      auto pos = kv.first.rfind("::");
+      if (pos != std::string::npos) {
+        std::string mname = kv.first.substr(pos + 2);
+        if (mname == method_name) {
+          found_mangled = kv.second;
+          break;
+        }
+      }
+    }
+    if (!found_mangled.empty()) {
+      EmitCommandWithString("CallVirtual", found_mangled);
+    } else {
+      EmitCommandWithString("CallVirtual", method_name);
+    }
+    return;
+  }
+
+  // generic fallback: evaluate callee then CallDynamic
+  node.MutableCallee().Accept(*this);
+  EmitCommand("CallDynamic");
+}
+
+void BytecodeVisitor::Visit(FieldAccess& node) {
+  node.MutableObject().Accept(*this);
+  // find field index if we have class info
+  int index = 0;
+  // try retrieving class name from object expression if it's IdentRef to 'this' or variable containing class instance
+  // For now use placeholder 0 as before
+  EmitCommandWithInt("GetField", index);
+  // If field is primitive wrapper in our examples, emit Unwrap
+  // we attempt to find field type if possible:
+  // (not all cases available; left as heuristic)
+  // If you have class_fields_ we could lookup by current_class_name_ or by object's static type
+  // For now, don't automatically Unwrap here; let caller emit when needed.
+}
+
+void BytecodeVisitor::Visit(IndexAccess& node) {
+  node.MutableObject().Accept(*this);
+  node.MutableIndexExpr().Accept(*this);
+  EmitCommand("GetIndex");
+}
+
+void BytecodeVisitor::Visit(NamespaceRef& node) {
+  // treat namespace references as static variable load
+  EmitCommandWithInt("LoadStatic", static_cast<int64_t>(GetStaticIndex(node.Name())));
+}
+
+void BytecodeVisitor::Visit(SafeCall& node) {
+  node.MutableObject().Accept(*this);
+  for (auto it = node.MutableArgs().rbegin(); it != node.MutableArgs().rend(); ++it) {
+    (*it)->Accept(*this);
+  }
+  EmitCommandWithString("SafeCall", node.Method());
+}
+
+void BytecodeVisitor::Visit(Elvis& node) {
+  // lhs ?: rhs
+  node.MutableLhs().Accept(*this);
+  node.MutableRhs().Accept(*this);
+  EmitCommand("NullCoalesce");
+}
+
+void BytecodeVisitor::Visit(CastAs& node) {
+  node.MutableExpression().Accept(*this);
+  EmitCommand("CastAs");
+}
+
+void BytecodeVisitor::Visit(TypeTestIs& node) {
+  node.MutableExpression().Accept(*this);
+  std::string type_name = TypeToMangledName(node.Type());
+  EmitCommandWithString("IsType", type_name);
+}
+
+void BytecodeVisitor::Visit(IdentRef& node) {
+  // Prefer local; fallback to static/global
+  if (local_variables_.find(node.Name()) != local_variables_.end()) {
+    EmitCommandWithInt("LoadLocal", static_cast<int64_t>(GetLocalIndex(node.Name())));
+  } else {
+    EmitCommandWithInt("LoadStatic", static_cast<int64_t>(GetStaticIndex(node.Name())));
+  }
+}
+
+void BytecodeVisitor::Visit(IntLit& node) {
+  EmitCommandWithInt("PushInt", node.Value());
+}
+
+void BytecodeVisitor::Visit(FloatLit& node) {
+  EmitCommandWithFloat("PushFloat", node.Value());
+}
+
+void BytecodeVisitor::Visit(StringLit& node) {
+  EmitCommandWithString("PushString", node.Value());
+}
+
+void BytecodeVisitor::Visit(CharLit& node) {
+  EmitCommandWithInt("PushChar", static_cast<int64_t>(node.Value()));
+}
+
+void BytecodeVisitor::Visit(BoolLit& node) {
+  EmitCommandWithBool("PushBool", node.Value());
+}
+
+void BytecodeVisitor::Visit(NullLit& node) {
+  EmitCommand("PushNull");
+}
+
+// --------------------------- Utilities and ID generation ---------------------------
+
+std::string BytecodeVisitor::GenerateFunctionId(const std::string& name, const std::vector<Param>& params) {
+  std::ostringstream oss;
+  oss << "_Global_" << name;
+  if (!params.empty()) {
+    oss << "_";
+    for (size_t i = 0; i < params.size(); ++i) {
+      if (i) {
+        oss << "_";
+      }
+      oss << TypeToMangledName(params[i].GetType());
+    }
+  }
+  return oss.str();
+}
+
+std::string BytecodeVisitor::GenerateMethodId(const std::string& class_name,
+                                              const std::string& method_name,
+                                              const std::vector<Param>& params,
+                                              bool is_constructor,
+                                              bool is_destructor) {
+  std::ostringstream oss;
+  if (is_constructor) {
+    oss << "_" << class_name << "_constructor";
+  } else if (is_destructor) {
+    oss << "_" << class_name << "_destructor";
+  } else {
+    oss << "_" << class_name << "_" << method_name;
+    if (!params.empty()) {
+      oss << "_";
+      for (size_t i = 0; i < params.size(); ++i) {
+        if (i) {
+          oss << "_";
+        }
+        oss << TypeToMangledName(params[i].GetType());
+      }
+    }
+  }
+  return oss.str();
+}
+
+std::string BytecodeVisitor::GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params) {
+  std::ostringstream oss;
+  oss << "_" << class_name << "_constructor";
+  if (!params.empty()) {
+    oss << "_";
+    for (size_t i = 0; i < params.size(); ++i) {
+      if (i) {
+        oss << "_";
+      }
+      oss << TypeToMangledName(params[i].GetType());
+    }
+  }
+  return oss.str();
+}
+
+std::string BytecodeVisitor::GenerateDestructorId(const std::string& class_name) {
+  return "_" + class_name + "_destructor";
+}
+
+std::string BytecodeVisitor::TypeToMangledName(const TypeReference& type) {
+  std::ostringstream oss;
+  const auto& qname = type.QualifiedName();
+  for (size_t i = 0; i < qname.size(); ++i) {
+    if (i > 0) {
+      oss << "::";
+    }
+    oss << qname[i];
+  }
+
+  if (type.Arity() > 0) {
+    oss << "<";
+    for (size_t i = 0; i < type.Arity(); ++i) {
+      if (i) {
+        oss << ",";
+      }
+      oss << TypeToMangledName(type.TypeArguments()[i]);
+    }
+    oss << ">";
+  }
+
+  if (type.IsNullable()) {
+    oss << "?";
+  }
+
+  return oss.str();
+}
+
+void BytecodeVisitor::VisitExpression(Expr* expr) {
+  if (expr != nullptr) {
+    expr->Accept(*this);
+  }
+}
+
+void BytecodeVisitor::VisitStatement(Stmt* stmt) {
+  if (stmt != nullptr) {
+    stmt->Accept(*this);
+  }
+}
+
+void BytecodeVisitor::VisitBlock(Block* block) {
+  if (block != nullptr) {
+    block->Accept(*this);
+  }
+}
+
+size_t BytecodeVisitor::GetLocalIndex(const std::string& name) {
+  if (local_variables_.find(name) == local_variables_.end()) {
+    local_variables_[name] = next_local_index_++;
+  }
+  return local_variables_[name];
+}
+
+size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
+  if (static_variables_.find(name) == static_variables_.end()) {
+    static_variables_[name] = next_static_index_++;
+  }
+  return static_variables_[name];
+}
+
+void BytecodeVisitor::ResetLocalVariables() {
+  local_variables_.clear();
+  next_local_index_ = 0;
+}
+
+} // namespace ovum::compiler::parser

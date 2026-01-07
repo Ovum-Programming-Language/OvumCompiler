@@ -75,7 +75,7 @@ std::string_view StateForHead::Name() const {
 IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* block = ctx.TopNodeAs<Block>();
+  auto* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
@@ -139,7 +139,7 @@ IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) c
 
   ts.Consume();
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::unique_ptr<AstNode>(body.get()));
+  ctx.PushNode(std::move(body));
 
   SourceSpan span = StateBase::Union(StateBase::SpanFrom(start), iter_expr->Span());
   auto for_stmt =

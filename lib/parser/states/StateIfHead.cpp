@@ -50,7 +50,7 @@ std::string_view StateIfHead::Name() const {
 IState::StepResult StateIfHead::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* block = ctx.TopNodeAs<Block>();
+  auto* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
@@ -66,7 +66,7 @@ IState::StepResult StateIfHead::TryStep(ContextParser& ctx, ITokenStream& ts) co
   if (if_stmt == nullptr) {
     // Create new IfStmt
     auto new_if = ctx.Factory()->MakeIfStmt({}, nullptr, StateBase::SpanFrom(start));
-    ctx.PushNode(std::unique_ptr<AstNode>(new_if.get()));
+    ctx.PushNode(std::move(new_if));
     if_stmt = new_if.get();
   }
 
@@ -109,13 +109,16 @@ IState::StepResult StateIfHead::TryStep(ContextParser& ctx, ITokenStream& ts) co
     }
 
     ts.Consume();
-    auto then_block = ctx.Factory()->MakeBlock({}, SourceSpan{});
-    ctx.PushNode(std::unique_ptr<AstNode>(then_block.get()));
-    ctx.PushState(StateRegistry::Block());
+    ctx.PopState();
 
     // Store condition for later
     ctx.PushNode(std::unique_ptr<AstNode>(condition.release()));
     ctx.PushState(StateRegistry::IfTail());
+
+    auto then_block = ctx.Factory()->MakeBlock({}, SourceSpan{});
+    ctx.PushNode(std::move(then_block));
+    ctx.PushState(StateRegistry::Block());
+
     return true;
   }
 

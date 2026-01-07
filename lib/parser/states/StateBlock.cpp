@@ -38,7 +38,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateBlock::Name() const {
   return "Block";
@@ -59,39 +59,39 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
   const Token& tok = ts.Peek();
   if (tok.GetLexeme() == "}") {
     ts.Consume();
-    
+
     // Check if there's a parent node that needs this block
     if (ctx.NodeStack().size() >= 2) {
       auto parent_node = ctx.NodeStack()[ctx.NodeStack().size() - 2].MutableNode();
-      
+
       // Check if parent is FunctionDecl
-      FunctionDecl* func = dynamic_cast<FunctionDecl*>(parent_node);
+      auto* func = dynamic_cast<FunctionDecl*>(parent_node);
       if (func != nullptr && func->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* block = dynamic_cast<Block*>(block_node.get());
+        auto* block = dynamic_cast<Block*>(block_node.get());
         if (block != nullptr) {
           func->SetBody(std::unique_ptr<Block>(block));
           block_node.release();
-          
+
           // Pop function and add to module
           auto func_node = ctx.PopNode();
-          Module* module = ctx.TopNodeAs<Module>();
+          auto* module = ctx.TopNodeAs<Module>();
           if (module != nullptr) {
             module->AddDecl(std::unique_ptr<Decl>(dynamic_cast<Decl*>(func_node.release())));
           }
         }
         return false;
       }
-      
+
       // Check if parent is IfStmt (for else block)
-      IfStmt* if_stmt = dynamic_cast<IfStmt*>(parent_node);
+      auto* if_stmt = dynamic_cast<IfStmt*>(parent_node);
       if (if_stmt != nullptr && if_stmt->ElseBlock() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* else_block = dynamic_cast<Block*>(block_node.get());
+        auto* else_block = dynamic_cast<Block*>(block_node.get());
         if (else_block != nullptr) {
           if_stmt->SetElseBlock(std::unique_ptr<Block>(else_block));
           block_node.release();
-          
+
           // Pop IfStmt and add to parent block
           auto if_node = ctx.PopNode();
           Block* parent_block = ctx.TopNodeAs<Block>();
@@ -101,90 +101,90 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         }
         return false;
       }
-      
+
       // Check if parent is WhileStmt
-      WhileStmt* while_stmt = dynamic_cast<WhileStmt*>(parent_node);
+      auto* while_stmt = dynamic_cast<WhileStmt*>(parent_node);
       if (while_stmt != nullptr && while_stmt->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           while_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
         return false;
       }
-      
+
       // Check if parent is ForStmt
-      ForStmt* for_stmt = dynamic_cast<ForStmt*>(parent_node);
+      auto* for_stmt = dynamic_cast<ForStmt*>(parent_node);
       if (for_stmt != nullptr && for_stmt->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           for_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
         return false;
       }
-      
+
       // Check if parent is UnsafeBlock
-      UnsafeBlock* unsafe_stmt = dynamic_cast<UnsafeBlock*>(parent_node);
+      auto* unsafe_stmt = dynamic_cast<UnsafeBlock*>(parent_node);
       if (unsafe_stmt != nullptr && unsafe_stmt->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           unsafe_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
         return false;
       }
-      
+
       // Check if parent is MethodDecl
-      MethodDecl* method = dynamic_cast<MethodDecl*>(parent_node);
+      auto* method = dynamic_cast<MethodDecl*>(parent_node);
       if (method != nullptr && method->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           method->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
-          
+
           // Pop method and add to class
           auto method_node = ctx.PopNode();
-          ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
+          auto* class_decl = ctx.TopNodeAs<ClassDecl>();
           if (class_decl != nullptr) {
             class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(method_node.release())));
           }
         }
         return false;
       }
-      
+
       // Check if parent is CallDecl
-      CallDecl* call = dynamic_cast<CallDecl*>(parent_node);
+      auto* call = dynamic_cast<CallDecl*>(parent_node);
       if (call != nullptr && call->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           call->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
-          
+
           // Pop call and add to class
           auto call_node = ctx.PopNode();
-          ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
+          auto* class_decl = ctx.TopNodeAs<ClassDecl>();
           if (class_decl != nullptr) {
             class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(call_node.release())));
           }
         }
         return false;
       }
-      
+
       // Check if parent is DestructorDecl
-      DestructorDecl* destructor = dynamic_cast<DestructorDecl*>(parent_node);
+      auto* destructor = dynamic_cast<DestructorDecl*>(parent_node);
       if (destructor != nullptr && destructor->Body() == nullptr) {
         auto block_node = ctx.PopNode();
-        Block* body_block = dynamic_cast<Block*>(block_node.get());
+        auto* body_block = dynamic_cast<Block*>(block_node.get());
         if (body_block != nullptr) {
           destructor->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
-          
+
           // Pop destructor and add to class
           auto destructor_node = ctx.PopNode();
           ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
@@ -195,12 +195,12 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         return false;
       }
     }
-    
-    return false;  // Block complete
+
+    return false; // Block complete
   }
 
   ctx.PushState(StateRegistry::Stmt());
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

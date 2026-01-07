@@ -65,7 +65,7 @@ std::string_view StateMethodHdr::Name() const {
 IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
+  auto* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
@@ -110,7 +110,6 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
       return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
     }
-    lex = "fun";
   }
 
   if (lex == "static") {
@@ -134,10 +133,10 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
     return std::unexpected(StateError(std::string_view("expected method name")));
   }
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
   auto method = ctx.Factory()->MakeMethod(
       is_public, is_override, is_static, is_pure, std::move(name), {}, nullptr, nullptr, span);
-  ctx.PushNode(std::unique_ptr<AstNode>(method.get()));
+  ctx.PushNode(std::move(method));
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
@@ -146,6 +145,8 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
     }
     return std::unexpected(StateError(std::string_view("expected '(' after method name")));
   }
+
+  ts.Consume();
 
   ctx.PushState(StateRegistry::FuncParams());
   return true;

@@ -5,7 +5,6 @@
 
 #include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/InterfaceDecl.hpp"
-#include "lib/parser/ast/nodes/decls/InterfaceMethod.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
@@ -119,14 +118,12 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
     ts.Consume();
 
     // Parse parameters
-    std::vector<InterfaceMethod::Param> params;
+    std::vector<Param> params;
     SkipTrivia(ts);
     if (!ts.IsEof() && ts.Peek().GetLexeme() != ")") {
       while (true) {
-        bool is_var = false;
         if (!ts.IsEof() && ts.Peek().GetLexeme() == "var") {
           ts.Consume();
-          is_var = true;
           SkipTrivia(ts);
         }
 
@@ -209,14 +206,12 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   ts.Consume();
 
   // Parse parameters
-  std::vector<InterfaceMethod::Param> params;
+  std::vector<Param> params;
   SkipTrivia(ts);
   if (!ts.IsEof() && ts.Peek().GetLexeme() != ")") {
     while (true) {
-      bool is_var = false;
       if (!ts.IsEof() && ts.Peek().GetLexeme() == "var") {
         ts.Consume();
-        is_var = true;
         SkipTrivia(ts);
       }
 
@@ -269,7 +264,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   }
 
   if (ts.LastConsumed() != nullptr) {
-    span = StateBase::Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
+    span = Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
   }
   auto method = ctx.Factory()->MakeInterfaceMethod(std::move(name), std::move(params), std::move(return_type), span);
   interface_decl->AddMember(std::move(method));

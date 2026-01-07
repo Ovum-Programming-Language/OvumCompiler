@@ -91,7 +91,7 @@ IState::StepResult StateClassHdr::TryStep(ContextParser& ctx, ITokenStream& ts) 
     return std::unexpected(StateError(std::string_view("expected class name")));
   }
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
 
   // Check for implements clause
   std::vector<TypeReference> implements;
@@ -117,7 +117,7 @@ IState::StepResult StateClassHdr::TryStep(ContextParser& ctx, ITokenStream& ts) 
   }
 
   auto class_decl = ctx.Factory()->MakeClass(std::move(name), std::move(implements), {}, span);
-  ctx.PushNode(std::unique_ptr<AstNode>(class_decl.get()));
+  ctx.PushNode(std::move(class_decl));
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
@@ -127,6 +127,9 @@ IState::StepResult StateClassHdr::TryStep(ContextParser& ctx, ITokenStream& ts) 
     return std::unexpected(StateError(std::string_view("expected '{' for class body")));
   }
 
+  ts.Consume();
+
+  ctx.PopState();
   ctx.PushState(StateRegistry::ClassBody());
   return true;
 }

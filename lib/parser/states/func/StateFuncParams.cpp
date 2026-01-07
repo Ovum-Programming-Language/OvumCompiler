@@ -77,9 +77,9 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   SkipTrivia(ts);
 
   // Check for FunctionDecl, MethodDecl, or CallDecl
-  FunctionDecl* func = ctx.TopNodeAs<FunctionDecl>();
-  MethodDecl* method = ctx.TopNodeAs<MethodDecl>();
-  CallDecl* call = ctx.TopNodeAs<CallDecl>();
+  auto* func = ctx.TopNodeAs<FunctionDecl>();
+  auto* method = ctx.TopNodeAs<MethodDecl>();
+  auto* call = ctx.TopNodeAs<CallDecl>();
 
   if (func == nullptr && method == nullptr && call == nullptr) {
     return std::unexpected(
@@ -112,6 +112,7 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
     }
 
     SkipTrivia(ts);
+    ctx.PopState();
     ctx.PushState(StateRegistry::FuncBody());
     return true;
   }
@@ -194,6 +195,7 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   }
 
   SkipTrivia(ts);
+  ctx.PopState();
   ctx.PushState(StateRegistry::FuncBody());
   return true;
 }

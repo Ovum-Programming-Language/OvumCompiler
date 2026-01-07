@@ -40,7 +40,7 @@ std::string_view StateCallDeclHdr::Name() const {
 IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
+  auto* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
@@ -77,7 +77,7 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
 
   SourceSpan span = StateBase::SpanFrom(start);
   auto call = ctx.Factory()->MakeCallDecl(is_public, {}, nullptr, nullptr, span);
-  ctx.PushNode(std::unique_ptr<AstNode>(call.get()));
+  ctx.PushNode(std::move(call));
 
   ctx.PushState(StateRegistry::FuncParams());
   return true;

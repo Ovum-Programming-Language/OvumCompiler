@@ -13,8 +13,8 @@ namespace ovum::compiler::parser {
 class InterfaceMethodBuilder : public NodeBuilderBase<InterfaceMethod> {
 public:
   InterfaceMethodBuilder& WithName(std::string name);
-  InterfaceMethodBuilder& AddParam(InterfaceMethod::Param parameter);
-  InterfaceMethodBuilder& WithParams(std::vector<InterfaceMethod::Param> params);
+  InterfaceMethodBuilder& AddParam(Param parameter);
+  InterfaceMethodBuilder& WithParams(std::vector<Param> params);
   InterfaceMethodBuilder& WithReturnType(std::unique_ptr<TypeReference> type);
 };
 

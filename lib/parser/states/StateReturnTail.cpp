@@ -66,7 +66,7 @@ std::string_view StateReturnTail::Name() const {
 IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* block = ctx.TopNodeAs<Block>();
+  auto* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
@@ -76,7 +76,7 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
   }
 
   const Token& start = ts.Peek();
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
 
   SkipTrivia(ts);
 
@@ -86,7 +86,8 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
     auto stmt = ctx.Factory()->MakeReturnStmt(nullptr, span);
     block->Append(std::move(stmt));
     ConsumeTerminators(ts);
-    return false;
+    ctx.PopState();
+    return true;
   }
 
   // Return with value
@@ -95,11 +96,12 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
     return std::unexpected(StateError(std::string_view("failed to parse return expression")));
   }
 
-  span = StateBase::Union(span, expr->Span());
+  span = Union(span, expr->Span());
   auto stmt = ctx.Factory()->MakeReturnStmt(std::move(expr), span);
   block->Append(std::move(stmt));
   ConsumeTerminators(ts);
-  return false;
+  ctx.PopState();
+  return true;
 }
 
 } // namespace ovum::compiler::parser

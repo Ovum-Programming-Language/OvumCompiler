@@ -111,7 +111,7 @@ IState::StepResult StateIfTail::TryStep(ContextParser& ctx, ITokenStream& ts) co
 
     ts.Consume();
     auto else_block = ctx.Factory()->MakeBlock({}, SourceSpan{});
-    ctx.PushNode(std::unique_ptr<AstNode>(else_block.get()));
+    ctx.PushNode(std::move(else_block));
     ctx.PushState(StateRegistry::Block());
 
     // IfStmt will be handled when else block completes

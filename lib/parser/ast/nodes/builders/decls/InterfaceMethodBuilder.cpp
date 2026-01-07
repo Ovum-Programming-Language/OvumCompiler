@@ -7,12 +7,12 @@ InterfaceMethodBuilder& InterfaceMethodBuilder::WithName(std::string name) {
   return *this;
 }
 
-InterfaceMethodBuilder& InterfaceMethodBuilder::AddParam(InterfaceMethod::Param parameter) {
+InterfaceMethodBuilder& InterfaceMethodBuilder::AddParam(Param parameter) {
   node_->MutableParams().push_back(std::move(parameter));
   return *this;
 }
 
-InterfaceMethodBuilder& InterfaceMethodBuilder::WithParams(std::vector<InterfaceMethod::Param> params) {
+InterfaceMethodBuilder& InterfaceMethodBuilder::WithParams(std::vector<Param> params) {
   for (auto& param : params) {
     node_->MutableParams().push_back(std::move(param));
   }

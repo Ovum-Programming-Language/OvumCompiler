@@ -109,7 +109,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
     return false;
   }
 
-  Block* block = ctx.TopNodeAs<Block>();
+  auto* block = ctx.TopNodeAs<Block>();
   if (block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
@@ -118,28 +118,35 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   std::string lex = tok.GetLexeme();
 
   if (lex == "if") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::IfHead());
     return true;
   }
 
   if (lex == "while") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::WhileHead());
+    ts.Consume();
     return true;
   }
 
   if (lex == "for") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::ForHead());
+    ts.Consume();
     return true;
   }
 
   if (lex == "return") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::ReturnTail());
+    ts.Consume();
     return true;
   }
 
   if (lex == "break") {
     ts.Consume();
-    SourceSpan span = StateBase::SpanFrom(tok);
+    SourceSpan span = SpanFrom(tok);
     auto stmt = ctx.Factory()->MakeBreakStmt(span);
     block->Append(std::move(stmt));
     ConsumeTerminators(ts);
@@ -148,7 +155,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
 
   if (lex == "continue") {
     ts.Consume();
-    SourceSpan span = StateBase::SpanFrom(tok);
+    SourceSpan span = SpanFrom(tok);
     auto stmt = ctx.Factory()->MakeContinueStmt(span);
     block->Append(std::move(stmt));
     ConsumeTerminators(ts);
@@ -156,12 +163,16 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   }
 
   if (lex == "unsafe") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::UnsafeBlock());
+    ts.Consume();
     return true;
   }
 
   if (lex == "{") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::Block());
+    ts.Consume();
     return true;
   }
 
@@ -175,7 +186,6 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
       ReportUnexpected(ctx.Diags(), "P_VAR_NAME", "expected variable name", ts.TryPeek());
       return std::unexpected(StateError(std::string_view("expected variable name")));
     }
-    lex = ts.Peek().GetLexeme();
   }
 
   if (IsIdentifier(ts.Peek())) {
@@ -211,9 +221,6 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
       ConsumeTerminators(ts);
       return false;
     }
-
-    // Expression statement - put identifier back
-    ts.Rewind(1);
   }
 
   // Expression statement

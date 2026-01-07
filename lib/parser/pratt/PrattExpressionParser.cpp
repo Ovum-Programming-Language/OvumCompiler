@@ -4,7 +4,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
 #include <utility>
 
 #include <tokens/Token.hpp>
@@ -19,9 +18,9 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-constexpr int kBP_Assign = 5; // right-assoc
-constexpr int kBP_Elvis = 20; // right-assoc
-constexpr int kBP_Post = 100; // postfix
+constexpr int kBpAssign = 5; // right-assoc
+constexpr int kBpElvis = 20; // right-assoc
+constexpr int kBpPost = 100; // postfix
 
 bool Lex(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
@@ -33,12 +32,12 @@ bool IsIdentifier(const Token& t) {
 
 bool IsLiteral(const Token& t) {
   const std::string ty = t.GetStringType();
-  return ty.rfind("LITERAL", 0) == 0; // "LITERAL:*"
+  return ty.starts_with("LITERAL"); // "LITERAL:*"
 }
 
 SourceSpan SpanFrom(const Token& token) {
   const auto& pos = token.GetPosition();
-  return SourceSpan(SourceId{}, pos, pos);
+  return {SourceId{}, pos, pos};
 }
 
 SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
@@ -68,8 +67,8 @@ bool ParseFloat(const std::string& text, long double* out) {
 }
 
 std::string Unquote(std::string_view lexeme) {
-  if (lexeme.size() >= 2 && ((lexeme.front() == '"' && lexeme.back() == '"') ||
-                             (lexeme.front() == '\'' && lexeme.back() == '\''))) {
+  if (lexeme.size() >= 2 &&
+      ((lexeme.front() == '"' && lexeme.back() == '"') || (lexeme.front() == '\'' && lexeme.back() == '\''))) {
     return std::string(lexeme.substr(1, lexeme.size() - 2));
   }
   return std::string(lexeme);
@@ -171,13 +170,13 @@ std::unique_ptr<Expr> PrattExpressionParser::ParseExpr(ITokenStream& ts, IDiagno
     const bool is_ref_assign = Lex(look, "=");
     const bool is_copy_assign = Lex(look, ":=");
     if (is_ref_assign || is_copy_assign) {
-      if (kBP_Assign < min_bp) {
+      if (kBpAssign < min_bp) {
         break;
       }
 
       ts.Consume();
 
-      std::unique_ptr<Expr> rhs = ParseExpr(ts, diags, kBP_Assign - 1); // right-assoc
+      std::unique_ptr<Expr> rhs = ParseExpr(ts, diags, kBpAssign - 1); // right-assoc
       if (!rhs) {
         return nullptr;
       }
@@ -267,7 +266,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
 
   if (auto pre = resolver_->FindPrefix(look)) {
     ts.Consume();
-    std::unique_ptr<Expr> operand = ParseExpr(ts, diags, kBP_Post - 1);
+    std::unique_ptr<Expr> operand = ParseExpr(ts, diags, kBpPost - 1);
     if (!operand) {
       return nullptr;
     }
@@ -427,11 +426,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
       end_span = SpanFrom(*last);
     }
 
-    return factory_->MakeSafeCall(std::move(base),
-                                  std::move(method),
-                                  std::move(args),
-                                  std::nullopt,
-                                  end_span);
+    return factory_->MakeSafeCall(std::move(base), std::move(method), std::move(args), std::nullopt, end_span);
   }
 
   if (Lex(look, "::")) {
