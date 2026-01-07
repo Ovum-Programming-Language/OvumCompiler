@@ -284,3 +284,17 @@ fun b(): Void { return; }
   EXPECT_NE(bc.find("b"), std::string::npos);
   std::cout << bc << std::endl;
 }
+
+TEST_F(ParserBytecodeTest, Fibbonacci) {
+  const std::string bc = GenerateBytecode(R"(
+pure fun Fib(n: int): int {
+    if (n <= 1) return n
+    val fib1: int = Fib(n - 1)
+    val fib2: int = Fib(n - 2)
+    return fib1 + fib2
+}
+)");
+
+  EXPECT_NE(bc.find("Fib"), std::string::npos);
+  std::cout << bc << std::endl;
+}

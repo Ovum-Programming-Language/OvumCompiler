@@ -30,6 +30,7 @@ struct LintOptions {
   bool warn_large_class = true;
   bool warn_if_without_branches = true;
   bool warn_while_true = true;
+  // TODO: add "_" check
 };
 
 class LintVisitor : public WalkVisitor {

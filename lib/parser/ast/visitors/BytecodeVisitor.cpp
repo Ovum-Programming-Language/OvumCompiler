@@ -1,6 +1,7 @@
 #include "BytecodeVisitor.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -121,6 +122,38 @@ void BytecodeVisitor::EmitBlockEnd() {
   indent_level_--;
   EmitIndent();
   output_ << "}\n";
+}
+
+void BytecodeVisitor::EmitBlockEndWithoutEscape() {
+  indent_level_--;
+  EmitIndent();
+  output_ << "}";
+}
+
+void BytecodeVisitor::EmitIfStart() {
+  EmitIndent();
+  output_ << "if ";
+  output_ << "{\n";
+  indent_level_++;
+}
+
+void BytecodeVisitor::EmitThenStart() {
+  output_ << " then ";
+  output_ << "{\n";
+  indent_level_++;
+}
+
+void BytecodeVisitor::EmitElseStart() {
+  output_ << " else ";
+  output_ << "{\n";
+  indent_level_++;
+}
+
+void BytecodeVisitor::EmitElseIfStart() {
+  EmitIndent();
+  output_ << "else if ";
+  output_ << "{\n";
+  indent_level_++;
 }
 
 void BytecodeVisitor::Visit(Module& node) {
@@ -451,29 +484,34 @@ void BytecodeVisitor::Visit(ContinueStmt& /*node*/) {
 
 void BytecodeVisitor::Visit(IfStmt& node) {
   auto& branches = node.MutableBranches();
-  for (size_t i = 0; i < branches.size(); ++i) {
-    if (i > 0) {
-      EmitIndent();
-      output_ << "else ";
-    }
-    EmitIndent();
-    output_ << "if ";
-    EmitBlockStart();
-    branches[i].MutableCondition()->Accept(*this);
-    EmitBlockEnd();
 
-    EmitIndent();
-    output_ << "then ";
-    EmitBlockStart();
+  for (size_t i = 0; i < branches.size(); ++i) {
+    auto* cond = branches[i].MutableCondition();
+    if (!cond) {
+      continue;
+    }
+
+    if (i == 0) {
+      EmitIfStart();
+    } else {
+      EmitElseIfStart();
+    }
+
+    cond->Accept(*this);
+    EmitBlockEndWithoutEscape();
+
+    EmitThenStart();
     branches[i].MutableThen()->Accept(*this);
-    EmitBlockEnd();
+    if (auto* else_block = node.MutableElseBlock()) {
+      EmitBlockEndWithoutEscape();
+    } else {
+      EmitBlockEnd();
+    }
   }
 
-  if (node.MutableElseBlock() != nullptr) {
-    EmitIndent();
-    output_ << "else ";
-    EmitBlockStart();
-    node.MutableElseBlock()->Accept(*this);
+  if (auto* else_block = node.MutableElseBlock()) {
+    EmitElseStart();
+    else_block->Accept(*this);
     EmitBlockEnd();
   }
 }
@@ -741,7 +779,6 @@ void BytecodeVisitor::Visit(NullLit& node) {
 void BytecodeVisitor::Visit(ThisExpr& node) {
   // TODO: MAKE bytecode visitor
 }
-
 
 std::string BytecodeVisitor::GenerateFunctionId(const std::string& name, const std::vector<Param>& params) {
   std::ostringstream oss;

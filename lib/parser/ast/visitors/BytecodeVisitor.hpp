@@ -15,6 +15,9 @@ public:
   explicit BytecodeVisitor(std::ostream& output);
   ~BytecodeVisitor() override = default;
 
+  void EmitThenStart();
+  void EmitElseStart();
+  void EmitElseIfStart();
   // Decls
   void Visit(Module& node) override;
   void Visit(FunctionDecl& node) override;
@@ -93,6 +96,8 @@ private:
 
   void EmitBlockStart();
   void EmitBlockEnd();
+  void EmitBlockEndWithoutEscape();
+  void EmitIfStart();
 
   std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
 
