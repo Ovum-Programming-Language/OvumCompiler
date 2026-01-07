@@ -60,6 +60,7 @@ public:
   void Visit(CharLit& node) override;
   void Visit(BoolLit& node) override;
   void Visit(NullLit& node) override;
+  void Visit(ThisExpr& node) override;
 
 private:
   std::ostream& output_;

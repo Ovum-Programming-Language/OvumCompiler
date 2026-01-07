@@ -61,6 +61,7 @@
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/ast/nodes/decls/TypeAliasDecl.hpp"
 
+#include "ast/nodes/builders/exprs/ThisExprBuilder.hpp"
 #include "lib/parser/ast/nodes/exprs/Assign.hpp"
 #include "lib/parser/ast/nodes/exprs/Binary.hpp"
 #include "lib/parser/ast/nodes/exprs/Call.hpp"
@@ -297,6 +298,11 @@ struct BuilderFor<NullLit> {
 template<>
 struct BuilderFor<StringLit> {
   using type = StringLitBuilder;
+};
+
+template<>
+struct BuilderFor<ThisExpr> {
+  using type = ThisExprBuilder;
 };
 
 template<class T, class = void>

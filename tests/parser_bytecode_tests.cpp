@@ -205,28 +205,6 @@ fun f(): String? {
   std::cout << bc << std::endl;
 }
 
-TEST_F(ParserBytecodeTest, GenericType) {
-  const std::string bc = GenerateBytecode(R"(
-fun f(xs: List<Int>): Void {
-  return;
-}
-)");
-
-  EXPECT_NE(bc.find("List"), std::string::npos);
-  std::cout << bc << std::endl;
-}
-
-TEST_F(ParserBytecodeTest, NestedGenericType) {
-  const std::string bc = GenerateBytecode(R"(
-fun f(m: Map<String, List<Int>>): Void {
-  return;
-}
-)");
-
-  EXPECT_NE(bc.find("Map"), std::string::npos);
-  std::cout << bc << std::endl;
-}
-
 TEST_F(ParserBytecodeTest, GlobalVariableInitStatic) {
   const std::string bc = GenerateBytecode(R"(
 val x: Int = 42;

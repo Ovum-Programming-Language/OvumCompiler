@@ -22,6 +22,7 @@
 #include "nodes/exprs/IndexAccess.hpp"
 #include "nodes/exprs/NamespaceRef.hpp"
 #include "nodes/exprs/SafeCall.hpp"
+#include "nodes/exprs/ThisExpr.hpp"
 #include "nodes/exprs/TypeTestIs.hpp"
 #include "nodes/exprs/Unary.hpp"
 #include "nodes/exprs/literals/BoolLit.hpp"
@@ -91,6 +92,7 @@ public:
   virtual void Visit(CharLit&) = 0;
   virtual void Visit(BoolLit&) = 0;
   virtual void Visit(NullLit&) = 0;
+  virtual void Visit(ThisExpr&) = 0;
 };
 
 } // namespace ovum::compiler::parser

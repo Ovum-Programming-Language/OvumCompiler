@@ -418,4 +418,8 @@ void PrintVisitor::Visit(NullLit& node) {
   WriteLine("NullLit");
 }
 
+void PrintVisitor::Visit(ThisExpr& node) {
+  WriteLine("This");
+}
+
 } // namespace ovum::compiler::parser

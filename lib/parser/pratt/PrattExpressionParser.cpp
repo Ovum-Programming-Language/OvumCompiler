@@ -317,6 +317,18 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
     return factory_->MakeBool(value, SpanFrom(look));
   }
 
+  if (IsIdentifier(look)) {
+    std::string name = look.GetLexeme();
+    ts.Consume();
+
+    if (name == "this") {
+      return factory_->MakeThisExpr(SpanFrom(look));
+    } else {
+      return factory_->MakeIdent(std::move(name), SpanFrom(look));
+    }
+  }
+
+
   diags.Error("E_EXPR_PRIMARY", "expected primary expression");
   return nullptr;
 }

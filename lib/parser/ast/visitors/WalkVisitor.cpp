@@ -270,5 +270,8 @@ void WalkVisitor::Visit(BoolLit& node) {
 void WalkVisitor::Visit(NullLit& node) {
   (void) node;
 }
+void WalkVisitor::Visit(ThisExpr& node) {
+  (void) node;
+}
 
 } // namespace ovum::compiler::parser

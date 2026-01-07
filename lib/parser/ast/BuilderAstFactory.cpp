@@ -355,4 +355,10 @@ std::unique_ptr<NullLit> BuilderAstFactory::MakeNull(SourceSpan span) {
   return b.Build();
 }
 
+std::unique_ptr<ThisExpr> BuilderAstFactory::MakeThisExpr(SourceSpan span) {
+  auto b = ParserBuilder::Make<ThisExpr>();
+  b.WithSpan(span);
+  return b.Build();
+}
+
 } // namespace ovum::compiler::parser

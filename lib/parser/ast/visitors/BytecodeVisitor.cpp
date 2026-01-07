@@ -195,8 +195,6 @@ void BytecodeVisitor::Visit(Module& node) {
   }
 }
 
-// --------------------------- Functions / Methods / Constructors ---------------------------
-
 void BytecodeVisitor::Visit(FunctionDecl& node) {
   ResetLocalVariables();
   for (auto& param : node.MutableParams()) {
@@ -415,8 +413,6 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
   current_class_name_ = prev_class;
 }
 
-// --------------------------- Statements / Blocks ---------------------------
-
 void BytecodeVisitor::Visit(Block& node) {
   for (auto& stmt : node.GetStatements()) {
     stmt->Accept(*this);
@@ -512,8 +508,6 @@ void BytecodeVisitor::Visit(UnsafeBlock& node) {
     node.MutableBody()->Accept(*this);
   }
 }
-
-// --------------------------- Expressions ---------------------------
 
 void BytecodeVisitor::Visit(Binary& node) {
   // push rhs then lhs (right-to-left)
@@ -744,7 +738,10 @@ void BytecodeVisitor::Visit(NullLit& node) {
   EmitCommand("PushNull");
 }
 
-// --------------------------- Utilities and ID generation ---------------------------
+void BytecodeVisitor::Visit(ThisExpr& node) {
+  // TODO: MAKE bytecode visitor
+}
+
 
 std::string BytecodeVisitor::GenerateFunctionId(const std::string& name, const std::vector<Param>& params) {
   std::ostringstream oss;

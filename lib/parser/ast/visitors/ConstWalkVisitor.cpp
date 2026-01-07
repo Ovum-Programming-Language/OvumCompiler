@@ -271,4 +271,8 @@ void ConstWalkVisitor::Visit(NullLit& node) {
   (void) node;
 }
 
+void ConstWalkVisitor::Visit(ThisExpr& node) {
+  (void) node;
+}
+
 } // namespace ovum::compiler::parser

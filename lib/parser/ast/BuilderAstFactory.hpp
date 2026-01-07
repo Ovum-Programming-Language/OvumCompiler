@@ -153,6 +153,7 @@ public:
   std::unique_ptr<CharLit> MakeChar(char v, SourceSpan span) override;
   std::unique_ptr<BoolLit> MakeBool(bool v, SourceSpan span) override;
   std::unique_ptr<NullLit> MakeNull(SourceSpan span) override;
+  std::unique_ptr<ThisExpr> MakeThisExpr(SourceSpan span) override;
 };
 
 } // namespace ovum::compiler::parser
