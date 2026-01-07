@@ -31,14 +31,14 @@ TEST(LexerUnitTestSuite, SingleCharacter) {
 TEST(LexerUnitTestSuite, Keywords) {
   const std::string src =
       "fun pure val var class interface implements override if else while for in return break continue unsafe is as "
-      "typealias";
+      "typealias this";
   Lexer lexer(src);
   auto tokens_result = lexer.Tokenize();
   ASSERT_TRUE(tokens_result.has_value()) << "Tokenize failed: " << tokens_result.error().what();
   auto items = LexerUnitTestSuite::ExtractLexemesAndTypes(tokens_result.value());
   std::vector<std::string> expected_lexemes = {
-      "fun",   "pure", "val", "var",    "class", "interface", "implements", "override", "if", "else",
-      "while", "for",  "in",  "return", "break", "continue",  "unsafe",     "is",       "as", "typealias"};
+      "fun", "pure", "val",    "var",   "class",    "interface", "implements", "override", "if",        "else", "while",
+      "for", "in",   "return", "break", "continue", "unsafe",    "is",         "as",       "typealias", "this"};
   std::vector<std::string> expected_types(expected_lexemes.size(), "KEYWORD");
   LexerUnitTestSuite::AssertLexemesAndTypesEqual(items, expected_lexemes, expected_types);
 }
