@@ -102,7 +102,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
 
   const Token& start = ts.Peek();
   std::string lex = start.GetLexeme();
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
 
   // Check for call
   if (lex == "call") {

@@ -80,9 +80,9 @@ IState::StepResult StateInterfaceHdr::TryStep(ContextParser& ctx, ITokenStream& 
     return std::unexpected(StateError(std::string_view("expected interface name")));
   }
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
   auto interface_decl = ctx.Factory()->MakeInterface(std::move(name), {}, span);
-  ctx.PushNode(std::unique_ptr<AstNode>(interface_decl.get()));
+  ctx.PushNode(std::move(interface_decl));
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
@@ -91,7 +91,8 @@ IState::StepResult StateInterfaceHdr::TryStep(ContextParser& ctx, ITokenStream& 
     }
     return std::unexpected(StateError(std::string_view("expected '{' for interface body")));
   }
-
+  ts.Consume();
+  ctx.PopState();
   ctx.PushState(StateRegistry::InterfaceBody());
   return true;
 }

@@ -119,7 +119,6 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
       return std::unexpected(StateError(std::string_view("expected 'fun' after 'static'")));
     }
-    lex = "fun";
   }
 
   if (lex != "fun") {
@@ -147,7 +146,7 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
   }
 
   ts.Consume();
-
+  ctx.PopState();
   ctx.PushState(StateRegistry::FuncParams());
   return true;
 }

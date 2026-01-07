@@ -245,10 +245,28 @@ class Point {
   std::cout << bc << std::endl;
 }
 
+TEST_F(ParserBytecodeTest, ClassDestructor) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+  public val x: Int;
+
+  public destructor(): Void {
+  }
+}
+)");
+
+  EXPECT_NE(bc.find("vtable Point"), std::string::npos);
+  std::cout << bc << std::endl;
+}
+
 TEST_F(ParserBytecodeTest, InterfaceDeclaration) {
   const std::string bc = GenerateBytecode(R"(
 interface Drawable {
-  fun draw(): Void;
+  fun Draw(): Void;
+}
+
+class Point implements Drawable {
+  fun Draw(): Void {}
 }
 )");
 

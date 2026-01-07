@@ -45,9 +45,6 @@ SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
 }
 
 bool ParseInteger(const std::string& text, long long* out) {
-  if (out == nullptr) {
-    return false;
-  }
   const char* begin = text.data();
   const char* end = begin + text.size();
   auto res = std::from_chars(begin, end, *out, 10);
@@ -56,9 +53,6 @@ bool ParseInteger(const std::string& text, long long* out) {
 
 bool ParseFloat(const std::string& text, long double* out) {
   try {
-    if (out == nullptr) {
-      return false;
-    }
     *out = std::stold(text);
     return true;
   } catch (...) {
@@ -275,6 +269,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
     if (operand) {
       span = Union(span, operand->Span());
     }
+
     return factory_->MakeUnary(pre->get(), std::move(operand), span);
   }
 
@@ -292,6 +287,11 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
 
     ts.Consume();
     return inner;
+  }
+
+  if (Lex(look, "this")) {
+    ts.Consume();
+    return factory_->MakeThisExpr(SpanFrom(look));
   }
 
   if (IsIdentifier(look)) {
@@ -316,18 +316,6 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
     ts.Consume();
     return factory_->MakeBool(value, SpanFrom(look));
   }
-
-  if (IsIdentifier(look)) {
-    std::string name = look.GetLexeme();
-    ts.Consume();
-
-    if (name == "this") {
-      return factory_->MakeThisExpr(SpanFrom(look));
-    } else {
-      return factory_->MakeIdent(std::move(name), SpanFrom(look));
-    }
-  }
-
 
   diags.Error("E_EXPR_PRIMARY", "expected primary expression");
   return nullptr;

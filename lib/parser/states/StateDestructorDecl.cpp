@@ -114,7 +114,7 @@ IState::StepResult StateDestructorDecl::TryStep(ContextParser& ctx, ITokenStream
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
   ctx.PushNode(std::move(body));
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
   auto destructor = ctx.Factory()->MakeDestructor(is_public, std::move(body), span);
   ctx.PushNode(std::move(destructor));
 
