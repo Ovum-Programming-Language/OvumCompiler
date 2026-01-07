@@ -288,7 +288,7 @@ fun b(): Void { return; }
 TEST_F(ParserBytecodeTest, Fibbonacci) {
   const std::string bc = GenerateBytecode(R"(
 pure fun Fib(n: int): int {
-    if (n <= 1) return n
+    if (n <= 1) { return n }
     val fib1: int = Fib(n - 1)
     val fib2: int = Fib(n - 2)
     return fib1 + fib2

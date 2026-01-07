@@ -126,14 +126,12 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   if (lex == "while") {
     ctx.PopState();
     ctx.PushState(StateRegistry::WhileHead());
-    ts.Consume();
     return true;
   }
 
   if (lex == "for") {
     ctx.PopState();
     ctx.PushState(StateRegistry::ForHead());
-    ts.Consume();
     return true;
   }
 

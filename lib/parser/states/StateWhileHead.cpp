@@ -50,8 +50,8 @@ std::string_view StateWhileHead::Name() const {
 IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* block = ctx.TopNodeAs<Block>();
-  if (block == nullptr) {
+  Block* parent_block = ctx.TopNodeAs<Block>();
+  if (!parent_block) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
@@ -67,8 +67,8 @@ IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_WHILE_COND_OPEN", std::string_view("expected '(' after 'while'"));
+    if (ctx.Diags()) {
+      ctx.Diags()->Error("P_WHILE_COND_OPEN", "expected '(' after 'while'");
     }
     return std::unexpected(StateError(std::string_view("expected '(' after 'while'")));
   }
@@ -76,14 +76,14 @@ IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   SkipTrivia(ts);
   auto condition = ParseExpression(ctx, ts);
-  if (condition == nullptr) {
+  if (!condition) {
     return std::unexpected(StateError(std::string_view("failed to parse while condition")));
   }
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_WHILE_COND_CLOSE", std::string_view("expected ')' after condition"));
+    if (ctx.Diags()) {
+      ctx.Diags()->Error("P_WHILE_COND_CLOSE", "expected ')' after condition");
     }
     return std::unexpected(StateError(std::string_view("expected ')' after condition")));
   }
@@ -91,21 +91,22 @@ IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_WHILE_BLOCK", std::string_view("expected '{' for while body"));
+    if (ctx.Diags()) {
+      ctx.Diags()->Error("P_WHILE_BLOCK", "expected '{' for while body");
     }
     return std::unexpected(StateError(std::string_view("expected '{' for while body")));
   }
-
   ts.Consume();
+
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
+
+  auto while_stmt = ctx.Factory()->MakeWhileStmt(std::move(condition), nullptr, SpanFrom(start));
+
+  ctx.PushNode(std::move(while_stmt));
+
   ctx.PushNode(std::move(body));
-
-  SourceSpan span = StateBase::Union(StateBase::SpanFrom(start), condition->Span());
-  auto while_stmt = ctx.Factory()->MakeWhileStmt(std::move(condition), std::move(body), span);
-
-  block->Append(std::move(while_stmt));
   ctx.PushState(StateRegistry::Block());
+
   return true;
 }
 

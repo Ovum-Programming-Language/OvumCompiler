@@ -111,6 +111,12 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
           while_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
+        auto while_node = ctx.PopNode();
+        Block* parent_block = ctx.TopNodeAs<Block>();
+        if (parent_block != nullptr) {
+          parent_block->Append(std::unique_ptr<Stmt>(dynamic_cast<Stmt*>(while_node.release())));
+        }
+        ctx.PopState();
         return false;
       }
 
