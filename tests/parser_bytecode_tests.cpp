@@ -300,3 +300,49 @@ pure fun Fib(n: int): int {
   EXPECT_NE(bc.find("Fib"), std::string::npos);
   std::cout << bc << std::endl;
 }
+
+TEST_F(ParserBytecodeTest, Objects) {
+  const std::string bc = GenerateBytecode(R"(
+class Point1 {
+  public val x: Int;
+}
+
+class Point2 {
+  public val p: Point1;
+}
+)");
+
+  EXPECT_NE(bc.find("vtable Point1"), std::string::npos);
+  EXPECT_NE(bc.find("vtable Point2"), std::string::npos);
+  std::cout << bc << std::endl;
+}
+
+TEST_F(ParserBytecodeTest, Hashable) {
+  const std::string bc = GenerateBytecode(R"(
+fun f(): Void {
+  val text: String = "Hello"
+  val hash: Int = text.GetHash()
+  return;
+}
+)");
+
+  EXPECT_NE(bc.find("\"Hello\""), std::string::npos);
+  EXPECT_NE(bc.find("GetHash"), std::string::npos);
+  std::cout << bc << std::endl;
+}
+
+TEST_F(ParserBytecodeTest, Main) {
+  const std::string bc = GenerateBytecode(R"(
+fun Main(args: StringArray): int {
+    var i: int = 1
+
+    while (i <= 5) {
+        sys::PrintLine(Int(i).ToString())
+        i = i + 1
+    }
+
+    return 0
+}
+)");
+  std::cout << bc << std::endl;
+}
