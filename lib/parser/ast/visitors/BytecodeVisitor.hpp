@@ -93,6 +93,7 @@ private:
   void EmitCommandWithFloat(const std::string& command, double value);
   void EmitCommandWithBool(const std::string& command, bool value);
   void EmitCommandWithString(const std::string& command, const std::string& value);
+  void EmitCommandWithStringWithoutBraces(const std::string& command, const std::string& value);
 
   void EmitBlockStart();
   void EmitBlockStartWithoutSpaces();

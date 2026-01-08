@@ -112,6 +112,11 @@ void BytecodeVisitor::EmitCommandWithString(const std::string& command, const st
   output_ << command << " \"" << EscapeStringForEmit(value) << "\"\n";
 }
 
+void BytecodeVisitor::EmitCommandWithStringWithoutBraces(const std::string& command, const std::string& value) {
+  EmitIndent();
+  output_ << command << " \"" << EscapeStringForEmit(value) << "\"\n";
+}
+
 void BytecodeVisitor::EmitBlockStart() {
   EmitIndent();
   output_ << "{\n";
@@ -653,11 +658,11 @@ void BytecodeVisitor::Visit(Call& node) {
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableCallee())) {
     auto it = function_name_map_.find(ident->Name());
     if (it != function_name_map_.end()) {
-      EmitCommandWithString("Call", it->second);
+      EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
     // fallback to name as-is
-    EmitCommandWithString("Call", ident->Name());
+    EmitCommandWithStringWithoutBraces("Call", ident->Name());
     return;
   }
 
@@ -683,9 +688,9 @@ void BytecodeVisitor::Visit(Call& node) {
       }
     }
     if (!found_mangled.empty()) {
-      EmitCommandWithString("CallVirtual", found_mangled);
+      EmitCommandWithStringWithoutBraces("CallVirtual", found_mangled);
     } else {
-      EmitCommandWithString("CallVirtual", method_name);
+      EmitCommandWithStringWithoutBraces("CallVirtual", method_name);
     }
     return;
   }
@@ -725,7 +730,7 @@ void BytecodeVisitor::Visit(SafeCall& node) {
   for (auto it = node.MutableArgs().rbegin(); it != node.MutableArgs().rend(); ++it) {
     (*it)->Accept(*this);
   }
-  EmitCommandWithString("SafeCall", node.Method());
+  EmitCommandWithStringWithoutBraces("SafeCall", node.Method());
 }
 
 void BytecodeVisitor::Visit(Elvis& node) {
