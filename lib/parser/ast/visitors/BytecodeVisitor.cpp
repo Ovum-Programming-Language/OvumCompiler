@@ -114,7 +114,7 @@ void BytecodeVisitor::EmitCommandWithString(const std::string& command, const st
 
 void BytecodeVisitor::EmitCommandWithStringWithoutBraces(const std::string& command, const std::string& value) {
   EmitIndent();
-  output_ << command << " \"" << EscapeStringForEmit(value) << "\"\n";
+  output_ << command << " " << EscapeStringForEmit(value) << "\n";
 }
 
 void BytecodeVisitor::EmitBlockStart() {
