@@ -118,6 +118,11 @@ void BytecodeVisitor::EmitBlockStart() {
   indent_level_++;
 }
 
+void BytecodeVisitor::EmitBlockStartWithoutSpaces() {
+  output_ << "{\n";
+  indent_level_++;
+}
+
 void BytecodeVisitor::EmitBlockEnd() {
   indent_level_--;
   EmitIndent();
@@ -519,15 +524,13 @@ void BytecodeVisitor::Visit(IfStmt& node) {
 void BytecodeVisitor::Visit(WhileStmt& node) {
   EmitIndent();
   output_ << "while ";
-  EmitBlockStart();
+  EmitBlockStartWithoutSpaces();
   if (node.MutableCondition() != nullptr) {
     node.MutableCondition()->Accept(*this);
   }
-  EmitBlockEnd();
-
-  EmitIndent();
-  output_ << "then ";
-  EmitBlockStart();
+  EmitBlockEndWithoutEscape();
+  output_ << " then ";
+  EmitBlockStartWithoutSpaces();
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
   }

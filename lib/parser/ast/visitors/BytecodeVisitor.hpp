@@ -95,6 +95,7 @@ private:
   void EmitCommandWithString(const std::string& command, const std::string& value);
 
   void EmitBlockStart();
+  void EmitBlockStartWithoutSpaces();
   void EmitBlockEnd();
   void EmitBlockEndWithoutEscape();
   void EmitIfStart();

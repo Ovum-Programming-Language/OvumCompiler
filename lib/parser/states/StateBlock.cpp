@@ -198,6 +198,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
             class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(destructor_node.release())));
           }
         }
+        ctx.PopState();
         return false;
       }
     }

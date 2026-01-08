@@ -177,6 +177,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
   // Check for destructor
   if (lex == "destructor") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::DestructorDecl());
     return true;
   }
@@ -253,7 +254,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     init = ctx.Expr()->Parse(ts, *ctx.Diags());
   }
 
-  span = StateBase::Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
+  span = Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
   auto field = ctx.Factory()->MakeField(is_public, is_var, std::move(name), std::move(*type), std::move(init), span);
   class_decl->AddMember(std::move(field));
   ConsumeTerminators(ts);

@@ -50,7 +50,6 @@ IState::StepResult StateDestructorDecl::TryStep(ContextParser& ctx, ITokenStream
 
   const Token& start = ts.Peek();
 
-  // Check for access modifier
   bool is_public = true;
   if (start.GetLexeme() == "public" || start.GetLexeme() == "private") {
     is_public = (start.GetLexeme() == "public");
@@ -68,7 +67,7 @@ IState::StepResult StateDestructorDecl::TryStep(ContextParser& ctx, ITokenStream
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "(") {
-    if (ctx.Diags() != nullptr) {
+    if (ctx.Diags()) {
       ctx.Diags()->Error("P_DESTRUCTOR_PARAMS", "expected '(' after 'destructor'");
     }
     return std::unexpected(StateError(std::string_view("expected '(' after 'destructor'")));
@@ -77,48 +76,49 @@ IState::StepResult StateDestructorDecl::TryStep(ContextParser& ctx, ITokenStream
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ")") {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_DESTRUCTOR_PARAMS_CLOSE", "expected ')' after '(' in destructor");
+    if (ctx.Diags()) {
+      ctx.Diags()->Error("P_DESTRUCTOR_PARAMS_CLOSE", "expected ')' in destructor");
     }
-    return std::unexpected(StateError(std::string_view("expected ')' after '(' in destructor")));
+    return std::unexpected(StateError(std::string_view("expected ')' in destructor")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_DESTRUCTOR_RETURN", "expected ':' after destructor parameters");
+    if (ctx.Diags()) {
+      ctx.Diags()->Error("P_DESTRUCTOR_RETURN", "expected ':' after parameters");
     }
-    return std::unexpected(StateError(std::string_view("expected ':' after destructor parameters")));
+    return std::unexpected(StateError(std::string_view("expected ':' after parameters")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "Void") {
-    if (ctx.Diags() != nullptr) {
+    if (ctx.Diags()) {
       ctx.Diags()->Error("P_DESTRUCTOR_VOID", "expected 'Void' return type for destructor");
     }
-    return std::unexpected(StateError(std::string_view("expected 'Void' return type for destructor")));
+    return std::unexpected(StateError(std::string_view("expected 'Void' return type")));
   }
   ts.Consume();
 
   SkipTrivia(ts);
   if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
-    if (ctx.Diags() != nullptr) {
+    if (ctx.Diags()) {
       ctx.Diags()->Error("P_DESTRUCTOR_BODY", "expected '{' for destructor body");
     }
     return std::unexpected(StateError(std::string_view("expected '{' for destructor body")));
   }
 
   ts.Consume();
-  auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::move(body));
 
-  SourceSpan span = SpanFrom(start);
-  auto destructor = ctx.Factory()->MakeDestructor(is_public, std::move(body), span);
+  auto destructor = ctx.Factory()->MakeDestructor(is_public, nullptr, SpanFrom(start));
   ctx.PushNode(std::move(destructor));
 
+  auto body = ctx.Factory()->MakeBlock({}, SpanFrom(start));
+  ctx.PushNode(std::move(body));
+
   ctx.PushState(StateRegistry::Block());
+
   return true;
 }
 

@@ -164,12 +164,14 @@ TEST_F(ParserBytecodeTest, WhileLoop) {
 fun f(): Void {
   while (true) {
     break;
+    continue;
   }
 }
 )");
 
   EXPECT_NE(bc.find("while {"), std::string::npos);
   EXPECT_NE(bc.find("Break"), std::string::npos);
+  EXPECT_NE(bc.find("Continue"), std::string::npos);
   std::cout << bc << std::endl;
 }
 
@@ -277,7 +279,7 @@ class Point implements Drawable {
 TEST_F(ParserBytecodeTest, MultipleFunctions) {
   const std::string bc = GenerateBytecode(R"(
 fun a(): Void { return; }
-fun b(): Void { return; }
+fun b(): Void { a(); }
 )");
 
   EXPECT_NE(bc.find("a"), std::string::npos);
