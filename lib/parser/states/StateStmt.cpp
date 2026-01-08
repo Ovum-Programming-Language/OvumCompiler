@@ -213,12 +213,13 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
         return std::unexpected(StateError(std::string_view("failed to parse initialization expression")));
       }
 
-      SourceSpan span = StateBase::Union(StateBase::SpanFrom(tok), init->Span());
+      SourceSpan span = Union(SpanFrom(tok), init->Span());
       auto stmt = ctx.Factory()->MakeVarDeclStmt(is_var, std::move(name), std::move(*type), std::move(init), span);
       block->Append(std::move(stmt));
       ConsumeTerminators(ts);
       return false;
     }
+    ts.Rewind(1);
   }
 
   // Expression statement
