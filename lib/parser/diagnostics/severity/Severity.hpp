@@ -17,7 +17,6 @@ public:
   static std::shared_ptr<const ISeverity> Custom(std::string_view name, int level);
 };
 
-
 } // namespace ovum::compiler::parser
 
 #endif // PARSER_SEVERITY_HPP_

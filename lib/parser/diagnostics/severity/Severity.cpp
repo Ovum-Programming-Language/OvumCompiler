@@ -42,7 +42,6 @@ std::shared_ptr<const ISeverity> Severity::Error() {
   return kInst;
 }
 
-
 std::shared_ptr<const ISeverity> Severity::Custom(std::string_view name, int level) {
   return std::make_shared<const SimpleSeverity>(std::string{name}, level);
 }

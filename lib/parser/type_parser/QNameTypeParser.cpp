@@ -45,7 +45,8 @@ void SkipTrivia(ITokenStream& ts) {
 
 } // namespace
 
-QNameTypeParser::QNameTypeParser(IAstFactory& factory) noexcept : factory_(std::shared_ptr<IAstFactory>(&factory, [](auto*) {})) {
+QNameTypeParser::QNameTypeParser(IAstFactory& factory) noexcept :
+    factory_(std::shared_ptr<IAstFactory>(&factory, [](auto*) {})) {
 }
 
 std::unique_ptr<TypeReference> QNameTypeParser::ParseType(ITokenStream& ts, IDiagnosticSink& diags) {

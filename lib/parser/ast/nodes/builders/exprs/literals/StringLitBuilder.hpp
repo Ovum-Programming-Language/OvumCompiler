@@ -13,6 +13,6 @@ public:
   StringLitBuilder& WithValue(std::string value);
 };
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser
 
-#endif  // PARSER_STRINGLITBUILDER_HPP_
+#endif // PARSER_STRINGLITBUILDER_HPP_

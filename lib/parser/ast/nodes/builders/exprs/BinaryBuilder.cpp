@@ -17,4 +17,4 @@ BinaryBuilder& BinaryBuilder::WithRhs(std::unique_ptr<Expr> rhs) {
   return *this;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

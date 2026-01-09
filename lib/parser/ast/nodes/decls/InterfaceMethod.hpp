@@ -6,14 +6,13 @@
 
 #include "lib/parser/ast/nodes/base/AstNode.hpp"
 #include "lib/parser/ast/nodes/base/Decl.hpp"
-#include "lib/parser/types/TypeReference.hpp"
 #include "lib/parser/types/Param.hpp"
+#include "lib/parser/types/TypeReference.hpp"
 
 namespace ovum::compiler::parser {
 
 class InterfaceMethod : public Decl {
 public:
-
   void Accept(AstVisitor& visitor) override;
 
   const std::string& Name() const noexcept;

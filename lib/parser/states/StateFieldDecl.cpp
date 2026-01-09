@@ -14,4 +14,4 @@ IState::StepResult StateFieldDecl::TryStep(ContextParser& ctx, ITokenStream& ts)
   return std::unexpected(StateError(std::string_view("StateFieldDecl should not be called")));
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

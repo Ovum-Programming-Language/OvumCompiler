@@ -16,4 +16,4 @@ IState::StepResult StateSyncToStmtEnd::TryStep(ContextParser& ctx, ITokenStream&
   return false;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

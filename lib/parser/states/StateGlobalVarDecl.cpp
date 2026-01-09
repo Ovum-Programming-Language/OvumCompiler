@@ -14,4 +14,4 @@ IState::StepResult StateGlobalVarDecl::TryStep(ContextParser& ctx, ITokenStream&
   return std::unexpected(StateError(std::string_view("StateGlobalVarDecl should not be called")));
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser

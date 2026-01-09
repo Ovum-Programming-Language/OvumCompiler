@@ -79,7 +79,7 @@ const IState& StateRegistry::InterfaceDecl() {
 }
 
 const IState& StateRegistry::SignatureDecl() {
-  return InterfaceDecl();  // Alias for InterfaceDecl
+  return InterfaceDecl(); // Alias for InterfaceDecl
 }
 const IState& StateRegistry::TypeAliasDecl() {
   static StateTypeAliasDecl s;

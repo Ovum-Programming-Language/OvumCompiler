@@ -142,8 +142,7 @@ IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) c
   ctx.PushNode(std::move(body));
 
   SourceSpan span = StateBase::Union(StateBase::SpanFrom(start), iter_expr->Span());
-  auto for_stmt =
-      ctx.Factory()->MakeForStmt(std::move(iter_name), std::move(iter_expr), std::move(body), span);
+  auto for_stmt = ctx.Factory()->MakeForStmt(std::move(iter_name), std::move(iter_expr), std::move(body), span);
 
   block->Append(std::move(for_stmt));
   ctx.PushState(StateRegistry::Block());

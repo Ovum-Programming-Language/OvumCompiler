@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "lib/parser/ast/nodes/builders/base/NodeBuilderBase.hpp"
-#include "lib/parser/ast/nodes/stmts/Branch.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
+#include "lib/parser/ast/nodes/stmts/Branch.hpp"
 #include "lib/parser/ast/nodes/stmts/IfStmt.hpp"
 
 namespace ovum::compiler::parser {

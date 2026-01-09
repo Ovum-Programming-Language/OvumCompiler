@@ -1,8 +1,8 @@
 #ifndef PARSER_MATCHIDENTIFIER_HPP_
 #define PARSER_MATCHIDENTIFIER_HPP_
 
-#include "tokens/Token.hpp"
 #include "ITokenMatcher.hpp"
+#include "tokens/Token.hpp"
 
 namespace ovum::compiler::parser {
 

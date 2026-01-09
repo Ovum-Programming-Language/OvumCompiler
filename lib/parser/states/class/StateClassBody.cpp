@@ -29,7 +29,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string_view StateClassBody::Name() const {
   return "ClassBody";
@@ -63,4 +63,4 @@ IState::StepResult StateClassBody::TryStep(ContextParser& ctx, ITokenStream& ts)
   return true;
 }
 
-}  // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser
