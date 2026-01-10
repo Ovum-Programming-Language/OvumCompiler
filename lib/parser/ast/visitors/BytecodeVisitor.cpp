@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -56,17 +58,25 @@
 namespace ovum::compiler::parser {
 
 namespace {
-// TODO: Implement proper field size calculation based on actual type sizes
-// Currently uses a heuristic that assumes all fields are 8 bytes
-// Should calculate based on type: int/float/byte = 8, bool = 1, object = 8 (pointer), etc.
+
 size_t FieldSizeForType(const TypeReference& t) {
-  (void) t;
+  if (t.QualifiedName().empty()) {
+    return 8;
+  }
+
+  std::string_view type_name = t.SimpleName();
+
+  if (type_name == "int" || type_name == "float") {
+    return 8;
+  }
+  if (type_name == "byte" || type_name == "char" || type_name == "bool") {
+    return 1;
+  }
+
   return 8;
 }
 
-// helper: normalize string for printing (no quotes inside)
 std::string EscapeStringForEmit(const std::string& s) {
-  // minimal escaping only for double quotes
   std::string out;
   out.reserve(s.size());
   for (char c : s) {
@@ -81,8 +91,240 @@ std::string EscapeStringForEmit(const std::string& s) {
 }
 } // namespace
 
-BytecodeVisitor::BytecodeVisitor(std::ostream& output) : output_(output), next_function_id_(0) {
-  pending_init_static_ = {};
+const std::unordered_set<std::string> BytecodeVisitor::kBuiltinSystemCommands = {"Print",
+                                                                                 "PrintLine",
+                                                                                 "ReadLine",
+                                                                                 "ReadChar",
+                                                                                 "ReadInt",
+                                                                                 "ReadFloat",
+                                                                                 "UnixTime",
+                                                                                 "UnixTimeMs",
+                                                                                 "UnixTimeNs",
+                                                                                 "NanoTime",
+                                                                                 "FormatDateTime",
+                                                                                 "ParseDateTime",
+                                                                                 "FileExists",
+                                                                                 "DirectoryExists",
+                                                                                 "CreateDirectory",
+                                                                                 "DeleteFile",
+                                                                                 "DeleteDirectory",
+                                                                                 "MoveFile",
+                                                                                 "CopyFile",
+                                                                                 "ListDirectory",
+                                                                                 "GetCurrentDirectory",
+                                                                                 "ChangeDirectory",
+                                                                                 "SleepMs",
+                                                                                 "SleepNs",
+                                                                                 "Exit",
+                                                                                 "GetProcessId",
+                                                                                 "GetEnvironmentVariable",
+                                                                                 "SetEnvironmentVariable",
+                                                                                 "Random",
+                                                                                 "RandomRange",
+                                                                                 "RandomFloat",
+                                                                                 "RandomFloatRange",
+                                                                                 "SeedRandom",
+                                                                                 "GetMemoryUsage",
+                                                                                 "GetPeakMemoryUsage",
+                                                                                 "ForceGarbageCollection",
+                                                                                 "GetProcessorCount",
+                                                                                 "GetOsName",
+                                                                                 "GetOsVersion",
+                                                                                 "GetArchitecture",
+                                                                                 "GetUserName",
+                                                                                 "GetHomeDirectory",
+                                                                                 "GetLastError",
+                                                                                 "ClearError",
+                                                                                 "Interop",
+                                                                                 "TypeOf"};
+
+const std::unordered_map<std::string, std::string> BytecodeVisitor::kBuiltinReturnPrimitives = {
+    {"RandomFloatRange", "Float"},
+    {"RandomFloat", "Float"},
+    {"Random", "Int"},
+    {"RandomRange", "Int"},
+    {"UnixTime", "Int"},
+    {"UnixTimeMs", "Int"},
+    {"UnixTimeNs", "Int"},
+    {"NanoTime", "Int"},
+    {"GetProcessId", "Int"},
+    {"GetMemoryUsage", "Int"},
+    {"GetPeakMemoryUsage", "Int"},
+    {"GetProcessorCount", "Int"},
+};
+
+const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int",
+                                                                            "Float",
+                                                                            "String",
+                                                                            "Bool",
+                                                                            "Char",
+                                                                            "Byte",
+                                                                            "IntArray",
+                                                                            "FloatArray",
+                                                                            "StringArray",
+                                                                            "BoolArray",
+                                                                            "ByteArray",
+                                                                            "CharArray",
+                                                                            "ObjectArray"};
+
+const std::unordered_set<std::string> BytecodeVisitor::kPrimitiveTypeNames = {"int", "float", "byte", "char", "bool"};
+
+const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> BytecodeVisitor::kBuiltinMethods = {
+    {"String",
+     {
+         {"GetHash", "_String_GetHash_<C>"},
+         {"ToString", "_String_ToString_<C>"},
+         {"Length", "_String_Length_<C>"},
+         {"Equals", "_String_Equals_<C>_Object"},
+         {"Substring", "_String_Substring_<C>_int_int"},
+         {"Compare", "_String_Compare_<C>_String"},
+     }},
+    {"Int",
+     {
+         {"ToString", "_Int_ToString_<C>"},
+         {"GetHash", "_Int_GetHash_<C>"},
+         {"Equals", "_Int_Equals_<C>_Object"},
+     }},
+    {"Float",
+     {
+         {"ToString", "_Float_ToString_<C>"},
+         {"GetHash", "_Float_GetHash_<C>"},
+         {"Equals", "_Float_Equals_<C>_Object"},
+     }},
+    {"Byte",
+     {
+         {"ToString", "_Byte_ToString_<C>"},
+         {"GetHash", "_Byte_GetHash_<C>"},
+         {"Equals", "_Byte_Equals_<C>_Object"},
+     }},
+    {"Char",
+     {
+         {"ToString", "_Char_ToString_<C>"},
+         {"GetHash", "_Char_GetHash_<C>"},
+         {"Equals", "_Char_Equals_<C>_Object"},
+     }},
+    {"Bool",
+     {
+         {"ToString", "_Bool_ToString_<C>"},
+         {"GetHash", "_Bool_GetHash_<C>"},
+         {"Equals", "_Bool_Equals_<C>_Object"},
+     }},
+    {"IntArray",
+     {
+         {"Length", "_IntArray_Length_<C>"},
+         {"ToString", "_IntArray_ToString_<C>"},
+         {"GetHash", "_IntArray_GetHash_<C>"},
+         {"Equals", "_IntArray_Equals_<C>_Object"},
+         {"Clear", "_IntArray_Clear_<M>"},
+         {"ShrinkToFit", "_IntArray_ShrinkToFit_<M>"},
+         {"Reserve", "_IntArray_Reserve_<M>_int"},
+         {"Capacity", "_IntArray_Capacity_<C>"},
+         {"Add", "_IntArray_Add_<M>_int"},
+         {"RemoveAt", "_IntArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_IntArray_InsertAt_<M>_int_int"},
+         {"SetAt", "_IntArray_SetAt_<M>_int_int"},
+         {"GetAt", "_IntArray_GetAt_<C>_int"},
+     }},
+    {"FloatArray",
+     {
+         {"Length", "_FloatArray_Length_<C>"},
+         {"ToString", "_FloatArray_ToString_<C>"},
+         {"GetHash", "_FloatArray_GetHash_<C>"},
+         {"Equals", "_FloatArray_Equals_<C>_Object"},
+         {"Clear", "_FloatArray_Clear_<M>"},
+         {"ShrinkToFit", "_FloatArray_ShrinkToFit_<M>"},
+         {"Reserve", "_FloatArray_Reserve_<M>_int"},
+         {"Capacity", "_FloatArray_Capacity_<C>"},
+         {"Add", "_FloatArray_Add_<M>_float"},
+         {"RemoveAt", "_FloatArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_FloatArray_InsertAt_<M>_int_float"},
+         {"SetAt", "_FloatArray_SetAt_<M>_int_float"},
+         {"GetAt", "_FloatArray_GetAt_<C>_int"},
+     }},
+    {"ByteArray",
+     {
+         {"Length", "_ByteArray_Length_<C>"},
+         {"ToString", "_ByteArray_ToString_<C>"},
+         {"GetHash", "_ByteArray_GetHash_<C>"},
+         {"Equals", "_ByteArray_Equals_<C>_Object"},
+         {"Clear", "_ByteArray_Clear_<M>"},
+         {"ShrinkToFit", "_ByteArray_ShrinkToFit_<M>"},
+         {"Reserve", "_ByteArray_Reserve_<M>_int"},
+         {"Capacity", "_ByteArray_Capacity_<C>"},
+         {"Add", "_ByteArray_Add_<M>_byte"},
+         {"RemoveAt", "_ByteArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_ByteArray_InsertAt_<M>_int_byte"},
+         {"SetAt", "_ByteArray_SetAt_<M>_int_byte"},
+         {"GetAt", "_ByteArray_GetAt_<C>_int"},
+     }},
+    {"BoolArray",
+     {
+         {"Length", "_BoolArray_Length_<C>"},
+         {"ToString", "_BoolArray_ToString_<C>"},
+         {"GetHash", "_BoolArray_GetHash_<C>"},
+         {"Equals", "_BoolArray_Equals_<C>_Object"},
+         {"Clear", "_BoolArray_Clear_<M>"},
+         {"ShrinkToFit", "_BoolArray_ShrinkToFit_<M>"},
+         {"Reserve", "_BoolArray_Reserve_<M>_int"},
+         {"Capacity", "_BoolArray_Capacity_<C>"},
+         {"Add", "_BoolArray_Add_<M>_bool"},
+         {"RemoveAt", "_BoolArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_BoolArray_InsertAt_<M>_int_bool"},
+         {"SetAt", "_BoolArray_SetAt_<M>_int_bool"},
+         {"GetAt", "_BoolArray_GetAt_<C>_int"},
+     }},
+    {"CharArray",
+     {
+         {"Length", "_CharArray_Length_<C>"},
+         {"ToString", "_CharArray_ToString_<C>"},
+         {"GetHash", "_CharArray_GetHash_<C>"},
+         {"Equals", "_CharArray_Equals_<C>_Object"},
+         {"Clear", "_CharArray_Clear_<M>"},
+         {"ShrinkToFit", "_CharArray_ShrinkToFit_<M>"},
+         {"Reserve", "_CharArray_Reserve_<M>_int"},
+         {"Capacity", "_CharArray_Capacity_<C>"},
+         {"Add", "_CharArray_Add_<M>_char"},
+         {"RemoveAt", "_CharArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_CharArray_InsertAt_<M>_int_char"},
+         {"SetAt", "_CharArray_SetAt_<M>_int_char"},
+         {"GetAt", "_CharArray_GetAt_<C>_int"},
+     }},
+    {"StringArray",
+     {
+         {"Length", "_StringArray_Length_<C>"},
+         {"ToString", "_StringArray_ToString_<C>"},
+         {"GetHash", "_StringArray_GetHash_<C>"},
+         {"Equals", "_StringArray_Equals_<C>_Object"},
+         {"Clear", "_StringArray_Clear_<M>"},
+         {"ShrinkToFit", "_StringArray_ShrinkToFit_<M>"},
+         {"Reserve", "_StringArray_Reserve_<M>_int"},
+         {"Capacity", "_StringArray_Capacity_<C>"},
+         {"Add", "_StringArray_Add_<M>_Object"},
+         {"RemoveAt", "_StringArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_StringArray_InsertAt_<M>_int_Object"},
+         {"SetAt", "_StringArray_SetAt_<M>_int_Object"},
+         {"GetAt", "_StringArray_GetAt_<C>_int"},
+     }},
+    {"ObjectArray",
+     {
+         {"Length", "_ObjectArray_Length_<C>"},
+         {"ToString", "_ObjectArray_ToString_<C>"},
+         {"GetHash", "_ObjectArray_GetHash_<C>"},
+         {"Equals", "_ObjectArray_Equals_<C>_Object"},
+         {"Clear", "_ObjectArray_Clear_<M>"},
+         {"ShrinkToFit", "_ObjectArray_ShrinkToFit_<M>"},
+         {"Reserve", "_ObjectArray_Reserve_<M>_int"},
+         {"Capacity", "_ObjectArray_Capacity_<C>"},
+         {"Add", "_ObjectArray_Add_<M>_Object"},
+         {"RemoveAt", "_ObjectArray_RemoveAt_<M>_int"},
+         {"InsertAt", "_ObjectArray_InsertAt_<M>_int_Object"},
+         {"SetAt", "_ObjectArray_SetAt_<M>_int_Object"},
+         {"GetAt", "_ObjectArray_GetAt_<C>_int"},
+     }},
+};
+
+BytecodeVisitor::BytecodeVisitor(std::ostream& output) :
+    output_(output), next_function_id_(0), pending_init_static_({}) {
 }
 
 void BytecodeVisitor::EmitIndent() {
@@ -103,7 +345,14 @@ void BytecodeVisitor::EmitCommandWithInt(const std::string& command, int64_t val
 
 void BytecodeVisitor::EmitCommandWithFloat(const std::string& command, double value) {
   EmitIndent();
-  output_ << command << " " << value << "\n";
+  output_ << command << " ";
+
+  if (value == std::floor(value) && std::isfinite(value)) {
+    output_ << value << ".0";
+  } else {
+    output_ << value;
+  }
+  output_ << "\n";
 }
 
 void BytecodeVisitor::EmitCommandWithBool(const std::string& command, bool value) {
@@ -121,30 +370,8 @@ void BytecodeVisitor::EmitCommandWithStringWithoutBraces(const std::string& comm
   output_ << command << " " << EscapeStringForEmit(value) << "\n";
 }
 
-void BytecodeVisitor::EmitDup() {
-  EmitCommand("Dup");
-}
-
-void BytecodeVisitor::EmitSwap() {
-  EmitCommand("Swap");
-}
-
-void BytecodeVisitor::EmitRotate(int64_t n) {
-  EmitCommandWithInt("Rotate", n);
-}
-
-// Helper method for PushByte - emits PushByte command for Byte literals
 void BytecodeVisitor::EmitPushByte(uint8_t value) {
   EmitCommandWithInt("PushByte", static_cast<int64_t>(value));
-}
-
-// Helper methods for low-level vtable operations (for unsafe blocks)
-void BytecodeVisitor::EmitGetVTable(const std::string& class_name) {
-  EmitCommandWithStringWithoutBraces("GetVTable", class_name);
-}
-
-void BytecodeVisitor::EmitSetVTable(const std::string& class_name) {
-  EmitCommandWithStringWithoutBraces("SetVTable", class_name);
 }
 
 void BytecodeVisitor::EmitBlockStart() {
@@ -197,60 +424,58 @@ void BytecodeVisitor::EmitElseIfStart() {
 }
 
 void BytecodeVisitor::Visit(Module& node) {
-  // First pass: register function/method names and collect static initializers
-  // We need function registry so that later Call nodes can emit mangled names.
-  // TODO: Consider using a symbol table instead of multiple maps for better organization
   function_name_map_.clear();
   function_return_types_.clear();
   method_name_map_.clear();
   method_vtable_map_.clear();
   method_return_types_.clear();
   class_fields_.clear();
+  constructor_params_.clear();
   pending_init_static_.clear();
 
-  // scan declarations to register names and collect static inits
   for (auto& decl : node.MutableDecls()) {
-    // function declarations
     if (auto* f = dynamic_cast<FunctionDecl*>(decl.get())) {
       std::string mangled = GenerateFunctionId(f->Name(), f->Params());
       function_name_map_[f->Name()] = mangled;
-      // Store return type
+
       if (f->ReturnType() != nullptr) {
         function_return_types_[f->Name()] = TypeToMangledName(*f->ReturnType());
       } else {
         function_return_types_[f->Name()] = "void";
       }
     }
-    // class declarations: register methods and collect fields
+
     if (auto* c = dynamic_cast<ClassDecl*>(decl.get())) {
       std::string class_name = c->Name();
-      // collect fields and method mangles
+
       std::vector<std::pair<std::string, TypeReference>> fields;
       for (auto& m : c->MutableMembers()) {
-        if (auto* fd = dynamic_cast<FieldDecl*>(m.get())) {
-          fields.emplace_back(fd->Name(), fd->Type()); // assumes FieldDecl has GetType()
+        if (const auto* fd = dynamic_cast<FieldDecl*>(m.get())) {
+          fields.emplace_back(fd->Name(), fd->Type());
         }
         if (auto* sd = dynamic_cast<StaticFieldDecl*>(m.get())) {
-          // static field initializer -> add to pending_init_static_
           if (sd->MutableInit() != nullptr) {
             pending_init_static_.push_back(sd->MutableInit());
             pending_init_static_names_.push_back(sd->Name());
           }
         }
-        if (auto* md = dynamic_cast<MethodDecl*>(m.get())) {
-          // Check if this is a constructor (method with same name as class)
+        if (const auto* md = dynamic_cast<MethodDecl*>(m.get())) {
           if (md->Name() == class_name) {
-            // Register as constructor
-            std::string ctor = GenerateConstructorId(class_name, md->Params());
+            const std::string ctor = GenerateConstructorId(class_name, md->Params());
             method_name_map_[class_name + "::<ctor>"] = ctor;
+
+            std::vector<TypeReference> param_types;
+            for (const auto& param : md->Params()) {
+              param_types.push_back(param.GetType());
+            }
+            constructor_params_[class_name + "::<ctor>"] = param_types;
           } else {
-            // Normal method
-            bool is_mutable = false; // TODO: md->IsMutable() when available
+            bool is_mutable = false;
             std::string mid = GenerateMethodId(class_name, md->Name(), md->Params(), false, false, is_mutable);
             std::string vtable_name = GenerateMethodVTableName(md->Name(), md->Params(), is_mutable);
             method_name_map_[class_name + "::" + md->Name()] = mid;
             method_vtable_map_[class_name + "::" + md->Name()] = vtable_name;
-            // Store return type
+
             if (md->ReturnType() != nullptr) {
               method_return_types_[class_name + "::" + md->Name()] = TypeToMangledName(*md->ReturnType());
             } else {
@@ -261,11 +486,17 @@ void BytecodeVisitor::Visit(Module& node) {
         if (auto* cd = dynamic_cast<CallDecl*>(m.get())) {
           std::string ctor = GenerateConstructorId(class_name, cd->Params());
           method_name_map_[class_name + "::<ctor>"] = ctor;
+
+          std::vector<TypeReference> param_types;
+          for (const auto& param : cd->Params()) {
+            param_types.push_back(param.GetType());
+          }
+          constructor_params_[class_name + "::<ctor>"] = param_types;
         }
       }
       class_fields_[class_name] = fields;
     }
-    // global/static var declarations to init-static
+
     if (auto* gv = dynamic_cast<GlobalVarDecl*>(decl.get())) {
       if (gv->MutableInit() != nullptr) {
         pending_init_static_.push_back(gv->MutableInit());
@@ -274,13 +505,11 @@ void BytecodeVisitor::Visit(Module& node) {
     }
   }
 
-  // Emit a single init-static block even if empty (match examples)
   EmitIndent();
   output_ << "init-static {\n";
   indent_level_++;
   if (!pending_init_static_.empty()) {
     for (size_t i = 0; i < pending_init_static_.size(); ++i) {
-      // Evaluate initializer expression and SetStatic with assigned index
       pending_init_static_[i]->Accept(*this);
       EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(pending_init_static_names_[i])));
     }
@@ -289,7 +518,6 @@ void BytecodeVisitor::Visit(Module& node) {
   EmitIndent();
   output_ << "}\n\n";
 
-  // Second pass: actually emit declarations (functions, classes, etc.)
   for (auto& decl : node.MutableDecls()) {
     decl->Accept(*this);
   }
@@ -298,36 +526,27 @@ void BytecodeVisitor::Visit(Module& node) {
 void BytecodeVisitor::Visit(FunctionDecl& node) {
   ResetLocalVariables();
 
-  // Track current function name for return statement wrapping
   std::string prev_function = current_function_name_;
   current_function_name_ = node.Name();
 
-  // Register parameters as local variables (they start at index 0, 1, 2, ...)
-  // Parameters are pushed right-to-left, so LoadLocal 0 = first (leftmost) parameter
   for (auto& param : node.MutableParams()) {
     GetLocalIndex(param.GetName());
-    // Store parameter type for operand type determination
+
     std::string type_name = TypeToMangledName(param.GetType());
     variable_types_[param.GetName()] = type_name;
   }
 
-  // Register function in function map (if not already registered in first pass)
   std::string mangled = GenerateFunctionId(node.Name(), node.Params());
 
-  // Store return type for return statement wrapping
   if (node.ReturnType() != nullptr) {
     function_return_types_[node.Name()] = TypeToMangledName(*node.ReturnType());
   } else {
     function_return_types_[node.Name()] = "void";
   }
 
-  // Emit function declaration
-  // Format: pure(<param_types>)? function:<param_count> <mangled_name> { ... }
-  // According to documentation: pure(int, int) function:2 _Global_IsEven_int_int
-  // The parentheses contain parameter types, not return type
   if (node.IsPure()) {
     output_ << "pure";
-    // Generate parameter types in parentheses
+
     if (!node.Params().empty()) {
       output_ << "(";
       for (size_t i = 0; i < node.Params().size(); ++i) {
@@ -339,7 +558,6 @@ void BytecodeVisitor::Visit(FunctionDecl& node) {
       }
       output_ << ")";
     } else {
-      // No parameters - empty parentheses
       output_ << "()";
     }
     output_ << " ";
@@ -352,19 +570,16 @@ void BytecodeVisitor::Visit(FunctionDecl& node) {
   EmitBlockEnd();
   output_ << "\n";
 
-  // Restore previous function name
   current_function_name_ = prev_function;
 }
 
 void BytecodeVisitor::Visit(MethodDecl& node) {
-  // Check if this is actually a constructor (method with same name as class)
-  // If so, handle it as a constructor
   if (node.Name() == current_class_name_) {
     ResetLocalVariables();
     GetLocalIndex("this");
     for (auto& param : node.MutableParams()) {
       GetLocalIndex(param.GetName());
-      // Store parameter type for operand type determination
+
       std::string type_name = TypeToMangledName(param.GetType());
       variable_types_[param.GetName()] = type_name;
     }
@@ -372,11 +587,15 @@ void BytecodeVisitor::Visit(MethodDecl& node) {
     std::string ctor_id = GenerateConstructorId(current_class_name_, node.Params());
     method_name_map_[current_class_name_ + "::<ctor>"] = ctor_id;
 
-    // Constructor has this + params.size() parameters
+    std::vector<TypeReference> param_types;
+    for (const auto& param : node.Params()) {
+      param_types.push_back(param.GetType());
+    }
+    constructor_params_[current_class_name_ + "::<ctor>"] = param_types;
+
     output_ << "function:" << (node.Params().size() + 1) << " " << ctor_id << " ";
     EmitBlockStart();
     if (node.MutableBody() != nullptr) {
-      // Check if body already ends with a return statement
       bool has_return = false;
       auto& stmts = node.MutableBody()->GetStatements();
       if (!stmts.empty()) {
@@ -384,10 +603,9 @@ void BytecodeVisitor::Visit(MethodDecl& node) {
           has_return = true;
         }
       }
-      
+
       node.MutableBody()->Accept(*this);
-      
-      // Only add return this if body doesn't already return
+
       if (!has_return) {
         EmitCommandWithInt("LoadLocal", 0);
         EmitCommand("Return");
@@ -401,29 +619,23 @@ void BytecodeVisitor::Visit(MethodDecl& node) {
     return;
   }
 
-  // Normal method processing
   ResetLocalVariables();
-  // TODO: Handle 'this' parameter for instance methods (should be at index 0)
-  // Currently methods don't have 'this' in parameter list, but should access it as LoadLocal 0
-  // This might need adjustment based on how methods are called
+
+  GetLocalIndex("this");
   for (auto& param : node.MutableParams()) {
     GetLocalIndex(param.GetName());
-    // Store parameter type for operand type determination
+
     std::string type_name = TypeToMangledName(param.GetType());
     variable_types_[param.GetName()] = type_name;
   }
 
-  // Determine if method is mutable
-  // TODO: Add IsMutable() method to MethodDecl when mutable methods are supported
-  // For now, assume all methods are const (<C>)
-  bool is_mutable = false; // TODO: node.IsMutable() when available
+  bool is_mutable = false;
 
   std::string method_id = GenerateMethodId(current_class_name_, node.Name(), node.Params(), false, false, is_mutable);
-  // register mapping class::name -> mangled
+
   method_name_map_[current_class_name_ + "::" + node.Name()] = method_id;
 
-  // Note: Parameter count doesn't include 'this' for methods
-  output_ << "function:" << node.Params().size() << " " << method_id << " ";
+  output_ << "function:" << (node.Params().size() + 1) << " " << method_id << " ";
   EmitBlockStart();
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
@@ -434,32 +646,33 @@ void BytecodeVisitor::Visit(MethodDecl& node) {
 
 void BytecodeVisitor::Visit(CallDecl& node) {
   ResetLocalVariables();
-  // Constructor has 'this' as first parameter (LoadLocal 0)
-  // Parameters start from LoadLocal 1, 2, etc.
-  // So we register 'this' at index 0, then parameters at 1, 2, etc.
-  GetLocalIndex("this"); // Register 'this' at index 0
+
+  GetLocalIndex("this");
   for (auto& param : node.MutableParams()) {
     GetLocalIndex(param.GetName());
-    // Store parameter type for operand type determination
+
     std::string type_name = TypeToMangledName(param.GetType());
     variable_types_[param.GetName()] = type_name;
   }
 
   std::string call_id = GenerateConstructorId(current_class_name_, node.Params());
-  // store constructor mapping as Class::<ctor>
+
   method_name_map_[current_class_name_ + "::<ctor>"] = call_id;
 
-  // Constructor has this + params.size() parameters
+  std::vector<TypeReference> param_types;
+  for (const auto& param : node.Params()) {
+    param_types.push_back(param.GetType());
+  }
+  constructor_params_[current_class_name_ + "::<ctor>"] = param_types;
+
   output_ << "function:" << (node.Params().size() + 1) << " " << call_id << " ";
   EmitBlockStart();
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
-    // Constructors should return this if body doesn't already return
-    // Check if last statement is return - for now, always add return this
+
     EmitCommandWithInt("LoadLocal", 0);
     EmitCommand("Return");
   } else {
-    // If no body, return this
     EmitCommandWithInt("LoadLocal", 0);
     EmitCommand("Return");
   }
@@ -474,7 +687,7 @@ void BytecodeVisitor::Visit(InterfaceDecl& node) {
 }
 
 void BytecodeVisitor::Visit(InterfaceMethod& node) {
-  bool is_mutable = false; // TODO: node.IsMutable() when available
+  bool is_mutable = false;
   std::string id = GenerateMethodId(
       /* class_name */ "",
       node.Name(),
@@ -490,10 +703,6 @@ void BytecodeVisitor::Visit(TypeAliasDecl&) {
 }
 
 void BytecodeVisitor::Visit(GlobalVarDecl& node) {
-  // GlobalVarDecl initialization is already handled in init-static block
-  // during the first pass in Visit(Module&). This method is called during
-  // the second pass and should not generate any code - just ensure the
-  // variable is registered in static index map.
   (void) GetStaticIndex(node.Name());
 }
 
@@ -509,13 +718,12 @@ void BytecodeVisitor::Visit(StaticFieldDecl& node) {
 
 void BytecodeVisitor::Visit(DestructorDecl& node) {
   ResetLocalVariables();
-  // Destructor has 'this' as first parameter (LoadLocal 0)
-  GetLocalIndex("this"); // Register 'this' at index 0
+
+  GetLocalIndex("this");
 
   std::string destructor_id = GenerateDestructorId(current_class_name_);
   method_name_map_[current_class_name_ + "::<dtor>"] = destructor_id;
 
-  // Destructor has 1 parameter: this
   output_ << "function:1 " << destructor_id << " ";
   EmitBlockStart();
   if (node.MutableBody() != nullptr) {
@@ -526,35 +734,35 @@ void BytecodeVisitor::Visit(DestructorDecl& node) {
 }
 
 void BytecodeVisitor::Visit(ClassDecl& node) {
-  // collect fields and interfaces to build vtable
   std::string prev_class = current_class_name_;
   current_class_name_ = node.Name();
 
-  // Collect fields
   std::vector<std::pair<std::string, TypeReference>> fields;
-  std::vector<std::pair<std::string, std::string>> method_map; // methodName -> mangled
+  std::vector<std::pair<std::string, std::string>> method_map;
 
   for (auto& member : node.MutableMembers()) {
     if (auto* fd = dynamic_cast<FieldDecl*>(member.get())) {
       fields.emplace_back(fd->Name(), fd->Type());
     }
     if (auto* ifm = dynamic_cast<InterfaceMethod*>(member.get())) {
-      // interface methods in class? often not present in members; skip
       (void) ifm;
     }
     if (auto* md = dynamic_cast<MethodDecl*>(member.get())) {
-      // Skip methods with the same name as the class - these are constructors
-      // and should be handled as CallDecl, not MethodDecl
       if (md->Name() == node.Name()) {
-        // This is actually a constructor, treat it as such
         std::string ctor_id = GenerateConstructorId(node.Name(), md->Params());
         method_name_map_[node.Name() + "::<ctor>"] = ctor_id;
-        // Don't add to method_map - constructors are not in vtable
+
+        std::vector<TypeReference> param_types;
+        for (const auto& param : md->Params()) {
+          param_types.push_back(param.GetType());
+        }
+        constructor_params_[node.Name() + "::<ctor>"] = param_types;
+
       } else {
-        bool is_mutable = false; // TODO: md->IsMutable() when available
+        bool is_mutable = false;
         std::string mid = GenerateMethodId(node.Name(), md->Name(), md->Params(), false, false, is_mutable);
         std::string vtable_name = GenerateMethodVTableName(md->Name(), md->Params(), is_mutable);
-        // Store method name and params for vtable generation
+
         method_map.emplace_back(md->Name(), mid);
         method_name_map_[node.Name() + "::" + md->Name()] = mid;
         method_vtable_map_[node.Name() + "::" + md->Name()] = vtable_name;
@@ -562,11 +770,16 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
     }
     if (auto* cd = dynamic_cast<CallDecl*>(member.get())) {
       std::string ce = GenerateConstructorId(node.Name(), cd->Params());
-      // Constructors are not in vtable methods, only store for CallConstructor
+
       method_name_map_[node.Name() + "::<ctor>"] = ce;
+
+      std::vector<TypeReference> param_types;
+      for (const auto& param : cd->Params()) {
+        param_types.push_back(param.GetType());
+      }
+      constructor_params_[node.Name() + "::<ctor>"] = param_types;
     }
     if (auto* sfd = dynamic_cast<StaticFieldDecl*>(member.get())) {
-      // static field handled in module init-phase earlier
       if (sfd->MutableInit() != nullptr) {
         pending_init_static_.push_back(sfd->MutableInit());
         pending_init_static_names_.push_back(sfd->Name());
@@ -574,7 +787,6 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
     }
   }
 
-  // compute size: 4 (vtable idx) + 4 (badge) + sum(field sizes)
   size_t header = 4 + 4;
   size_t fields_size = 0;
   for (auto& f : fields) {
@@ -582,7 +794,6 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
   }
   size_t total_size = header + fields_size;
 
-  // Emit vtable block
   EmitIndent();
   output_ << "vtable " << node.Name() << " {\n";
   indent_level_++;
@@ -601,23 +812,20 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
     EmitIndent();
     output_ << "}\n";
   } else {
-    // empty interfaces block omitted in your examples, but keep consistent
   }
 
-  // methods (constructors are not in vtable, only regular methods)
   if (!method_map.empty()) {
     EmitIndent();
     output_ << "methods {\n";
     indent_level_++;
     for (auto& m : method_map) {
       EmitIndent();
-      // Format: _methodName_<C>_args: _ClassName_methodName_<C>_args
-      // Find the MethodDecl to get params for vtable name
+
       std::string vtable_name;
       for (auto& member : node.MutableMembers()) {
         if (auto* md = dynamic_cast<MethodDecl*>(member.get())) {
           if (md->Name() == m.first) {
-            bool is_mutable = false; // TODO: md->IsMutable() when available
+            bool is_mutable = false;
             vtable_name = GenerateMethodVTableName(m.first, md->Params(), is_mutable);
             break;
           }
@@ -630,17 +838,22 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
     output_ << "}\n";
   }
 
-  // vartable (fields)
   EmitIndent();
   output_ << "vartable {\n";
   indent_level_++;
-  // compute offsets: after header
+
   size_t offset = header;
   for (auto& f : fields) {
     EmitIndent();
-    // format type@offset — we show "Object" for user-defined if ambiguous
+
     std::string tname = TypeToMangledName(f.second);
-    output_ << f.first << ": " << tname << "@" << offset << "\n";
+    std::string vartable_type;
+    if (tname == "int" || tname == "float" || tname == "byte" || tname == "char" || tname == "bool") {
+      vartable_type = tname;
+    } else {
+      vartable_type = "Object";
+    }
+    output_ << f.first << ": " << vartable_type << "@" << offset << "\n";
     offset += FieldSizeForType(f.second);
   }
   indent_level_--;
@@ -651,7 +864,6 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
   EmitIndent();
   output_ << "}\n\n";
 
-  // Emit members (methods/constructors/destructors) bodies
   for (auto& member : node.MutableMembers()) {
     member->Accept(*this);
   }
@@ -668,36 +880,45 @@ void BytecodeVisitor::Visit(Block& node) {
 void BytecodeVisitor::Visit(VarDeclStmt& node) {
   if (node.MutableInit() != nullptr) {
     node.MutableInit()->Accept(*this);
+
+    std::string expected_type_name = TypeToMangledName(node.Type());
+    std::string value_type_name = GetTypeNameForExpr(node.MutableInit());
+    EmitTypeConversionIfNeeded(expected_type_name, value_type_name);
+
     EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(node.Name())));
   }
-  // Store variable type for later use
+
   std::string type_name = TypeToMangledName(node.Type());
   variable_types_[node.Name()] = type_name;
 }
 
 void BytecodeVisitor::Visit(ExprStmt& node) {
   if (node.MutableExpression() != nullptr) {
+    bool is_system_command = false;
+    if (auto* call = dynamic_cast<Call*>(node.MutableExpression())) {
+      if (auto* ns_ref = dynamic_cast<NamespaceRef*>(&call->MutableCallee())) {
+        is_system_command = IsBuiltinSystemCommand(ns_ref->Name());
+      }
+    }
+
     node.MutableExpression()->Accept(*this);
 
-    // Only pop if expression returns a value (not void)
-    // Check if expression is a Call that returns void
     bool should_pop = true;
 
-    if (auto* call = dynamic_cast<Call*>(node.MutableExpression())) {
-      // Try to determine return type from function name
+    if (is_system_command) {
+      should_pop = false;
+    } else if (auto* call = dynamic_cast<Call*>(node.MutableExpression())) {
       if (auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
         std::string func_name = ident->Name();
         auto return_type_it = function_return_types_.find(func_name);
         if (return_type_it != function_return_types_.end()) {
-          // Check if function returns void
           if (return_type_it->second == "void" || return_type_it->second == "Void") {
             should_pop = false;
           }
         }
       } else if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
-        // Method call - check if method returns void
         std::string method_name = field_access->Name();
-        // Try to determine object type to find method
+
         std::string object_type;
         if (auto* obj_ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
           auto type_it = variable_types_.find(obj_ident->Name());
@@ -706,7 +927,6 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
           }
         }
 
-        // Search for method return type
         std::string method_key;
         if (!object_type.empty()) {
           method_key = object_type + "::" + method_name;
@@ -724,10 +944,12 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
         }
       }
     } else if (auto* assign = dynamic_cast<Assign*>(node.MutableExpression())) {
-      // Assignment expressions return the assigned value
-      should_pop = true;
+      if (dynamic_cast<FieldAccess*>(&assign->MutableTarget())) {
+        should_pop = false;
+      } else {
+        should_pop = false;
+      }
     } else {
-      // Other expressions (literals, binary, unary, etc.) return values
       should_pop = true;
     }
 
@@ -741,17 +963,12 @@ void BytecodeVisitor::Visit(ReturnStmt& node) {
   if (node.MutableValue() != nullptr) {
     node.MutableValue()->Accept(*this);
 
-    // If return type is a wrapper and expression result is primitive, wrap it
     if (!current_function_name_.empty()) {
       auto it = function_return_types_.find(current_function_name_);
       if (it != function_return_types_.end()) {
         std::string return_type = it->second;
-        OperandType result_type = DetermineOperandType(node.MutableValue());
-        if (IsPrimitiveWrapper(return_type) &&
-            (result_type == OperandType::Int || result_type == OperandType::Float || result_type == OperandType::Byte ||
-             result_type == OperandType::Bool || result_type == OperandType::Char)) {
-          EmitWrapIfNeeded(return_type, result_type);
-        }
+        std::string result_type_name = GetTypeNameForExpr(node.MutableValue());
+        EmitTypeConversionIfNeeded(return_type, result_type_name);
       }
     }
   }
@@ -786,7 +1003,7 @@ void BytecodeVisitor::Visit(IfStmt& node) {
 
     EmitThenStart();
     branches[i].MutableThen()->Accept(*this);
-    if (auto* else_block = node.MutableElseBlock()) {
+    if (node.MutableElseBlock()) {
       EmitBlockEndWithoutEscape();
     } else {
       EmitBlockEnd();
@@ -817,55 +1034,83 @@ void BytecodeVisitor::Visit(WhileStmt& node) {
 }
 
 void BytecodeVisitor::Visit(ForStmt& node) {
-  // Lower for loop: for (item in collection) { body }
-  // Translates to: collection.iterator(), then while loop with MoveNext() and Current
+  bool collection_is_local = false;
+  size_t collection_index = 0;
+  std::string collection_var_name = node.IteratorName() + "_collection";
+  std::string collection_type;
 
-  // Get iterator from collection
   if (node.MutableIteratorExpr() != nullptr) {
-    node.MutableIteratorExpr()->Accept(*this);
-    // Call GetIterator method on collection (assumes collection has GetIterator())
-    EmitCommandWithStringWithoutBraces("Call", "_Object_GetIterator_<C>");
+    if (auto* ident = dynamic_cast<IdentRef*>(node.MutableIteratorExpr())) {
+      auto var_it = variable_types_.find(ident->Name());
+      auto local_it = local_variables_.find(ident->Name());
+      if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
+        collection_is_local = true;
+        collection_index = local_it->second;
+        collection_var_name = ident->Name();
+        collection_type = var_it->second;
+      } else {
+        node.MutableIteratorExpr()->Accept(*this);
+        collection_index = GetLocalIndex(collection_var_name);
+        EmitCommandWithInt("SetLocal", static_cast<int64_t>(collection_index));
+
+        collection_type = "ObjectArray";
+      }
+    } else {
+      node.MutableIteratorExpr()->Accept(*this);
+      collection_index = GetLocalIndex(collection_var_name);
+      EmitCommandWithInt("SetLocal", static_cast<int64_t>(collection_index));
+
+      collection_type = "ObjectArray";
+    }
   }
 
-  // Store iterator in a local variable
-  size_t iter_index = GetLocalIndex(node.IteratorName() + "_iter");
-  EmitCommandWithInt("SetLocal", static_cast<int64_t>(iter_index));
+  EmitCommandWithInt("PushInt", 0);
+  size_t counter_index = GetLocalIndex(node.IteratorName() + "_i");
+  EmitCommandWithInt("SetLocal", static_cast<int64_t>(counter_index));
 
-  // Create while loop: while (iterator.MoveNext()) { var item = iterator.Current; body }
   EmitIndent();
   output_ << "while ";
   EmitBlockStartWithoutSpaces();
 
-  // Check MoveNext: iterator.MoveNext()
-  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(iter_index));
-  EmitCommandWithStringWithoutBraces("Call", "_Iterator_MoveNext_<C>");
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(collection_index));
+
+  std::string length_method = GenerateArrayLengthMethodName(collection_type);
+  EmitCommandWithStringWithoutBraces("Call", length_method);
+
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(counter_index));
+
+  EmitCommand("IntLessThan");
 
   EmitBlockEndWithoutEscape();
   output_ << " then ";
   EmitBlockStartWithoutSpaces();
 
-  // Get current item: iterator.Current
-  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(iter_index));
-  EmitCommandWithStringWithoutBraces("Call", "_Iterator_Current_<C>");
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(counter_index));
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(collection_index));
 
-  // Store in iterator variable
+  if (collection_type.empty()) {
+    collection_type = "ObjectArray";
+  }
+
+  std::string method_name = GenerateArrayGetAtMethodName(collection_type);
+  EmitCommandWithStringWithoutBraces("Call", method_name);
+
   size_t item_index = GetLocalIndex(node.IteratorName());
   EmitCommandWithInt("SetLocal", static_cast<int64_t>(item_index));
 
-  // Emit loop body
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
   }
+
+  EmitCommandWithInt("PushInt", 1);
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(counter_index));
+  EmitCommand("IntAdd");
+  EmitCommandWithInt("SetLocal", static_cast<int64_t>(counter_index));
 
   EmitBlockEnd();
 }
 
 void BytecodeVisitor::Visit(UnsafeBlock& node) {
-  // Unsafe blocks allow low-level operations that bypass safety guarantees
-  // Inside unsafe blocks, operations like GetVTable/SetVTable can be used
-  // for low-level object manipulation
-  // Note: GetVTable/SetVTable can be called via sys::GetVTable/sys::SetVTable
-  // or through direct bytecode generation if needed
   EmitCommand("UnsafeBlockStart");
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
@@ -874,83 +1119,58 @@ void BytecodeVisitor::Visit(UnsafeBlock& node) {
 }
 
 void BytecodeVisitor::Visit(Binary& node) {
-  // Binary operations: push operands right-to-left, then emit operation command
-  // Special handling for null comparisons (== null, != null) using IsNull command
-
   const auto& op = node.Op();
 
-  // Check for null comparison before pushing operands
-  // Null comparisons are optimized to use IsNull command directly
   bool is_null_comparison = (dynamic_cast<NullLit*>(&node.MutableLhs()) != nullptr) ||
                             (dynamic_cast<NullLit*>(&node.MutableRhs()) != nullptr);
 
   if (is_null_comparison && (&op == &OpTags::Eq() || &op == &OpTags::Ne())) {
-    // For null comparison, push only the non-null operand, then check IsNull
     if (dynamic_cast<NullLit*>(&node.MutableLhs()) != nullptr) {
-      // lhs is null, rhs is the expression to check
       node.MutableRhs().Accept(*this);
     } else {
-      // rhs is null, lhs is the expression to check
       node.MutableLhs().Accept(*this);
     }
-    // Stack now: [value] - check if it's null
+
     EmitCommand("IsNull");
     if (&op == &OpTags::Ne()) {
-      // For != null, negate the result
       EmitCommand("BoolNot");
     }
     return;
   }
 
-  // Push operands right-to-left (right operand first, left operand last)
-  // According to bytecode spec: operands are pushed right-to-left
-  // This ensures correct stack order for binary operations
-  // Check if operands are primitive wrappers and unwrap them if needed
   std::string lhs_type_name = GetTypeNameForExpr(&node.MutableLhs());
   std::string rhs_type_name = GetTypeNameForExpr(&node.MutableRhs());
-
-  // Determine operation type based on operand types (before unwrapping)
-  // After unwrapping, primitives will be on stack, so we need to know the primitive type
-  // GetPrimitiveTypeForWrapper converts wrapper types to primitives for operation selection
-  std::string lhs_primitive =
-      IsPrimitiveWrapper(lhs_type_name) ? GetPrimitiveTypeForWrapper(lhs_type_name) : lhs_type_name;
-  std::string rhs_primitive =
-      IsPrimitiveWrapper(rhs_type_name) ? GetPrimitiveTypeForWrapper(rhs_type_name) : rhs_type_name;
 
   OperandType lhs_type = DetermineOperandType(&node.MutableLhs());
   OperandType rhs_type = DetermineOperandType(&node.MutableRhs());
 
-  // After unwrapping, both operands become primitives, so we need to determine
-  // the primitive type for operation selection
   if (IsPrimitiveWrapper(lhs_type_name)) {
-    // Convert wrapper to primitive type for operation
-    if (lhs_type_name == "Int")
+    if (lhs_type_name == "Int") {
       lhs_type = OperandType::Int;
-    else if (lhs_type_name == "Float")
+    } else if (lhs_type_name == "Float") {
       lhs_type = OperandType::Float;
-    else if (lhs_type_name == "Byte")
+    } else if (lhs_type_name == "Byte") {
       lhs_type = OperandType::Byte;
-    else if (lhs_type_name == "Char")
+    } else if (lhs_type_name == "Char") {
       lhs_type = OperandType::Char;
-    else if (lhs_type_name == "Bool")
+    } else if (lhs_type_name == "Bool") {
       lhs_type = OperandType::Bool;
+    }
   }
   if (IsPrimitiveWrapper(rhs_type_name)) {
-    // Convert wrapper to primitive type for operation
-    if (rhs_type_name == "Int")
+    if (rhs_type_name == "Int") {
       rhs_type = OperandType::Int;
-    else if (rhs_type_name == "Float")
+    } else if (rhs_type_name == "Float") {
       rhs_type = OperandType::Float;
-    else if (rhs_type_name == "Byte")
+    } else if (rhs_type_name == "Byte") {
       rhs_type = OperandType::Byte;
-    else if (rhs_type_name == "Char")
+    } else if (rhs_type_name == "Char") {
       rhs_type = OperandType::Char;
-    else if (rhs_type_name == "Bool")
+    } else if (rhs_type_name == "Bool") {
       rhs_type = OperandType::Bool;
+    }
   }
 
-  // Determine the dominant type (Float > Int > Byte > Bool)
-  // For comparison and bitwise operations, if one operand is Byte, prefer Byte operations
   bool is_comparison = (&op == &OpTags::Lt() || &op == &OpTags::Le() || &op == &OpTags::Gt() || &op == &OpTags::Ge() ||
                         &op == &OpTags::Eq() || &op == &OpTags::Ne());
   bool is_bitwise = (&op == &OpTags::BitwiseAnd() || &op == &OpTags::BitwiseOr() || &op == &OpTags::Xor() ||
@@ -960,7 +1180,6 @@ void BytecodeVisitor::Visit(Binary& node) {
   if (rhs_type == OperandType::Float || lhs_type == OperandType::Float) {
     dominant_type = OperandType::Float;
   } else if ((is_comparison || is_bitwise) && (rhs_type == OperandType::Byte || lhs_type == OperandType::Byte)) {
-    // For comparisons and bitwise operations, if one operand is Byte, use Byte operations
     dominant_type = OperandType::Byte;
   } else if (rhs_type == OperandType::Int || lhs_type == OperandType::Int) {
     dominant_type = OperandType::Int;
@@ -972,202 +1191,32 @@ void BytecodeVisitor::Visit(Binary& node) {
     dominant_type = OperandType::Bool;
   }
 
-  // For all operations including StringConcat, push operands right-to-left (right first, left last)
-  // According to bytecode spec: operands are pushed right-to-left
-  // StringConcat expects [left, right] on stack (left on top) and does left + right
-  // So we push right first, then left, which gives [left, right] (left on top)
   if (&op == &OpTags::Add() && dominant_type == OperandType::String) {
-    // String concatenation: push right first, then left (same as other operations)
     node.MutableRhs().Accept(*this);
-    if (IsPrimitiveWrapper(rhs_type_name)) {
-      EmitCommand("Unwrap");
-    }
-
+    EmitUnwrapIfNeeded(rhs_type_name);
     node.MutableLhs().Accept(*this);
-    if (IsPrimitiveWrapper(lhs_type_name)) {
-      EmitCommand("Unwrap");
-    }
-
+    EmitUnwrapIfNeeded(lhs_type_name);
     EmitCommand("StringConcat");
     return;
-  } else {
-    // For non-string operations, push operands right-to-left (right first, left last)
-    node.MutableRhs().Accept(*this);
-    if (IsPrimitiveWrapper(rhs_type_name)) {
-      EmitCommand("Unwrap");
-    }
-
-    node.MutableLhs().Accept(*this);
-    if (IsPrimitiveWrapper(lhs_type_name)) {
-      EmitCommand("Unwrap");
-    }
-
-    if (&op == &OpTags::Add()) {
-      // Non-string addition (already handled StringConcat above)
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatAdd");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteAdd");
-      } else {
-        EmitCommand("IntAdd");
-      }
-    } else if (&op == &OpTags::Sub()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatSubtract");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteSubtract");
-      } else {
-        EmitCommand("IntSubtract");
-      }
-    } else if (&op == &OpTags::Mul()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatMultiply");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteMultiply");
-      } else {
-        EmitCommand("IntMultiply");
-      }
-    } else if (&op == &OpTags::Div()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatDivide");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteDivide");
-      } else {
-        EmitCommand("IntDivide");
-      }
-    } else if (&op == &OpTags::Mod()) {
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteModulo");
-      } else {
-        EmitCommand("IntModulo");
-      }
-    } else if (&op == &OpTags::Lt()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatLessThan");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteLessThan");
-      } else {
-        EmitCommand("IntLessThan");
-      }
-    } else if (&op == &OpTags::Le()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatLessEqual");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteLessEqual");
-      } else {
-        EmitCommand("IntLessEqual");
-      }
-    } else if (&op == &OpTags::Gt()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatGreaterThan");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteGreaterThan");
-      } else {
-        EmitCommand("IntGreaterThan");
-      }
-    } else if (&op == &OpTags::Ge()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatGreaterEqual");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteGreaterEqual");
-      } else {
-        EmitCommand("IntGreaterEqual");
-      }
-    } else if (&op == &OpTags::Eq()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatEqual");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteEqual");
-      } else {
-        EmitCommand("IntEqual");
-      }
-    } else if (&op == &OpTags::Ne()) {
-      if (dominant_type == OperandType::Float) {
-        EmitCommand("FloatNotEqual");
-      } else if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteNotEqual");
-      } else {
-        EmitCommand("IntNotEqual");
-      }
-    } else if (&op == &OpTags::And()) {
-      // Logical AND (&&)
-      EmitCommand("BoolAnd");
-    } else if (&op == &OpTags::Or()) {
-      // Logical OR (||)
-      EmitCommand("BoolOr");
-    } else if (&op == &OpTags::Xor()) {
-      // Xor can be both logical (BoolXor) and bitwise (IntXor/ByteXor)
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteXor");
-      } else if (dominant_type == OperandType::Int) {
-        EmitCommand("IntXor");
-      } else {
-        EmitCommand("BoolXor");
-      }
-    } else if (&op == &OpTags::BitwiseAnd()) {
-      // Bitwise AND (&)
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteAnd");
-      } else {
-        EmitCommand("IntAnd");
-      }
-    } else if (&op == &OpTags::BitwiseOr()) {
-      // Bitwise OR (|)
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteOr");
-      } else {
-        EmitCommand("IntOr");
-      }
-    } else if (&op == &OpTags::LeftShift()) {
-      // Left shift (<<)
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteLeftShift");
-      } else {
-        EmitCommand("IntLeftShift");
-      }
-    } else if (&op == &OpTags::RightShift()) {
-      // Right shift (>>)
-      if (dominant_type == OperandType::Byte) {
-        EmitCommand("ByteRightShift");
-      } else {
-        EmitCommand("IntRightShift");
-      }
-    } else {
-      EmitCommand("UnsupportedBinaryOp");
-    }
-
-    // If operation returns a primitive and result should be wrapped, wrap it
-    // Comparison operations always return bool (primitive), so no wrapping
-    if (!is_comparison) {
-      // If both operands are wrappers of the same type, result should be that wrapper type
-      if (IsPrimitiveWrapper(lhs_type_name) && lhs_type_name == rhs_type_name) {
-        EmitWrapIfNeeded(lhs_type_name, dominant_type);
-      }
-      // If only LHS is wrapper, result should be that wrapper type
-      else if (IsPrimitiveWrapper(lhs_type_name) && !IsPrimitiveWrapper(rhs_type_name)) {
-        EmitWrapIfNeeded(lhs_type_name, dominant_type);
-      }
-      // If only RHS is wrapper, result should be that wrapper type
-      else if (!IsPrimitiveWrapper(lhs_type_name) && IsPrimitiveWrapper(rhs_type_name)) {
-        EmitWrapIfNeeded(rhs_type_name, dominant_type);
-      }
-    }
   }
+
+  node.MutableRhs().Accept(*this);
+  EmitUnwrapIfNeeded(rhs_type_name);
+  node.MutableLhs().Accept(*this);
+  EmitUnwrapIfNeeded(lhs_type_name);
+  EmitBinaryOperatorCommand(op, dominant_type);
 }
 
 void BytecodeVisitor::Visit(Unary& node) {
   const auto& op = node.Op();
-  
-  // For Unwrap operator (!), we don't need to unwrap primitive wrappers
-  // This is for unwrapping nullable types, not primitive wrappers
+
   if (&op == &OpTags::Unwrap()) {
     node.MutableOperand().Accept(*this);
-    // Unwrap nullable type - emit Unwrap command
+
     EmitCommand("Unwrap");
     return;
   }
 
-  // Check if operand is a primitive wrapper and unwrap it if needed
   std::string operand_type_name = GetTypeNameForExpr(&node.MutableOperand());
 
   node.MutableOperand().Accept(*this);
@@ -1186,27 +1235,23 @@ void BytecodeVisitor::Visit(Unary& node) {
     } else {
       EmitCommand("IntNegate");
     }
-    // For negation, result type is same as operand type
-    // If operand was a wrapper, wrap the result back
+
     if (IsPrimitiveWrapper(operand_type_name)) {
       EmitWrapIfNeeded(operand_type_name, operand_type);
     }
   } else if (&op == &OpTags::Plus()) {
-    // unary plus — no-op, but if operand was wrapper, result should be wrapper
     if (IsPrimitiveWrapper(operand_type_name)) {
       EmitWrapIfNeeded(operand_type_name, operand_type);
     }
   } else if (&op == &OpTags::Not()) {
-    // Logical NOT (!) - result is always bool (primitive)
     EmitCommand("BoolNot");
   } else if (&op == &OpTags::BitwiseNot()) {
-    // Bitwise NOT (~) - result type is same as operand type
     if (operand_type == OperandType::Byte) {
       EmitCommand("ByteNot");
     } else {
       EmitCommand("IntNot");
     }
-    // If operand was a wrapper, wrap the result back
+
     if (IsPrimitiveWrapper(operand_type_name)) {
       EmitWrapIfNeeded(operand_type_name, operand_type);
     }
@@ -1219,38 +1264,8 @@ void BytecodeVisitor::Visit(Assign& node) {
   const auto& op = node.Kind();
   bool is_copy_assign = (&op == &OpTags::CopyAssign());
 
-  // For SetField: we need [object, value] on stack
-  // Strategy: push value first, then object, so stack is [object, value]
-
-  // target
   if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableTarget())) {
-    // For field assignment: this.x = value
-    // We need: value, this, SetField index
-    // Push value first
-    node.MutableValue().Accept(*this);
-
-    // For CopyAssign with reference types, perform deep copy
-    if (is_copy_assign) {
-      // Determine if value is a reference type
-      // For now, assume all non-fundamental types are reference types
-      // TODO: More precise type checking
-      OperandType value_type = DetermineOperandType(&node.MutableValue());
-      if (value_type == OperandType::String || value_type == OperandType::Unknown) {
-        // Assume reference type - call Copy() method if available
-        // For now, just use the value as-is (Copy semantics may be handled by runtime)
-        // TODO: Emit Copy command or call Copy() method
-      }
-    }
-
-    // Then push object (this)
-    field_access->MutableObject().Accept(*this);
-    // Stack now: [object, value] - correct for SetField
-
-    // Find field index - try current class first, then search all classes
-    int field_index = -1;
     std::string object_type_name;
-
-    // Try to determine object type
     if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
       auto type_it = variable_types_.find(ident->Name());
       if (type_it != variable_types_.end()) {
@@ -1258,44 +1273,44 @@ void BytecodeVisitor::Visit(Assign& node) {
       }
     }
 
-    // Search for field in object's class
+    std::string expected_field_type_name;
     if (!object_type_name.empty()) {
-      auto fields_it = class_fields_.find(object_type_name);
-      if (fields_it != class_fields_.end()) {
-        const auto& fields = fields_it->second;
-        for (size_t i = 0; i < fields.size(); ++i) {
-          if (fields[i].first == field_access->Name()) {
-            field_index = static_cast<int>(i);
-            break;
-          }
-        }
+      expected_field_type_name = GetFieldTypeName(object_type_name, field_access->Name());
+    }
+    if (expected_field_type_name.empty() && !current_class_name_.empty()) {
+      expected_field_type_name = GetFieldTypeName(current_class_name_, field_access->Name());
+    }
+
+    node.MutableValue().Accept(*this);
+
+    if (!expected_field_type_name.empty()) {
+      std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
+      EmitTypeConversionIfNeeded(expected_field_type_name, value_type_name);
+    }
+
+    if (is_copy_assign) {
+      OperandType value_type = DetermineOperandType(&node.MutableValue());
+      if (value_type == OperandType::String || value_type == OperandType::Unknown) {
       }
     }
 
-    // Fallback: search in current class
+    field_access->MutableObject().Accept(*this);
+
+    int field_index = -1;
+    if (!object_type_name.empty()) {
+      field_index = FindFieldIndex(object_type_name, field_access->Name());
+    }
     if (field_index < 0 && !current_class_name_.empty()) {
-      auto fields_it = class_fields_.find(current_class_name_);
-      if (fields_it != class_fields_.end()) {
-        const auto& fields = fields_it->second;
-        for (size_t i = 0; i < fields.size(); ++i) {
-          if (fields[i].first == field_access->Name()) {
-            field_index = static_cast<int>(i);
-            break;
-          }
-        }
-      }
+      field_index = FindFieldIndex(current_class_name_, field_access->Name());
     }
-
     if (field_index < 0) {
-      field_index = 0; // Fallback
+      field_index = 0;
     }
     EmitCommandWithInt("SetField", field_index);
     return;
   }
 
-  // For CopyAssign with reference types (classes), call the copy method
   if (is_copy_assign) {
-    // Determine types of target and value
     std::string target_type_name;
     std::string value_type_name;
 
@@ -1306,7 +1321,6 @@ void BytecodeVisitor::Visit(Assign& node) {
       }
     }
 
-    // Determine value type
     if (auto* value_ident = dynamic_cast<IdentRef*>(&node.MutableValue())) {
       auto type_it = variable_types_.find(value_ident->Name());
       if (type_it != variable_types_.end()) {
@@ -1316,7 +1330,6 @@ void BytecodeVisitor::Visit(Assign& node) {
       value_type_name = GetTypeNameForExpr(&node.MutableValue());
     }
 
-    // Check if both are reference types (classes, not fundamental types)
     bool target_is_ref = target_type_name != "int" && target_type_name != "float" && target_type_name != "byte" &&
                          target_type_name != "char" && target_type_name != "bool" && target_type_name != "pointer" &&
                          !target_type_name.empty();
@@ -1324,227 +1337,234 @@ void BytecodeVisitor::Visit(Assign& node) {
                         value_type_name != "char" && value_type_name != "bool" && value_type_name != "pointer" &&
                         !value_type_name.empty();
 
-    // For CopyAssign with reference types, call the copy method: _{ClassName}_copy_<M>_{ClassName}
-    // Method call format: arguments are pushed right-to-left first, then object (this)
-    // For method calls, arguments are pushed first (right-to-left), then object
-    // For a method with one argument: push arg first, then obj (this) → stack: [obj (this), arg]
-    // Inside the method: LoadLocal 0 = this, LoadLocal 1 = arg
     if (target_is_ref && value_is_ref && target_type_name == value_type_name) {
-      // Push value (argument) first - arguments are pushed right-to-left, for single arg just push it
-      node.MutableValue().Accept(*this); // Push value (p2) - argument
-      // Then push target (as this for method call) - object is pushed after arguments
-      node.MutableTarget().Accept(*this); // Push target (p1) - this for method call
+      node.MutableValue().Accept(*this);
 
-      // Stack now: [p1 (this), p2 (arg)] - correct for method call where this is at bottom, arg at top
-      // Inside copy method: LoadLocal 0 = this (p1), LoadLocal 1 = arg (p2)
-      // Generate copy method name: _{ClassName}_copy_<M>_{ClassName}
+      node.MutableTarget().Accept(*this);
+
       std::string copy_method_name = GenerateCopyMethodId(target_type_name, value_type_name);
       EmitCommandWithStringWithoutBraces("Call", copy_method_name);
       return;
     }
   }
 
-  // For regular assignment or CopyAssign with fundamental types: value first, then SetLocal
-  node.MutableValue().Accept(*this);
-
-  // target
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
+    node.MutableValue().Accept(*this);
+
+    std::string expected_type_name;
+    auto type_it = variable_types_.find(ident->Name());
+    if (type_it != variable_types_.end()) {
+      expected_type_name = type_it->second;
+    }
+
+    if (!expected_type_name.empty()) {
+      std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
+      EmitTypeConversionIfNeeded(expected_type_name, value_type_name);
+    }
+
     EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
   } else if (auto* index_access = dynamic_cast<IndexAccess*>(&node.MutableTarget())) {
-    // For SetIndex: we need [object, index, value]
-    // Currently: value is on top
-    // Push object, then index (right-to-left for SetIndex: value is already pushed, then index, then object)
+    node.MutableValue().Accept(*this);
+
+    std::string array_type = GetTypeNameForExpr(&index_access->MutableObject());
+    std::string elem_type = GetElementTypeForArray(array_type);
+    std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
+    EmitTypeConversionIfNeeded(elem_type, value_type_name);
+
     index_access->MutableIndexExpr().Accept(*this);
     index_access->MutableObject().Accept(*this);
-    // Stack now: [object, index, value] - correct for SetIndex (object at bottom, value at top)
-    EmitCommand("SetIndex");
+
+    std::string method_name = GenerateArraySetAtMethodName(array_type);
+    EmitCommandWithStringWithoutBraces("Call", method_name);
   } else {
     EmitCommand("UnsupportedAssignTarget");
   }
 }
 
 void BytecodeVisitor::Visit(Call& node) {
-  // Push arguments right-to-left
   auto& args = node.MutableArgs();
-  for (auto it = args.rbegin(); it != args.rend(); ++it) {
-    (*it)->Accept(*this);
-  }
 
-  // If callee is NamespaceRef (sys::PrintLine), handle built-in commands
   if (auto* ns_ref = dynamic_cast<NamespaceRef*>(&node.MutableCallee())) {
     std::string ns_name = ns_ref->Name();
-    // Handle sys:: namespace functions as built-in commands
-    // TODO: Consider loading this list from a configuration file or making it extensible
-    // TODO: Verify all these commands are actually supported by the bytecode VM
-    static const std::unordered_set<std::string> kBuiltinCommands = {"Print",
-                                                                     "PrintLine",
-                                                                     "ReadLine",
-                                                                     "ReadChar",
-                                                                     "ReadInt",
-                                                                     "ReadFloat",
-                                                                     "UnixTime",
-                                                                     "UnixTimeMs",
-                                                                     "UnixTimeNs",
-                                                                     "NanoTime",
-                                                                     "FormatDateTime",
-                                                                     "ParseDateTime",
-                                                                     "FileExists",
-                                                                     "DirectoryExists",
-                                                                     "CreateDirectory",
-                                                                     "DeleteFile",
-                                                                     "DeleteDirectory",
-                                                                     "MoveFile",
-                                                                     "CopyFile",
-                                                                     "ListDirectory",
-                                                                     "GetCurrentDirectory",
-                                                                     "ChangeDirectory",
-                                                                     "SleepMs",
-                                                                     "SleepNs",
-                                                                     "Exit",
-                                                                     "GetProcessId",
-                                                                     "GetEnvironmentVariable",
-                                                                     "SetEnvironmentVariable",
-                                                                     "Random",
-                                                                     "RandomRange",
-                                                                     "RandomFloat",
-                                                                     "RandomFloatRange",
-                                                                     "SeedRandom",
-                                                                     "GetMemoryUsage",
-                                                                     "GetPeakMemoryUsage",
-                                                                     "ForceGarbageCollection",
-                                                                     "GetProcessorCount",
-                                                                     "GetOsName",
-                                                                     "GetOsVersion",
-                                                                     "GetArchitecture",
-                                                                     "GetUserName",
-                                                                     "GetHomeDirectory",
-                                                                     "GetLastError",
-                                                                     "ClearError",
-                                                                     "Interop",
-                                                                     "TypeOf"};
 
-    if (kBuiltinCommands.find(ns_name) != kBuiltinCommands.end()) {
+    if (IsBuiltinSystemCommand(ns_name)) {
+      EmitArgumentsInReverse(args);
       EmitCommand(ns_name);
+
+      auto wrap_type_it = kBuiltinReturnPrimitives.find(ns_name);
+      if (wrap_type_it != kBuiltinReturnPrimitives.end()) {
+        std::string wrapper_type = wrap_type_it->second;
+
+        if (wrapper_type == "Float") {
+          EmitCommandWithStringWithoutBraces("CallConstructor", "_Float_float");
+        } else if (wrapper_type == "Int") {
+          EmitCommandWithStringWithoutBraces("CallConstructor", "_Int_int");
+        }
+      }
+
       return;
     }
-    // For other namespace functions, try to find mangled name
+
     std::string full_name = "sys::" + ns_name;
     auto it = function_name_map_.find(full_name);
     if (it != function_name_map_.end()) {
       EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
-    // fallback
+
     EmitCommandWithStringWithoutBraces("Call", full_name);
     return;
   }
 
-  // If callee is a simple identifier
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableCallee())) {
     std::string name = ident->Name();
 
-    // Check if it's a constructor call (type name like Int, Float, String, etc.)
-    // Common built-in type constructors
-    static const std::unordered_set<std::string> builtin_types = {"Int",
-                                                                  "Float",
-                                                                  "String",
-                                                                  "Bool",
-                                                                  "Char",
-                                                                  "Byte",
-                                                                  "IntArray",
-                                                                  "FloatArray",
-                                                                  "StringArray",
-                                                                  "BoolArray",
-                                                                  "ByteArray",
-                                                                  "CharArray",
-                                                                  "ObjectArray"};
+    if (kBuiltinTypeNames.find(name) != kBuiltinTypeNames.end()) {
+      std::vector<std::string> expected_param_types;
+      if (args.size() == 1) {
+        std::string param_type;
+        if (name == "Int") {
+          param_type = "int";
+        } else if (name == "Float") {
+          param_type = "float";
+        } else if (name == "String") {
+          param_type = "String";
+        } else if (name == "Bool") {
+          param_type = "bool";
+        } else if (name == "Char") {
+          param_type = "char";
+        } else if (name == "Byte") {
+          param_type = "byte";
+        } else {
+          param_type = "Object";
+        }
+        expected_param_types.push_back(param_type);
+      } else if (args.size() == 2) {
+        expected_param_types.emplace_back("int");
+        std::string type2;
+        if (name == "IntArray") {
+          type2 = "int";
+        } else if (name == "FloatArray") {
+          type2 = "float";
+        } else if (name == "StringArray") {
+          type2 = "String";
+        } else if (name == "BoolArray") {
+          type2 = "bool";
+        } else if (name == "ByteArray") {
+          type2 = "byte";
+        } else if (name == "CharArray") {
+          type2 = "char";
+        } else if (name == "ObjectArray") {
+          type2 = "Object";
+        } else {
+          type2 = "Object";
+        }
+        expected_param_types.push_back(type2);
+      } else if (args.size() == 3) {
+        expected_param_types.emplace_back("float");
+        expected_param_types.emplace_back("float");
+        expected_param_types.emplace_back("float");
+      }
 
-    if (builtin_types.find(name) != builtin_types.end()) {
-      // Generate constructor name: _TypeName_paramTypes
+      for (size_t i = args.size(); i > 0; --i) {
+        size_t arg_idx = i - 1;
+        Expr* arg = args[arg_idx].get();
+
+        arg->Accept(*this);
+
+        if (arg_idx < expected_param_types.size()) {
+          const std::string& expected_type_name = expected_param_types[arg_idx];
+          std::string arg_type_name = GetTypeNameForExpr(arg);
+
+          bool needs_wrap = IsPrimitiveWrapper(expected_type_name) && IsPrimitiveType(arg_type_name);
+          bool needs_unwrap = IsPrimitiveType(expected_type_name) && IsPrimitiveWrapper(arg_type_name);
+
+          if (needs_wrap) {
+            const std::string& wrapper_type = expected_type_name;
+            const std::string& primitive_type = arg_type_name;
+            std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+            EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
+          } else if (needs_unwrap) {
+            EmitCommand("Unwrap");
+          }
+        }
+      }
+
       std::string constructor_name = "_" + name;
       if (args.size() == 1) {
-        // For single argument constructors, determine type from constructor name
-        std::string param_type;
-        if (name == "Int")
-          param_type = "int";
-        else if (name == "Float")
-          param_type = "float";
-        else if (name == "String")
-          param_type = "String";
-        else if (name == "Bool")
-          param_type = "bool";
-        else if (name == "Char")
-          param_type = "char";
-        else if (name == "Byte")
-          param_type = "byte";
-        else
-          param_type = "Object"; // fallback
-        constructor_name += "_" + param_type;
+        constructor_name += "_" + expected_param_types[0];
       } else if (args.size() == 2) {
-        // For two arguments (typically arrays: size, initial_value)
-        std::string type1 = "int"; // size
-        std::string type2;
-        if (name == "IntArray")
-          type2 = "int";
-        else if (name == "FloatArray")
-          type2 = "float";
-        else if (name == "StringArray")
-          type2 = "String";
-        else if (name == "BoolArray")
-          type2 = "bool";
-        else if (name == "ByteArray")
-          type2 = "byte";
-        else if (name == "CharArray")
-          type2 = "char";
-        else if (name == "ObjectArray")
-          type2 = "Object";
-        else
-          type2 = "Object"; // fallback
-        constructor_name += "_" + type1 + "_" + type2;
+        constructor_name += "_" + expected_param_types[0] + "_" + expected_param_types[1];
       } else if (args.size() == 3) {
-        // For three arguments (e.g., Rectangle: width, height)
-        constructor_name += "_float_float"; // Common case
+        constructor_name += "_float_float_float";
       }
       EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
       return;
     }
 
-    // Check if it's a constructor call for a user-defined class
-    // Look for registered constructor in method_name_map_ with key "ClassName::<ctor>"
     std::string ctor_key = name + "::<ctor>";
     auto ctor_it = method_name_map_.find(ctor_key);
     if (ctor_it != method_name_map_.end()) {
-      // This is a constructor call for a user-defined class
+      auto param_types_it = constructor_params_.find(ctor_key);
+      if (param_types_it != constructor_params_.end()) {
+        const auto& expected_param_types = param_types_it->second;
+
+        for (size_t i = args.size(); i > 0; --i) {
+          size_t arg_idx = i - 1;
+          Expr* arg = args[arg_idx].get();
+
+          arg->Accept(*this);
+
+          if (arg_idx < expected_param_types.size()) {
+            const TypeReference& expected_type = expected_param_types[arg_idx];
+            std::string expected_type_name = TypeToMangledName(expected_type);
+            std::string arg_type_name = GetTypeNameForExpr(arg);
+
+            bool needs_wrap = IsPrimitiveWrapper(expected_type_name) && IsPrimitiveType(arg_type_name);
+            bool needs_unwrap = IsPrimitiveType(expected_type_name) && IsPrimitiveWrapper(arg_type_name);
+
+            if (needs_wrap) {
+              const std::string& wrapper_type = expected_type_name;
+              const std::string& primitive_type = arg_type_name;
+              std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+              EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
+            } else if (needs_unwrap) {
+              EmitCommand("Unwrap");
+            }
+          }
+        }
+      } else {
+        for (auto& arg : std::ranges::reverse_view(args)) {
+          arg->Accept(*this);
+        }
+      }
       EmitCommandWithStringWithoutBraces("CallConstructor", ctor_it->second);
-      // After CallConstructor, we need to get and set the vtable for the object
-      // GetVTable gets the vtable for the class and pushes it onto the stack
-      // The object is already on the stack from CallConstructor
-      EmitGetVTable(name);
       return;
     }
 
-    // Check if it's a registered function
     auto it = function_name_map_.find(name);
     if (it != function_name_map_.end()) {
+      for (auto& arg : std::ranges::reverse_view(args)) {
+        arg->Accept(*this);
+      }
       EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
-    // fallback to name as-is
+
+    for (auto& arg : std::ranges::reverse_view(args)) {
+      arg->Accept(*this);
+    }
     EmitCommandWithStringWithoutBraces("Call", name);
     return;
   }
 
-  // If callee is FieldAccess (a.method), call method
   if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableCallee())) {
-    // emit object first
     field_access->MutableObject().Accept(*this);
 
     std::string method_name = field_access->Name();
 
-    // Try to determine object type
     std::string object_type;
     if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-      // Object is a variable - try to get its type
       auto type_it = variable_types_.find(ident->Name());
       if (type_it != variable_types_.end()) {
         object_type = type_it->second;
@@ -1555,28 +1575,248 @@ void BytecodeVisitor::Visit(Call& node) {
       object_type = "int";
     } else if (auto* float_lit = dynamic_cast<FloatLit*>(&field_access->MutableObject())) {
       object_type = "float";
+    } else if (auto* this_expr = dynamic_cast<ThisExpr*>(&field_access->MutableObject())) {
+      object_type = current_class_name_;
     }
 
-    // Check if method exists in multiple classes (virtual method case)
-    // Also check if calling through interface (interfaces always use virtual dispatch)
-    // Count how many classes have a method with this name
+    if (object_type.empty()) {
+      object_type = GetTypeNameForExpr(&field_access->MutableObject());
+    }
+
+    if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&field_access->MutableObject())) {
+      std::string field_type;
+      std::string nested_object_type = object_type;
+      if (auto* nested_this_expr = dynamic_cast<ThisExpr*>(&nested_field_access->MutableObject())) {
+        nested_object_type = current_class_name_;
+      } else if (auto* nested_ident = dynamic_cast<IdentRef*>(&nested_field_access->MutableObject())) {
+        auto type_it = variable_types_.find(nested_ident->Name());
+        if (type_it != variable_types_.end()) {
+          nested_object_type = type_it->second;
+        }
+      }
+
+      if (nested_object_type.empty() && !current_class_name_.empty()) {
+        nested_object_type = current_class_name_;
+      }
+
+      if (!nested_object_type.empty()) {
+        auto fields_it = class_fields_.find(nested_object_type);
+        if (fields_it != class_fields_.end()) {
+          const auto& fields = fields_it->second;
+          for (const auto& field : fields) {
+            if (field.first == nested_field_access->Name()) {
+              field_type = TypeToMangledName(field.second);
+              break;
+            }
+          }
+        }
+      }
+
+      if (field_type.empty() && !current_class_name_.empty()) {
+        auto fields_it = class_fields_.find(current_class_name_);
+        if (fields_it != class_fields_.end()) {
+          const auto& fields = fields_it->second;
+          for (const auto& field : fields) {
+            if (field.first == nested_field_access->Name()) {
+              field_type = TypeToMangledName(field.second);
+              break;
+            }
+          }
+        }
+      }
+
+      if (!field_type.empty()) {
+        object_type = field_type;
+      }
+    }
+
+    bool is_primitive_type = kPrimitiveTypeNames.find(object_type) != kPrimitiveTypeNames.end();
+
+    if (is_primitive_type) {
+      if (method_name == "ToString") {
+        if (object_type == "int") {
+          EmitCommand("IntToString");
+          return;
+        }
+        if (object_type == "float") {
+          EmitCommand("FloatToString");
+          return;
+        }
+      }
+    }
+
+    if (kBuiltinTypeNames.find(object_type) != kBuiltinTypeNames.end()) {
+      auto generate_array_method_name = [&](const std::string& array_type,
+                                            const std::string& method_name) -> std::string {
+        std::string base_name = "_" + array_type + "_" + method_name;
+
+        std::string elem_type;
+        if (array_type == "IntArray") {
+          elem_type = "int";
+        } else if (array_type == "FloatArray") {
+          elem_type = "float";
+        } else if (array_type == "ByteArray") {
+          elem_type = "byte";
+        } else if (array_type == "BoolArray") {
+          elem_type = "bool";
+        } else if (array_type == "CharArray") {
+          elem_type = "char";
+        } else if (array_type == "StringArray" || array_type == "ObjectArray") {
+          elem_type = "Object";
+        } else {
+          elem_type = "Object";
+        }
+
+        if (method_name == "Length" || method_name == "GetHash" || method_name == "ToString" ||
+            method_name == "Equals" || method_name == "Capacity" || method_name == "GetAt") {
+          base_name += "_<C>";
+        } else {
+          base_name += "_<M>";
+        }
+
+        if (method_name == "Add") {
+          base_name += "_" + elem_type;
+        } else if (method_name == "GetAt") {
+          base_name += "_int";
+        } else if (method_name == "SetAt") {
+          base_name += "_int_" + elem_type;
+        } else if (method_name == "InsertAt") {
+          base_name += "_int_" + elem_type;
+        } else if (method_name == "RemoveAt") {
+          base_name += "_int";
+        } else if (method_name == "Reserve") {
+          base_name += "_int";
+        } else if (method_name == "Equals") {
+          base_name += "_Object";
+        }
+
+        return base_name;
+      };
+
+      std::string method_call;
+      if (!object_type.empty()) {
+        auto type_it = kBuiltinMethods.find(object_type);
+        if (type_it != kBuiltinMethods.end()) {
+          auto method_it = type_it->second.find(method_name);
+          if (method_it != type_it->second.end()) {
+            method_call = method_it->second;
+          } else {
+            if (object_type.find("Array") != std::string::npos) {
+              method_call = generate_array_method_name(object_type, method_name);
+            }
+          }
+        }
+      }
+
+      if (!method_call.empty()) {
+        std::vector<std::string> expected_param_types;
+
+        if (method_name == "Add") {
+          std::string elem_type;
+          if (object_type == "IntArray") {
+            elem_type = "int";
+          } else if (object_type == "FloatArray") {
+            elem_type = "float";
+          } else if (object_type == "ByteArray") {
+            elem_type = "byte";
+          } else if (object_type == "BoolArray") {
+            elem_type = "bool";
+          } else if (object_type == "CharArray") {
+            elem_type = "char";
+          } else {
+            elem_type = "Object";
+          }
+          expected_param_types.push_back(elem_type);
+        } else if (method_name == "SetAt" || method_name == "InsertAt") {
+          expected_param_types.emplace_back("int");
+          std::string elem_type;
+          if (object_type == "IntArray") {
+            elem_type = "int";
+          } else if (object_type == "FloatArray") {
+            elem_type = "float";
+          } else if (object_type == "ByteArray") {
+            elem_type = "byte";
+          } else if (object_type == "BoolArray") {
+            elem_type = "bool";
+          } else if (object_type == "CharArray") {
+            elem_type = "char";
+          } else {
+            elem_type = "Object";
+          }
+          expected_param_types.push_back(elem_type);
+        } else if (method_name == "Equals") {
+          expected_param_types.emplace_back("Object");
+        } else if (method_name == "Substring") {
+          expected_param_types.emplace_back("int");
+          expected_param_types.emplace_back("int");
+        } else if (method_name == "Compare") {
+          expected_param_types.emplace_back("String");
+        } else if (method_name == "Reserve" || method_name == "RemoveAt") {
+          expected_param_types.emplace_back("int");
+        }
+
+        for (size_t i = args.size(); i > 0; --i) {
+          size_t arg_idx = i - 1;
+          Expr* arg = args[arg_idx].get();
+
+          arg->Accept(*this);
+
+          if (size_t param_idx = args.size() - 1 - arg_idx; param_idx < expected_param_types.size()) {
+            const std::string& expected_type_name = expected_param_types[param_idx];
+            std::string arg_type_name = GetTypeNameForExpr(arg);
+
+            bool needs_wrap = IsPrimitiveWrapper(expected_type_name) && IsPrimitiveType(arg_type_name);
+            bool needs_unwrap = IsPrimitiveType(expected_type_name) && IsPrimitiveWrapper(arg_type_name);
+
+            if (needs_wrap) {
+              const std::string& wrapper_type = expected_type_name;
+              const std::string& primitive_type = arg_type_name;
+              std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+              EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
+            } else if (needs_unwrap) {
+              EmitCommand("Unwrap");
+            }
+          }
+        }
+
+        EmitCommandWithStringWithoutBraces("Call", method_call);
+        return;
+      }
+
+      for (auto& arg : std::ranges::reverse_view(args)) {
+        arg->Accept(*this);
+      }
+      std::string vtable_name = "_" + method_name + "_<C>";
+      if (!args.empty()) {
+        vtable_name += "_Object";
+      }
+      EmitCommandWithStringWithoutBraces("CallVirtual", vtable_name);
+      return;
+    }
+
     int method_count = 0;
     std::string full_method_name;
     std::string vtable_name;
-    
-    // Check if object_type is an interface (interfaces start with 'I' by convention)
-    // If type name starts with 'I' followed by uppercase letter and method not found in method_name_map_,
-    // it's likely an interface type (interfaces don't have method implementations in method_name_map_)
+    std::string specific_method_name;
+
     bool is_interface_type = false;
-    if (!object_type.empty() && object_type.size() > 1 && object_type[0] == 'I') {
+    if (object_type == "Object") {
+      is_interface_type = true;
+    } else if (!object_type.empty() && object_type.size() > 1 && object_type[0] == 'I') {
       if (std::isupper(static_cast<unsigned char>(object_type[1]))) {
-        // Check if method not found for this type (interfaces don't have implementations)
         if (method_name_map_.find(object_type + "::" + method_name) == method_name_map_.end()) {
           is_interface_type = true;
         }
       }
     }
-    
+
+    if (!object_type.empty()) {
+      auto specific_it = method_name_map_.find(object_type + "::" + method_name);
+      if (specific_it != method_name_map_.end()) {
+        specific_method_name = specific_it->second;
+      }
+    }
+
     for (const auto& kv : method_name_map_) {
       auto pos = kv.first.rfind("::");
       if (pos != std::string::npos) {
@@ -1586,7 +1826,7 @@ void BytecodeVisitor::Visit(Call& node) {
           if (full_method_name.empty()) {
             full_method_name = kv.second;
           }
-          // Get vtable name for this method (should be same for all classes)
+
           auto vtable_it = method_vtable_map_.find(kv.first);
           if (vtable_it != method_vtable_map_.end() && vtable_name.empty()) {
             vtable_name = vtable_it->second;
@@ -1595,90 +1835,33 @@ void BytecodeVisitor::Visit(Call& node) {
       }
     }
 
-    // Use CallVirtual if:
-    // 1. Method found in multiple classes (virtual dispatch)
-    // 2. Calling through interface type (interfaces always use virtual dispatch)
-    // 3. Method not found in object's type but exists in other classes (polymorphism)
-    bool use_virtual = (method_count > 1) || 
-                       is_interface_type ||
-                       (!object_type.empty() && method_count > 0 && 
-                        method_name_map_.find(object_type + "::" + method_name) == method_name_map_.end());
-    
-    if (use_virtual) {
-      // Use CallVirtual for virtual method dispatch
+    bool use_virtual = (method_count > 1) || is_interface_type ||
+                       (!object_type.empty() && method_count > 0 && specific_method_name.empty());
+
+    for (auto& arg : std::ranges::reverse_view(args)) {
+      arg->Accept(*this);
+    }
+
+    if (!specific_method_name.empty()) {
+      EmitCommandWithStringWithoutBraces("Call", specific_method_name);
+    } else if (use_virtual) {
       if (vtable_name.empty()) {
-        // Generate vtable name: _MethodName_<C> or _MethodName_<C>_ParamTypes
-        // For methods with no parameters, it's just _MethodName_<C>
-        bool is_mutable = false; // TODO: determine from method signature
+        bool is_mutable = false;
         vtable_name = GenerateMethodVTableName(method_name, std::vector<Param>(), is_mutable);
       }
       EmitCommandWithStringWithoutBraces("CallVirtual", vtable_name);
     } else if (!full_method_name.empty()) {
-      // Direct call for non-virtual methods (found in single class)
       EmitCommandWithStringWithoutBraces("Call", full_method_name);
     } else {
-      // Fallback: try common built-in types
-      // Common methods on built-in types
-      static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> builtin_methods = {
-          {"String",
-           {
-               {"GetHash", "_String_GetHash_<C>"},
-               {"ToString", "_String_ToString_<C>"},
-               {"Length", "_String_Length_<C>"},
-               {"Equals", "_String_Equals_<C>_Object"},
-               {"Substring", "_String_Substring_<C>_int_int"},
-               {"Compare", "_String_Compare_<C>_String"},
-           }},
-          {"Int",
-           {
-               {"ToString", "_Int_ToString_<C>"},
-               {"GetHash", "_Int_GetHash_<C>"},
-               {"Equals", "_Int_Equals_<C>_Object"},
-           }},
-          {"Float",
-           {
-               {"ToString", "_Float_ToString_<C>"},
-               {"GetHash", "_Float_GetHash_<C>"},
-               {"Equals", "_Float_Equals_<C>_Object"},
-           }},
-          {"int",
-           {
-               {"ToString", "_Int_ToString_<C>"},
-               {"GetHash", "_Int_GetHash_<C>"},
-           }},
-          {"float",
-           {
-               {"ToString", "_Float_ToString_<C>"},
-               {"GetHash", "_Float_GetHash_<C>"},
-           }},
-      };
-
-      std::string method_call;
-      if (!object_type.empty()) {
-        auto type_it = builtin_methods.find(object_type);
-        if (type_it != builtin_methods.end()) {
-          auto method_it = type_it->second.find(method_name);
-          if (method_it != type_it->second.end()) {
-            method_call = method_it->second;
-          }
-        }
+      std::string vtable_name = "_" + method_name + "_<C>";
+      if (!args.empty()) {
+        vtable_name += "_Object";
       }
-
-      if (!method_call.empty()) {
-        EmitCommandWithStringWithoutBraces("Call", method_call);
-      } else {
-        // Unknown method - try CallVirtual as fallback
-        std::string vtable_name = "_" + method_name + "_<C>";
-        if (!args.empty()) {
-          vtable_name += "_Object"; // Simplified
-        }
-        EmitCommandWithStringWithoutBraces("CallVirtual", vtable_name);
-      }
+      EmitCommandWithStringWithoutBraces("CallVirtual", vtable_name);
     }
     return;
   }
 
-  // generic fallback: evaluate callee then CallDynamic
   node.MutableCallee().Accept(*this);
   EmitCommand("CallDynamic");
 }
@@ -1686,11 +1869,7 @@ void BytecodeVisitor::Visit(Call& node) {
 void BytecodeVisitor::Visit(FieldAccess& node) {
   node.MutableObject().Accept(*this);
 
-  // Find field index - try to determine object type first
-  int field_index = -1;
   std::string object_type_name;
-
-  // Try to determine object type from variable
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableObject())) {
     auto type_it = variable_types_.find(ident->Name());
     if (type_it != variable_types_.end()) {
@@ -1698,112 +1877,168 @@ void BytecodeVisitor::Visit(FieldAccess& node) {
     }
   }
 
-  // Search for field in object's class and determine field type
-  std::string field_type_name;
+  int field_index = -1;
   if (!object_type_name.empty()) {
-    auto fields_it = class_fields_.find(object_type_name);
-    if (fields_it != class_fields_.end()) {
-      const auto& fields = fields_it->second;
-      for (size_t i = 0; i < fields.size(); ++i) {
-        if (fields[i].first == node.Name()) {
-          field_index = static_cast<int>(i);
-          field_type_name = TypeToMangledName(fields[i].second);
-          break;
-        }
-      }
-    }
+    field_index = FindFieldIndex(object_type_name, node.Name());
   }
-
-  // Fallback: search in current class
   if (field_index < 0 && !current_class_name_.empty()) {
-    auto fields_it = class_fields_.find(current_class_name_);
-    if (fields_it != class_fields_.end()) {
-      const auto& fields = fields_it->second;
-      for (size_t i = 0; i < fields.size(); ++i) {
-        if (fields[i].first == node.Name()) {
-          field_index = static_cast<int>(i);
-          if (field_type_name.empty()) {
-            field_type_name = TypeToMangledName(fields[i].second);
-          }
-          break;
-        }
-      }
-    }
+    field_index = FindFieldIndex(current_class_name_, node.Name());
   }
-
   if (field_index < 0) {
-    field_index = 0; // Fallback
+    field_index = 0;
   }
 
   EmitCommandWithInt("GetField", field_index);
-
-  // Automatically emit Unwrap for primitive wrapper types if field type is a wrapper
-  if (!field_type_name.empty()) {
-    EmitUnwrapIfNeeded(field_type_name);
-  }
 }
 
 void BytecodeVisitor::Visit(IndexAccess& node) {
-  node.MutableObject().Accept(*this);
   node.MutableIndexExpr().Accept(*this);
-  EmitCommand("GetIndex");
+  node.MutableObject().Accept(*this);
+
+  std::string array_type = GetTypeNameForExpr(&node.MutableObject());
+  std::string method_name = GenerateArrayGetAtMethodName(array_type);
+  EmitCommandWithStringWithoutBraces("Call", method_name);
 }
 
 void BytecodeVisitor::Visit(NamespaceRef& node) {
-  // treat namespace references as static variable load
   EmitCommandWithInt("LoadStatic", static_cast<int64_t>(GetStaticIndex(node.Name())));
 }
 
 void BytecodeVisitor::Visit(SafeCall& node) {
   node.MutableObject().Accept(*this);
-  for (auto it = node.MutableArgs().rbegin(); it != node.MutableArgs().rend(); ++it) {
-    (*it)->Accept(*this);
+  for (auto& it : std::ranges::reverse_view(node.MutableArgs())) {
+    it->Accept(*this);
   }
   EmitCommandWithStringWithoutBraces("SafeCall", node.Method());
 }
 
 void BytecodeVisitor::Visit(Elvis& node) {
-  // lhs ?: rhs
-  node.MutableLhs().Accept(*this);
+  bool use_direct_var = false;
+  size_t lhs_var_index = 0;
+  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableLhs())) {
+    auto var_it = variable_types_.find(ident->Name());
+    auto local_it = local_variables_.find(ident->Name());
+    if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
+      use_direct_var = true;
+      lhs_var_index = local_it->second;
+    }
+  }
+
+  size_t temp_var_index = 0;
+  if (!use_direct_var) {
+    node.MutableLhs().Accept(*this);
+    std::string temp_var_name = "__elvis_temp_" + std::to_string(next_local_index_);
+    temp_var_index = GetLocalIndex(temp_var_name);
+    EmitCommandWithInt("SetLocal", static_cast<int64_t>(temp_var_index));
+  }
+
+  size_t var_index = use_direct_var ? lhs_var_index : temp_var_index;
+
   node.MutableRhs().Accept(*this);
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(var_index));
   EmitCommand("NullCoalesce");
 }
 
 void BytecodeVisitor::Visit(CastAs& node) {
-  node.MutableExpression().Accept(*this);
-
-  // Determine source and target types
   OperandType source_type = DetermineOperandType(&node.MutableExpression());
   std::string target_type_name = TypeToMangledName(node.Type());
+  bool is_nullable = node.Type().IsNullable();
 
-  // Emit type conversion commands for common conversions
   if (source_type == OperandType::Int && (target_type_name == "float" || target_type_name == "Float")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("IntToFloat");
+    return;
   } else if (source_type == OperandType::Float && (target_type_name == "int" || target_type_name == "Int")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("FloatToInt");
+    return;
   } else if (source_type == OperandType::Byte && (target_type_name == "int" || target_type_name == "Int")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("ByteToInt");
+    return;
   } else if (source_type == OperandType::Int && (target_type_name == "byte" || target_type_name == "Byte")) {
-    // Int to Byte - use IntToByte if available, otherwise use CastAs
-    EmitCommandWithStringWithoutBraces("CastAs", target_type_name);
+    node.MutableExpression().Accept(*this);
+    EmitCommand("IntToByte");
+    return;
   } else if (source_type == OperandType::String && (target_type_name == "int" || target_type_name == "Int")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("StringToInt");
+    return;
   } else if (source_type == OperandType::String && (target_type_name == "float" || target_type_name == "Float")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("StringToFloat");
+    return;
   } else if (source_type == OperandType::Int && target_type_name == "String") {
+    node.MutableExpression().Accept(*this);
     EmitCommand("IntToString");
+    return;
   } else if (source_type == OperandType::Float && target_type_name == "String") {
+    node.MutableExpression().Accept(*this);
     EmitCommand("FloatToString");
+    return;
   } else if (source_type == OperandType::Char && (target_type_name == "byte" || target_type_name == "Byte")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("CharToByte");
+    return;
   } else if (source_type == OperandType::Byte && (target_type_name == "char" || target_type_name == "Char")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("ByteToChar");
+    return;
   } else if (source_type == OperandType::Bool && (target_type_name == "byte" || target_type_name == "Byte")) {
+    node.MutableExpression().Accept(*this);
     EmitCommand("BoolToByte");
-  } else {
-    // Generic cast for other types
-    EmitCommandWithStringWithoutBraces("CastAs", target_type_name);
+    return;
   }
+
+  bool use_direct_var = false;
+  size_t expr_var_index = 0;
+  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableExpression())) {
+    auto var_it = variable_types_.find(ident->Name());
+    auto local_it = local_variables_.find(ident->Name());
+    if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
+      use_direct_var = true;
+      expr_var_index = local_it->second;
+    }
+  }
+
+  size_t temp_var_index = 0;
+  if (!use_direct_var) {
+    node.MutableExpression().Accept(*this);
+    std::string temp_var_name = "__cast_temp_" + std::to_string(next_local_index_);
+    temp_var_index = GetLocalIndex(temp_var_name);
+    EmitCommandWithInt("SetLocal", static_cast<int64_t>(temp_var_index));
+  }
+
+  size_t var_index = use_direct_var ? expr_var_index : temp_var_index;
+
+  TypeReference base_type = node.Type().WithoutNullable();
+  std::string base_type_name = TypeToMangledName(base_type);
+
+  bool target_is_nullable = is_nullable || (!target_type_name.empty() && target_type_name.back() == '?');
+
+  EmitIndent();
+  output_ << "if ";
+  EmitBlockStartWithoutSpaces();
+
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(var_index));
+  EmitCommandWithStringWithoutBraces("IsType", base_type_name);
+
+  EmitBlockEndWithoutEscape();
+  output_ << " then ";
+  EmitBlockStartWithoutSpaces();
+
+  EmitCommandWithInt("LoadLocal", static_cast<int64_t>(var_index));
+  EmitCommandWithStringWithoutBraces("CallConstructor", "_Nullable_Object");
+
+  EmitBlockEndWithoutEscape();
+  output_ << " else ";
+  EmitBlockStartWithoutSpaces();
+
+  EmitCommandWithString("PushString", "Unexpected type");
+  EmitCommand("PrintLine");
+  EmitCommand("PushNull");
+
+  EmitBlockEnd();
 }
 
 void BytecodeVisitor::Visit(TypeTestIs& node) {
@@ -1813,7 +2048,6 @@ void BytecodeVisitor::Visit(TypeTestIs& node) {
 }
 
 void BytecodeVisitor::Visit(IdentRef& node) {
-  // Prefer local; fallback to static/global
   if (local_variables_.contains(node.Name())) {
     EmitCommandWithInt("LoadLocal", static_cast<int64_t>(GetLocalIndex(node.Name())));
   } else {
@@ -1850,7 +2084,6 @@ void BytecodeVisitor::Visit(NullLit& node) {
 }
 
 void BytecodeVisitor::Visit(ThisExpr& node) {
-  // 'this' is always at local index 0 in methods and constructors
   EmitCommandWithInt("LoadLocal", 0);
 }
 
@@ -1877,7 +2110,6 @@ std::string BytecodeVisitor::GenerateMethodId(const std::string& class_name,
                                               bool is_mutable) {
   std::ostringstream oss;
   if (is_constructor) {
-    // Constructor: _ClassName_param1Type_param2Type
     oss << "_" << class_name;
     if (!params.empty()) {
       oss << "_";
@@ -1891,7 +2123,6 @@ std::string BytecodeVisitor::GenerateMethodId(const std::string& class_name,
   } else if (is_destructor) {
     oss << "_" << class_name << "_destructor";
   } else {
-    // Method: _ClassName_methodName_<C>_param1Type_param2Type or _ClassName_methodName_<M>_param1Type_param2Type
     oss << "_" << class_name << "_" << method_name;
     if (is_mutable) {
       oss << "_<M>";
@@ -1931,8 +2162,6 @@ std::string BytecodeVisitor::GenerateDestructorId(const std::string& class_name)
 }
 
 std::string BytecodeVisitor::GenerateCopyMethodId(const std::string& class_name, const std::string& param_type) {
-  // Format: _{ClassName}_copy_<M>_{ClassName}
-  // This is a special member method that can only be called via := operator
   return "_" + class_name + "_copy_<M>_" + param_type;
 }
 
@@ -1940,7 +2169,7 @@ std::string BytecodeVisitor::GenerateMethodVTableName(const std::string& method_
                                                       const std::vector<Param>& params,
                                                       bool is_mutable) {
   std::ostringstream oss;
-  // Format: _methodName_<C>_param1Type_param2Type or _methodName_<M>_param1Type_param2Type
+
   oss << "_" << method_name;
   if (is_mutable) {
     oss << "_<M>";
@@ -1962,9 +2191,9 @@ std::string BytecodeVisitor::GenerateMethodVTableName(const std::string& method_
 std::string BytecodeVisitor::TypeToMangledName(const TypeReference& type) {
   std::ostringstream oss;
   const auto& qname = type.QualifiedName();
-  // For mangled names, use only the simple name (last component), not the full qualified name
+
   if (!qname.empty()) {
-    oss << qname.back(); // Use last component only
+    oss << qname.back();
   }
 
   if (type.Arity() > 0) {
@@ -2019,19 +2248,15 @@ size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
 
 void BytecodeVisitor::ResetLocalVariables() {
   local_variables_.clear();
-  variable_types_.clear(); // Also clear variable types
+  variable_types_.clear();
   next_local_index_ = 0;
 }
 
-// Determines the operand type of an expression for proper bytecode generation
-// Uses TypeReference information from AST nodes instead of just dynamic_cast on literals
-// This allows correct type-aware code generation for variables, fields, and complex expressions
 BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
   if (expr == nullptr) {
     return OperandType::Unknown;
   }
 
-  // Check literals first (fast path for constant values)
   if (dynamic_cast<IntLit*>(expr) != nullptr) {
     return OperandType::Int;
   }
@@ -2048,7 +2273,6 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     return OperandType::Char;
   }
 
-  // Check variable types from variable_types_ map
   if (auto* ident = dynamic_cast<IdentRef*>(expr)) {
     auto it = variable_types_.find(ident->Name());
     if (it != variable_types_.end()) {
@@ -2069,8 +2293,6 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  // Check FieldAccess - try to get type from field declaration in class_fields_
-  // Searches in object's class first, then falls back to current class
   if (auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
     if (!current_class_name_.empty()) {
       auto fields_it = class_fields_.find(current_class_name_);
@@ -2099,7 +2321,6 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  // Check CastAs - use the target type (cast expression's result type)
   if (auto* cast = dynamic_cast<CastAs*>(expr)) {
     const std::string& type_name = TypeToMangledName(cast->Type());
     if (type_name == "int" || type_name == "Int") {
@@ -2117,25 +2338,20 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  // Check Binary/Unary - recursively determine from operands
-  // For binary operations, returns the dominant type (Float > Int > Byte > String > Bool)
   if (auto* binary = dynamic_cast<Binary*>(expr)) {
     OperandType lhs_type = DetermineOperandType(&binary->MutableLhs());
     OperandType rhs_type = DetermineOperandType(&binary->MutableRhs());
 
-    // For shift operations (<<, >>), result type is the same as left operand type
     const auto& op = binary->Op();
     if (&op == &OpTags::LeftShift() || &op == &OpTags::RightShift()) {
       return lhs_type != OperandType::Unknown ? lhs_type : OperandType::Int;
     }
 
-    // For bitwise operations (and, or, xor), if one operand is Byte, prefer Byte
     bool is_bitwise = (&op == &OpTags::BitwiseAnd() || &op == &OpTags::BitwiseOr() || &op == &OpTags::Xor());
     if (is_bitwise && (lhs_type == OperandType::Byte || rhs_type == OperandType::Byte)) {
       return OperandType::Byte;
     }
 
-    // Return dominant type based on type promotion rules
     if (lhs_type == OperandType::Float || rhs_type == OperandType::Float) {
       return OperandType::Float;
     } else if (lhs_type == OperandType::Int || rhs_type == OperandType::Int) {
@@ -2151,7 +2367,6 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  // For unary operations, return the type of the operand
   if (auto* unary = dynamic_cast<Unary*>(expr)) {
     return DetermineOperandType(&unary->MutableOperand());
   }
@@ -2182,7 +2397,6 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     return "unknown";
   }
 
-  // Check if it's a variable reference
   if (auto* ident = dynamic_cast<IdentRef*>(expr)) {
     auto it = variable_types_.find(ident->Name());
     if (it != variable_types_.end()) {
@@ -2190,9 +2404,26 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     }
   }
 
-  // Check if it's a field access
   if (auto* field = dynamic_cast<FieldAccess*>(expr)) {
-    // Try to determine type from field declaration
+    std::string object_type_name;
+    if (auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
+      auto type_it = variable_types_.find(ident->Name());
+      if (type_it != variable_types_.end()) {
+        object_type_name = type_it->second;
+      }
+    }
+
+    if (!object_type_name.empty()) {
+      auto fields_it = class_fields_.find(object_type_name);
+      if (fields_it != class_fields_.end()) {
+        for (const auto& f : fields_it->second) {
+          if (f.first == field->Name()) {
+            return TypeToMangledName(f.second);
+          }
+        }
+      }
+    }
+
     if (!current_class_name_.empty()) {
       auto fields_it = class_fields_.find(current_class_name_);
       if (fields_it != class_fields_.end()) {
@@ -2205,21 +2436,25 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     }
   }
 
-  // For literals, return primitive type (they are always primitives)
-  if (dynamic_cast<IntLit*>(expr) != nullptr)
+  if (dynamic_cast<IntLit*>(expr) != nullptr) {
     return "int";
-  if (dynamic_cast<FloatLit*>(expr) != nullptr)
+  }
+  if (dynamic_cast<FloatLit*>(expr) != nullptr) {
     return "float";
-  if (dynamic_cast<ByteLit*>(expr) != nullptr)
+  }
+  if (dynamic_cast<ByteLit*>(expr) != nullptr) {
     return "byte";
-  if (dynamic_cast<CharLit*>(expr) != nullptr)
+  }
+  if (dynamic_cast<CharLit*>(expr) != nullptr) {
     return "char";
-  if (dynamic_cast<BoolLit*>(expr) != nullptr)
+  }
+  if (dynamic_cast<BoolLit*>(expr) != nullptr) {
     return "bool";
-  if (dynamic_cast<StringLit*>(expr) != nullptr)
+  }
+  if (dynamic_cast<StringLit*>(expr) != nullptr) {
     return "String";
+  }
 
-  // For other expressions, return primitive type based on OperandType
   return GetOperandTypeName(expr);
 }
 
@@ -2234,30 +2469,40 @@ bool BytecodeVisitor::IsPrimitiveType(const std::string& type_name) const {
 }
 
 std::string BytecodeVisitor::GetPrimitiveTypeForWrapper(const std::string& wrapper_type) const {
-  if (wrapper_type == "Int")
+  if (wrapper_type == "Int") {
     return "int";
-  if (wrapper_type == "Float")
+  }
+  if (wrapper_type == "Float") {
     return "float";
-  if (wrapper_type == "Byte")
+  }
+  if (wrapper_type == "Byte") {
     return "byte";
-  if (wrapper_type == "Char")
+  }
+  if (wrapper_type == "Char") {
     return "char";
-  if (wrapper_type == "Bool")
+  }
+  if (wrapper_type == "Bool") {
     return "bool";
+  }
   return wrapper_type;
 }
 
 std::string BytecodeVisitor::GetWrapperTypeForPrimitive(const std::string& primitive_type) const {
-  if (primitive_type == "int")
+  if (primitive_type == "int") {
     return "Int";
-  if (primitive_type == "float")
+  }
+  if (primitive_type == "float") {
     return "Float";
-  if (primitive_type == "byte")
+  }
+  if (primitive_type == "byte") {
     return "Byte";
-  if (primitive_type == "char")
+  }
+  if (primitive_type == "char") {
     return "Char";
-  if (primitive_type == "bool")
+  }
+  if (primitive_type == "bool") {
     return "Bool";
+  }
   return primitive_type;
 }
 
@@ -2268,12 +2513,219 @@ void BytecodeVisitor::EmitUnwrapIfNeeded(const std::string& type_name) {
 }
 
 void BytecodeVisitor::EmitWrapIfNeeded(const std::string& expected_type, OperandType result_type) {
-  // If expected type is a wrapper and result is primitive, wrap it
   if (IsPrimitiveWrapper(expected_type)) {
     std::string primitive_type = GetPrimitiveTypeForWrapper(expected_type);
-    // Constructor name format: _WrapperType_primitiveType (e.g., _Int_int)
-    std::string constructor_name = "_" + expected_type + "_" + primitive_type;
-    EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
+    EmitWrapConstructorCall(expected_type, primitive_type);
+  }
+}
+
+void BytecodeVisitor::EmitTypeConversionIfNeeded(const std::string& expected_type, const std::string& actual_type) {
+  if (IsPrimitiveWrapper(expected_type) && IsPrimitiveType(actual_type)) {
+    EmitWrapConstructorCall(expected_type, actual_type);
+  } else if (IsPrimitiveType(expected_type) && IsPrimitiveWrapper(actual_type)) {
+    EmitCommand("Unwrap");
+  }
+}
+
+void BytecodeVisitor::EmitWrapConstructorCall(const std::string& wrapper_type, const std::string& primitive_type) {
+  std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+  EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
+}
+
+int BytecodeVisitor::FindFieldIndex(const std::string& class_name, const std::string& field_name) {
+  auto fields_it = class_fields_.find(class_name);
+  if (fields_it != class_fields_.end()) {
+    const auto& fields = fields_it->second;
+    for (size_t i = 0; i < fields.size(); ++i) {
+      if (fields[i].first == field_name) {
+        return static_cast<int>(i);
+      }
+    }
+  }
+  return -1;
+}
+
+std::string BytecodeVisitor::GetFieldTypeName(const std::string& class_name, const std::string& field_name) {
+  auto fields_it = class_fields_.find(class_name);
+  if (fields_it != class_fields_.end()) {
+    const auto& fields = fields_it->second;
+    for (const auto& field : fields) {
+      if (field.first == field_name) {
+        return TypeToMangledName(field.second);
+      }
+    }
+  }
+  return "";
+}
+
+void BytecodeVisitor::EmitBinaryOperatorCommand(const IBinaryOpTag& op, OperandType dominant_type) {
+  const auto emit_type_command =
+      [this](OperandType type, const std::string& float_cmd, const std::string& byte_cmd, const std::string& int_cmd) {
+        if (type == OperandType::Float) {
+          EmitCommand(float_cmd);
+        } else if (type == OperandType::Byte) {
+          EmitCommand(byte_cmd);
+        } else {
+          EmitCommand(int_cmd);
+        }
+      };
+
+  if (&op == &OpTags::Add()) {
+    emit_type_command(dominant_type, "FloatAdd", "ByteAdd", "IntAdd");
+  } else if (&op == &OpTags::Sub()) {
+    emit_type_command(dominant_type, "FloatSubtract", "ByteSubtract", "IntSubtract");
+  } else if (&op == &OpTags::Mul()) {
+    emit_type_command(dominant_type, "FloatMultiply", "ByteMultiply", "IntMultiply");
+  } else if (&op == &OpTags::Div()) {
+    emit_type_command(dominant_type, "FloatDivide", "ByteDivide", "IntDivide");
+  } else if (&op == &OpTags::Mod()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteModulo");
+    } else {
+      EmitCommand("IntModulo");
+    }
+  } else if (&op == &OpTags::Lt()) {
+    emit_type_command(dominant_type, "FloatLessThan", "ByteLessThan", "IntLessThan");
+  } else if (&op == &OpTags::Le()) {
+    emit_type_command(dominant_type, "FloatLessEqual", "ByteLessEqual", "IntLessEqual");
+  } else if (&op == &OpTags::Gt()) {
+    emit_type_command(dominant_type, "FloatGreaterThan", "ByteGreaterThan", "IntGreaterThan");
+  } else if (&op == &OpTags::Ge()) {
+    emit_type_command(dominant_type, "FloatGreaterEqual", "ByteGreaterEqual", "IntGreaterEqual");
+  } else if (&op == &OpTags::Eq()) {
+    emit_type_command(dominant_type, "FloatEqual", "ByteEqual", "IntEqual");
+  } else if (&op == &OpTags::Ne()) {
+    emit_type_command(dominant_type, "FloatNotEqual", "ByteNotEqual", "IntNotEqual");
+  } else if (&op == &OpTags::And()) {
+    EmitCommand("BoolAnd");
+  } else if (&op == &OpTags::Or()) {
+    EmitCommand("BoolOr");
+  } else if (&op == &OpTags::Xor()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteXor");
+    } else if (dominant_type == OperandType::Int) {
+      EmitCommand("IntXor");
+    } else {
+      EmitCommand("BoolXor");
+    }
+  } else if (&op == &OpTags::BitwiseAnd()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteAnd");
+    } else {
+      EmitCommand("IntAnd");
+    }
+  } else if (&op == &OpTags::BitwiseOr()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteOr");
+    } else {
+      EmitCommand("IntOr");
+    }
+  } else if (&op == &OpTags::LeftShift()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteLeftShift");
+    } else {
+      EmitCommand("IntLeftShift");
+    }
+  } else if (&op == &OpTags::RightShift()) {
+    if (dominant_type == OperandType::Byte) {
+      EmitCommand("ByteRightShift");
+    } else {
+      EmitCommand("IntRightShift");
+    }
+  } else {
+    EmitCommand("UnsupportedBinaryOp");
+  }
+}
+
+std::string BytecodeVisitor::GenerateArrayLengthMethodName(const std::string& array_type) {
+  return "_" + array_type + "_Length_<C>";
+}
+
+std::string BytecodeVisitor::GenerateArrayGetAtMethodName(const std::string& array_type) {
+  GetElementTypeForArray(array_type);
+  return "_" + array_type + "_GetAt_<C>_int";
+}
+
+std::string BytecodeVisitor::GenerateArraySetAtMethodName(const std::string& array_type) {
+  std::string elem_type = GetElementTypeForArray(array_type);
+  return "_" + array_type + "_SetAt_<M>_int_" + elem_type;
+}
+
+std::string BytecodeVisitor::GenerateArrayMethodName(const std::string& array_type, const std::string& method_name) {
+  std::string base_name = "_" + array_type + "_" + method_name;
+  std::string elem_type = GetElementTypeForArray(array_type);
+
+  if (method_name == "Length" || method_name == "GetHash" || method_name == "ToString" || method_name == "Equals" ||
+      method_name == "Capacity" || method_name == "GetAt") {
+    base_name += "_<C>";
+  } else {
+    base_name += "_<M>";
+  }
+
+  if (method_name == "Add") {
+    base_name += "_" + elem_type;
+  } else if (method_name == "GetAt") {
+    base_name += "_int";
+  } else if (method_name == "SetAt") {
+    base_name += "_int_" + elem_type;
+  } else if (method_name == "InsertAt") {
+    base_name += "_int_" + elem_type;
+  } else if (method_name == "RemoveAt") {
+    base_name += "_int";
+  } else if (method_name == "Reserve") {
+    base_name += "_int";
+  } else if (method_name == "Equals") {
+    base_name += "_Object";
+  }
+
+  return base_name;
+}
+
+std::string BytecodeVisitor::GetElementTypeForArray(const std::string& array_type) {
+  if (array_type == "IntArray") {
+    return "int";
+  }
+  if (array_type == "FloatArray") {
+    return "float";
+  }
+  if (array_type == "ByteArray") {
+    return "byte";
+  }
+  if (array_type == "BoolArray") {
+    return "bool";
+  }
+  if (array_type == "CharArray") {
+    return "char";
+  }
+  if (array_type == "StringArray" || array_type == "ObjectArray") {
+    return "Object";
+  }
+  return "Object";
+}
+
+bool BytecodeVisitor::IsBuiltinSystemCommand(const std::string& name) const {
+  return kBuiltinSystemCommands.contains(name);
+}
+
+void BytecodeVisitor::EmitParameterConversions(const std::vector<std::unique_ptr<Expr>>& args,
+                                               const std::vector<TypeReference>& expected_types) {
+  for (size_t i = args.size(); i > 0; --i) {
+    size_t arg_idx = i - 1;
+    Expr* arg = args[arg_idx].get();
+    arg->Accept(*this);
+
+    if (arg_idx < expected_types.size()) {
+      const TypeReference& expected_type = expected_types[arg_idx];
+      std::string expected_type_name = TypeToMangledName(expected_type);
+      std::string arg_type_name = GetTypeNameForExpr(arg);
+      EmitTypeConversionIfNeeded(expected_type_name, arg_type_name);
+    }
+  }
+}
+
+void BytecodeVisitor::EmitArgumentsInReverse(const std::vector<std::unique_ptr<Expr>>& args) {
+  for (const auto& arg : std::ranges::reverse_view(args)) {
+    arg->Accept(*this);
   }
 }
 

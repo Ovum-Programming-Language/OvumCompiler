@@ -4,6 +4,7 @@
 #include <ostream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "lib/parser/ast/AstVisitor.hpp"
@@ -18,7 +19,6 @@ public:
   void EmitThenStart();
   void EmitElseStart();
   void EmitElseIfStart();
-  // Decls
   void Visit(Module& node) override;
   void Visit(FunctionDecl& node) override;
   void Visit(ClassDecl& node) override;
@@ -32,7 +32,6 @@ public:
   void Visit(CallDecl& node) override;
   void Visit(DestructorDecl& node) override;
 
-  // Stmts
   void Visit(Block& node) override;
   void Visit(VarDeclStmt& node) override;
   void Visit(ExprStmt& node) override;
@@ -44,7 +43,6 @@ public:
   void Visit(ForStmt& node) override;
   void Visit(UnsafeBlock& node) override;
 
-  // Exprs
   void Visit(Binary& node) override;
   void Visit(Unary& node) override;
   void Visit(Assign& node) override;
@@ -78,22 +76,27 @@ private:
 
   std::unordered_map<std::string, size_t> local_variables_;
   std::unordered_map<std::string, size_t> static_variables_;
-  std::unordered_map<std::string, std::string> variable_types_; // variable name -> type name
+  std::unordered_map<std::string, std::string> variable_types_;
   size_t next_local_index_{0};
   size_t next_static_index_{0};
 
   std::unordered_map<std::string, std::string> function_name_map_;
-  std::unordered_map<std::string, std::string>
-      function_return_types_; // function name -> return type name ("void" or type name)
+  std::unordered_map<std::string, std::string> function_return_types_;
   size_t next_function_id_;
 
   std::vector<Expr*> pending_init_static_;
   std::vector<std::string> pending_init_static_names_;
-  std::unordered_map<std::string, std::string> method_name_map_;   // "Class::method" -> mangled name
-  std::unordered_map<std::string, std::string> method_vtable_map_; // "Class::method" -> vtable name
-  std::unordered_map<std::string, std::string>
-      method_return_types_; // "Class::method" -> return type name ("void" or type name)
+  std::unordered_map<std::string, std::string> method_name_map_;
+  std::unordered_map<std::string, std::string> method_vtable_map_;
+  std::unordered_map<std::string, std::string> method_return_types_;
   std::unordered_map<std::string, std::vector<std::pair<std::string, TypeReference>>> class_fields_;
+  std::unordered_map<std::string, std::vector<TypeReference>> constructor_params_;
+
+  static const std::unordered_set<std::string> kBuiltinSystemCommands;
+  static const std::unordered_map<std::string, std::string> kBuiltinReturnPrimitives;
+  static const std::unordered_set<std::string> kBuiltinTypeNames;
+  static const std::unordered_set<std::string> kPrimitiveTypeNames;
+  static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> kBuiltinMethods;
 
   void EmitIndent();
   void EmitCommand(const std::string& command);
@@ -103,18 +106,7 @@ private:
   void EmitCommandWithString(const std::string& command, const std::string& value);
   void EmitCommandWithStringWithoutBraces(const std::string& command, const std::string& value);
 
-  // Stack manipulation operations (for optimization)
-  void EmitDup();             // Duplicates the top value on the stack
-  void EmitSwap();            // Swaps the top two values on the stack
-  void EmitRotate(int64_t n); // Rotates the top n values on the stack
-
-  // Byte literal support
   void EmitPushByte(uint8_t value);
-
-  // Low-level vtable operations (for unsafe blocks)
-  void EmitGetVTable(const std::string& class_name); // Gets vtable for specified class
-  void EmitSetVTable(const std::string& class_name); // Sets vtable for object instance
-
   void EmitBlockStart();
   void EmitBlockStartWithoutSpaces();
   void EmitBlockEnd();
@@ -145,21 +137,34 @@ private:
   size_t GetStaticIndex(const std::string& name);
   void ResetLocalVariables();
 
-  // Helper functions for type determination
   enum class OperandType { Int, Float, Byte, Bool, Char, String, Unknown };
   OperandType DetermineOperandType(Expr* expr);
   std::string GetOperandTypeName(Expr* expr);
   std::string GetTypeNameForExpr(Expr* expr);
-  
-  // Helper functions for primitive wrapper handling
+
   bool IsPrimitiveWrapper(const std::string& type_name) const;
   bool IsPrimitiveType(const std::string& type_name) const;
   std::string GetPrimitiveTypeForWrapper(const std::string& wrapper_type) const;
   std::string GetWrapperTypeForPrimitive(const std::string& primitive_type) const;
   void EmitUnwrapIfNeeded(const std::string& type_name);
   void EmitWrapIfNeeded(const std::string& expected_type, OperandType result_type);
+
+  void EmitTypeConversionIfNeeded(const std::string& expected_type, const std::string& actual_type);
+  void EmitWrapConstructorCall(const std::string& wrapper_type, const std::string& primitive_type);
+  int FindFieldIndex(const std::string& class_name, const std::string& field_name);
+  std::string GetFieldTypeName(const std::string& class_name, const std::string& field_name);
+  void EmitBinaryOperatorCommand(const IBinaryOpTag& op, OperandType dominant_type);
+  std::string GenerateArrayLengthMethodName(const std::string& array_type);
+  std::string GenerateArrayGetAtMethodName(const std::string& array_type);
+  std::string GenerateArraySetAtMethodName(const std::string& array_type);
+  std::string GenerateArrayMethodName(const std::string& array_type, const std::string& method_name);
+  std::string GetElementTypeForArray(const std::string& array_type);
+  bool IsBuiltinSystemCommand(const std::string& name) const;
+  void EmitParameterConversions(const std::vector<std::unique_ptr<Expr>>& args,
+                                const std::vector<TypeReference>& expected_types);
+  void EmitArgumentsInReverse(const std::vector<std::unique_ptr<Expr>>& args);
 };
 
 } // namespace ovum::compiler::parser
 
-#endif // PARSER_BYTECODEVISITOR_HPP_
+#endif

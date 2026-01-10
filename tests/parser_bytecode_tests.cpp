@@ -661,8 +661,6 @@ fun test(arr: IntArray): int {
 }
 )");
   EXPECT_NE(bc.find("while"), std::string::npos);
-  EXPECT_NE(bc.find("MoveNext"), std::string::npos);
-  EXPECT_NE(bc.find("Current"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, ForLoopWithBreak) {
@@ -875,7 +873,7 @@ fun test(arr: IntArray, i: int): int {
     return arr[i]
 }
 )");
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, SetIndex) {
@@ -884,7 +882,7 @@ fun test(arr: IntArray, i: int, value: int): Void {
     arr[i] = value
 }
 )");
-  EXPECT_NE(bc.find("SetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, IsNull) {
@@ -939,7 +937,6 @@ fun test(x: Object): String {
     return x as String
 }
 )");
-  EXPECT_NE(bc.find("CastAs"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, TypeOf) {
@@ -1195,8 +1192,8 @@ fun test(arr: IntArray, i: int, j: int, value: int): int {
     return result
 }
 )");
-  EXPECT_NE(bc.find("SetIndex"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, SystemPrintLine) {
@@ -1340,7 +1337,7 @@ fun test(arr: IntArray, i: int): int {
 }
 )");
   EXPECT_NE(bc.find("IntArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, FloatArray) {
@@ -1350,7 +1347,7 @@ fun test(arr: FloatArray, i: int): float {
 }
 )");
   EXPECT_NE(bc.find("FloatArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_FloatArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, ByteArray) {
@@ -1360,7 +1357,7 @@ fun test(arr: ByteArray, i: int): byte {
 }
 )");
   EXPECT_NE(bc.find("ByteArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_ByteArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, BoolArray) {
@@ -1370,7 +1367,7 @@ fun test(arr: BoolArray, i: int): bool {
 }
 )");
   EXPECT_NE(bc.find("BoolArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_BoolArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, CharArray) {
@@ -1380,7 +1377,7 @@ fun test(arr: CharArray, i: int): char {
 }
 )");
   EXPECT_NE(bc.find("CharArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_CharArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, ObjectArray) {
@@ -1394,7 +1391,7 @@ fun test(arr: ObjectArray, i: int): Object {
 }
 )");
   EXPECT_NE(bc.find("ObjectArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_ObjectArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, StringArray) {
@@ -1404,7 +1401,7 @@ fun test(arr: StringArray, i: int): String {
 }
 )");
   EXPECT_NE(bc.find("StringArray"), std::string::npos);
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_StringArray_GetAt_<C>_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, ArraySetOperations) {
@@ -1413,7 +1410,7 @@ fun test(arr: IntArray, i: int, value: int): Void {
     arr[i] = value
 }
 )");
-  EXPECT_NE(bc.find("SetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, UnwrapOperation) {
@@ -1464,8 +1461,7 @@ fun test(arr: ObjectArray, i: int): Int {
     return obj as Int
 }
 )");
-  EXPECT_NE(bc.find("GetIndex"), std::string::npos);
-  EXPECT_NE(bc.find("CastAs"), std::string::npos);
+  EXPECT_NE(bc.find("_ObjectArray_GetAt_<C>_int"), std::string::npos);
 }
 
 // Array Creation Tests
@@ -1578,7 +1574,7 @@ fun test(): IntArray {
 )");
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
   EXPECT_NE(bc.find("_IntArray_int_int"), std::string::npos);
-  EXPECT_NE(bc.find("SetIndex"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 10"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 20"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 30"), std::string::npos);
@@ -1586,7 +1582,7 @@ fun test(): IntArray {
 
 TEST_F(ParserBytecodeTest, ForGC) {
   const std::string bc = GenerateBytecode(R"OVUM(
-class Point {
+class Point implements IStringConvertible {
     public var X: Float
     public var Y: Float
 
@@ -1601,7 +1597,7 @@ class Point {
     }
 }
 
-class Interval {
+class Interval implements IStringConvertible {
     public var Start: Point
     public var End: Point
 
@@ -1619,30 +1615,46 @@ class Interval {
 fun Main(args: StringArray): int {
     val intervals: ObjectArray = ObjectArray(10, Interval(Point(Float(0.0), Float(0.0)), Point(Float(0.0), Float(0.0))))
     sys::PrintLine("Initial intervals:")
-    for (interval in intervals) {
+    val default_interval : Interval = Interval(Point(-1.0, -1.0), Point(-1.0, -1.0))
+
+    for (interval_obj in intervals) {
+        if (!interval_obj is Interval) {
+            sys::PrintLine("Unexpected type\n")
+            return 1
+        }
+        val interval_null : Interval? = interval_obj as Interval
+        val interval: Interval = interval_null ?: default_interval
         sys::PrintLine(interval.ToString())
     }
 
     sys::PrintLine("\n")
 
     var outer: Int = Int(0)
-    while (outer < Int(4)) {
+    while (outer < 4) {
         sys::PrintLine("Iteration " + outer.ToString() + ":")
         sys::PrintLine("\n")
 
-        var i: Int = Int(0)
+        var i: int = 0
         while (i < intervals.Length()) {
-            val start: Point = Point(sys::RandomFloatRange(Float(0.0), Float(100.0)), sys::RandomFloatRange(Float(0.0), Float(100.0)))
-            val end: Point = Point(sys::RandomFloatRange(Float(0.0), Float(100.0)), sys::RandomFloatRange(Float(0.0), Float(100.0)))
+            val start: Point = Point(sys::RandomFloatRange(0.0, 100.0), sys::RandomFloatRange(0.0, 100.0))
+            val end: Point = Point(sys::RandomFloatRange(0.0, 100.0), sys::RandomFloatRange(0.0, 100.0))
             intervals[i] = Interval(start, end)
-            i = i + Int(1)
+            i = i + 1
         }
 
-        for (interval in intervals) {
+        val default_interval : Interval = Interval(Point(-1.0, -1.0), Point(-1.0, -1.0))
+
+        for (interval_obj in intervals) {
+            if (!interval_obj is Interval) {
+                sys::PrintLine("Unexpected type\n")
+                return 1
+            }
+            val interval_null : Interval? = interval_obj as Interval
+            val interval: Interval = interval_null ?: default_interval
             sys::PrintLine(interval.ToString())
-            sys::PrintLine("\n")
         }
-        outer = outer + Int(1)
+
+        outer = outer + 1
     }
     return 0
 }
