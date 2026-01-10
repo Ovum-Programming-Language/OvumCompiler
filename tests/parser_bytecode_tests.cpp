@@ -1583,3 +1583,69 @@ fun test(): IntArray {
   EXPECT_NE(bc.find("PushInt 20"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 30"), std::string::npos);
 }
+
+TEST_F(ParserBytecodeTest, ForGC) {
+  const std::string bc = GenerateBytecode(R"OVUM(
+class Point {
+    public var X: Float
+    public var Y: Float
+
+    public fun Point(x: Float, y: Float): Point {
+        this.X = x
+        this.Y = y
+        return this
+    }
+
+    public override fun ToString(): String {
+        return "(" + this.X.ToString() + ", " + this.Y.ToString() + ")"
+    }
+}
+
+class Interval {
+    public var Start: Point
+    public var End: Point
+
+    public fun Interval(start: Point, end: Point): Interval {
+        this.Start = start
+        this.End = end
+        return this
+    }
+
+    public override fun ToString(): String {
+        return "[" + this.Start.ToString() + " - " + this.End.ToString() + "]"
+    }
+}
+
+fun Main(args: StringArray): int {
+    val intervals: ObjectArray = ObjectArray(10, Interval(Point(Float(0.0), Float(0.0)), Point(Float(0.0), Float(0.0))))
+    sys::PrintLine("Initial intervals:")
+    for (interval in intervals) {
+        sys::PrintLine(interval.ToString())
+    }
+
+    sys::PrintLine("\n")
+
+    var outer: Int = Int(0)
+    while (outer < Int(4)) {
+        sys::PrintLine("Iteration " + outer.ToString() + ":")
+        sys::PrintLine("\n")
+
+        var i: Int = Int(0)
+        while (i < intervals.Length()) {
+            val start: Point = Point(sys::RandomFloatRange(Float(0.0), Float(100.0)), sys::RandomFloatRange(Float(0.0), Float(100.0)))
+            val end: Point = Point(sys::RandomFloatRange(Float(0.0), Float(100.0)), sys::RandomFloatRange(Float(0.0), Float(100.0)))
+            intervals[i] = Interval(start, end)
+            i = i + Int(1)
+        }
+
+        for (interval in intervals) {
+            sys::PrintLine(interval.ToString())
+            sys::PrintLine("\n")
+        }
+        outer = outer + Int(1)
+    }
+    return 0
+}
+)OVUM");
+}
+

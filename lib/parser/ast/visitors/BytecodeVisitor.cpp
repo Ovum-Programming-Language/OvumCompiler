@@ -972,18 +972,19 @@ void BytecodeVisitor::Visit(Binary& node) {
     dominant_type = OperandType::Bool;
   }
 
-  // For StringConcat, push operands left-to-right (left first, right last)
-  // because StringConcat does left + right and expects [left, right] on stack
-  // For other operations, push right-to-left (right first, left last)
+  // For all operations including StringConcat, push operands right-to-left (right first, left last)
+  // According to bytecode spec: operands are pushed right-to-left
+  // StringConcat expects [left, right] on stack (left on top) and does left + right
+  // So we push right first, then left, which gives [left, right] (left on top)
   if (&op == &OpTags::Add() && dominant_type == OperandType::String) {
-    // String concatenation: push left first, then right
-    node.MutableLhs().Accept(*this);
-    if (IsPrimitiveWrapper(lhs_type_name)) {
+    // String concatenation: push right first, then left (same as other operations)
+    node.MutableRhs().Accept(*this);
+    if (IsPrimitiveWrapper(rhs_type_name)) {
       EmitCommand("Unwrap");
     }
 
-    node.MutableRhs().Accept(*this);
-    if (IsPrimitiveWrapper(rhs_type_name)) {
+    node.MutableLhs().Accept(*this);
+    if (IsPrimitiveWrapper(lhs_type_name)) {
       EmitCommand("Unwrap");
     }
 
