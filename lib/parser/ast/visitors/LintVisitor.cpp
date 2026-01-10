@@ -324,4 +324,9 @@ void LintVisitor::Visit(BoolLit& node) {
   WalkVisitor::Visit(node);
 }
 
+void LintVisitor::Visit(ByteLit& node) {
+  (void) node;
+  WalkVisitor::Visit(node);
+}
+
 } // namespace ovum::compiler::parser

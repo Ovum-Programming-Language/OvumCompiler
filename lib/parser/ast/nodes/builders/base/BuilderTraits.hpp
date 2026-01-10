@@ -30,6 +30,7 @@
 #include "lib/parser/ast/nodes/builders/exprs/TypeTestIsBuilder.hpp"
 #include "lib/parser/ast/nodes/builders/exprs/UnaryBuilder.hpp"
 #include "lib/parser/ast/nodes/builders/exprs/literals/BoolLitBuilder.hpp"
+#include "lib/parser/ast/nodes/builders/exprs/literals/ByteLitBuilder.hpp"
 #include "lib/parser/ast/nodes/builders/exprs/literals/CharLitBuilder.hpp"
 #include "lib/parser/ast/nodes/builders/exprs/literals/FloatLitBuilder.hpp"
 #include "lib/parser/ast/nodes/builders/exprs/literals/IntLitBuilder.hpp"
@@ -75,6 +76,7 @@
 #include "lib/parser/ast/nodes/exprs/TypeTestIs.hpp"
 #include "lib/parser/ast/nodes/exprs/Unary.hpp"
 #include "lib/parser/ast/nodes/exprs/literals/BoolLit.hpp"
+#include "lib/parser/ast/nodes/exprs/literals/ByteLit.hpp"
 #include "lib/parser/ast/nodes/exprs/literals/CharLit.hpp"
 #include "lib/parser/ast/nodes/exprs/literals/FloatLit.hpp"
 #include "lib/parser/ast/nodes/exprs/literals/IntLit.hpp"
@@ -273,6 +275,11 @@ struct BuilderFor<Unary> {
 template<>
 struct BuilderFor<BoolLit> {
   using type = BoolLitBuilder;
+};
+
+template<>
+struct BuilderFor<ByteLit> {
+  using type = ByteLitBuilder;
 };
 
 template<>

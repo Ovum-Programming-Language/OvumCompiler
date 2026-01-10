@@ -349,6 +349,12 @@ std::unique_ptr<BoolLit> BuilderAstFactory::MakeBool(bool v, SourceSpan span) {
   return b.Build();
 }
 
+std::unique_ptr<ByteLit> BuilderAstFactory::MakeByte(uint8_t v, SourceSpan span) {
+  auto b = ParserBuilder::Make<ByteLit>();
+  b.WithValue(v).WithSpan(span);
+  return b.Build();
+}
+
 std::unique_ptr<NullLit> BuilderAstFactory::MakeNull(SourceSpan span) {
   auto b = ParserBuilder::Make<NullLit>();
   b.WithSpan(span);

@@ -105,6 +105,7 @@ IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts)
   ctx.PushNode(std::move(while_stmt));
 
   ctx.PushNode(std::move(body));
+  ctx.PopState(); // Pop WhileHead before pushing Block
   ctx.PushState(StateRegistry::Block());
 
   return true;

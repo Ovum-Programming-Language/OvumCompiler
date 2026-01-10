@@ -267,6 +267,10 @@ void WalkVisitor::Visit(BoolLit& node) {
   (void) node;
 }
 
+void WalkVisitor::Visit(ByteLit& node) {
+  (void) node;
+}
+
 void WalkVisitor::Visit(NullLit& node) {
   (void) node;
 }

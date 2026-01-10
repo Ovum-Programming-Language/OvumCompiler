@@ -53,6 +53,7 @@
 #include "lib/parser/types/Param.hpp"
 #include "lib/parser/types/TypeReference.hpp"
 #include "nodes/exprs/ThisExpr.hpp"
+#include "nodes/exprs/literals/ByteLit.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -206,6 +207,7 @@ public:
   virtual std::unique_ptr<StringLit> MakeString(std::string v, SourceSpan span) = 0;
   virtual std::unique_ptr<CharLit> MakeChar(char v, SourceSpan span) = 0;
   virtual std::unique_ptr<BoolLit> MakeBool(bool v, SourceSpan span) = 0;
+  virtual std::unique_ptr<ByteLit> MakeByte(uint8_t v, SourceSpan span) = 0;
   virtual std::unique_ptr<NullLit> MakeNull(SourceSpan span) = 0;
   virtual std::unique_ptr<ThisExpr> MakeThisExpr(SourceSpan span) = 0;
 };

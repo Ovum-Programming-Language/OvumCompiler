@@ -90,6 +90,30 @@ struct BinaryXor : IBinaryOpTag {
   }
 };
 
+struct BinaryBitwiseAnd : IBinaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "bitwise_and";
+  }
+};
+
+struct BinaryBitwiseOr : IBinaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "bitwise_or";
+  }
+};
+
+struct BinaryLeftShift : IBinaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "left_shift";
+  }
+};
+
+struct BinaryRightShift : IBinaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "right_shift";
+  }
+};
+
 struct UnaryNeg : IUnaryOpTag {
   [[nodiscard]] std::string_view Name() const override {
     return "neg";
@@ -105,6 +129,18 @@ struct UnaryPlus : IUnaryOpTag {
 struct UnaryNot : IUnaryOpTag {
   [[nodiscard]] std::string_view Name() const override {
     return "not";
+  }
+};
+
+struct UnaryBitwiseNot : IUnaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "bitwise_not";
+  }
+};
+
+struct UnaryUnwrap : IUnaryOpTag {
+  [[nodiscard]] std::string_view Name() const override {
+    return "unwrap";
   }
 };
 
@@ -194,6 +230,26 @@ const IBinaryOpTag& Xor() {
   return t;
 }
 
+const IBinaryOpTag& BitwiseAnd() {
+  static BinaryBitwiseAnd t;
+  return t;
+}
+
+const IBinaryOpTag& BitwiseOr() {
+  static BinaryBitwiseOr t;
+  return t;
+}
+
+const IBinaryOpTag& LeftShift() {
+  static BinaryLeftShift t;
+  return t;
+}
+
+const IBinaryOpTag& RightShift() {
+  static BinaryRightShift t;
+  return t;
+}
+
 const IUnaryOpTag& Neg() {
   static UnaryNeg t;
   return t;
@@ -206,6 +262,16 @@ const IUnaryOpTag& Plus() {
 
 const IUnaryOpTag& Not() {
   static UnaryNot t;
+  return t;
+}
+
+const IUnaryOpTag& BitwiseNot() {
+  static UnaryBitwiseNot t;
+  return t;
+}
+
+const IUnaryOpTag& Unwrap() {
+  static UnaryUnwrap t;
   return t;
 }
 

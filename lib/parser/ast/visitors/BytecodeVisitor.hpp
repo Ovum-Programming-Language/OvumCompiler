@@ -62,6 +62,7 @@ public:
   void Visit(StringLit& node) override;
   void Visit(CharLit& node) override;
   void Visit(BoolLit& node) override;
+  void Visit(ByteLit& node) override;
   void Visit(NullLit& node) override;
   void Visit(ThisExpr& node) override;
 
@@ -72,19 +73,26 @@ private:
   static constexpr const char* kIndent = "  ";
 
   std::string current_class_name_;
+  std::string current_function_name_;
   std::vector<std::string> current_namespace_;
 
   std::unordered_map<std::string, size_t> local_variables_;
   std::unordered_map<std::string, size_t> static_variables_;
+  std::unordered_map<std::string, std::string> variable_types_; // variable name -> type name
   size_t next_local_index_{0};
   size_t next_static_index_{0};
 
   std::unordered_map<std::string, std::string> function_name_map_;
+  std::unordered_map<std::string, std::string>
+      function_return_types_; // function name -> return type name ("void" or type name)
   size_t next_function_id_;
 
   std::vector<Expr*> pending_init_static_;
   std::vector<std::string> pending_init_static_names_;
-  std::unordered_map<std::string, std::string> method_name_map_;
+  std::unordered_map<std::string, std::string> method_name_map_;   // "Class::method" -> mangled name
+  std::unordered_map<std::string, std::string> method_vtable_map_; // "Class::method" -> vtable name
+  std::unordered_map<std::string, std::string>
+      method_return_types_; // "Class::method" -> return type name ("void" or type name)
   std::unordered_map<std::string, std::vector<std::pair<std::string, TypeReference>>> class_fields_;
 
   void EmitIndent();
@@ -94,6 +102,18 @@ private:
   void EmitCommandWithBool(const std::string& command, bool value);
   void EmitCommandWithString(const std::string& command, const std::string& value);
   void EmitCommandWithStringWithoutBraces(const std::string& command, const std::string& value);
+
+  // Stack manipulation operations (for optimization)
+  void EmitDup();             // Duplicates the top value on the stack
+  void EmitSwap();            // Swaps the top two values on the stack
+  void EmitRotate(int64_t n); // Rotates the top n values on the stack
+
+  // Byte literal support
+  void EmitPushByte(uint8_t value);
+
+  // Low-level vtable operations (for unsafe blocks)
+  void EmitGetVTable(const std::string& class_name); // Gets vtable for specified class
+  void EmitSetVTable(const std::string& class_name); // Sets vtable for object instance
 
   void EmitBlockStart();
   void EmitBlockStartWithoutSpaces();
@@ -107,10 +127,15 @@ private:
                                const std::string& method_name,
                                const std::vector<Param>& params,
                                bool is_constructor,
-                               bool is_destructor);
+                               bool is_destructor,
+                               bool is_mutable = false);
 
+  std::string GenerateMethodVTableName(const std::string& method_name,
+                                       const std::vector<Param>& params,
+                                       bool is_mutable = false);
   std::string GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params);
   std::string GenerateDestructorId(const std::string& class_name);
+  std::string GenerateCopyMethodId(const std::string& class_name, const std::string& param_type);
   std::string TypeToMangledName(const TypeReference& type);
   void VisitExpression(Expr* expr);
   void VisitStatement(Stmt* stmt);
@@ -119,6 +144,20 @@ private:
   size_t GetLocalIndex(const std::string& name);
   size_t GetStaticIndex(const std::string& name);
   void ResetLocalVariables();
+
+  // Helper functions for type determination
+  enum class OperandType { Int, Float, Byte, Bool, Char, String, Unknown };
+  OperandType DetermineOperandType(Expr* expr);
+  std::string GetOperandTypeName(Expr* expr);
+  std::string GetTypeNameForExpr(Expr* expr);
+  
+  // Helper functions for primitive wrapper handling
+  bool IsPrimitiveWrapper(const std::string& type_name) const;
+  bool IsPrimitiveType(const std::string& type_name) const;
+  std::string GetPrimitiveTypeForWrapper(const std::string& wrapper_type) const;
+  std::string GetWrapperTypeForPrimitive(const std::string& primitive_type) const;
+  void EmitUnwrapIfNeeded(const std::string& type_name);
+  void EmitWrapIfNeeded(const std::string& expected_type, OperandType result_type);
 };
 
 } // namespace ovum::compiler::parser

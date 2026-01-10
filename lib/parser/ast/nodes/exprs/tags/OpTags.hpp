@@ -23,11 +23,17 @@ const IBinaryOpTag& Ne();
 const IBinaryOpTag& And();
 const IBinaryOpTag& Or();
 const IBinaryOpTag& Xor();
+const IBinaryOpTag& BitwiseAnd();  // &
+const IBinaryOpTag& BitwiseOr();   // |
+const IBinaryOpTag& LeftShift();   // <<
+const IBinaryOpTag& RightShift();  // >>
 
 // unary
 const IUnaryOpTag& Neg();
 const IUnaryOpTag& Plus();
 const IUnaryOpTag& Not();
+const IUnaryOpTag& BitwiseNot();   // ~
+const IUnaryOpTag& Unwrap();       // ! (postfix, for nullable unwrap)
 
 // assign
 const IAssignOpTag& RefAssign();  // =

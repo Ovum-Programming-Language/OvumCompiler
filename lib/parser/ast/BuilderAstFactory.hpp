@@ -152,6 +152,7 @@ public:
   std::unique_ptr<StringLit> MakeString(std::string v, SourceSpan span) override;
   std::unique_ptr<CharLit> MakeChar(char v, SourceSpan span) override;
   std::unique_ptr<BoolLit> MakeBool(bool v, SourceSpan span) override;
+  std::unique_ptr<ByteLit> MakeByte(uint8_t v, SourceSpan span) override;
   std::unique_ptr<NullLit> MakeNull(SourceSpan span) override;
   std::unique_ptr<ThisExpr> MakeThisExpr(SourceSpan span) override;
 };

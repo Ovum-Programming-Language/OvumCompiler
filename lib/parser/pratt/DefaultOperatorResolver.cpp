@@ -12,16 +12,25 @@ bool LexIs(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
 }
 
-constexpr int kBP_Assign = 10;
-constexpr int kBP_Elvis = 20; // right-assoc
-constexpr int kBP_Or = 30;
-constexpr int kBP_And = 40;
-constexpr int kBP_Xor = 50;
-constexpr int kBP_Eq = 60;
-constexpr int kBP_Rel = 70;
-constexpr int kBP_Add = 80;
-constexpr int kBP_Mul = 90;
-constexpr int kBP_Post = 100;
+  constexpr int kBP_Assign = 10;
+  constexpr int kBP_Elvis = 20; // right-assoc
+  constexpr int kBP_Or = 30;
+  constexpr int kBP_And = 40;
+  constexpr int kBP_Xor = 50;
+  constexpr int kBP_Eq = 60;
+  constexpr int kBP_Rel = 70;
+  constexpr int kBP_Add = 80;
+  // Bitwise operators have different precedences:
+  // << >> have highest precedence (higher than &)
+  // & has next precedence
+  // ^ has next precedence  
+  // | has lowest precedence (same as logical || but different operator)
+  constexpr int kBP_BitwiseOr = 82;   // | (lowest precedence)
+  constexpr int kBP_BitwiseXor = 83;  // ^
+  constexpr int kBP_BitwiseAnd = 84;  // &
+  constexpr int kBP_Shift = 85;       // << >> (highest precedence)
+  constexpr int kBP_Mul = 90;
+  constexpr int kBP_Post = 100;
 
 std::vector<InfixSpec>& InfixTable() {
   static std::vector<InfixSpec> specs;
@@ -44,14 +53,22 @@ std::vector<InfixSpec>& InfixTable() {
   add("==", kBP_Eq, OpTags::Eq());
   add("!=", kBP_Eq, OpTags::Ne());
 
-  add("<", kBP_Rel, OpTags::Lt());
+  // Comparison operators: two-character operators must be checked before single-character
   add("<=", kBP_Rel, OpTags::Le());
-  add(">", kBP_Rel, OpTags::Gt());
   add(">=", kBP_Rel, OpTags::Ge());
+  add("<", kBP_Rel, OpTags::Lt());
+  add(">", kBP_Rel, OpTags::Gt());
 
   add("&&", kBP_And, OpTags::And());
   add("||", kBP_Or, OpTags::Or());
-  add("^", kBP_Xor, OpTags::Xor());
+  
+  // Bitwise operators (higher precedence than Add, lower than Mul)
+  // Precedence: << >> (highest) > & > ^ > | (lowest)
+  add("<<", kBP_Shift, OpTags::LeftShift());
+  add(">>", kBP_Shift, OpTags::RightShift());
+  add("&", kBP_BitwiseAnd, OpTags::BitwiseAnd());
+  add("^", kBP_BitwiseXor, OpTags::Xor());  // Bitwise XOR (can also be logical XOR for bool)
+  add("|", kBP_BitwiseOr, OpTags::BitwiseOr());
 
   {
     InfixSpec elvis(kBP_Elvis, kBP_Elvis - 1, true, nullptr, true);
@@ -71,9 +88,11 @@ std::vector<PostfixSpec>& PostfixTable() {
   specs.emplace_back([](const Token& t) { return LexIs(t, "("); }, kBP_Post, false);
   specs.emplace_back([](const Token& t) { return LexIs(t, "."); }, kBP_Post, false);
   specs.emplace_back([](const Token& t) { return LexIs(t, "?."); }, kBP_Post, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "["); }, kBP_Post, false);
   specs.emplace_back([](const Token& t) { return LexIs(t, "as"); }, kBP_Post, true);
   specs.emplace_back([](const Token& t) { return LexIs(t, "is"); }, kBP_Post, true);
   specs.emplace_back([](const Token& t) { return LexIs(t, "::"); }, kBP_Post, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "!"); }, kBP_Post, false);  // Postfix ! for unwrap nullable
 
   return specs;
 }
@@ -89,6 +108,10 @@ const IUnaryOpTag* MatchPrefix(const Token& t) {
 
   if (LexIs(t, "!")) {
     return &OpTags::Not();
+  }
+
+  if (LexIs(t, "~")) {
+    return &OpTags::BitwiseNot();
   }
 
   return nullptr;

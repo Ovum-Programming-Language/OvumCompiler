@@ -116,7 +116,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         if (parent_block != nullptr) {
           parent_block->Append(std::unique_ptr<Stmt>(dynamic_cast<Stmt*>(while_node.release())));
         }
-        ctx.PopState();
+        // Don't call PopState here - ParserFsm will do it when returning false
         return false;
       }
 
@@ -129,6 +129,13 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
           for_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
+        // Pop ForStmt and add to parent block
+        auto for_node = ctx.PopNode();
+        Block* parent_block = ctx.TopNodeAs<Block>();
+        if (parent_block != nullptr) {
+          parent_block->Append(std::unique_ptr<Stmt>(dynamic_cast<Stmt*>(for_node.release())));
+        }
+        // Don't call PopState here - ParserFsm will do it when returning false
         return false;
       }
 
@@ -141,6 +148,13 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
           unsafe_stmt->SetBody(std::unique_ptr<Block>(body_block));
           block_node.release();
         }
+        // Pop UnsafeBlock and add to parent block
+        auto unsafe_node = ctx.PopNode();
+        Block* parent_block = ctx.TopNodeAs<Block>();
+        if (parent_block != nullptr) {
+          parent_block->Append(std::unique_ptr<Stmt>(dynamic_cast<Stmt*>(unsafe_node.release())));
+        }
+        // Don't call PopState here - ParserFsm will do it when returning false
         return false;
       }
 

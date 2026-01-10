@@ -50,6 +50,7 @@ public:
   void Visit(StringLit& node) override;
   void Visit(CharLit& node) override;
   void Visit(BoolLit& node) override;
+  void Visit(ByteLit& node);
   void Visit(NullLit& node) override;
   void Visit(ThisExpr& node) override;
 };

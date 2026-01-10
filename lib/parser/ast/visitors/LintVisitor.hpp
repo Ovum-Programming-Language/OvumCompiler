@@ -61,6 +61,7 @@ public:
 
   void Visit(StringLit& node) override;
   void Visit(BoolLit& node) override;
+  void Visit(ByteLit& node) override;
 
 private:
   bool IsPureExpr(Expr& expression) const;

@@ -217,21 +217,11 @@ IState::StepResult StateTopDecl::TryStep(ContextParser& ctx, ITokenStream& ts) c
   std::string lex = start.GetLexeme();
   SourceSpan span = SpanFrom(start);
 
-  // Check for pure fun
-  bool is_pure = false;
+  // Check for pure fun - don't consume, let StateFuncHdr handle it
+  // StateFuncHdr will consume 'pure' and 'fun' and create the function node
   if (lex == "pure") {
-    ts.Consume();
-    SkipTrivia(ts);
-    if (ts.IsEof()) {
-      ReportUnexpected(ctx.Diags(), "P_PURE_FUN", "expected 'fun' after 'pure'", ts.TryPeek());
-      return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
-    }
-    if (ts.Peek().GetLexeme() != "fun") {
-      ReportUnexpected(ctx.Diags(), "P_PURE_FUN", "expected 'fun' after 'pure'", &ts.Peek());
-      return std::unexpected(StateError(std::string_view("expected 'fun' after 'pure'")));
-    }
-    is_pure = true;
-    lex = "fun";
+    ctx.PushState(StateRegistry::FuncHdr());
+    return true;
   }
 
   if (lex == "fun") {

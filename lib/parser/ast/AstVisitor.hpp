@@ -26,6 +26,7 @@
 #include "nodes/exprs/TypeTestIs.hpp"
 #include "nodes/exprs/Unary.hpp"
 #include "nodes/exprs/literals/BoolLit.hpp"
+#include "nodes/exprs/literals/ByteLit.hpp"
 #include "nodes/exprs/literals/CharLit.hpp"
 #include "nodes/exprs/literals/FloatLit.hpp"
 #include "nodes/exprs/literals/IntLit.hpp"
@@ -91,6 +92,7 @@ public:
   virtual void Visit(StringLit&) = 0;
   virtual void Visit(CharLit&) = 0;
   virtual void Visit(BoolLit&) = 0;
+  virtual void Visit(ByteLit&) = 0;
   virtual void Visit(NullLit&) = 0;
   virtual void Visit(ThisExpr&) = 0;
 };

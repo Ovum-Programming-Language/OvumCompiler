@@ -229,6 +229,26 @@ std::expected<OptToken, LexerError> NumberHandler::Scan(SourceCodeWrapper& wrapp
     return std::unexpected(LexerError(std::string("Malformed float literal: ") + raw));
   }
 
+  // Check for byte literal suffix (b or B) before EnsureNoIdentTail
+  // Store the current position to check for 'b' suffix
+  char next_char = wrapper.Peek();
+  if (next_char == 'b' || next_char == 'B') {
+    // Parse the number part without the 'b' suffix
+    auto vi_result = ParseDecIntStrict(raw);
+    if (!vi_result) {
+      return std::unexpected(vi_result.error());
+    }
+    long long value = vi_result.value();
+    // Clamp to byte range [0, 255]
+    if (value < 0) value = 0;
+    if (value > 255) value = 255;
+    // Consume the 'b' suffix
+    raw.push_back(wrapper.Advance());
+    // Create byte literal token using MakeIntLiteral with special handling
+    // The parser will check for 'b' suffix in lexeme to determine if it's a byte literal
+    return TokenFactory::MakeIntLiteral(std::move(raw), value, wrapper.GetLine(), wrapper.GetTokenCol());
+  }
+
   auto ident_result = EnsureNoIdentTail(wrapper, "integer literal");
   if (!ident_result) {
     return std::unexpected(ident_result.error());

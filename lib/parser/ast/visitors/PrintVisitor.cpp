@@ -414,6 +414,10 @@ void PrintVisitor::Visit(BoolLit& node) {
   WriteLine(std::string("BoolLit value=") + (node.Value() ? "true" : "false"));
 }
 
+void PrintVisitor::Visit(ByteLit& node) {
+  WriteLine("ByteLit value=" + std::to_string(node.Value()));
+}
+
 void PrintVisitor::Visit(NullLit& node) {
   WriteLine("NullLit");
 }

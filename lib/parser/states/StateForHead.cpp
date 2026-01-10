@@ -139,12 +139,15 @@ IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) c
 
   ts.Consume();
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
+
+  SourceSpan span = StateBase::Union(SpanFrom(start), iter_expr->Span());
+  // Pass nullptr for body - it will be set later in StateBlock
+  auto for_stmt = ctx.Factory()->MakeForStmt(std::move(iter_name), std::move(iter_expr), nullptr, span);
+
+  // Push for_stmt first, then body, so StateBlock can find for_stmt as parent
+  ctx.PushNode(std::move(for_stmt));
   ctx.PushNode(std::move(body));
-
-  SourceSpan span = StateBase::Union(StateBase::SpanFrom(start), iter_expr->Span());
-  auto for_stmt = ctx.Factory()->MakeForStmt(std::move(iter_name), std::move(iter_expr), std::move(body), span);
-
-  block->Append(std::move(for_stmt));
+  ctx.PopState(); // Pop ForHead before pushing Block
   ctx.PushState(StateRegistry::Block());
   return true;
 }

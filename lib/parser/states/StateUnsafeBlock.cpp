@@ -48,14 +48,9 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
     return std::unexpected(StateError(std::string_view("unexpected end of file in unsafe block")));
   }
 
+  // The 'unsafe' token was already consumed in StateStmt, so we expect '{' here
   const Token& start = ts.Peek();
-  if (start.GetLexeme() != "unsafe") {
-    return std::unexpected(StateError(std::string_view("expected 'unsafe' keyword")));
-  }
-  ts.Consume();
-
-  SkipTrivia(ts);
-  if (ts.IsEof() || ts.Peek().GetLexeme() != "{") {
+  if (start.GetLexeme() != "{") {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_UNSAFE_BLOCK", std::string_view("expected '{' after 'unsafe'"));
     }
@@ -64,12 +59,14 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
 
   ts.Consume();
   auto unsafe_body = ctx.Factory()->MakeBlock({}, SourceSpan{});
-  ctx.PushNode(std::move(unsafe_body));
 
   SourceSpan span = StateBase::SpanFrom(start);
-  auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(std::move(unsafe_body), span);
+  auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(nullptr, span); // Pass nullptr for body initially
 
-  block->Append(std::move(unsafe_stmt));
+  // Push unsafe_stmt first, then body, so StateBlock can find unsafe_stmt as parent
+  ctx.PushNode(std::move(unsafe_stmt));
+  ctx.PushNode(std::move(unsafe_body));
+  ctx.PopState(); // Pop UnsafeBlock before pushing Block
   ctx.PushState(StateRegistry::Block());
   return true;
 }

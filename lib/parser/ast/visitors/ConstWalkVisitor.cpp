@@ -267,6 +267,10 @@ void ConstWalkVisitor::Visit(BoolLit& node) {
   (void) node;
 }
 
+void ConstWalkVisitor::Visit(ByteLit& node) {
+  (void) node;
+}
+
 void ConstWalkVisitor::Visit(NullLit& node) {
   (void) node;
 }
