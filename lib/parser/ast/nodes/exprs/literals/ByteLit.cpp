@@ -17,4 +17,3 @@ void ByteLit::SetValue(uint8_t new_value) noexcept {
 }
 
 } // namespace ovum::compiler::parser
-

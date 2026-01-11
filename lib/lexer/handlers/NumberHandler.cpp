@@ -240,8 +240,12 @@ std::expected<OptToken, LexerError> NumberHandler::Scan(SourceCodeWrapper& wrapp
     }
     long long value = vi_result.value();
     // Clamp to byte range [0, 255]
-    if (value < 0) value = 0;
-    if (value > 255) value = 255;
+    if (value < 0) {
+      value = 0;
+    }
+    if (value > 255) {
+      value = 255;
+    }
     // Consume the 'b' suffix
     raw.push_back(wrapper.Advance());
     // Create byte literal token using MakeIntLiteral with special handling

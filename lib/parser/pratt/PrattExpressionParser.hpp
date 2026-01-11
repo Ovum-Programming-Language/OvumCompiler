@@ -17,7 +17,9 @@ namespace ovum::compiler::parser {
 class PrattExpressionParser : public IExpressionParser { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   explicit PrattExpressionParser(std::unique_ptr<IOperatorResolver> resolver, std::shared_ptr<IAstFactory> factory);
-  PrattExpressionParser(std::unique_ptr<IOperatorResolver> resolver, std::shared_ptr<IAstFactory> factory, ITypeParser* type_parser);
+  PrattExpressionParser(std::unique_ptr<IOperatorResolver> resolver,
+                        std::shared_ptr<IAstFactory> factory,
+                        ITypeParser* type_parser);
   ~PrattExpressionParser() override = default;
 
   std::unique_ptr<Expr> Parse(ITokenStream& ts, IDiagnosticSink& diags) override;
@@ -31,7 +33,9 @@ public:
   void SetTypeParser(ITypeParser* type_parser);
 
 private:
-  [[nodiscard]] std::unique_ptr<Expr> MakeInfix(const InfixSpec& spec, std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs) const;
+  [[nodiscard]] std::unique_ptr<Expr> MakeInfix(const InfixSpec& spec,
+                                                std::unique_ptr<Expr> lhs,
+                                                std::unique_ptr<Expr> rhs) const;
 
   std::unique_ptr<IOperatorResolver> resolver_;
   std::shared_ptr<IAstFactory> factory_;

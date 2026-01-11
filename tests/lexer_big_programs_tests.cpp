@@ -912,8 +912,8 @@ sys::Print(len.ToString())
   std::vector<std::string> expected_types = {
       "KEYWORD",  "IDENT",   "PUNCT",    "NEWLINE",  "KEYWORD",     "KEYWORD", "IDENT",    "PUNCT",    "IDENT",
       "OPERATOR", "NEWLINE", "KEYWORD",  "KEYWORD",  "IDENT",       "PUNCT",   "IDENT",    "PUNCT",    "IDENT",
-      "OPERATOR", "PUNCT",   "PUNCT",    "IDENT",    "PUNCT",       "KEYWORD",   "OPERATOR", "IDENT",    "OPERATOR",
-      "IDENT",    "KEYWORD", "KEYWORD",    "PUNCT",    "PUNCT",       "NEWLINE", "KEYWORD",  "IDENT",    "PUNCT",
+      "OPERATOR", "PUNCT",   "PUNCT",    "IDENT",    "PUNCT",       "KEYWORD", "OPERATOR", "IDENT",    "OPERATOR",
+      "IDENT",    "KEYWORD", "KEYWORD",  "PUNCT",    "PUNCT",       "NEWLINE", "KEYWORD",  "IDENT",    "PUNCT",
       "IDENT",    "PUNCT",   "IDENT",    "OPERATOR", "PUNCT",       "PUNCT",   "IDENT",    "PUNCT",    "NEWLINE",
       "KEYWORD",  "IDENT",   "PUNCT",    "IDENT",    "OPERATOR",    "IDENT",   "OPERATOR", "IDENT",    "OPERATOR",
       "IDENT",    "PUNCT",   "PUNCT",    "OPERATOR", "LITERAL:Int", "NEWLINE", "IDENT",    "OPERATOR", "IDENT",

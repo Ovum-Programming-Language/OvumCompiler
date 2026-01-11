@@ -327,8 +327,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
      }},
 };
 
-BytecodeVisitor::BytecodeVisitor(std::ostream& output) :
-    output_(output), pending_init_static_({}) {
+BytecodeVisitor::BytecodeVisitor(std::ostream& output) : output_(output), pending_init_static_({}) {
 }
 
 void BytecodeVisitor::EmitIndent() const {

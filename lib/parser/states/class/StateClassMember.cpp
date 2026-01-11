@@ -40,7 +40,10 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx,
+                           ITokenStream& ts,
+                           std::string_view code,
+                           std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {

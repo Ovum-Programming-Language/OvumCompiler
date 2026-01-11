@@ -8,4 +8,3 @@ ByteLitBuilder& ByteLitBuilder::WithValue(uint8_t value) {
 }
 
 } // namespace ovum::compiler::parser
-

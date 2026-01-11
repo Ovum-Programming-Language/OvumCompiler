@@ -14,4 +14,3 @@ public:
 } // namespace ovum::compiler::parser
 
 #endif // PARSER_BYTELITBUILDER_HPP_
-
