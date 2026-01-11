@@ -67,7 +67,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* block = dynamic_cast<Block*>(block_node.get()); block != nullptr) {
           func->SetBody(std::unique_ptr<Block>(block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
 
           // Pop function and add to module
           auto func_node = ctx.PopNode();
@@ -83,7 +83,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* else_block = dynamic_cast<Block*>(block_node.get()); else_block != nullptr) {
           if_stmt->SetElseBlock(std::unique_ptr<Block>(else_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
 
           // Pop IfStmt and add to parent block
           auto if_node = ctx.PopNode();
@@ -100,7 +100,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           while_stmt->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
         }
         auto while_node = ctx.PopNode();
         if (auto* parent_block = ctx.TopNodeAs<Block>(); parent_block != nullptr) {
@@ -115,7 +115,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           for_stmt->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
         }
         // Pop ForStmt and add to parent block
         auto for_node = ctx.PopNode();
@@ -132,7 +132,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           unsafe_stmt->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
         }
         // Pop UnsafeBlock and add to parent block
         auto unsafe_node = ctx.PopNode();
@@ -143,12 +143,12 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         return false;
       }
 
-      // Check if parent is MethodDecl
+      // Check if the parent is MethodDecl
       if (auto* method = dynamic_cast<MethodDecl*>(parent_node); method != nullptr && method->Body() == nullptr) {
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           method->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
 
           // Pop method and add to class
           auto method_node = ctx.PopNode();
@@ -164,7 +164,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           call->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
 
           // Pop call and add to class
           auto call_node = ctx.PopNode();
@@ -182,7 +182,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
         auto block_node = ctx.PopNode();
         if (auto* body_block = dynamic_cast<Block*>(block_node.get()); body_block != nullptr) {
           destructor->SetBody(std::unique_ptr<Block>(body_block));
-          block_node.release();
+          [[maybe_unused]] auto* released = block_node.release();
 
           // Pop destructor and add to class
           auto destructor_node = ctx.PopNode();

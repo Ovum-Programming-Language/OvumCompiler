@@ -53,7 +53,7 @@ std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& ts, IDiagnosticSink& diag
   }
 
   if (auto* as_module = dynamic_cast<Module*>(root.get()); as_module != nullptr) {
-    root.release();
+    [[maybe_unused]] auto* realized = root.release();
     return std::unique_ptr<Module>(as_module);
   }
 

@@ -5,7 +5,7 @@
 
 namespace ovum::compiler::parser {
 
-class WalkVisitor : public AstVisitor {
+class WalkVisitor : public AstVisitor { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   ~WalkVisitor() override = default;
 

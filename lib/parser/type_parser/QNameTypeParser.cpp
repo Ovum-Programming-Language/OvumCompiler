@@ -68,8 +68,7 @@ std::unique_ptr<TypeReference> QNameTypeParser::ParseType(ITokenStream& ts, IDia
   SkipTrivia(ts);
   while (!ts.IsEof()) {
     const Token& sep = ts.Peek();
-    const std::string lex = sep.GetLexeme();
-    if (lex != "." && lex != "::") {
+    if (const std::string lex = sep.GetLexeme(); lex != "." && lex != "::") {
       break;
     }
 

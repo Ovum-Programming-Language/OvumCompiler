@@ -22,6 +22,7 @@ namespace {
 constexpr int kBpAssign = 5;
 constexpr int kBpPost = 100;
 constexpr int kDecimalBase = 10;
+constexpr int kMaxByteValue = 255;
 
 bool Lex(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
@@ -86,8 +87,8 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
       if (value < 0) {
         value = 0;
       }
-      if (value > 255) {
-        value = 255;
+      if (value > kMaxByteValue) {
+        value = kMaxByteValue;
       }
       return factory.MakeByte(static_cast<uint8_t>(value), span);
     }
@@ -130,8 +131,8 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
     if (value < 0) {
       value = 0;
     }
-    if (value > 255) {
-      value = 255;
+    if (value > kMaxByteValue) {
+      value = kMaxByteValue;
     }
     return factory.MakeByte(static_cast<uint8_t>(value), span);
   }
@@ -611,7 +612,7 @@ std::unique_ptr<Expr> PrattExpressionParser::MakeInfix(const InfixSpec& spec,
   const SourceSpan lhs_span = lhs->Span();
   const SourceSpan rhs_span = rhs->Span();
   const SourceSpan span = SourceSpan::Union(lhs_span, rhs_span);
-  
+
   if (spec.IsElvis()) {
     return factory_->MakeElvis(std::move(lhs), std::move(rhs), span);
   }

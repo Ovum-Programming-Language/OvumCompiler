@@ -10,7 +10,7 @@
 
 namespace ovum::compiler::parser {
 
-class BuilderAstFactory : public IAstFactory {
+class BuilderAstFactory : public IAstFactory { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   ~BuilderAstFactory() override = default;
 

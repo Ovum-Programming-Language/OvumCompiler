@@ -7,7 +7,7 @@
 namespace ovum::compiler::parser {
 
 void DiagnosticCollector::Report(Diagnostic d) {
-  bool suppressed = !ShouldKeep(d);
+  const bool suppressed = !ShouldKeep(d);
   d.SetSuppressed(suppressed);
   if (suppressed) {
     return;

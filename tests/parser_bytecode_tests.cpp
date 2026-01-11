@@ -109,11 +109,11 @@ protected:
     return bytecode;
   }
 
-  DiagnosticCollector diags_;
-  std::unique_ptr<ParserFsm> parser_;
-  std::unique_ptr<IExpressionParser> expr_parser_;
-  std::unique_ptr<ITypeParser> type_parser_;
-  std::shared_ptr<IAstFactory> factory_;
+  DiagnosticCollector diags_;                      // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  std::unique_ptr<ParserFsm> parser_;              // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  std::unique_ptr<IExpressionParser> expr_parser_; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  std::unique_ptr<ITypeParser> type_parser_;       // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+  std::shared_ptr<IAstFactory> factory_;           // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
 };
 
 TEST_F(ParserBytecodeTest, PushInt) {
