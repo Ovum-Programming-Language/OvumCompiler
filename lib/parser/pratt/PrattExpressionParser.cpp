@@ -56,7 +56,7 @@ bool ParseIntegerLiteral(const std::string& text, long long* out) {
       return false;
     }
   }
-  
+
   if (text.size() >= 2 && text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) {
     // Binary literal: 0b1010
     try {
@@ -66,7 +66,7 @@ bool ParseIntegerLiteral(const std::string& text, long long* out) {
       return false;
     }
   }
-  
+
   // Decimal literal: 42
   const char* begin = text.data();
   const char* end = begin + text.size();
