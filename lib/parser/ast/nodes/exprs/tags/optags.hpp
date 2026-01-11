@@ -5,9 +5,7 @@
 #include "IBinaryOpTag.hpp"
 #include "IUnaryOpTag.hpp"
 
-namespace ovum::compiler::parser {
-
-namespace OpTags {
+namespace ovum::compiler::parser::optags {
 // binary
 const IBinaryOpTag& Add();
 const IBinaryOpTag& Sub();
@@ -23,23 +21,21 @@ const IBinaryOpTag& Ne();
 const IBinaryOpTag& And();
 const IBinaryOpTag& Or();
 const IBinaryOpTag& Xor();
-const IBinaryOpTag& BitwiseAnd();  // &
-const IBinaryOpTag& BitwiseOr();   // |
-const IBinaryOpTag& LeftShift();   // <<
-const IBinaryOpTag& RightShift();  // >>
+const IBinaryOpTag& BitwiseAnd(); // &
+const IBinaryOpTag& BitwiseOr();  // |
+const IBinaryOpTag& LeftShift();  // <<
+const IBinaryOpTag& RightShift(); // >>
 
 // unary
 const IUnaryOpTag& Neg();
 const IUnaryOpTag& Plus();
 const IUnaryOpTag& Not();
-const IUnaryOpTag& BitwiseNot();   // ~
-const IUnaryOpTag& Unwrap();       // ! (postfix, for nullable unwrap)
+const IUnaryOpTag& BitwiseNot(); // ~
+const IUnaryOpTag& Unwrap();     // ! (postfix, for nullable unwrap)
 
 // assign
 const IAssignOpTag& RefAssign();  // =
 const IAssignOpTag& CopyAssign(); // :=
-} // namespace OpTags
-
-} // namespace ovum::compiler::parser
+} // namespace ovum::compiler::parser::optags
 
 #endif // PARSER_OPTAGS_HPP_

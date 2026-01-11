@@ -9,7 +9,7 @@
 
 namespace ovum::compiler::parser {
 
-class IExpressionParser {
+class IExpressionParser { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~IExpressionParser() = default;
 

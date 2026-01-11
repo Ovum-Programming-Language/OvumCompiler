@@ -8,7 +8,7 @@ namespace ovum::compiler::parser {
 
 class MatchIdentifier : public ITokenMatcher {
 public:
-  bool TryMatch(const Token& token) const override;
+  [[nodiscard]] bool TryMatch(const Token& token) const override;
 };
 
 } // namespace ovum::compiler::parser

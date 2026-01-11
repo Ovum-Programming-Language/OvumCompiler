@@ -2,7 +2,7 @@
 
 namespace ovum::compiler::parser {
 
-InfixSpec::InfixSpec(int left_bp, int right_bp, bool right_associative, IBinaryOpTag* tag, bool is_elvis) :
+InfixSpec::InfixSpec(int left_bp, int right_bp, bool right_associative, const IBinaryOpTag* tag, bool is_elvis) :
     lbp_(left_bp), rbp_(right_bp), right_associative_(right_associative), tag_(tag), is_elvis_(is_elvis) {
 }
 

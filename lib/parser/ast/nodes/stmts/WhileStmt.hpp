@@ -13,13 +13,13 @@ class WhileStmt : public Stmt {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const Expr* Condition() const noexcept;
-  Expr* MutableCondition() noexcept;
+  [[nodiscard]] const Expr* Condition() const noexcept;
+  [[nodiscard]] Expr* MutableCondition() const noexcept;
   void SetCondition(std::unique_ptr<Expr> condition_expr);
   std::unique_ptr<Expr> ReleaseCondition();
 
-  const Block* Body() const noexcept;
-  Block* MutableBody() noexcept;
+  [[nodiscard]] const Block* Body() const noexcept;
+  [[nodiscard]] Block* MutableBody() const noexcept;
   void SetBody(std::unique_ptr<Block> body_block);
   std::unique_ptr<Block> ReleaseBody();
 

@@ -12,12 +12,12 @@ class NamespaceRef : public Expr {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const Expr& NamespaceExpr() const noexcept;
-  Expr& MutableNamespaceExpr() noexcept;
+  [[nodiscard]] const Expr& NamespaceExpr() const noexcept;
+  [[nodiscard]] Expr& MutableNamespaceExpr() const noexcept;
   void SetNamespaceExpr(std::unique_ptr<Expr> new_namespace_expr);
   std::unique_ptr<Expr> ReplaceNamespaceExpr(std::unique_ptr<Expr> new_namespace_expr);
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string new_name);
 
 private:

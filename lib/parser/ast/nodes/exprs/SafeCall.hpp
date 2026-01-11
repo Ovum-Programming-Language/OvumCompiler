@@ -17,23 +17,23 @@ class SafeCall : public Expr {
 public:
   void Accept(AstVisitor& v) override;
 
-  const Expr& Object() const noexcept;
-  Expr& MutableObject() noexcept;
+  [[nodiscard]] const Expr& Object() const noexcept;
+  [[nodiscard]] Expr& MutableObject() const noexcept;
   void SetObject(std::unique_ptr<Expr> object_expr);
   std::unique_ptr<Expr> ReplaceObject(std::unique_ptr<Expr> new_object);
 
-  const std::string& Method() const noexcept;
+  [[nodiscard]] const std::string& Method() const noexcept;
   void SetMethod(std::string method_name);
 
-  const std::vector<std::unique_ptr<Expr>>& Args() const noexcept;
+  [[nodiscard]] const std::vector<std::unique_ptr<Expr>>& Args() const noexcept;
   std::vector<std::unique_ptr<Expr>>& MutableArgs() noexcept;
   void AddArg(std::unique_ptr<Expr> argument_expr);
   void ClearArgs();
 
-  bool IsNullPropagating() const noexcept;
+  static bool IsNullPropagating() noexcept;
 
   void SetInferredType(TypeReference inferred);
-  const std::optional<TypeReference>& InferredType() const noexcept;
+  [[nodiscard]] const std::optional<TypeReference>& InferredType() const noexcept;
 
 private:
   std::unique_ptr<Expr> object_;

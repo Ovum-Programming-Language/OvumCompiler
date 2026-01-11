@@ -12,7 +12,7 @@ const Expr* Branch::Condition() const noexcept {
   return condition_.get();
 }
 
-Expr* Branch::MutableCondition() noexcept {
+Expr* Branch::MutableCondition() const noexcept {
   return condition_.get();
 }
 
@@ -28,7 +28,7 @@ const Block* Branch::Then() const noexcept {
   return then_block_.get();
 }
 
-Block* Branch::MutableThen() noexcept {
+Block* Branch::MutableThen() const noexcept {
   return then_block_.get();
 }
 

@@ -14,14 +14,14 @@ class ClassDecl : public Decl {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string name);
 
-  const std::vector<TypeReference>& Implements() const noexcept;
+  [[nodiscard]] const std::vector<TypeReference>& Implements() const noexcept;
   std::vector<TypeReference>& MutableImplements() noexcept;
   void AddImplements(TypeReference type);
 
-  const std::vector<std::unique_ptr<Decl>>& Members() const noexcept;
+  [[nodiscard]] const std::vector<std::unique_ptr<Decl>>& Members() const noexcept;
   std::vector<std::unique_ptr<Decl>>& MutableMembers() noexcept;
   void AddMember(std::unique_ptr<Decl> decl);
   std::unique_ptr<Decl> ReleaseMember(std::size_t index);

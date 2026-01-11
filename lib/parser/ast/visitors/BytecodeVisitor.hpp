@@ -16,6 +16,11 @@ public:
   explicit BytecodeVisitor(std::ostream& output);
   ~BytecodeVisitor() override = default;
 
+  BytecodeVisitor(const BytecodeVisitor&) = delete;
+  BytecodeVisitor& operator=(const BytecodeVisitor&) = delete;
+  BytecodeVisitor(BytecodeVisitor&&) = delete;
+  BytecodeVisitor& operator=(BytecodeVisitor&&) = delete;
+
   void EmitThenStart();
   void EmitElseStart();
   void EmitElseIfStart();
@@ -82,7 +87,7 @@ private:
 
   std::unordered_map<std::string, std::string> function_name_map_;
   std::unordered_map<std::string, std::string> function_return_types_;
-  size_t next_function_id_;
+  size_t next_function_id_{0};
 
   std::vector<Expr*> pending_init_static_;
   std::vector<std::string> pending_init_static_names_;
@@ -98,7 +103,7 @@ private:
   static const std::unordered_set<std::string> kPrimitiveTypeNames;
   static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> kBuiltinMethods;
 
-  void EmitIndent();
+  void EmitIndent() const;
   void EmitCommand(const std::string& command);
   void EmitCommandWithInt(const std::string& command, int64_t value);
   void EmitCommandWithFloat(const std::string& command, double value);
@@ -113,7 +118,7 @@ private:
   void EmitBlockEndWithoutEscape();
   void EmitIfStart();
 
-  std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
+  static std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
 
   std::string GenerateMethodId(const std::string& class_name,
                                const std::string& method_name,
@@ -128,7 +133,7 @@ private:
   std::string GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params);
   std::string GenerateDestructorId(const std::string& class_name);
   std::string GenerateCopyMethodId(const std::string& class_name, const std::string& param_type);
-  std::string TypeToMangledName(const TypeReference& type);
+  static std::string TypeToMangledName(const TypeReference& type);
   void VisitExpression(Expr* expr);
   void VisitStatement(Stmt* stmt);
   void VisitBlock(Block* block);
@@ -137,24 +142,24 @@ private:
   size_t GetStaticIndex(const std::string& name);
   void ResetLocalVariables();
 
-  enum class OperandType { Int, Float, Byte, Bool, Char, String, Unknown };
+  enum class OperandType : std::uint8_t { kInt, kFloat, kByte, kBool, kChar, kString, kUnknown };
   OperandType DetermineOperandType(Expr* expr);
   std::string GetOperandTypeName(Expr* expr);
   std::string GetTypeNameForExpr(Expr* expr);
 
-  bool IsPrimitiveWrapper(const std::string& type_name) const;
+  static bool IsPrimitiveWrapper(const std::string& type_name);
   bool IsPrimitiveType(const std::string& type_name) const;
   std::string GetPrimitiveTypeForWrapper(const std::string& wrapper_type) const;
   std::string GetWrapperTypeForPrimitive(const std::string& primitive_type) const;
   void EmitUnwrapIfNeeded(const std::string& type_name);
-  void EmitWrapIfNeeded(const std::string& expected_type, OperandType result_type);
+  void EmitWrapIfNeeded(const std::string& expected_type);
 
   void EmitTypeConversionIfNeeded(const std::string& expected_type, const std::string& actual_type);
   void EmitWrapConstructorCall(const std::string& wrapper_type, const std::string& primitive_type);
   int FindFieldIndex(const std::string& class_name, const std::string& field_name);
   std::string GetFieldTypeName(const std::string& class_name, const std::string& field_name);
   void EmitBinaryOperatorCommand(const IBinaryOpTag& op, OperandType dominant_type);
-  std::string GenerateArrayLengthMethodName(const std::string& array_type);
+  static std::string GenerateArrayLengthMethodName(const std::string& array_type);
   std::string GenerateArrayGetAtMethodName(const std::string& array_type);
   std::string GenerateArraySetAtMethodName(const std::string& array_type);
   std::string GenerateArrayMethodName(const std::string& array_type, const std::string& method_name);

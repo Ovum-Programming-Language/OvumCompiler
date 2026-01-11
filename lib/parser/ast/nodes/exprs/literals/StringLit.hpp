@@ -11,7 +11,7 @@ class StringLit : public Expr {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& Value() const noexcept;
+  [[nodiscard]] const std::string& Value() const noexcept;
   void SetValue(std::string new_value);
 
 private:

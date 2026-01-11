@@ -13,8 +13,8 @@ class ReturnStmt : public Stmt {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  bool HasValue() const noexcept;
-  const Expr* Value() const noexcept;
+  [[nodiscard]] bool HasValue() const noexcept;
+  [[nodiscard]] const Expr* Value() const noexcept;
   Expr* MutableValue() noexcept;
   void SetValue(std::unique_ptr<Expr> new_value);
   void ResetValue();

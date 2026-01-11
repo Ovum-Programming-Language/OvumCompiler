@@ -10,12 +10,12 @@ namespace ovum::compiler::parser {
 
 class ContextParser; // forward
 
-class IState {
+class IState { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   using StepResult = std::expected<bool, StateError>;
 
   virtual ~IState() = default;
-  virtual std::string_view Name() const = 0;
+  [[nodiscard]] virtual std::string_view Name() const = 0;
   virtual StepResult TryStep(ContextParser& ctx, ITokenStream& ts) const = 0;
 };
 

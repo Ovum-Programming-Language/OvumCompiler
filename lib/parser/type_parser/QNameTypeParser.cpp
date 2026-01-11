@@ -7,14 +7,13 @@
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
 #include "lib/parser/tokens/token_traits/MatchLexeme.hpp"
-#include "lib/parser/tokens/token_traits/MatchType.hpp"
 
 namespace ovum::compiler::parser {
 
 namespace {
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
@@ -24,18 +23,17 @@ bool IsTypeNameToken(const Token& token) {
     return true;
   }
 
-  static const std::array<std::string_view, 8> kBuiltins{
+  static constexpr std::array<std::string_view, 8> kBuiltins{
       "Int", "Float", "Bool", "Char", "String", "Void", "Object", "Null"};
 
   const std::string lex = token.GetLexeme();
-  return std::find(kBuiltins.begin(), kBuiltins.end(), lex) != kBuiltins.end();
+  return std::ranges::find(kBuiltins, lex) != kBuiltins.end();
 }
 
 void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
-    const std::string type = t.GetStringType();
-    if (type == "COMMENT" || type == "NEWLINE") {
+    if (const std::string type = t.GetStringType(); type == "COMMENT" || type == "NEWLINE") {
       ts.Consume();
       continue;
     }

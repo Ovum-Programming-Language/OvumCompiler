@@ -44,7 +44,7 @@
 
 namespace ovum::compiler::parser {
 
-class AstVisitor {
+class AstVisitor { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~AstVisitor() = default;
 

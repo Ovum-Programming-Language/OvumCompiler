@@ -1,8 +1,6 @@
 #ifndef PARSER_VECTORTOKENSTREAM_HPP_
 #define PARSER_VECTORTOKENSTREAM_HPP_
 
-#include <cstddef>
-#include <cstdint>
 #include <vector>
 
 #include <tokens/Token.hpp>
@@ -19,17 +17,17 @@ public:
 
   TokenPtr Consume() override;
 
-  size_t Position() const override;
+  [[nodiscard]] size_t Position() const override;
 
   void Rewind(size_t n) override;
 
-  bool IsEof() const override;
+  [[nodiscard]] bool IsEof() const override;
 
-  const Token* LastConsumed() const override;
+  [[nodiscard]] const Token* LastConsumed() const override;
 
   const Token* TryPeek(size_t k = 0) override;
 
-  size_t Size() const;
+  [[nodiscard]] size_t Size() const;
 
 private:
   std::vector<TokenPtr> tokens_;

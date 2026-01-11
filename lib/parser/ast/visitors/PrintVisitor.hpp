@@ -9,7 +9,7 @@
 
 namespace ovum::compiler::parser {
 
-class PrintVisitor : public AstVisitor {
+class PrintVisitor : public AstVisitor { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   explicit PrintVisitor(std::ostream& output);
   PrintVisitor();
@@ -59,12 +59,12 @@ public:
   void Visit(StringLit& node) override;
   void Visit(CharLit& node) override;
   void Visit(BoolLit& node) override;
-  void Visit(ByteLit& node);
+  void Visit(ByteLit& node) override;
   void Visit(NullLit& node) override;
   void Visit(ThisExpr& node) override;
 
 private:
-  void WriteIndent();
+  void WriteIndent() const;
   void WriteLine(const std::string& text);
   void Open(const std::string& header);
   void Close();

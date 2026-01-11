@@ -5,7 +5,7 @@
 
 namespace ovum::compiler::parser {
 namespace {
-bool IsLex(const Token& tok, std::string_view lex) {
+bool IsLex(const Token& tok, const std::string_view lex) {
   return tok.GetLexeme() == lex;
 }
 } // namespace

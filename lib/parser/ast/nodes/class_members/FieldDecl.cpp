@@ -14,7 +14,7 @@ bool FieldDecl::IsPublic() const noexcept {
   return is_public_;
 }
 
-void FieldDecl::SetPublic(bool value) noexcept {
+void FieldDecl::SetPublic(const bool value) noexcept {
   is_public_ = value;
 }
 
@@ -22,7 +22,7 @@ bool FieldDecl::IsVar() const noexcept {
   return is_var_;
 }
 
-void FieldDecl::SetVar(bool var) noexcept {
+void FieldDecl::SetVar(const bool var) noexcept {
   is_var_ = var;
 }
 
@@ -50,7 +50,7 @@ const Expr* FieldDecl::Init() const noexcept {
   return init_.get();
 }
 
-Expr* FieldDecl::MutableInit() noexcept {
+Expr* FieldDecl::MutableInit() const noexcept {
   return init_.get();
 }
 

@@ -2,7 +2,7 @@
 
 namespace ovum::compiler::parser {
 
-MatchLexeme::MatchLexeme(std::string_view lexeme) : lexeme_(lexeme) {
+MatchLexeme::MatchLexeme(const std::string_view lexeme) : lexeme_(lexeme) {
 }
 
 bool MatchLexeme::TryMatch(const Token& token) const {

@@ -10,10 +10,13 @@
 
 namespace ovum::compiler::parser {
 
+constexpr std::size_t kDefaultMaxBlockLen = 200;
+constexpr std::size_t kDefaultMaxClassMembers = 64;
+
 struct LintOptions {
-  std::size_t max_block_len = 200;
+  std::size_t max_block_len = kDefaultMaxBlockLen;
   std::size_t max_nesting = 4;
-  std::size_t max_class_members = 64;
+  std::size_t max_class_members = kDefaultMaxClassMembers;
   bool warn_empty_blocks = true;
   bool warn_public_fields = true;
   bool warn_mutable_globals = true;
@@ -35,7 +38,7 @@ struct LintOptions {
 
 class LintVisitor : public WalkVisitor {
 public:
-  explicit LintVisitor(IDiagnosticSink& sink, LintOptions options = {}) : sink_(sink), opts_(options) {
+  explicit LintVisitor(IDiagnosticSink& sink, const LintOptions& options = {}) : sink_(sink), opts_(options) {
   }
 
   void Visit(Module& node) override;
@@ -64,7 +67,7 @@ public:
   void Visit(ByteLit& node) override;
 
 private:
-  bool IsPureExpr(Expr& expression) const;
+  static bool IsPureExpr(Expr& expression);
   void EnterBody();
   void LeaveBody();
   void EnterLoop();

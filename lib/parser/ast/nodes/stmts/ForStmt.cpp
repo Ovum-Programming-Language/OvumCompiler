@@ -22,7 +22,7 @@ const Expr* ForStmt::IteratorExpr() const noexcept {
   return iter_expr_.get();
 }
 
-Expr* ForStmt::MutableIteratorExpr() noexcept {
+Expr* ForStmt::MutableIteratorExpr() const noexcept {
   return iter_expr_.get();
 }
 
@@ -38,7 +38,7 @@ const Block* ForStmt::Body() const noexcept {
   return body_.get();
 }
 
-Block* ForStmt::MutableBody() noexcept {
+Block* ForStmt::MutableBody() const noexcept {
   return body_.get();
 }
 

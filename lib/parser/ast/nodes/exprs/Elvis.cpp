@@ -14,7 +14,7 @@ const Expr& Elvis::Lhs() const noexcept {
   return *lhs_;
 }
 
-Expr& Elvis::MutableLhs() noexcept {
+Expr& Elvis::MutableLhs() const noexcept {
   return *lhs_;
 }
 
@@ -32,7 +32,7 @@ const Expr& Elvis::Rhs() const noexcept {
   return *rhs_;
 }
 
-Expr& Elvis::MutableRhs() noexcept {
+Expr& Elvis::MutableRhs() const noexcept {
   return *rhs_;
 }
 

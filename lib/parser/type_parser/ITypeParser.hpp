@@ -9,7 +9,7 @@
 
 namespace ovum::compiler::parser {
 
-class ITypeParser {
+class ITypeParser { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~ITypeParser() = default;
   virtual std::unique_ptr<TypeReference> ParseType(ITokenStream& ts, IDiagnosticSink& diags) = 0;

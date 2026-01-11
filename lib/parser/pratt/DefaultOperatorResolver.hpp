@@ -13,14 +13,14 @@
 
 namespace ovum::compiler::parser {
 
-class DefaultOperatorResolver : public IOperatorResolver {
+class DefaultOperatorResolver : public IOperatorResolver { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   ~DefaultOperatorResolver() override = default;
 
-  std::optional<std::reference_wrapper<const InfixSpec>> FindInfix(const Token& t) const override;
-  std::optional<std::reference_wrapper<const PostfixSpec>> FindPostfix(const Token& t) const override;
-  std::optional<std::reference_wrapper<const IUnaryOpTag>> FindPrefix(const Token& t) const override;
-  bool IsContinuation(const Token& t) const override;
+  [[nodiscard]] std::optional<std::reference_wrapper<const InfixSpec>> FindInfix(const Token& t) const override;
+  [[nodiscard]] std::optional<std::reference_wrapper<const PostfixSpec>> FindPostfix(const Token& t) const override;
+  [[nodiscard]] std::optional<std::reference_wrapper<const IUnaryOpTag>> FindPrefix(const Token& t) const override;
+  [[nodiscard]] bool IsContinuation(const Token& t) const override;
 
 private:
   std::vector<InfixSpec> infix_;

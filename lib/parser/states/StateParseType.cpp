@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "lib/parser/context/ContextParser.hpp"
-#include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "type_parser/ITypeParser.hpp"
 
@@ -18,8 +17,7 @@ IState::StepResult StateParseType::TryStep(ContextParser& ctx, ITokenStream& ts)
     return std::unexpected(StateError(std::string_view("type parser not available")));
   }
 
-  auto type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
-  if (type == nullptr) {
+  if (const auto type = ctx.TypeParser()->ParseType(ts, *ctx.Diags()); type == nullptr) {
     return std::unexpected(StateError(std::string_view("failed to parse type")));
   }
 

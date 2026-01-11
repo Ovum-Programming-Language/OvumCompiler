@@ -6,15 +6,15 @@
 
 namespace ovum::compiler::parser {
 
-void SafeCall::Accept(AstVisitor& visitor) {
-  visitor.Visit(*this);
+void SafeCall::Accept(AstVisitor& v) {
+  v.Visit(*this);
 }
 
 const Expr& SafeCall::Object() const noexcept {
   return *object_;
 }
 
-Expr& SafeCall::MutableObject() noexcept {
+Expr& SafeCall::MutableObject() const noexcept {
   return *object_;
 }
 
@@ -52,7 +52,7 @@ void SafeCall::ClearArgs() {
   args_.clear();
 }
 
-bool SafeCall::IsNullPropagating() const noexcept {
+bool SafeCall::IsNullPropagating() noexcept {
   return true;
 }
 

@@ -4,10 +4,7 @@
 #include <string>
 
 #include "ast/IAstFactory.hpp"
-#include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
-#include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
-#include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/StaticFieldDecl.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
 #include "lib/parser/context/ContextParser.hpp"
@@ -43,12 +40,11 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
         ctx.Diags()->Error(code, message, span);
       } else {
@@ -65,8 +61,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   SkipTrivia(ts, false);
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
-    const std::string type = t.GetStringType();
-    if (type == "NEWLINE") {
+    if (const std::string type = t.GetStringType(); type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -87,7 +82,7 @@ std::string_view StateClassMember::Name() const {
 IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
+  auto* class_decl = ctx.TopNodeAs<ClassDecl>();
   if (class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
@@ -104,7 +99,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
   // Check for access modifier
   bool is_public = true;
   if (lex == "public" || lex == "private") {
-    is_public = (lex == "public");
+    is_public = lex == "public";
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
@@ -123,7 +118,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
     // Access modifier after static
     if (ts.Peek().GetLexeme() == "public" || ts.Peek().GetLexeme() == "private") {
-      is_public = (ts.Peek().GetLexeme() == "public");
+      is_public = ts.Peek().GetLexeme() == "public";
       ts.Consume();
       SkipTrivia(ts);
     }
@@ -134,7 +129,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
     bool is_var = false;
     if (ts.Peek().GetLexeme() == "var" || ts.Peek().GetLexeme() == "val") {
-      is_var = (ts.Peek().GetLexeme() == "var");
+      is_var = ts.Peek().GetLexeme() == "var";
       ts.Consume();
       SkipTrivia(ts);
     }
@@ -167,7 +162,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
       init = ctx.Expr()->Parse(ts, *ctx.Diags());
     }
 
-    span = StateBase::Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
+    span = Union(span, ts.LastConsumed() ? SpanFrom(*ts.LastConsumed()) : span);
     auto field =
         ctx.Factory()->MakeStaticField(is_public, is_var, std::move(name), std::move(*type), std::move(init), span);
     class_decl->AddMember(std::move(field));
@@ -189,10 +184,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
   }
 
   // Check for method (fun)
-  bool is_override = false;
-  bool is_pure = false;
   if (lex == "override") {
-    is_override = true;
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
@@ -201,7 +193,6 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     lex = ts.Peek().GetLexeme();
   }
   if (lex == "pure") {
-    is_pure = true;
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "fun") {
@@ -219,7 +210,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
   // Field declaration
   bool is_var = false;
   if (lex == "var" || lex == "val") {
-    is_var = (lex == "var");
+    is_var = lex == "var";
     ts.Consume();
     SkipTrivia(ts);
   } else {
@@ -254,7 +245,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
     init = ctx.Expr()->Parse(ts, *ctx.Diags());
   }
 
-  span = Union(span, ts.LastConsumed() ? StateBase::SpanFrom(*ts.LastConsumed()) : span);
+  span = Union(span, ts.LastConsumed() ? SpanFrom(*ts.LastConsumed()) : span);
   auto field = ctx.Factory()->MakeField(is_public, is_var, std::move(name), std::move(*type), std::move(init), span);
   class_decl->AddMember(std::move(field));
   ConsumeTerminators(ts);

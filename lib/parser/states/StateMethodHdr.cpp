@@ -17,7 +17,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -25,7 +25,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -34,20 +34,19 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
-        ctx.Diags()->Error(code, message, span);
+        ctx.Diags()->Error("P_METHOD_NAME", "expected method name", span);
       } else {
-        ctx.Diags()->Error(code, message);
+        ctx.Diags()->Error("P_METHOD_NAME", "expected method name");
       }
     }
     return "";
@@ -65,8 +64,7 @@ std::string_view StateMethodHdr::Name() const {
 IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  auto* class_decl = ctx.TopNodeAs<ClassDecl>();
-  if (class_decl == nullptr) {
+  if (const auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
@@ -84,7 +82,7 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
 
   std::string lex = start.GetLexeme();
   if (lex == "public" || lex == "private") {
-    is_public = (lex == "public");
+    is_public = lex == "public";
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {
@@ -127,7 +125,7 @@ IState::StepResult StateMethodHdr::TryStep(ContextParser& ctx, ITokenStream& ts)
   ts.Consume();
 
   SkipTrivia(ts);
-  std::string name = ReadIdentifier(ctx, ts, "P_METHOD_NAME", "expected method name");
+  std::string name = ReadIdentifier(ctx, ts);
   if (name.empty()) {
     return std::unexpected(StateError(std::string_view("expected method name")));
   }

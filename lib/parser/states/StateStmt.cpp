@@ -19,7 +19,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts, const bool skip_newlines = true) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -36,7 +36,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
@@ -46,17 +46,6 @@ void ReportUnexpected(IDiagnosticSink* diags, std::string_view code, std::string
   }
   SourceSpan span = StateBase::SpanFrom(*tok);
   diags->Error(code, message, span);
-}
-
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
-  SkipTrivia(ts);
-  if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
-    const Token* tok = ts.TryPeek();
-    ReportUnexpected(ctx.Diags(), code, message, tok);
-    return "";
-  }
-  std::string name = ts.Consume()->GetLexeme();
-  return name;
 }
 
 std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
@@ -83,8 +72,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   SkipTrivia(ts, false);
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
-    const std::string type = t.GetStringType();
-    if (type == "NEWLINE") {
+    if (const std::string type = t.GetStringType(); type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -177,7 +165,7 @@ IState::StepResult StateStmt::TryStep(ContextParser& ctx, ITokenStream& ts) cons
   // Try variable declaration: [var] identifier : type = expression
   bool is_var = false;
   if (lex == "var" || lex == "val") {
-    is_var = (lex == "var");
+    is_var = lex == "var";
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof()) {

@@ -9,9 +9,7 @@ VectorTokenStream::VectorTokenStream(std::vector<TokenPtr> tokens) : tokens_(std
 }
 
 const Token& VectorTokenStream::Peek(size_t k) {
-  const Token* token = TryPeek(k);
-
-  if (token != nullptr) {
+  if (const Token* token = TryPeek(k); token != nullptr) {
     return *token;
   }
 
@@ -59,8 +57,7 @@ const Token* VectorTokenStream::LastConsumed() const {
 }
 
 const Token* VectorTokenStream::TryPeek(size_t k) {
-  const size_t pos = index_ + k;
-  if (pos < tokens_.size()) {
+  if (const size_t pos = index_ + k; pos < tokens_.size()) {
     return tokens_[pos].get();
   }
 

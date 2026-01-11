@@ -14,7 +14,7 @@ const Expr* WhileStmt::Condition() const noexcept {
   return cond_.get();
 }
 
-Expr* WhileStmt::MutableCondition() noexcept {
+Expr* WhileStmt::MutableCondition() const noexcept {
   return cond_.get();
 }
 
@@ -30,7 +30,7 @@ const Block* WhileStmt::Body() const noexcept {
   return body_.get();
 }
 
-Block* WhileStmt::MutableBody() noexcept {
+Block* WhileStmt::MutableBody() const noexcept {
   return body_.get();
 }
 

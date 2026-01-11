@@ -70,11 +70,11 @@ void Lexer::SetDefaultHandler(std::unique_ptr<Handler> handler) {
 
 std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> Lexer::MakeDefaultHandlers() {
   std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> table{};
-  table.at(static_cast<unsigned char>(' ')) = std::make_unique<WhitespaceHandler>();
-  table.at(static_cast<unsigned char>('\t')) = std::make_unique<WhitespaceHandler>();
-  table.at(static_cast<unsigned char>('\r')) = std::make_unique<WhitespaceHandler>();
+  table.at(' ') = std::make_unique<WhitespaceHandler>();
+  table.at('\t') = std::make_unique<WhitespaceHandler>();
+  table.at('\r') = std::make_unique<WhitespaceHandler>();
 
-  table.at(static_cast<unsigned char>('\n')) = std::make_unique<NewlineHandler>();
+  table.at('\n') = std::make_unique<NewlineHandler>();
 
   for (unsigned char ch = 'a'; ch <= 'z'; ++ch) {
     table.at(ch) = std::make_unique<IdentifierHandler>();
@@ -84,20 +84,20 @@ std::array<std::unique_ptr<Handler>, kDefaultTokenReserve> Lexer::MakeDefaultHan
     table.at(ch) = std::make_unique<IdentifierHandler>();
   }
 
-  table.at(static_cast<unsigned char>('_')) = std::make_unique<IdentifierHandler>();
-  table.at(static_cast<unsigned char>('#')) = std::make_unique<IdentifierHandler>();
+  table.at('_') = std::make_unique<IdentifierHandler>();
+  table.at('#') = std::make_unique<IdentifierHandler>();
 
   for (unsigned char digit = '0'; digit <= '9'; ++digit) {
     table.at(digit) = std::make_unique<NumberHandler>();
   }
 
-  table.at(static_cast<unsigned char>('.')) = std::make_unique<DotCompositeHandler>();
+  table.at('.') = std::make_unique<DotCompositeHandler>();
 
-  table.at(static_cast<unsigned char>('"')) = std::make_unique<StringHandler>();
-  table.at(static_cast<unsigned char>('\'')) = std::make_unique<CharHandler>();
-  table.at(static_cast<unsigned char>('/')) = std::make_unique<SlashHandler>();
+  table.at('"') = std::make_unique<StringHandler>();
+  table.at('\'') = std::make_unique<CharHandler>();
+  table.at('/') = std::make_unique<SlashHandler>();
 
-  table.at(static_cast<unsigned char>(':')) = std::make_unique<ColonHandler>();
+  table.at(':') = std::make_unique<ColonHandler>();
 
   for (const unsigned char ch : std::string(kOperatorChars)) {
     table.at(ch) = std::make_unique<OperatorHandler>();

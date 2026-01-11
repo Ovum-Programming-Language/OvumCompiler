@@ -14,10 +14,10 @@ class InterfaceDecl : public Decl {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string new_name);
 
-  const std::vector<std::unique_ptr<InterfaceMethod>>& Members() const noexcept;
+  [[nodiscard]] const std::vector<std::unique_ptr<InterfaceMethod>>& Members() const noexcept;
   std::vector<std::unique_ptr<InterfaceMethod>>& MutableMembers() noexcept;
 
   void AddMember(std::unique_ptr<InterfaceMethod> method);

@@ -9,6 +9,11 @@ class ConstWalkVisitor : public AstVisitor {
 public:
   ~ConstWalkVisitor() override = default;
 
+  ConstWalkVisitor(const ConstWalkVisitor&) = delete;
+  ConstWalkVisitor& operator=(const ConstWalkVisitor&) = delete;
+  ConstWalkVisitor(ConstWalkVisitor&&) = delete;
+  ConstWalkVisitor& operator=(ConstWalkVisitor&&) = delete;
+
   void Visit(Module& node) override;
   void Visit(FunctionDecl& node) override;
   void Visit(ClassDecl& node) override;
@@ -50,7 +55,7 @@ public:
   void Visit(StringLit& node) override;
   void Visit(CharLit& node) override;
   void Visit(BoolLit& node) override;
-  void Visit(ByteLit& node);
+  void Visit(ByteLit& node) override;
   void Visit(NullLit& node) override;
   void Visit(ThisExpr& node) override;
 };

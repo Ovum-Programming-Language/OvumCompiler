@@ -1,7 +1,6 @@
 #ifndef PARSER_SOURCEID_HPP_
 #define PARSER_SOURCEID_HPP_
 
-#include <cstdint>
 #include <string>
 #include <string_view>
 

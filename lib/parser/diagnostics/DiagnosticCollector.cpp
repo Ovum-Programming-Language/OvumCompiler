@@ -21,11 +21,10 @@ void DiagnosticCollector::Report(Diagnostic d) {
     return;
   }
 
-  int err_level = Severity::Error()->Level();
-  int warn_level = Severity::Warning()->Level();
-  int level = d.GetSeverity() ? d.GetSeverity()->Level() : 0;
+  const int err_level = Severity::Error()->Level();
+  const int warn_level = Severity::Warning()->Level();
 
-  if (level >= err_level) {
+  if (const int level = d.GetSeverity() ? d.GetSeverity()->Level() : 0; level >= err_level) {
     if (error_limit_ && errors_ >= *error_limit_) {
       return;
     }
@@ -147,7 +146,7 @@ bool DiagnosticCollector::ShouldKeep(const Diagnostic& d) const {
 bool DiagnosticCollector::IsDuplicate(const Diagnostic& d) const {
   for (const auto& prev : diags_) {
     if (prev.GetCode() == d.GetCode() && prev.GetMessage() == d.GetMessage() &&
-        ((prev.GetSeverity() && d.GetSeverity()) ? prev.GetSeverity()->Level() == d.GetSeverity()->Level()
+        (prev.GetSeverity() && d.GetSeverity() ? prev.GetSeverity()->Level() == d.GetSeverity()->Level()
                                                  : prev.GetSeverity() == d.GetSeverity())) {
       return true;
     }

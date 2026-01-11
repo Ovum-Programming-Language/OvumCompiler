@@ -16,7 +16,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts, const bool skip_newlines = true) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -33,16 +33,18 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx,
+                           ITokenStream& ts,
+                           const std::string_view code,
+                           const std::string_view message) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
         ctx.Diags()->Error(code, message, span);
       } else {
@@ -55,7 +57,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_vie
   return name;
 }
 
-std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
+std::unique_ptr<TypeReference> ParseType(const ContextParser& ctx, ITokenStream& ts) {
   if (ctx.TypeParser() == nullptr) {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_TYPE_PARSER", "type parser not available");
@@ -69,8 +71,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   SkipTrivia(ts, false);
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
-    const std::string type = t.GetStringType();
-    if (type == "NEWLINE") {
+    if (const std::string type = t.GetStringType(); type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -91,7 +92,7 @@ std::string_view StateInterfaceDecl::Name() const {
 IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  InterfaceDecl* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
+  auto* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
   if (interface_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected InterfaceDecl node on stack")));
   }
@@ -101,7 +102,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   }
 
   const Token& start = ts.Peek();
-  std::string lex = start.GetLexeme();
+  const std::string lex = start.GetLexeme();
   SourceSpan span = SpanFrom(start);
 
   // Check for call
@@ -147,7 +148,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
           break;
         }
 
-        params.push_back({name, std::move(*type)});
+        params.emplace_back(name, std::move(*type));
 
         SkipTrivia(ts);
         if (ts.IsEof() || ts.Peek().GetLexeme() != ",") {
@@ -235,7 +236,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
         break;
       }
 
-      params.push_back({param_name, std::move(*type)});
+      params.emplace_back(param_name, std::move(*type));
 
       SkipTrivia(ts);
       if (ts.IsEof() || ts.Peek().GetLexeme() != ",") {
@@ -264,7 +265,7 @@ IState::StepResult StateInterfaceDecl::TryStep(ContextParser& ctx, ITokenStream&
   }
 
   if (ts.LastConsumed() != nullptr) {
-    span = Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
+    span = Union(span, SpanFrom(*ts.LastConsumed()));
   }
   auto method = ctx.Factory()->MakeInterfaceMethod(std::move(name), std::move(params), std::move(return_type), span);
   interface_decl->AddMember(std::move(method));

@@ -12,7 +12,7 @@ namespace ovum::compiler::parser {
 class MatchAnyOf : public ITokenMatcher {
 public:
   explicit MatchAnyOf(std::vector<std::unique_ptr<ITokenMatcher>> matchers);
-  bool TryMatch(const Token& token) const override;
+  [[nodiscard]] bool TryMatch(const Token& token) const override;
 
 private:
   std::vector<std::unique_ptr<ITokenMatcher>> matchers_;

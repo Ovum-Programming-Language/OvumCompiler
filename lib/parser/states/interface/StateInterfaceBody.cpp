@@ -13,7 +13,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -21,7 +21,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -38,8 +38,7 @@ std::string_view StateInterfaceBody::Name() const {
 IState::StepResult StateInterfaceBody::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  InterfaceDecl* interface_decl = ctx.TopNodeAs<InterfaceDecl>();
-  if (interface_decl == nullptr) {
+  if (const auto* interface_decl = ctx.TopNodeAs<InterfaceDecl>(); interface_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected InterfaceDecl node on stack")));
   }
 
@@ -47,13 +46,11 @@ IState::StepResult StateInterfaceBody::TryStep(ContextParser& ctx, ITokenStream&
     return std::unexpected(StateError(std::string_view("unexpected end of file in interface body")));
   }
 
-  const Token& tok = ts.Peek();
-  if (tok.GetLexeme() == "}") {
+  if (const Token& tok = ts.Peek(); tok.GetLexeme() == "}") {
     ts.Consume();
     // Pop interface and add to module
     auto interface_node = ctx.PopNode();
-    Module* module = ctx.TopNodeAs<Module>();
-    if (module != nullptr) {
+    if (auto* module = ctx.TopNodeAs<Module>(); module != nullptr) {
       module->AddDecl(std::unique_ptr<Decl>(dynamic_cast<Decl*>(interface_node.release())));
     }
     return false;

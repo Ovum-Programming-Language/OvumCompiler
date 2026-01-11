@@ -11,7 +11,7 @@ namespace ovum::compiler::parser {
 class MatchLexeme : public ITokenMatcher {
 public:
   explicit MatchLexeme(std::string_view lexeme);
-  bool TryMatch(const Token& token) const override;
+  [[nodiscard]] bool TryMatch(const Token& token) const override;
 
 private:
   std::string_view lexeme_;

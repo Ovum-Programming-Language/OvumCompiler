@@ -60,7 +60,7 @@ void LintVisitor::CheckNestingDepth(const SourceSpan&) const {
   }
 }
 
-bool LintVisitor::IsPureExpr(Expr& expression) const {
+bool LintVisitor::IsPureExpr(Expr& expression) {
   if (dynamic_cast<Assign*>(&expression)) {
     return false;
   }
@@ -94,7 +94,7 @@ void LintVisitor::Visit(ClassDecl& node) {
 
 void LintVisitor::Visit(FunctionDecl& node) {
   if (opts_.warn_empty_bodies) {
-    if (auto* b = node.MutableBody()) {
+    if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
         sink_.Warn("W0102", "function body is empty");
       }
@@ -107,7 +107,7 @@ void LintVisitor::Visit(FunctionDecl& node) {
 void LintVisitor::Visit(MethodDecl& node) {
   if (opts_.warn_empty_bodies) {
     if (!node.IsPure()) {
-      if (auto* b = node.MutableBody()) {
+      if (const auto* b = node.MutableBody()) {
         if (b->Size() == 0) {
           sink_.Warn("W0103", "method body is empty");
         }
@@ -120,7 +120,7 @@ void LintVisitor::Visit(MethodDecl& node) {
 
 void LintVisitor::Visit(CallDecl& node) {
   if (opts_.warn_empty_bodies) {
-    if (auto* b = node.MutableBody()) {
+    if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
         sink_.Warn("W0104", "call body is empty");
       }
@@ -132,7 +132,7 @@ void LintVisitor::Visit(CallDecl& node) {
 
 void LintVisitor::Visit(DestructorDecl& node) {
   if (opts_.warn_empty_bodies) {
-    if (auto* b = node.MutableBody()) {
+    if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
         sink_.Warn("W0105", "destructor body is empty");
       }
@@ -151,8 +151,8 @@ void LintVisitor::Visit(Block& node) {
 
   CheckNestingDepth();
 
-  bool terminated = false;
   if (opts_.warn_unreachable) {
+    bool terminated = false;
     for (const auto& stmt : node.GetStatements()) {
       if (terminated) {
         sink_.Warn("W0301", "unreachable statement");
@@ -170,7 +170,7 @@ void LintVisitor::Visit(Block& node) {
     sink_.Warn("W0203", "block is too long");
   }
 
-  for (auto& stmt : node.GetStatements()) {
+  for (const auto& stmt : node.GetStatements()) {
     stmt->Accept(*this);
   }
 
@@ -244,7 +244,7 @@ void LintVisitor::Visit(WhileStmt& node) {
 
   if (opts_.warn_while_true) {
     if (auto* cond = node.MutableCondition()) {
-      if (auto* bl = dynamic_cast<BoolLit*>(cond)) {
+      if (const auto* bl = dynamic_cast<BoolLit*>(cond)) {
         if (bl->Value()) {
           sink_.Warn("W0601", "while(true) loop");
         }

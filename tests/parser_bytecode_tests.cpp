@@ -145,8 +145,9 @@ fun test(): bool {
 
 TEST_F(ParserBytecodeTest, PushChar) {
   const std::string bc = GenerateBytecode(R"(
-fun test(): char {
-    return 'A'
+fun Main(args: StringArray): int {
+    val x: Char = 'a'
+    return 0
 }
 )");
   EXPECT_NE(bc.find("PushChar"), std::string::npos);
@@ -932,7 +933,7 @@ fun test(x: Object): bool {
 }
 
 TEST_F(ParserBytecodeTest, CastAs) {
-  const std::string bc = GenerateBytecode(R"(
+  GenerateBytecode(R"(
 fun test(x: Object): String {
     return x as String
 }
@@ -1581,7 +1582,7 @@ fun test(): IntArray {
 }
 
 TEST_F(ParserBytecodeTest, ForGC) {
-  const std::string bc = GenerateBytecode(R"OVUM(
+  GenerateBytecode(R"OVUM(
 class Point implements IStringConvertible {
     public var X: Float
     public var Y: Float
@@ -1660,4 +1661,3 @@ fun Main(args: StringArray): int {
 }
 )OVUM");
 }
-

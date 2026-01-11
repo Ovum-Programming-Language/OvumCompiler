@@ -27,7 +27,7 @@ public:
   void SetReturnType(std::unique_ptr<TypeReference> type);
   std::unique_ptr<TypeReference> ReleaseReturnType();
 
-  const Block* Body() const noexcept;
+  [[nodiscard]] const Block* Body() const noexcept;
   Block* MutableBody() noexcept;
   void SetBody(std::unique_ptr<Block> block);
   std::unique_ptr<Block> ReleaseBody();

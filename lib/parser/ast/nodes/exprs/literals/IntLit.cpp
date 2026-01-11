@@ -9,11 +9,11 @@ void IntLit::Accept(AstVisitor& visitor) {
 }
 
 int64_t IntLit::Value() const noexcept {
-  return value;
+  return value_;
 }
 
 void IntLit::SetValue(int64_t new_value) noexcept {
-  value = new_value;
+  value_ = new_value;
 }
 
 } // namespace ovum::compiler::parser

@@ -12,10 +12,10 @@ class TypeAliasDecl : public Decl {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string new_name);
 
-  const TypeReference& AliasedType() const noexcept;
+  [[nodiscard]] const TypeReference& AliasedType() const noexcept;
   TypeReference& MutableAliasedType() noexcept;
   void SetAliasedType(TypeReference type);
 

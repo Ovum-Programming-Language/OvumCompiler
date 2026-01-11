@@ -14,7 +14,7 @@ const Expr& NamespaceRef::NamespaceExpr() const noexcept {
   return *namespace_;
 }
 
-Expr& NamespaceRef::MutableNamespaceExpr() noexcept {
+Expr& NamespaceRef::MutableNamespaceExpr() const noexcept {
   return *namespace_;
 }
 

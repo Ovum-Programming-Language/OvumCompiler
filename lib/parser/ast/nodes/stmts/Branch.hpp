@@ -17,13 +17,13 @@ public:
   Branch& operator=(Branch&&) noexcept = default;
   ~Branch() = default;
 
-  const Expr* Condition() const noexcept;
-  Expr* MutableCondition() noexcept;
+  [[nodiscard]] const Expr* Condition() const noexcept;
+  [[nodiscard]] Expr* MutableCondition() const noexcept;
   void SetCondition(std::unique_ptr<Expr> expression);
   std::unique_ptr<Expr> ReleaseCondition();
 
-  const Block* Then() const noexcept;
-  Block* MutableThen() noexcept;
+  [[nodiscard]] const Block* Then() const noexcept;
+  [[nodiscard]] Block* MutableThen() const noexcept;
   void SetThen(std::unique_ptr<Block> then_body);
   std::unique_ptr<Block> ReleaseThen();
 

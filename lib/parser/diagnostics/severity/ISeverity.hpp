@@ -5,11 +5,11 @@
 
 namespace ovum::compiler::parser {
 
-class ISeverity {
+class ISeverity { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~ISeverity() = default;
-  virtual std::string_view Name() const = 0;
-  virtual int Level() const = 0;
+  [[nodiscard]] virtual std::string_view Name() const = 0;
+  [[nodiscard]] virtual int Level() const = 0;
 };
 
 } // namespace ovum::compiler::parser

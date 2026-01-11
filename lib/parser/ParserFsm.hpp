@@ -10,7 +10,7 @@
 
 namespace ovum::compiler::parser {
 
-class ParserFsm : public IParser {
+class ParserFsm : public IParser { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   ParserFsm(std::unique_ptr<IExpressionParser> expr,
             std::unique_ptr<ITypeParser> typep,

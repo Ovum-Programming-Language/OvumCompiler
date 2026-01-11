@@ -12,7 +12,7 @@ bool GlobalVarDecl::IsVar() const noexcept {
   return is_var_;
 }
 
-void GlobalVarDecl::SetVar(bool is_var) noexcept {
+void GlobalVarDecl::SetVar(const bool is_var) noexcept {
   is_var_ = is_var;
 }
 
@@ -40,7 +40,7 @@ const Expr* GlobalVarDecl::Init() const noexcept {
   return init_.get();
 }
 
-Expr* GlobalVarDecl::MutableInit() noexcept {
+Expr* GlobalVarDecl::MutableInit() const noexcept {
   return init_.get();
 }
 

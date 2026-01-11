@@ -10,7 +10,7 @@ namespace ovum::compiler::parser {
 namespace {
 class SimpleSeverity : public ISeverity {
 public:
-  SimpleSeverity(std::string name, int level) : name_(std::move(name)), level_(level) {
+  SimpleSeverity(std::string name, const int level) : name_(std::move(name)), level_(level) {
   }
 
   [[nodiscard]] std::string_view Name() const override {
@@ -42,7 +42,7 @@ std::shared_ptr<const ISeverity> Severity::Error() {
   return kInst;
 }
 
-std::shared_ptr<const ISeverity> Severity::Custom(std::string_view name, int level) {
+std::shared_ptr<const ISeverity> Severity::Custom(const std::string_view name, int level) {
   return std::make_shared<const SimpleSeverity>(std::string{name}, level);
 }
 

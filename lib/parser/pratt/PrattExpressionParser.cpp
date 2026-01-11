@@ -8,7 +8,7 @@
 
 #include <tokens/Token.hpp>
 
-#include "lib/parser/ast/nodes/exprs/tags/OpTags.hpp"
+#include "lib/parser/ast/nodes/exprs/tags/optags.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/pratt/specifications/InfixSpec.hpp"
 #include "lib/parser/pratt/specifications/PostfixSpec.hpp"
@@ -19,9 +19,9 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-constexpr int kBpAssign = 5; // right-assoc
-constexpr int kBpElvis = 20; // right-assoc
-constexpr int kBpPost = 100; // postfix
+constexpr int kBpAssign = 5;
+constexpr int kBpPost = 100;
+constexpr int kDecimalBase = 10;
 
 bool Lex(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
@@ -33,7 +33,7 @@ bool IsIdentifier(const Token& t) {
 
 bool IsLiteral(const Token& t) {
   const std::string ty = t.GetStringType();
-  return ty.starts_with("LITERAL"); // "LITERAL:*"
+  return ty.starts_with("LITERAL");
 }
 
 SourceSpan SpanFrom(const Token& token) {
@@ -48,8 +48,8 @@ SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
 bool ParseInteger(const std::string& text, long long* out) {
   const char* begin = text.data();
   const char* end = begin + text.size();
-  auto res = std::from_chars(begin, end, *out, 10);
-  return res.ec == std::errc{} && res.ptr == end;
+  auto [ptr, ec] = std::from_chars(begin, end, *out, kDecimalBase);
+  return ec == std::errc{} && ptr == end;
 }
 
 bool ParseFloat(const std::string& text, long double* out) {
@@ -76,22 +76,22 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
   if (ty == "LITERAL:Int") {
     long long value = 0;
     const std::string& lexeme = token.GetLexeme();
-    
-    // Check if this is actually a byte literal (ends with 'b' or 'B')
+
     if (!lexeme.empty() && (lexeme.back() == 'b' || lexeme.back() == 'B')) {
-      // This is a byte literal, parse without the 'b' suffix
-      std::string num_part = lexeme.substr(0, lexeme.size() - 1);
-      if (!ParseInteger(num_part, &value)) {
+      if (const std::string num_part = lexeme.substr(0, lexeme.size() - 1); !ParseInteger(num_part, &value)) {
         diags.Error("E_LITERAL_BYTE", "invalid byte literal", span);
         return nullptr;
       }
-      // Clamp to byte range [0, 255]
-      if (value < 0) value = 0;
-      if (value > 255) value = 255;
+
+      if (value < 0) {
+        value = 0;
+      }
+      if (value > 255) {
+        value = 255;
+      }
       return factory.MakeByte(static_cast<uint8_t>(value), span);
     }
-    
-    // Regular integer literal
+
     if (!ParseInteger(lexeme, &value)) {
       diags.Error("E_LITERAL_INT", "invalid integer literal", span);
       return nullptr;
@@ -126,9 +126,13 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
       diags.Error("E_LITERAL_BYTE", "invalid byte literal", span);
       return nullptr;
     }
-    // Clamp to byte range [0, 255]
-    if (value < 0) value = 0;
-    if (value > 255) value = 255;
+
+    if (value < 0) {
+      value = 0;
+    }
+    if (value > 255) {
+      value = 255;
+    }
     return factory.MakeByte(static_cast<uint8_t>(value), span);
   }
 
@@ -157,7 +161,7 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
 
 PrattExpressionParser::PrattExpressionParser(std::unique_ptr<IOperatorResolver> resolver,
                                              std::shared_ptr<IAstFactory> factory) :
-    resolver_(std::move(resolver)), factory_(std::move(factory)), type_parser_(nullptr) {
+    resolver_(std::move(resolver)), factory_(std::move(factory)) {
 }
 
 PrattExpressionParser::PrattExpressionParser(std::unique_ptr<IOperatorResolver> resolver,
@@ -187,8 +191,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParseExpr(ITokenStream& ts, IDiagno
       break;
     }
 
-    const int bp = post->get().BindingPower();
-    if (bp < min_bp) {
+    if (const int bp = post->get().BindingPower(); bp < min_bp) {
       break;
     }
 
@@ -201,51 +204,46 @@ std::unique_ptr<Expr> PrattExpressionParser::ParseExpr(ITokenStream& ts, IDiagno
   while (!ts.IsEof()) {
     const Token& look = ts.Peek();
 
-    // Check for statement terminators or keywords that should stop expression parsing
     const std::string& lex = look.GetLexeme();
     if (lex == ";" || look.GetStringType() == "NEWLINE") {
-      break; // Statement terminator
+      break;
     }
-    // Check for statement keywords that should stop expression parsing
-    if (lex == "val" || lex == "var" || lex == "return" || lex == "if" || lex == "while" || 
-        lex == "for" || lex == "break" || lex == "continue" || lex == "unsafe" || lex == "{") {
-      break; // Statement keyword
+
+    if (lex == "val" || lex == "var" || lex == "return" || lex == "if" || lex == "while" || lex == "for" ||
+        lex == "break" || lex == "continue" || lex == "unsafe" || lex == "{") {
+      break;
     }
 
     const bool is_ref_assign = Lex(look, "=");
-    const bool is_copy_assign = Lex(look, ":=");
-    if (is_ref_assign || is_copy_assign) {
+    if (const bool is_copy_assign = Lex(look, ":="); is_ref_assign || is_copy_assign) {
       if (kBpAssign < min_bp) {
         break;
       }
 
       ts.Consume();
 
-      std::unique_ptr<Expr> rhs = ParseExpr(ts, diags, kBpAssign - 1); // right-assoc
+      std::unique_ptr<Expr> rhs = ParseExpr(ts, diags, kBpAssign - 1);
       if (!rhs) {
         return nullptr;
       }
 
       SourceSpan span = Union(left->Span(), rhs->Span());
       left = factory_->MakeAssign(
-          is_ref_assign ? OpTags::RefAssign() : OpTags::CopyAssign(), std::move(left), std::move(rhs), span);
+          is_ref_assign ? optags::RefAssign() : optags::CopyAssign(), std::move(left), std::move(rhs), span);
 
-      // Check for postfix operators after assignment (e.g., arr[i] = value[0])
-      // But stop if we hit statement terminators (newline, semicolon) or statement keywords (val, var, return, etc.)
       while (!ts.IsEof()) {
         const Token& next = ts.Peek();
-        
-        // Check for statement terminators or keywords that should stop expression parsing
-        const std::string& lex = next.GetLexeme();
-        if (lex == ";" || next.GetStringType() == "NEWLINE") {
-          break; // Statement terminator
+
+        const std::string& new_lex = next.GetLexeme();
+        if (new_lex == ";" || next.GetStringType() == "NEWLINE") {
+          break;
         }
-        // Check for statement keywords that should stop expression parsing
-        if (lex == "val" || lex == "var" || lex == "return" || lex == "if" || lex == "while" || 
-            lex == "for" || lex == "break" || lex == "continue" || lex == "unsafe" || lex == "{") {
-          break; // Statement keyword
+
+        if (new_lex == "val" || new_lex == "var" || new_lex == "return" || new_lex == "if" || new_lex == "while" ||
+            new_lex == "for" || new_lex == "break" || new_lex == "continue" || new_lex == "unsafe" || new_lex == "{") {
+          break;
         }
-        
+
         const auto post2 = resolver_->FindPostfix(next);
         if (!post2.has_value() || post2->get().BindingPower() < min_bp) {
           break;
@@ -264,13 +262,12 @@ std::unique_ptr<Expr> PrattExpressionParser::ParseExpr(ITokenStream& ts, IDiagno
       break;
     }
 
-    const int lbp = inf->get().Lbp();
-    if (lbp < min_bp) {
+    if (const int lbp = inf->get().Lbp(); lbp < min_bp) {
       break;
     }
 
     if (inf->get().IsElvis()) {
-      ts.Consume(); // ?:
+      ts.Consume();
       std::unique_ptr<Expr> rhs = ParseExpr(ts, diags, inf->get().Rbp());
       if (!rhs) {
         return nullptr;
@@ -510,19 +507,18 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
   if (Lex(look, "[")) {
     ts.Consume();
     const SourceSpan start_span = base ? base->Span() : SpanFrom(look);
-    
-    // Parse index expression
+
     std::unique_ptr<Expr> index_expr = ParseExpr(ts, diags, 0);
     if (!index_expr) {
       diags.Error("E_INDEX_EXPR", "expected index expression");
       return nullptr;
     }
-    
+
     if (ts.IsEof() || !Lex(ts.Peek(), "]")) {
       diags.Error("E_INDEX_CLOSE", "expected ']' after index expression");
       return nullptr;
     }
-    
+
     ts.Consume();
     SourceSpan end_span = index_expr->Span();
     if (const Token* last = ts.LastConsumed()) {
@@ -569,13 +565,12 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
   }
 
   if (Lex(look, "!")) {
-    // Postfix ! for unwrap nullable types
     ts.Consume();
     SourceSpan span = base ? base->Span() : SpanFrom(look);
     if (const Token* last = ts.LastConsumed()) {
       span = Union(span, SpanFrom(*last));
     }
-    return factory_->MakeUnary(OpTags::Unwrap(), std::move(base), span);
+    return factory_->MakeUnary(optags::Unwrap(), std::move(base), span);
   }
 
   return base;
@@ -612,11 +607,15 @@ std::vector<std::unique_ptr<Expr>> PrattExpressionParser::ParseArgList(ITokenStr
 
 std::unique_ptr<Expr> PrattExpressionParser::MakeInfix(const InfixSpec& spec,
                                                        std::unique_ptr<Expr> lhs,
-                                                       std::unique_ptr<Expr> rhs) {
+                                                       std::unique_ptr<Expr> rhs) const {
+  const SourceSpan lhs_span = lhs->Span();
+  const SourceSpan rhs_span = rhs->Span();
+  const SourceSpan span = SourceSpan::Union(lhs_span, rhs_span);
+  
   if (spec.IsElvis()) {
-    return factory_->MakeElvis(std::move(lhs), std::move(rhs), SourceSpan::Union(lhs->Span(), rhs->Span()));
+    return factory_->MakeElvis(std::move(lhs), std::move(rhs), span);
   }
-  return factory_->MakeBinary(*spec.Tag(), std::move(lhs), std::move(rhs), SourceSpan::Union(lhs->Span(), rhs->Span()));
+  return factory_->MakeBinary(*spec.Tag(), std::move(lhs), std::move(rhs), span);
 }
 
 } // namespace ovum::compiler::parser

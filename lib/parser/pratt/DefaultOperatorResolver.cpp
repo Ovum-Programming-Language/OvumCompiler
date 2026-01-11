@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <string_view>
 
-#include "lib/parser/ast/nodes/exprs/tags/OpTags.hpp"
+#include "lib/parser/ast/nodes/exprs/tags/optags.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -12,25 +12,18 @@ bool LexIs(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
 }
 
-  constexpr int kBP_Assign = 10;
-  constexpr int kBP_Elvis = 20; // right-assoc
-  constexpr int kBP_Or = 30;
-  constexpr int kBP_And = 40;
-  constexpr int kBP_Xor = 50;
-  constexpr int kBP_Eq = 60;
-  constexpr int kBP_Rel = 70;
-  constexpr int kBP_Add = 80;
-  // Bitwise operators have different precedences:
-  // << >> have highest precedence (higher than &)
-  // & has next precedence
-  // ^ has next precedence  
-  // | has lowest precedence (same as logical || but different operator)
-  constexpr int kBP_BitwiseOr = 82;   // | (lowest precedence)
-  constexpr int kBP_BitwiseXor = 83;  // ^
-  constexpr int kBP_BitwiseAnd = 84;  // &
-  constexpr int kBP_Shift = 85;       // << >> (highest precedence)
-  constexpr int kBP_Mul = 90;
-  constexpr int kBP_Post = 100;
+constexpr int kBpElvis = 20;
+constexpr int kBpOr = 30;
+constexpr int kBpAnd = 40;
+constexpr int kBpEq = 60;
+constexpr int kBpRel = 70;
+constexpr int kBpAdd = 80;
+constexpr int kBpBitwiseOr = 82;
+constexpr int kBpBitwiseXor = 83;
+constexpr int kBpBitwiseAnd = 84;
+constexpr int kBpShift = 85;
+constexpr int kBpMul = 90;
+constexpr int kBpPost = 100;
 
 std::vector<InfixSpec>& InfixTable() {
   static std::vector<InfixSpec> specs;
@@ -38,40 +31,37 @@ std::vector<InfixSpec>& InfixTable() {
     return specs;
   }
 
-  auto add = [&](std::string_view lex, int bp, const IBinaryOpTag& tag) {
-    InfixSpec s(bp, bp, false, const_cast<IBinaryOpTag*>(&tag), false);
+  auto add = [&](std::string_view lex, const int bp, const IBinaryOpTag& tag) {
+    InfixSpec s(bp, bp, false, &tag, false);
     s.SetMatcher([lex](const Token& t) { return LexIs(t, lex); });
     specs.push_back(std::move(s));
   };
 
-  add("+", kBP_Add, OpTags::Add());
-  add("-", kBP_Add, OpTags::Sub());
-  add("*", kBP_Mul, OpTags::Mul());
-  add("/", kBP_Mul, OpTags::Div());
-  add("%", kBP_Mul, OpTags::Mod());
+  add("+", kBpAdd, optags::Add());
+  add("-", kBpAdd, optags::Sub());
+  add("*", kBpMul, optags::Mul());
+  add("/", kBpMul, optags::Div());
+  add("%", kBpMul, optags::Mod());
 
-  add("==", kBP_Eq, OpTags::Eq());
-  add("!=", kBP_Eq, OpTags::Ne());
+  add("==", kBpEq, optags::Eq());
+  add("!=", kBpEq, optags::Ne());
 
-  // Comparison operators: two-character operators must be checked before single-character
-  add("<=", kBP_Rel, OpTags::Le());
-  add(">=", kBP_Rel, OpTags::Ge());
-  add("<", kBP_Rel, OpTags::Lt());
-  add(">", kBP_Rel, OpTags::Gt());
+  add("<=", kBpRel, optags::Le());
+  add(">=", kBpRel, optags::Ge());
+  add("<", kBpRel, optags::Lt());
+  add(">", kBpRel, optags::Gt());
 
-  add("&&", kBP_And, OpTags::And());
-  add("||", kBP_Or, OpTags::Or());
-  
-  // Bitwise operators (higher precedence than Add, lower than Mul)
-  // Precedence: << >> (highest) > & > ^ > | (lowest)
-  add("<<", kBP_Shift, OpTags::LeftShift());
-  add(">>", kBP_Shift, OpTags::RightShift());
-  add("&", kBP_BitwiseAnd, OpTags::BitwiseAnd());
-  add("^", kBP_BitwiseXor, OpTags::Xor());  // Bitwise XOR (can also be logical XOR for bool)
-  add("|", kBP_BitwiseOr, OpTags::BitwiseOr());
+  add("&&", kBpAnd, optags::And());
+  add("||", kBpOr, optags::Or());
+
+  add("<<", kBpShift, optags::LeftShift());
+  add(">>", kBpShift, optags::RightShift());
+  add("&", kBpBitwiseAnd, optags::BitwiseAnd());
+  add("^", kBpBitwiseXor, optags::Xor());
+  add("|", kBpBitwiseOr, optags::BitwiseOr());
 
   {
-    InfixSpec elvis(kBP_Elvis, kBP_Elvis - 1, true, nullptr, true);
+    InfixSpec elvis(kBpElvis, kBpElvis - 1, true, nullptr, true);
     elvis.SetMatcher([](const Token& t) { return LexIs(t, "?:"); });
     specs.push_back(std::move(elvis));
   }
@@ -85,33 +75,33 @@ std::vector<PostfixSpec>& PostfixTable() {
     return specs;
   }
 
-  specs.emplace_back([](const Token& t) { return LexIs(t, "("); }, kBP_Post, false);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "."); }, kBP_Post, false);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "?."); }, kBP_Post, false);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "["); }, kBP_Post, false);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "as"); }, kBP_Post, true);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "is"); }, kBP_Post, true);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "::"); }, kBP_Post, false);
-  specs.emplace_back([](const Token& t) { return LexIs(t, "!"); }, kBP_Post, false);  // Postfix ! for unwrap nullable
+  specs.emplace_back([](const Token& t) { return LexIs(t, "("); }, kBpPost, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "."); }, kBpPost, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "?."); }, kBpPost, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "["); }, kBpPost, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "as"); }, kBpPost, true);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "is"); }, kBpPost, true);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "::"); }, kBpPost, false);
+  specs.emplace_back([](const Token& t) { return LexIs(t, "!"); }, kBpPost, false);
 
   return specs;
 }
 
 const IUnaryOpTag* MatchPrefix(const Token& t) {
   if (LexIs(t, "-")) {
-    return &OpTags::Neg();
+    return &optags::Neg();
   }
 
   if (LexIs(t, "+")) {
-    return &OpTags::Plus();
+    return &optags::Plus();
   }
 
   if (LexIs(t, "!")) {
-    return &OpTags::Not();
+    return &optags::Not();
   }
 
   if (LexIs(t, "~")) {
-    return &OpTags::BitwiseNot();
+    return &optags::BitwiseNot();
   }
 
   return nullptr;
@@ -120,8 +110,7 @@ const IUnaryOpTag* MatchPrefix(const Token& t) {
 } // namespace
 
 std::optional<std::reference_wrapper<const InfixSpec>> DefaultOperatorResolver::FindInfix(const Token& t) const {
-  auto& tbl = InfixTable();
-  for (const auto& s : tbl) {
+  for (const auto& tbl = InfixTable(); const auto& s : tbl) {
     if (s.TryMatch(t)) {
       return std::cref(s);
     }
@@ -131,8 +120,7 @@ std::optional<std::reference_wrapper<const InfixSpec>> DefaultOperatorResolver::
 }
 
 std::optional<std::reference_wrapper<const PostfixSpec>> DefaultOperatorResolver::FindPostfix(const Token& t) const {
-  auto& tbl = PostfixTable();
-  for (const auto& s : tbl) {
+  for (const auto& tbl = PostfixTable(); const auto& s : tbl) {
     if (s.TryMatch(t)) {
       return std::cref(s);
     }
@@ -158,8 +146,7 @@ bool DefaultOperatorResolver::IsContinuation(const Token& t) const {
     return true;
   }
 
-  const auto& lx = t.GetLexeme();
-  if (lx == "(" || lx == "[") {
+  if (const auto& lx = t.GetLexeme(); lx == "(" || lx == "[") {
     return true;
   }
   return false;

@@ -59,21 +59,25 @@ namespace ovum::compiler::parser {
 
 namespace {
 
+constexpr size_t kPointerSizeBytes = 8;
+constexpr size_t kIntFloatSizeBytes = 8;
+constexpr size_t kByteCharBoolSizeBytes = 1;
+
 size_t FieldSizeForType(const TypeReference& t) {
   if (t.QualifiedName().empty()) {
-    return 8;
+    return kPointerSizeBytes;
   }
 
   std::string_view type_name = t.SimpleName();
 
   if (type_name == "int" || type_name == "float") {
-    return 8;
+    return kIntFloatSizeBytes;
   }
   if (type_name == "byte" || type_name == "char" || type_name == "bool") {
-    return 1;
+    return kByteCharBoolSizeBytes;
   }
 
-  return 8;
+  return kPointerSizeBytes;
 }
 
 std::string EscapeStringForEmit(const std::string& s) {
@@ -324,10 +328,10 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
 };
 
 BytecodeVisitor::BytecodeVisitor(std::ostream& output) :
-    output_(output), next_function_id_(0), pending_init_static_({}) {
+    output_(output), pending_init_static_({}) {
 }
 
-void BytecodeVisitor::EmitIndent() {
+void BytecodeVisitor::EmitIndent() const {
   for (int i = 0; i < indent_level_; ++i) {
     output_ << kIndent;
   }
@@ -371,7 +375,7 @@ void BytecodeVisitor::EmitCommandWithStringWithoutBraces(const std::string& comm
 }
 
 void BytecodeVisitor::EmitPushByte(uint8_t value) {
-  EmitCommandWithInt("PushByte", static_cast<int64_t>(value));
+  EmitCommandWithInt("PushByte", value);
 }
 
 void BytecodeVisitor::EmitBlockStart() {
@@ -597,8 +601,7 @@ void BytecodeVisitor::Visit(MethodDecl& node) {
     EmitBlockStart();
     if (node.MutableBody() != nullptr) {
       bool has_return = false;
-      auto& stmts = node.MutableBody()->GetStatements();
-      if (!stmts.empty()) {
+      if (const auto& stmts = node.MutableBody()->GetStatements(); !stmts.empty()) {
         if (dynamic_cast<ReturnStmt*>(stmts.back().get()) != nullptr) {
           has_return = true;
         }
@@ -789,8 +792,8 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
 
   size_t header = 4 + 4;
   size_t fields_size = 0;
-  for (auto& f : fields) {
-    fields_size += FieldSizeForType(f.second);
+  for (auto& val : fields | std::views::values) {
+    fields_size += FieldSizeForType(val);
   }
   size_t total_size = header + fields_size;
 
@@ -818,20 +821,20 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
     EmitIndent();
     output_ << "methods {\n";
     indent_level_++;
-    for (auto& m : method_map) {
+    for (auto& [fst, snd] : method_map) {
       EmitIndent();
 
       std::string vtable_name;
       for (auto& member : node.MutableMembers()) {
         if (auto* md = dynamic_cast<MethodDecl*>(member.get())) {
-          if (md->Name() == m.first) {
+          if (md->Name() == fst) {
             bool is_mutable = false;
-            vtable_name = GenerateMethodVTableName(m.first, md->Params(), is_mutable);
+            vtable_name = GenerateMethodVTableName(fst, md->Params(), is_mutable);
             break;
           }
         }
       }
-      output_ << vtable_name << ": " << m.second << "\n";
+      output_ << vtable_name << ": " << snd << "\n";
     }
     indent_level_--;
     EmitIndent();
@@ -843,18 +846,18 @@ void BytecodeVisitor::Visit(ClassDecl& node) {
   indent_level_++;
 
   size_t offset = header;
-  for (auto& f : fields) {
+  for (auto& [fst, snd] : fields) {
     EmitIndent();
 
-    std::string tname = TypeToMangledName(f.second);
+    std::string tname = TypeToMangledName(snd);
     std::string vartable_type;
     if (tname == "int" || tname == "float" || tname == "byte" || tname == "char" || tname == "bool") {
       vartable_type = tname;
     } else {
       vartable_type = "Object";
     }
-    output_ << f.first << ": " << vartable_type << "@" << offset << "\n";
-    offset += FieldSizeForType(f.second);
+    output_ << fst << ": " << vartable_type << "@" << offset << "\n";
+    offset += FieldSizeForType(snd);
   }
   indent_level_--;
   EmitIndent();
@@ -905,24 +908,23 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
 
     bool should_pop = true;
 
-    if (is_system_command) {
+    if (is_system_command || dynamic_cast<Assign*>(node.MutableExpression())) {
       should_pop = false;
     } else if (auto* call = dynamic_cast<Call*>(node.MutableExpression())) {
-      if (auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
-        std::string func_name = ident->Name();
-        auto return_type_it = function_return_types_.find(func_name);
-        if (return_type_it != function_return_types_.end()) {
+      if (const auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
+        const std::string func_name = ident->Name();
+        if (const auto return_type_it = function_return_types_.find(func_name);
+            return_type_it != function_return_types_.end()) {
           if (return_type_it->second == "void" || return_type_it->second == "Void") {
             should_pop = false;
           }
         }
       } else if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
-        std::string method_name = field_access->Name();
+        const std::string method_name = field_access->Name();
 
         std::string object_type;
-        if (auto* obj_ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-          auto type_it = variable_types_.find(obj_ident->Name());
-          if (type_it != variable_types_.end()) {
+        if (const auto* obj_ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
+          if (const auto type_it = variable_types_.find(obj_ident->Name()); type_it != variable_types_.end()) {
             object_type = type_it->second;
           }
         }
@@ -935,23 +937,16 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
         }
 
         if (!method_key.empty()) {
-          auto return_type_it = method_return_types_.find(method_key);
-          if (return_type_it != method_return_types_.end()) {
+          if (const auto return_type_it = method_return_types_.find(method_key);
+              return_type_it != method_return_types_.end()) {
             if (return_type_it->second == "void" || return_type_it->second == "Void") {
               should_pop = false;
             }
           }
         }
       }
-    } else if (auto* assign = dynamic_cast<Assign*>(node.MutableExpression())) {
-      if (dynamic_cast<FieldAccess*>(&assign->MutableTarget())) {
-        should_pop = false;
-      } else {
-        should_pop = false;
-      }
-    } else {
-      should_pop = true;
     }
+    // If should_pop is still true at this point, it means the expression left a value on the stack
 
     if (should_pop) {
       EmitCommand("Pop");
@@ -964,10 +959,9 @@ void BytecodeVisitor::Visit(ReturnStmt& node) {
     node.MutableValue()->Accept(*this);
 
     if (!current_function_name_.empty()) {
-      auto it = function_return_types_.find(current_function_name_);
-      if (it != function_return_types_.end()) {
-        std::string return_type = it->second;
-        std::string result_type_name = GetTypeNameForExpr(node.MutableValue());
+      if (const auto it = function_return_types_.find(current_function_name_); it != function_return_types_.end()) {
+        const std::string return_type = it->second;
+        const std::string result_type_name = GetTypeNameForExpr(node.MutableValue());
         EmitTypeConversionIfNeeded(return_type, result_type_name);
       }
     }
@@ -1034,17 +1028,15 @@ void BytecodeVisitor::Visit(WhileStmt& node) {
 }
 
 void BytecodeVisitor::Visit(ForStmt& node) {
-  bool collection_is_local = false;
   size_t collection_index = 0;
   std::string collection_var_name = node.IteratorName() + "_collection";
   std::string collection_type;
 
   if (node.MutableIteratorExpr() != nullptr) {
-    if (auto* ident = dynamic_cast<IdentRef*>(node.MutableIteratorExpr())) {
-      auto var_it = variable_types_.find(ident->Name());
-      auto local_it = local_variables_.find(ident->Name());
-      if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
-        collection_is_local = true;
+    if (const auto* ident = dynamic_cast<IdentRef*>(node.MutableIteratorExpr())) {
+      const auto var_it = variable_types_.find(ident->Name());
+      if (const auto local_it = local_variables_.find(ident->Name());
+          var_it != variable_types_.end() && local_it != local_variables_.end()) {
         collection_index = local_it->second;
         collection_var_name = ident->Name();
         collection_type = var_it->second;
@@ -1121,10 +1113,10 @@ void BytecodeVisitor::Visit(UnsafeBlock& node) {
 void BytecodeVisitor::Visit(Binary& node) {
   const auto& op = node.Op();
 
-  bool is_null_comparison = (dynamic_cast<NullLit*>(&node.MutableLhs()) != nullptr) ||
-                            (dynamic_cast<NullLit*>(&node.MutableRhs()) != nullptr);
+  bool is_null_comparison =
+      dynamic_cast<NullLit*>(&node.MutableLhs()) != nullptr || dynamic_cast<NullLit*>(&node.MutableRhs()) != nullptr;
 
-  if (is_null_comparison && (&op == &OpTags::Eq() || &op == &OpTags::Ne())) {
+  if (is_null_comparison && (&op == &optags::Eq() || &op == &optags::Ne())) {
     if (dynamic_cast<NullLit*>(&node.MutableLhs()) != nullptr) {
       node.MutableRhs().Accept(*this);
     } else {
@@ -1132,7 +1124,7 @@ void BytecodeVisitor::Visit(Binary& node) {
     }
 
     EmitCommand("IsNull");
-    if (&op == &OpTags::Ne()) {
+    if (&op == &optags::Ne()) {
       EmitCommand("BoolNot");
     }
     return;
@@ -1146,52 +1138,51 @@ void BytecodeVisitor::Visit(Binary& node) {
 
   if (IsPrimitiveWrapper(lhs_type_name)) {
     if (lhs_type_name == "Int") {
-      lhs_type = OperandType::Int;
+      lhs_type = OperandType::kInt;
     } else if (lhs_type_name == "Float") {
-      lhs_type = OperandType::Float;
+      lhs_type = OperandType::kFloat;
     } else if (lhs_type_name == "Byte") {
-      lhs_type = OperandType::Byte;
+      lhs_type = OperandType::kByte;
     } else if (lhs_type_name == "Char") {
-      lhs_type = OperandType::Char;
+      lhs_type = OperandType::kChar;
     } else if (lhs_type_name == "Bool") {
-      lhs_type = OperandType::Bool;
+      lhs_type = OperandType::kBool;
     }
   }
   if (IsPrimitiveWrapper(rhs_type_name)) {
     if (rhs_type_name == "Int") {
-      rhs_type = OperandType::Int;
+      rhs_type = OperandType::kInt;
     } else if (rhs_type_name == "Float") {
-      rhs_type = OperandType::Float;
+      rhs_type = OperandType::kFloat;
     } else if (rhs_type_name == "Byte") {
-      rhs_type = OperandType::Byte;
+      rhs_type = OperandType::kByte;
     } else if (rhs_type_name == "Char") {
-      rhs_type = OperandType::Char;
+      rhs_type = OperandType::kChar;
     } else if (rhs_type_name == "Bool") {
-      rhs_type = OperandType::Bool;
+      rhs_type = OperandType::kBool;
     }
   }
 
-  bool is_comparison = (&op == &OpTags::Lt() || &op == &OpTags::Le() || &op == &OpTags::Gt() || &op == &OpTags::Ge() ||
-                        &op == &OpTags::Eq() || &op == &OpTags::Ne());
-  bool is_bitwise = (&op == &OpTags::BitwiseAnd() || &op == &OpTags::BitwiseOr() || &op == &OpTags::Xor() ||
-                     &op == &OpTags::LeftShift() || &op == &OpTags::RightShift());
+  bool is_comparison = &op == &optags::Lt() || &op == &optags::Le() || &op == &optags::Gt() || &op == &optags::Ge() ||
+                       &op == &optags::Eq() || &op == &optags::Ne();
+  bool is_bitwise = &op == &optags::BitwiseAnd() || &op == &optags::BitwiseOr() || &op == &optags::Xor() ||
+                    &op == &optags::LeftShift() || &op == &optags::RightShift();
 
   OperandType dominant_type = lhs_type;
-  if (rhs_type == OperandType::Float || lhs_type == OperandType::Float) {
-    dominant_type = OperandType::Float;
-  } else if ((is_comparison || is_bitwise) && (rhs_type == OperandType::Byte || lhs_type == OperandType::Byte)) {
-    dominant_type = OperandType::Byte;
-  } else if (rhs_type == OperandType::Int || lhs_type == OperandType::Int) {
-    dominant_type = OperandType::Int;
-  } else if (rhs_type == OperandType::Byte || lhs_type == OperandType::Byte) {
-    dominant_type = OperandType::Byte;
-  } else if (rhs_type == OperandType::String || lhs_type == OperandType::String) {
-    dominant_type = OperandType::String;
-  } else if (rhs_type == OperandType::Bool || lhs_type == OperandType::Bool) {
-    dominant_type = OperandType::Bool;
+  if (rhs_type == OperandType::kFloat || lhs_type == OperandType::kFloat) {
+    dominant_type = OperandType::kFloat;
+  } else if (((is_comparison || is_bitwise) && (rhs_type == OperandType::kByte || lhs_type == OperandType::kByte)) ||
+             rhs_type == OperandType::kByte || lhs_type == OperandType::kByte) {
+    dominant_type = OperandType::kByte;
+  } else if (rhs_type == OperandType::kInt || lhs_type == OperandType::kInt) {
+    dominant_type = OperandType::kInt;
+  } else if (rhs_type == OperandType::kString || lhs_type == OperandType::kString) {
+    dominant_type = OperandType::kString;
+  } else if (rhs_type == OperandType::kBool || lhs_type == OperandType::kBool) {
+    dominant_type = OperandType::kBool;
   }
 
-  if (&op == &OpTags::Add() && dominant_type == OperandType::String) {
+  if (&op == &optags::Add() && dominant_type == OperandType::kString) {
     node.MutableRhs().Accept(*this);
     EmitUnwrapIfNeeded(rhs_type_name);
     node.MutableLhs().Accept(*this);
@@ -1210,7 +1201,7 @@ void BytecodeVisitor::Visit(Binary& node) {
 void BytecodeVisitor::Visit(Unary& node) {
   const auto& op = node.Op();
 
-  if (&op == &OpTags::Unwrap()) {
+  if (&op == &optags::Unwrap()) {
     node.MutableOperand().Accept(*this);
 
     EmitCommand("Unwrap");
@@ -1227,33 +1218,33 @@ void BytecodeVisitor::Visit(Unary& node) {
 
   OperandType operand_type = DetermineOperandType(&node.MutableOperand());
 
-  if (&op == &OpTags::Neg()) {
-    if (operand_type == OperandType::Float) {
+  if (&op == &optags::Neg()) {
+    if (operand_type == OperandType::kFloat) {
       EmitCommand("FloatNegate");
-    } else if (operand_type == OperandType::Byte) {
+    } else if (operand_type == OperandType::kByte) {
       EmitCommand("ByteNegate");
     } else {
       EmitCommand("IntNegate");
     }
 
     if (IsPrimitiveWrapper(operand_type_name)) {
-      EmitWrapIfNeeded(operand_type_name, operand_type);
+      EmitWrapIfNeeded(operand_type_name);
     }
-  } else if (&op == &OpTags::Plus()) {
+  } else if (&op == &optags::Plus()) {
     if (IsPrimitiveWrapper(operand_type_name)) {
-      EmitWrapIfNeeded(operand_type_name, operand_type);
+      EmitWrapIfNeeded(operand_type_name);
     }
-  } else if (&op == &OpTags::Not()) {
+  } else if (&op == &optags::Not()) {
     EmitCommand("BoolNot");
-  } else if (&op == &OpTags::BitwiseNot()) {
-    if (operand_type == OperandType::Byte) {
+  } else if (&op == &optags::BitwiseNot()) {
+    if (operand_type == OperandType::kByte) {
       EmitCommand("ByteNot");
     } else {
       EmitCommand("IntNot");
     }
 
     if (IsPrimitiveWrapper(operand_type_name)) {
-      EmitWrapIfNeeded(operand_type_name, operand_type);
+      EmitWrapIfNeeded(operand_type_name);
     }
   } else {
     EmitCommand("UnsupportedUnaryOp");
@@ -1262,13 +1253,12 @@ void BytecodeVisitor::Visit(Unary& node) {
 
 void BytecodeVisitor::Visit(Assign& node) {
   const auto& op = node.Kind();
-  bool is_copy_assign = (&op == &OpTags::CopyAssign());
+  bool is_copy_assign = (&op == &optags::CopyAssign());
 
   if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableTarget())) {
     std::string object_type_name;
     if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-      auto type_it = variable_types_.find(ident->Name());
-      if (type_it != variable_types_.end()) {
+      if (auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
         object_type_name = type_it->second;
       }
     }
@@ -1289,8 +1279,8 @@ void BytecodeVisitor::Visit(Assign& node) {
     }
 
     if (is_copy_assign) {
-      OperandType value_type = DetermineOperandType(&node.MutableValue());
-      if (value_type == OperandType::String || value_type == OperandType::Unknown) {
+      if (OperandType value_type = DetermineOperandType(&node.MutableValue());
+          value_type == OperandType::kString || value_type == OperandType::kUnknown) {
       }
     }
 
@@ -1315,15 +1305,13 @@ void BytecodeVisitor::Visit(Assign& node) {
     std::string value_type_name;
 
     if (auto* target_ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
-      auto type_it = variable_types_.find(target_ident->Name());
-      if (type_it != variable_types_.end()) {
+      if (auto type_it = variable_types_.find(target_ident->Name()); type_it != variable_types_.end()) {
         target_type_name = type_it->second;
       }
     }
 
     if (auto* value_ident = dynamic_cast<IdentRef*>(&node.MutableValue())) {
-      auto type_it = variable_types_.find(value_ident->Name());
-      if (type_it != variable_types_.end()) {
+      if (auto type_it = variable_types_.find(value_ident->Name()); type_it != variable_types_.end()) {
         value_type_name = type_it->second;
       }
     } else {
@@ -1352,8 +1340,7 @@ void BytecodeVisitor::Visit(Assign& node) {
     node.MutableValue().Accept(*this);
 
     std::string expected_type_name;
-    auto type_it = variable_types_.find(ident->Name());
-    if (type_it != variable_types_.end()) {
+    if (auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
       expected_type_name = type_it->second;
     }
 
@@ -1391,11 +1378,8 @@ void BytecodeVisitor::Visit(Call& node) {
       EmitArgumentsInReverse(args);
       EmitCommand(ns_name);
 
-      auto wrap_type_it = kBuiltinReturnPrimitives.find(ns_name);
-      if (wrap_type_it != kBuiltinReturnPrimitives.end()) {
-        std::string wrapper_type = wrap_type_it->second;
-
-        if (wrapper_type == "Float") {
+      if (auto wrap_type_it = kBuiltinReturnPrimitives.find(ns_name); wrap_type_it != kBuiltinReturnPrimitives.end()) {
+        if (std::string wrapper_type = wrap_type_it->second; wrapper_type == "Float") {
           EmitCommandWithStringWithoutBraces("CallConstructor", "_Float_float");
         } else if (wrapper_type == "Int") {
           EmitCommandWithStringWithoutBraces("CallConstructor", "_Int_int");
@@ -1406,8 +1390,7 @@ void BytecodeVisitor::Visit(Call& node) {
     }
 
     std::string full_name = "sys::" + ns_name;
-    auto it = function_name_map_.find(full_name);
-    if (it != function_name_map_.end()) {
+    if (auto it = function_name_map_.find(full_name); it != function_name_map_.end()) {
       EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
@@ -1419,7 +1402,7 @@ void BytecodeVisitor::Visit(Call& node) {
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableCallee())) {
     std::string name = ident->Name();
 
-    if (kBuiltinTypeNames.find(name) != kBuiltinTypeNames.end()) {
+    if (kBuiltinTypeNames.contains(name)) {
       std::vector<std::string> expected_param_types;
       if (args.size() == 1) {
         std::string param_type;
@@ -1454,8 +1437,6 @@ void BytecodeVisitor::Visit(Call& node) {
           type2 = "byte";
         } else if (name == "CharArray") {
           type2 = "char";
-        } else if (name == "ObjectArray") {
-          type2 = "Object";
         } else {
           type2 = "Object";
         }
@@ -1482,7 +1463,7 @@ void BytecodeVisitor::Visit(Call& node) {
           if (needs_wrap) {
             const std::string& wrapper_type = expected_type_name;
             const std::string& primitive_type = arg_type_name;
-            std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+            std::string constructor_name = std::string("_" + wrapper_type + "_").append(primitive_type);
             EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
           } else if (needs_unwrap) {
             EmitCommand("Unwrap");
@@ -1492,21 +1473,19 @@ void BytecodeVisitor::Visit(Call& node) {
 
       std::string constructor_name = "_" + name;
       if (args.size() == 1) {
-        constructor_name += "_" + expected_param_types[0];
+        constructor_name.append("_" + expected_param_types[0]);
       } else if (args.size() == 2) {
-        constructor_name += "_" + expected_param_types[0] + "_" + expected_param_types[1];
+        constructor_name.append("_" + expected_param_types[0] + "_" + expected_param_types[1]);
       } else if (args.size() == 3) {
-        constructor_name += "_float_float_float";
+        constructor_name.append("_float_float_float");
       }
       EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
       return;
     }
 
     std::string ctor_key = name + "::<ctor>";
-    auto ctor_it = method_name_map_.find(ctor_key);
-    if (ctor_it != method_name_map_.end()) {
-      auto param_types_it = constructor_params_.find(ctor_key);
-      if (param_types_it != constructor_params_.end()) {
+    if (auto ctor_it = method_name_map_.find(ctor_key); ctor_it != method_name_map_.end()) {
+      if (auto param_types_it = constructor_params_.find(ctor_key); param_types_it != constructor_params_.end()) {
         const auto& expected_param_types = param_types_it->second;
 
         for (size_t i = args.size(); i > 0; --i) {
@@ -1526,7 +1505,9 @@ void BytecodeVisitor::Visit(Call& node) {
             if (needs_wrap) {
               const std::string& wrapper_type = expected_type_name;
               const std::string& primitive_type = arg_type_name;
-              std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+              std::string constructor_name = "_";
+              constructor_name.append(wrapper_type + "_");
+              constructor_name.append(primitive_type);
               EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
             } else if (needs_unwrap) {
               EmitCommand("Unwrap");
@@ -1542,8 +1523,7 @@ void BytecodeVisitor::Visit(Call& node) {
       return;
     }
 
-    auto it = function_name_map_.find(name);
-    if (it != function_name_map_.end()) {
+    if (auto it = function_name_map_.find(name); it != function_name_map_.end()) {
       for (auto& arg : std::ranges::reverse_view(args)) {
         arg->Accept(*this);
       }
@@ -1565,17 +1545,16 @@ void BytecodeVisitor::Visit(Call& node) {
 
     std::string object_type;
     if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-      auto type_it = variable_types_.find(ident->Name());
-      if (type_it != variable_types_.end()) {
+      if (auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
         object_type = type_it->second;
       }
-    } else if (auto* string_lit = dynamic_cast<StringLit*>(&field_access->MutableObject())) {
+    } else if (dynamic_cast<StringLit*>(&field_access->MutableObject())) {
       object_type = "String";
-    } else if (auto* int_lit = dynamic_cast<IntLit*>(&field_access->MutableObject())) {
+    } else if (dynamic_cast<IntLit*>(&field_access->MutableObject())) {
       object_type = "int";
-    } else if (auto* float_lit = dynamic_cast<FloatLit*>(&field_access->MutableObject())) {
+    } else if (dynamic_cast<FloatLit*>(&field_access->MutableObject())) {
       object_type = "float";
-    } else if (auto* this_expr = dynamic_cast<ThisExpr*>(&field_access->MutableObject())) {
+    } else if (dynamic_cast<ThisExpr*>(&field_access->MutableObject())) {
       object_type = current_class_name_;
     }
 
@@ -1586,11 +1565,10 @@ void BytecodeVisitor::Visit(Call& node) {
     if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&field_access->MutableObject())) {
       std::string field_type;
       std::string nested_object_type = object_type;
-      if (auto* nested_this_expr = dynamic_cast<ThisExpr*>(&nested_field_access->MutableObject())) {
+      if (dynamic_cast<ThisExpr*>(&nested_field_access->MutableObject())) {
         nested_object_type = current_class_name_;
       } else if (auto* nested_ident = dynamic_cast<IdentRef*>(&nested_field_access->MutableObject())) {
-        auto type_it = variable_types_.find(nested_ident->Name());
-        if (type_it != variable_types_.end()) {
+        if (auto type_it = variable_types_.find(nested_ident->Name()); type_it != variable_types_.end()) {
           nested_object_type = type_it->second;
         }
       }
@@ -1600,12 +1578,10 @@ void BytecodeVisitor::Visit(Call& node) {
       }
 
       if (!nested_object_type.empty()) {
-        auto fields_it = class_fields_.find(nested_object_type);
-        if (fields_it != class_fields_.end()) {
-          const auto& fields = fields_it->second;
-          for (const auto& field : fields) {
-            if (field.first == nested_field_access->Name()) {
-              field_type = TypeToMangledName(field.second);
+        if (auto fields_it = class_fields_.find(nested_object_type); fields_it != class_fields_.end()) {
+          for (const auto& fields = fields_it->second; const auto& [name, type] : fields) {
+            if (name == nested_field_access->Name()) {
+              field_type = TypeToMangledName(type);
               break;
             }
           }
@@ -1613,12 +1589,10 @@ void BytecodeVisitor::Visit(Call& node) {
       }
 
       if (field_type.empty() && !current_class_name_.empty()) {
-        auto fields_it = class_fields_.find(current_class_name_);
-        if (fields_it != class_fields_.end()) {
-          const auto& fields = fields_it->second;
-          for (const auto& field : fields) {
-            if (field.first == nested_field_access->Name()) {
-              field_type = TypeToMangledName(field.second);
+        if (auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
+          for (const auto& fields = fields_it->second; const auto& [name, type] : fields) {
+            if (name == nested_field_access->Name()) {
+              field_type = TypeToMangledName(type);
               break;
             }
           }
@@ -1630,9 +1604,7 @@ void BytecodeVisitor::Visit(Call& node) {
       }
     }
 
-    bool is_primitive_type = kPrimitiveTypeNames.find(object_type) != kPrimitiveTypeNames.end();
-
-    if (is_primitive_type) {
+    if (kPrimitiveTypeNames.contains(object_type)) {
       if (method_name == "ToString") {
         if (object_type == "int") {
           EmitCommand("IntToString");
@@ -1645,10 +1617,10 @@ void BytecodeVisitor::Visit(Call& node) {
       }
     }
 
-    if (kBuiltinTypeNames.find(object_type) != kBuiltinTypeNames.end()) {
+    if (kBuiltinTypeNames.contains(object_type)) {
       auto generate_array_method_name = [&](const std::string& array_type,
-                                            const std::string& method_name) -> std::string {
-        std::string base_name = "_" + array_type + "_" + method_name;
+                                            const std::string& code_method_name) -> std::string {
+        std::string base_name = "_" + array_type + "_" + code_method_name;
 
         std::string elem_type;
         if (array_type == "IntArray") {
@@ -1661,32 +1633,24 @@ void BytecodeVisitor::Visit(Call& node) {
           elem_type = "bool";
         } else if (array_type == "CharArray") {
           elem_type = "char";
-        } else if (array_type == "StringArray" || array_type == "ObjectArray") {
-          elem_type = "Object";
         } else {
           elem_type = "Object";
         }
 
-        if (method_name == "Length" || method_name == "GetHash" || method_name == "ToString" ||
-            method_name == "Equals" || method_name == "Capacity" || method_name == "GetAt") {
+        if (code_method_name == "Length" || code_method_name == "GetHash" || code_method_name == "ToString" ||
+            code_method_name == "Equals" || code_method_name == "Capacity" || code_method_name == "GetAt") {
           base_name += "_<C>";
         } else {
           base_name += "_<M>";
         }
 
-        if (method_name == "Add") {
+        if (code_method_name == "Add") {
           base_name += "_" + elem_type;
-        } else if (method_name == "GetAt") {
+        } else if (code_method_name == "GetAt" || code_method_name == "RemoveAt" || code_method_name == "Reserve") {
           base_name += "_int";
-        } else if (method_name == "SetAt") {
+        } else if (code_method_name == "SetAt" || code_method_name == "InsertAt") {
           base_name += "_int_" + elem_type;
-        } else if (method_name == "InsertAt") {
-          base_name += "_int_" + elem_type;
-        } else if (method_name == "RemoveAt") {
-          base_name += "_int";
-        } else if (method_name == "Reserve") {
-          base_name += "_int";
-        } else if (method_name == "Equals") {
+        } else if (code_method_name == "Equals") {
           base_name += "_Object";
         }
 
@@ -1695,10 +1659,8 @@ void BytecodeVisitor::Visit(Call& node) {
 
       std::string method_call;
       if (!object_type.empty()) {
-        auto type_it = kBuiltinMethods.find(object_type);
-        if (type_it != kBuiltinMethods.end()) {
-          auto method_it = type_it->second.find(method_name);
-          if (method_it != type_it->second.end()) {
+        if (auto type_it = kBuiltinMethods.find(object_type); type_it != kBuiltinMethods.end()) {
+          if (auto method_it = type_it->second.find(method_name); method_it != type_it->second.end()) {
             method_call = method_it->second;
           } else {
             if (object_type.find("Array") != std::string::npos) {
@@ -1771,7 +1733,8 @@ void BytecodeVisitor::Visit(Call& node) {
             if (needs_wrap) {
               const std::string& wrapper_type = expected_type_name;
               const std::string& primitive_type = arg_type_name;
-              std::string constructor_name = "_" + wrapper_type + "_" + primitive_type;
+              std::string constructor_name = "_" + wrapper_type;
+              constructor_name.append("_" + primitive_type);
               EmitCommandWithStringWithoutBraces("CallConstructor", constructor_name);
             } else if (needs_unwrap) {
               EmitCommand("Unwrap");
@@ -1804,38 +1767,36 @@ void BytecodeVisitor::Visit(Call& node) {
       is_interface_type = true;
     } else if (!object_type.empty() && object_type.size() > 1 && object_type[0] == 'I') {
       if (std::isupper(static_cast<unsigned char>(object_type[1]))) {
-        if (method_name_map_.find(object_type + "::" + method_name) == method_name_map_.end()) {
+        if (!method_name_map_.contains(object_type + "::" + method_name)) {
           is_interface_type = true;
         }
       }
     }
 
     if (!object_type.empty()) {
-      auto specific_it = method_name_map_.find(object_type + "::" + method_name);
-      if (specific_it != method_name_map_.end()) {
+      if (auto specific_it = method_name_map_.find(object_type + "::" + method_name);
+          specific_it != method_name_map_.end()) {
         specific_method_name = specific_it->second;
       }
     }
 
-    for (const auto& kv : method_name_map_) {
-      auto pos = kv.first.rfind("::");
-      if (pos != std::string::npos) {
-        std::string mname = kv.first.substr(pos + 2);
-        if (mname == method_name) {
+    for (const auto& [fst, snd] : method_name_map_) {
+      if (auto pos = fst.rfind("::"); pos != std::string::npos) {
+        if (std::string code_method_name = fst.substr(pos + 2); code_method_name == method_name) {
           method_count++;
           if (full_method_name.empty()) {
-            full_method_name = kv.second;
+            full_method_name = snd;
           }
 
-          auto vtable_it = method_vtable_map_.find(kv.first);
-          if (vtable_it != method_vtable_map_.end() && vtable_name.empty()) {
+          if (auto vtable_it = method_vtable_map_.find(fst);
+              vtable_it != method_vtable_map_.end() && vtable_name.empty()) {
             vtable_name = vtable_it->second;
           }
         }
       }
     }
 
-    bool use_virtual = (method_count > 1) || is_interface_type ||
+    bool use_virtual = method_count > 1 || is_interface_type ||
                        (!object_type.empty() && method_count > 0 && specific_method_name.empty());
 
     for (auto& arg : std::ranges::reverse_view(args)) {
@@ -1853,11 +1814,11 @@ void BytecodeVisitor::Visit(Call& node) {
     } else if (!full_method_name.empty()) {
       EmitCommandWithStringWithoutBraces("Call", full_method_name);
     } else {
-      std::string vtable_name = "_" + method_name + "_<C>";
+      std::string vtable_method_name = "_" + method_name + "_<C>";
       if (!args.empty()) {
-        vtable_name += "_Object";
+        vtable_method_name += "_Object";
       }
-      EmitCommandWithStringWithoutBraces("CallVirtual", vtable_name);
+      EmitCommandWithStringWithoutBraces("CallVirtual", vtable_method_name);
     }
     return;
   }
@@ -1870,9 +1831,8 @@ void BytecodeVisitor::Visit(FieldAccess& node) {
   node.MutableObject().Accept(*this);
 
   std::string object_type_name;
-  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableObject())) {
-    auto type_it = variable_types_.find(ident->Name());
-    if (type_it != variable_types_.end()) {
+  if (const auto* ident = dynamic_cast<IdentRef*>(&node.MutableObject())) {
+    if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
       object_type_name = type_it->second;
     }
   }
@@ -1915,10 +1875,10 @@ void BytecodeVisitor::Visit(SafeCall& node) {
 void BytecodeVisitor::Visit(Elvis& node) {
   bool use_direct_var = false;
   size_t lhs_var_index = 0;
-  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableLhs())) {
-    auto var_it = variable_types_.find(ident->Name());
-    auto local_it = local_variables_.find(ident->Name());
-    if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
+  if (const auto* ident = dynamic_cast<IdentRef*>(&node.MutableLhs())) {
+    const auto var_it = variable_types_.find(ident->Name());
+    if (const auto local_it = local_variables_.find(ident->Name());
+        var_it != variable_types_.end() && local_it != local_variables_.end()) {
       use_direct_var = true;
       lhs_var_index = local_it->second;
     }
@@ -1942,49 +1902,68 @@ void BytecodeVisitor::Visit(Elvis& node) {
 void BytecodeVisitor::Visit(CastAs& node) {
   OperandType source_type = DetermineOperandType(&node.MutableExpression());
   std::string target_type_name = TypeToMangledName(node.Type());
-  bool is_nullable = node.Type().IsNullable();
 
-  if (source_type == OperandType::Int && (target_type_name == "float" || target_type_name == "Float")) {
+  if (source_type == OperandType::kInt && (target_type_name == "float" || target_type_name == "Float")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("IntToFloat");
     return;
-  } else if (source_type == OperandType::Float && (target_type_name == "int" || target_type_name == "Int")) {
+  }
+
+  if (source_type == OperandType::kFloat && (target_type_name == "int" || target_type_name == "Int")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("FloatToInt");
     return;
-  } else if (source_type == OperandType::Byte && (target_type_name == "int" || target_type_name == "Int")) {
+  }
+
+  if (source_type == OperandType::kByte && (target_type_name == "int" || target_type_name == "Int")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("ByteToInt");
     return;
-  } else if (source_type == OperandType::Int && (target_type_name == "byte" || target_type_name == "Byte")) {
+  }
+
+  if (source_type == OperandType::kInt && (target_type_name == "byte" || target_type_name == "Byte")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("IntToByte");
     return;
-  } else if (source_type == OperandType::String && (target_type_name == "int" || target_type_name == "Int")) {
+  }
+
+  if (source_type == OperandType::kString && (target_type_name == "int" || target_type_name == "Int")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("StringToInt");
     return;
-  } else if (source_type == OperandType::String && (target_type_name == "float" || target_type_name == "Float")) {
+  }
+
+  if (source_type == OperandType::kString && (target_type_name == "float" || target_type_name == "Float")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("StringToFloat");
     return;
-  } else if (source_type == OperandType::Int && target_type_name == "String") {
+  }
+
+  if (source_type == OperandType::kInt && target_type_name == "String") {
     node.MutableExpression().Accept(*this);
     EmitCommand("IntToString");
     return;
-  } else if (source_type == OperandType::Float && target_type_name == "String") {
+  }
+
+  if (source_type == OperandType::kFloat && target_type_name == "String") {
     node.MutableExpression().Accept(*this);
     EmitCommand("FloatToString");
     return;
-  } else if (source_type == OperandType::Char && (target_type_name == "byte" || target_type_name == "Byte")) {
+  }
+
+  if (source_type == OperandType::kChar && (target_type_name == "byte" || target_type_name == "Byte")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("CharToByte");
     return;
-  } else if (source_type == OperandType::Byte && (target_type_name == "char" || target_type_name == "Char")) {
+  }
+
+  if (source_type == OperandType::kByte && (target_type_name == "char" || target_type_name == "Char")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("ByteToChar");
     return;
-  } else if (source_type == OperandType::Bool && (target_type_name == "byte" || target_type_name == "Byte")) {
+  }
+
+  if (source_type == OperandType::kBool && (target_type_name == "byte" || target_type_name == "Byte")) {
     node.MutableExpression().Accept(*this);
     EmitCommand("BoolToByte");
     return;
@@ -1992,10 +1971,10 @@ void BytecodeVisitor::Visit(CastAs& node) {
 
   bool use_direct_var = false;
   size_t expr_var_index = 0;
-  if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableExpression())) {
-    auto var_it = variable_types_.find(ident->Name());
-    auto local_it = local_variables_.find(ident->Name());
-    if (var_it != variable_types_.end() && local_it != local_variables_.end()) {
+  if (const auto* ident = dynamic_cast<IdentRef*>(&node.MutableExpression())) {
+    const auto var_it = variable_types_.find(ident->Name());
+    if (const auto local_it = local_variables_.find(ident->Name());
+        var_it != variable_types_.end() && local_it != local_variables_.end()) {
       use_direct_var = true;
       expr_var_index = local_it->second;
     }
@@ -2011,10 +1990,8 @@ void BytecodeVisitor::Visit(CastAs& node) {
 
   size_t var_index = use_direct_var ? expr_var_index : temp_var_index;
 
-  TypeReference base_type = node.Type().WithoutNullable();
+  const TypeReference base_type = node.Type().WithoutNullable();
   std::string base_type_name = TypeToMangledName(base_type);
-
-  bool target_is_nullable = is_nullable || (!target_type_name.empty() && target_type_name.back() == '?');
 
   EmitIndent();
   output_ << "if ";
@@ -2068,7 +2045,7 @@ void BytecodeVisitor::Visit(StringLit& node) {
 }
 
 void BytecodeVisitor::Visit(CharLit& node) {
-  EmitCommandWithInt("PushChar", static_cast<int64_t>(node.Value()));
+  EmitCommandWithInt("PushChar", node.Value());
 }
 
 void BytecodeVisitor::Visit(BoolLit& node) {
@@ -2190,9 +2167,8 @@ std::string BytecodeVisitor::GenerateMethodVTableName(const std::string& method_
 
 std::string BytecodeVisitor::TypeToMangledName(const TypeReference& type) {
   std::ostringstream oss;
-  const auto& qname = type.QualifiedName();
 
-  if (!qname.empty()) {
+  if (const auto& qname = type.QualifiedName(); !qname.empty()) {
     oss << qname.back();
   }
 
@@ -2233,14 +2209,14 @@ void BytecodeVisitor::VisitBlock(Block* block) {
 }
 
 size_t BytecodeVisitor::GetLocalIndex(const std::string& name) {
-  if (local_variables_.find(name) == local_variables_.end()) {
+  if (!local_variables_.contains(name)) {
     local_variables_[name] = next_local_index_++;
   }
   return local_variables_[name];
 }
 
 size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
-  if (static_variables_.find(name) == static_variables_.end()) {
+  if (!static_variables_.contains(name)) {
     static_variables_[name] = next_static_index_++;
   }
   return static_variables_[name];
@@ -2254,65 +2230,72 @@ void BytecodeVisitor::ResetLocalVariables() {
 
 BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
   if (expr == nullptr) {
-    return OperandType::Unknown;
+    return OperandType::kUnknown;
   }
 
   if (dynamic_cast<IntLit*>(expr) != nullptr) {
-    return OperandType::Int;
+    return OperandType::kInt;
   }
   if (dynamic_cast<FloatLit*>(expr) != nullptr) {
-    return OperandType::Float;
+    return OperandType::kFloat;
   }
   if (dynamic_cast<StringLit*>(expr) != nullptr) {
-    return OperandType::String;
+    return OperandType::kString;
   }
   if (dynamic_cast<BoolLit*>(expr) != nullptr) {
-    return OperandType::Bool;
+    return OperandType::kBool;
   }
   if (dynamic_cast<CharLit*>(expr) != nullptr) {
-    return OperandType::Char;
+    return OperandType::kChar;
   }
 
-  if (auto* ident = dynamic_cast<IdentRef*>(expr)) {
-    auto it = variable_types_.find(ident->Name());
-    if (it != variable_types_.end()) {
+  if (const auto* ident = dynamic_cast<IdentRef*>(expr)) {
+    if (const auto it = variable_types_.find(ident->Name()); it != variable_types_.end()) {
       const std::string& type_name = it->second;
       if (type_name == "int" || type_name == "Int") {
-        return OperandType::Int;
-      } else if (type_name == "float" || type_name == "Float") {
-        return OperandType::Float;
-      } else if (type_name == "byte" || type_name == "Byte") {
-        return OperandType::Byte;
-      } else if (type_name == "bool" || type_name == "Bool") {
-        return OperandType::Bool;
-      } else if (type_name == "char" || type_name == "Char") {
-        return OperandType::Char;
-      } else if (type_name == "String") {
-        return OperandType::String;
+        return OperandType::kInt;
+      }
+      if (type_name == "float" || type_name == "Float") {
+        return OperandType::kFloat;
+      }
+      if (type_name == "byte" || type_name == "Byte") {
+        return OperandType::kByte;
+      }
+      if (type_name == "bool" || type_name == "Bool") {
+        return OperandType::kBool;
+      }
+      if (type_name == "char" || type_name == "Char") {
+        return OperandType::kChar;
+      }
+      if (type_name == "String") {
+        return OperandType::kString;
       }
     }
   }
 
-  if (auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
+  if (const auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
     if (!current_class_name_.empty()) {
-      auto fields_it = class_fields_.find(current_class_name_);
-      if (fields_it != class_fields_.end()) {
-        const auto& fields = fields_it->second;
-        for (const auto& field : fields) {
-          if (field.first == field_access->Name()) {
-            const std::string& type_name = TypeToMangledName(field.second);
+      if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
+        for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
+          if (fst == field_access->Name()) {
+            const std::string& type_name = TypeToMangledName(snd);
             if (type_name == "int" || type_name == "Int") {
-              return OperandType::Int;
-            } else if (type_name == "float" || type_name == "Float") {
-              return OperandType::Float;
-            } else if (type_name == "byte" || type_name == "Byte") {
-              return OperandType::Byte;
-            } else if (type_name == "bool" || type_name == "Bool") {
-              return OperandType::Bool;
-            } else if (type_name == "char" || type_name == "Char") {
-              return OperandType::Char;
-            } else if (type_name == "String") {
-              return OperandType::String;
+              return OperandType::kInt;
+            }
+            if (type_name == "float" || type_name == "Float") {
+              return OperandType::kFloat;
+            }
+            if (type_name == "byte" || type_name == "Byte") {
+              return OperandType::kByte;
+            }
+            if (type_name == "bool" || type_name == "Bool") {
+              return OperandType::kBool;
+            }
+            if (type_name == "char" || type_name == "Char") {
+              return OperandType::kChar;
+            }
+            if (type_name == "String") {
+              return OperandType::kString;
             }
             break;
           }
@@ -2321,20 +2304,25 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  if (auto* cast = dynamic_cast<CastAs*>(expr)) {
+  if (const auto* cast = dynamic_cast<CastAs*>(expr)) {
     const std::string& type_name = TypeToMangledName(cast->Type());
     if (type_name == "int" || type_name == "Int") {
-      return OperandType::Int;
-    } else if (type_name == "float" || type_name == "Float") {
-      return OperandType::Float;
-    } else if (type_name == "byte" || type_name == "Byte") {
-      return OperandType::Byte;
-    } else if (type_name == "bool" || type_name == "Bool") {
-      return OperandType::Bool;
-    } else if (type_name == "char" || type_name == "Char") {
-      return OperandType::Char;
-    } else if (type_name == "String") {
-      return OperandType::String;
+      return OperandType::kInt;
+    }
+    if (type_name == "float" || type_name == "Float") {
+      return OperandType::kFloat;
+    }
+    if (type_name == "byte" || type_name == "Byte") {
+      return OperandType::kByte;
+    }
+    if (type_name == "bool" || type_name == "Bool") {
+      return OperandType::kBool;
+    }
+    if (type_name == "char" || type_name == "Char") {
+      return OperandType::kChar;
+    }
+    if (type_name == "String") {
+      return OperandType::kString;
     }
   }
 
@@ -2343,26 +2331,36 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     OperandType rhs_type = DetermineOperandType(&binary->MutableRhs());
 
     const auto& op = binary->Op();
-    if (&op == &OpTags::LeftShift() || &op == &OpTags::RightShift()) {
-      return lhs_type != OperandType::Unknown ? lhs_type : OperandType::Int;
+    if (&op == &optags::LeftShift() || &op == &optags::RightShift()) {
+      return lhs_type != OperandType::kUnknown ? lhs_type : OperandType::kInt;
     }
 
-    bool is_bitwise = (&op == &OpTags::BitwiseAnd() || &op == &OpTags::BitwiseOr() || &op == &OpTags::Xor());
-    if (is_bitwise && (lhs_type == OperandType::Byte || rhs_type == OperandType::Byte)) {
-      return OperandType::Byte;
+    if (const bool is_bitwise = &op == &optags::BitwiseAnd() || &op == &optags::BitwiseOr() || &op == &optags::Xor();
+        is_bitwise && (lhs_type == OperandType::kByte || rhs_type == OperandType::kByte)) {
+      return OperandType::kByte;
     }
 
-    if (lhs_type == OperandType::Float || rhs_type == OperandType::Float) {
-      return OperandType::Float;
-    } else if (lhs_type == OperandType::Int || rhs_type == OperandType::Int) {
-      return OperandType::Int;
-    } else if (lhs_type == OperandType::Byte || rhs_type == OperandType::Byte) {
-      return OperandType::Byte;
-    } else if (lhs_type == OperandType::String || rhs_type == OperandType::String) {
-      return OperandType::String;
-    } else if (lhs_type != OperandType::Unknown) {
+    if (lhs_type == OperandType::kFloat || rhs_type == OperandType::kFloat) {
+      return OperandType::kFloat;
+    }
+
+    if (lhs_type == OperandType::kInt || rhs_type == OperandType::kInt) {
+      return OperandType::kInt;
+    }
+
+    if (lhs_type == OperandType::kByte || rhs_type == OperandType::kByte) {
+      return OperandType::kByte;
+    }
+
+    if (lhs_type == OperandType::kString || rhs_type == OperandType::kString) {
+      return OperandType::kString;
+    }
+
+    if (lhs_type != OperandType::kUnknown) {
       return lhs_type;
-    } else if (rhs_type != OperandType::Unknown) {
+    }
+
+    if (rhs_type != OperandType::kUnknown) {
       return rhs_type;
     }
   }
@@ -2371,21 +2369,20 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     return DetermineOperandType(&unary->MutableOperand());
   }
 
-  return OperandType::Unknown;
+  return OperandType::kUnknown;
 }
 
 std::string BytecodeVisitor::GetOperandTypeName(Expr* expr) {
-  OperandType type = DetermineOperandType(expr);
-  switch (type) {
-    case OperandType::Int:
+  switch (DetermineOperandType(expr)) {
+    case OperandType::kInt:
       return "int";
-    case OperandType::Float:
+    case OperandType::kFloat:
       return "float";
-    case OperandType::Byte:
+    case OperandType::kByte:
       return "byte";
-    case OperandType::Bool:
+    case OperandType::kBool:
       return "bool";
-    case OperandType::String:
+    case OperandType::kString:
       return "String";
     default:
       return "unknown";
@@ -2397,39 +2394,35 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     return "unknown";
   }
 
-  if (auto* ident = dynamic_cast<IdentRef*>(expr)) {
-    auto it = variable_types_.find(ident->Name());
-    if (it != variable_types_.end()) {
+  if (const auto* ident = dynamic_cast<IdentRef*>(expr)) {
+    if (const auto it = variable_types_.find(ident->Name()); it != variable_types_.end()) {
       return it->second;
     }
   }
 
   if (auto* field = dynamic_cast<FieldAccess*>(expr)) {
     std::string object_type_name;
-    if (auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
-      auto type_it = variable_types_.find(ident->Name());
-      if (type_it != variable_types_.end()) {
+    if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
+      if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
         object_type_name = type_it->second;
       }
     }
 
     if (!object_type_name.empty()) {
-      auto fields_it = class_fields_.find(object_type_name);
-      if (fields_it != class_fields_.end()) {
-        for (const auto& f : fields_it->second) {
-          if (f.first == field->Name()) {
-            return TypeToMangledName(f.second);
+      if (const auto fields_it = class_fields_.find(object_type_name); fields_it != class_fields_.end()) {
+        for (const auto& [fst, snd] : fields_it->second) {
+          if (fst == field->Name()) {
+            return TypeToMangledName(snd);
           }
         }
       }
     }
 
     if (!current_class_name_.empty()) {
-      auto fields_it = class_fields_.find(current_class_name_);
-      if (fields_it != class_fields_.end()) {
-        for (const auto& f : fields_it->second) {
-          if (f.first == field->Name()) {
-            return TypeToMangledName(f.second);
+      if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
+        for (const auto& [fst, snd] : fields_it->second) {
+          if (fst == field->Name()) {
+            return TypeToMangledName(snd);
           }
         }
       }
@@ -2458,7 +2451,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
   return GetOperandTypeName(expr);
 }
 
-bool BytecodeVisitor::IsPrimitiveWrapper(const std::string& type_name) const {
+bool BytecodeVisitor::IsPrimitiveWrapper(const std::string& type_name) {
   return type_name == "Int" || type_name == "Float" || type_name == "Byte" || type_name == "Char" ||
          type_name == "Bool";
 }
@@ -2512,7 +2505,7 @@ void BytecodeVisitor::EmitUnwrapIfNeeded(const std::string& type_name) {
   }
 }
 
-void BytecodeVisitor::EmitWrapIfNeeded(const std::string& expected_type, OperandType result_type) {
+void BytecodeVisitor::EmitWrapIfNeeded(const std::string& expected_type) {
   if (IsPrimitiveWrapper(expected_type)) {
     std::string primitive_type = GetPrimitiveTypeForWrapper(expected_type);
     EmitWrapConstructorCall(expected_type, primitive_type);
@@ -2533,8 +2526,7 @@ void BytecodeVisitor::EmitWrapConstructorCall(const std::string& wrapper_type, c
 }
 
 int BytecodeVisitor::FindFieldIndex(const std::string& class_name, const std::string& field_name) {
-  auto fields_it = class_fields_.find(class_name);
-  if (fields_it != class_fields_.end()) {
+  if (const auto fields_it = class_fields_.find(class_name); fields_it != class_fields_.end()) {
     const auto& fields = fields_it->second;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (fields[i].first == field_name) {
@@ -2546,12 +2538,10 @@ int BytecodeVisitor::FindFieldIndex(const std::string& class_name, const std::st
 }
 
 std::string BytecodeVisitor::GetFieldTypeName(const std::string& class_name, const std::string& field_name) {
-  auto fields_it = class_fields_.find(class_name);
-  if (fields_it != class_fields_.end()) {
-    const auto& fields = fields_it->second;
-    for (const auto& field : fields) {
-      if (field.first == field_name) {
-        return TypeToMangledName(field.second);
+  if (const auto fields_it = class_fields_.find(class_name); fields_it != class_fields_.end()) {
+    for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
+      if (fst == field_name) {
+        return TypeToMangledName(snd);
       }
     }
   }
@@ -2561,73 +2551,73 @@ std::string BytecodeVisitor::GetFieldTypeName(const std::string& class_name, con
 void BytecodeVisitor::EmitBinaryOperatorCommand(const IBinaryOpTag& op, OperandType dominant_type) {
   const auto emit_type_command =
       [this](OperandType type, const std::string& float_cmd, const std::string& byte_cmd, const std::string& int_cmd) {
-        if (type == OperandType::Float) {
+        if (type == OperandType::kFloat) {
           EmitCommand(float_cmd);
-        } else if (type == OperandType::Byte) {
+        } else if (type == OperandType::kByte) {
           EmitCommand(byte_cmd);
         } else {
           EmitCommand(int_cmd);
         }
       };
 
-  if (&op == &OpTags::Add()) {
+  if (&op == &optags::Add()) {
     emit_type_command(dominant_type, "FloatAdd", "ByteAdd", "IntAdd");
-  } else if (&op == &OpTags::Sub()) {
+  } else if (&op == &optags::Sub()) {
     emit_type_command(dominant_type, "FloatSubtract", "ByteSubtract", "IntSubtract");
-  } else if (&op == &OpTags::Mul()) {
+  } else if (&op == &optags::Mul()) {
     emit_type_command(dominant_type, "FloatMultiply", "ByteMultiply", "IntMultiply");
-  } else if (&op == &OpTags::Div()) {
+  } else if (&op == &optags::Div()) {
     emit_type_command(dominant_type, "FloatDivide", "ByteDivide", "IntDivide");
-  } else if (&op == &OpTags::Mod()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::Mod()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteModulo");
     } else {
       EmitCommand("IntModulo");
     }
-  } else if (&op == &OpTags::Lt()) {
+  } else if (&op == &optags::Lt()) {
     emit_type_command(dominant_type, "FloatLessThan", "ByteLessThan", "IntLessThan");
-  } else if (&op == &OpTags::Le()) {
+  } else if (&op == &optags::Le()) {
     emit_type_command(dominant_type, "FloatLessEqual", "ByteLessEqual", "IntLessEqual");
-  } else if (&op == &OpTags::Gt()) {
+  } else if (&op == &optags::Gt()) {
     emit_type_command(dominant_type, "FloatGreaterThan", "ByteGreaterThan", "IntGreaterThan");
-  } else if (&op == &OpTags::Ge()) {
+  } else if (&op == &optags::Ge()) {
     emit_type_command(dominant_type, "FloatGreaterEqual", "ByteGreaterEqual", "IntGreaterEqual");
-  } else if (&op == &OpTags::Eq()) {
+  } else if (&op == &optags::Eq()) {
     emit_type_command(dominant_type, "FloatEqual", "ByteEqual", "IntEqual");
-  } else if (&op == &OpTags::Ne()) {
+  } else if (&op == &optags::Ne()) {
     emit_type_command(dominant_type, "FloatNotEqual", "ByteNotEqual", "IntNotEqual");
-  } else if (&op == &OpTags::And()) {
+  } else if (&op == &optags::And()) {
     EmitCommand("BoolAnd");
-  } else if (&op == &OpTags::Or()) {
+  } else if (&op == &optags::Or()) {
     EmitCommand("BoolOr");
-  } else if (&op == &OpTags::Xor()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::Xor()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteXor");
-    } else if (dominant_type == OperandType::Int) {
+    } else if (dominant_type == OperandType::kInt) {
       EmitCommand("IntXor");
     } else {
       EmitCommand("BoolXor");
     }
-  } else if (&op == &OpTags::BitwiseAnd()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::BitwiseAnd()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteAnd");
     } else {
       EmitCommand("IntAnd");
     }
-  } else if (&op == &OpTags::BitwiseOr()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::BitwiseOr()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteOr");
     } else {
       EmitCommand("IntOr");
     }
-  } else if (&op == &OpTags::LeftShift()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::LeftShift()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteLeftShift");
     } else {
       EmitCommand("IntLeftShift");
     }
-  } else if (&op == &OpTags::RightShift()) {
-    if (dominant_type == OperandType::Byte) {
+  } else if (&op == &optags::RightShift()) {
+    if (dominant_type == OperandType::kByte) {
       EmitCommand("ByteRightShift");
     } else {
       EmitCommand("IntRightShift");
@@ -2647,7 +2637,7 @@ std::string BytecodeVisitor::GenerateArrayGetAtMethodName(const std::string& arr
 }
 
 std::string BytecodeVisitor::GenerateArraySetAtMethodName(const std::string& array_type) {
-  std::string elem_type = GetElementTypeForArray(array_type);
+  const std::string elem_type = GetElementTypeForArray(array_type);
   return "_" + array_type + "_SetAt_<M>_int_" + elem_type;
 }
 
@@ -2664,16 +2654,10 @@ std::string BytecodeVisitor::GenerateArrayMethodName(const std::string& array_ty
 
   if (method_name == "Add") {
     base_name += "_" + elem_type;
-  } else if (method_name == "GetAt") {
+  } else if (method_name == "GetAt" || method_name == "RemoveAt" || method_name == "Reserve") {
     base_name += "_int";
-  } else if (method_name == "SetAt") {
+  } else if (method_name == "SetAt" || method_name == "InsertAt") {
     base_name += "_int_" + elem_type;
-  } else if (method_name == "InsertAt") {
-    base_name += "_int_" + elem_type;
-  } else if (method_name == "RemoveAt") {
-    base_name += "_int";
-  } else if (method_name == "Reserve") {
-    base_name += "_int";
   } else if (method_name == "Equals") {
     base_name += "_Object";
   }

@@ -27,13 +27,13 @@ public:
 
   TypeReference& operator=(std::string name);
 
-  bool StructurallyEquals(const TypeReference& other) const noexcept;
+  [[nodiscard]] bool StructurallyEquals(const TypeReference& other) const noexcept;
 
-  std::string StableKey() const;
-  std::string ToStringHuman() const;
+  [[nodiscard]] std::string StableKey() const;
+  [[nodiscard]] std::string ToStringHuman() const;
 
-  const std::vector<std::string>& QualifiedName() const noexcept;
-  std::string_view SimpleName() const noexcept;
+  [[nodiscard]] const std::vector<std::string>& QualifiedName() const noexcept;
+  [[nodiscard]] std::string_view SimpleName() const noexcept;
 
   void SetQualifiedName(std::vector<std::string> qname);
   void SetSimpleName(std::string name);
@@ -41,23 +41,23 @@ public:
   bool PopFrontQualifier();
   bool PopBackQualifier();
 
-  const std::vector<TypeReference>& TypeArguments() const noexcept;
+  [[nodiscard]] const std::vector<TypeReference>& TypeArguments() const noexcept;
   std::vector<TypeReference>& MutableTypeArguments() noexcept;
 
   void ClearTypeArguments();
   void AddTypeArgument(TypeReference arg);
-  std::size_t Arity() const noexcept;
+  [[nodiscard]] std::size_t Arity() const noexcept;
 
-  const Nullable& Nullability() const noexcept;
-  bool IsNullable() const noexcept;
+  [[nodiscard]] const Nullable& Nullability() const noexcept;
+  [[nodiscard]] bool IsNullable() const noexcept;
   void SetNullable(bool on) noexcept;
   void MakeNullable() noexcept;
   void MakeNonNullable() noexcept;
 
-  TypeReference WithoutNullable() const;
+  [[nodiscard]] TypeReference WithoutNullable() const;
 
-  bool IsResolved() const noexcept;
-  const ResolvedTypeHandle* Resolved() const noexcept;
+  [[nodiscard]] bool IsResolved() const noexcept;
+  [[nodiscard]] const ResolvedTypeHandle* Resolved() const noexcept;
 
   void SetResolvedHandle(const void* decl, std::string mangled, bool is_interface);
   void ResetResolvedHandle() noexcept;

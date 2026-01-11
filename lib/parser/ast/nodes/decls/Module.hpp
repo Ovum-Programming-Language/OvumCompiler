@@ -15,13 +15,13 @@ class Module : public AstNode {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string new_name);
 
-  const SourceId& Source() const noexcept;
+  [[nodiscard]] const SourceId& Source() const noexcept;
   void SetSource(SourceId id);
 
-  const std::vector<std::unique_ptr<Decl>>& Decls() const noexcept;
+  [[nodiscard]] const std::vector<std::unique_ptr<Decl>>& Decls() const noexcept;
   std::vector<std::unique_ptr<Decl>>& MutableDecls() noexcept;
   void AddDecl(std::unique_ptr<Decl> decl);
   std::unique_ptr<Decl> ReleaseDecl(std::size_t index);

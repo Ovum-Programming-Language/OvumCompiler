@@ -1,7 +1,6 @@
 #ifndef PARSER_BLOCK_HPP_
 #define PARSER_BLOCK_HPP_
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -15,13 +14,13 @@ public:
   void Accept(AstVisitor& visitor) override;
 
   std::vector<std::unique_ptr<Stmt>>& GetStatements();
-  const std::vector<std::unique_ptr<Stmt>>& GetStatements() const;
+  [[nodiscard]] const std::vector<std::unique_ptr<Stmt>>& GetStatements() const;
   void Append(std::unique_ptr<Stmt> statement);
 
   void Insert(std::size_t index, std::unique_ptr<Stmt> statement);
   std::unique_ptr<Stmt> ReleaseAt(std::size_t index);
   void Clear() noexcept;
-  std::size_t Size() const noexcept;
+  [[nodiscard]] size_t Size() const noexcept;
 
 private:
   std::vector<std::unique_ptr<Stmt>> stmts_;

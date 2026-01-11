@@ -5,7 +5,7 @@
 
 namespace ovum::compiler::parser {
 
-class SimpleRecovery : public IRecoveryStrategy {
+class SimpleRecovery : public IRecoveryStrategy { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   ~SimpleRecovery() override = default;
 

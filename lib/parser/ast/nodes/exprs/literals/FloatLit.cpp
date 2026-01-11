@@ -9,11 +9,11 @@ void FloatLit::Accept(AstVisitor& visitor) {
 }
 
 double FloatLit::Value() const noexcept {
-  return value;
+  return value_;
 }
 
 void FloatLit::SetValue(double new_value) noexcept {
-  value = new_value;
+  value_ = new_value;
 }
 
 } // namespace ovum::compiler::parser

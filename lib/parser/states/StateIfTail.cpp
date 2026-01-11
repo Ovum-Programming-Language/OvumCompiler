@@ -1,6 +1,7 @@
 #include "StateIfTail.hpp"
 
 #include <memory>
+#include <ranges>
 
 #include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
@@ -16,7 +17,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -24,22 +25,12 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
     break;
   }
-}
-
-std::unique_ptr<Expr> ParseExpression(ContextParser& ctx, ITokenStream& ts) {
-  if (ctx.Expr() == nullptr) {
-    if (ctx.Diags() != nullptr) {
-      ctx.Diags()->Error("P_EXPR_PARSER", "expression parser not available");
-    }
-    return nullptr;
-  }
-  return ctx.Expr()->Parse(ts, *ctx.Diags());
 }
 
 } // namespace
@@ -52,8 +43,8 @@ IState::StepResult StateIfTail::TryStep(ContextParser& ctx, ITokenStream& ts) co
   SkipTrivia(ts);
 
   IfStmt* if_stmt = nullptr;
-  for (auto it = ctx.NodeStack().rbegin(); it != ctx.NodeStack().rend(); ++it) {
-    if_stmt = dynamic_cast<IfStmt*>(it->MutableNode());
+  for (auto& it : std::ranges::reverse_view(ctx.NodeStack())) {
+    if_stmt = dynamic_cast<IfStmt*>(it.MutableNode());
     if (if_stmt) {
       break;
     }
@@ -64,9 +55,9 @@ IState::StepResult StateIfTail::TryStep(ContextParser& ctx, ITokenStream& ts) co
   }
 
   auto& branches = if_stmt->MutableBranches();
-  Branch* last_branch = branches.empty() ? nullptr : &branches.back();
 
-  if (!last_branch || last_branch->Condition() == nullptr) {
+  if (Branch* last_branch = branches.empty() ? nullptr : &branches.back();
+      !last_branch || last_branch->Condition() == nullptr) {
     if (ctx.NodeStack().size() < 2) {
       return std::unexpected(StateError(std::string_view("expected condition and then block on stack")));
     }
@@ -83,7 +74,6 @@ IState::StepResult StateIfTail::TryStep(ContextParser& ctx, ITokenStream& ts) co
 
     if (!last_branch) {
       if_stmt->AddBranch(Branch(std::move(condition), std::move(then_block)));
-      last_branch = &branches.back();
     } else {
       last_branch->SetCondition(std::move(condition));
       last_branch->SetThen(std::move(then_block));

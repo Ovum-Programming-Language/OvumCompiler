@@ -10,16 +10,16 @@
 
 namespace ovum::compiler::parser {
 
-class IDiagnosticSink {
+class IDiagnosticSink { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~IDiagnosticSink() = default;
 
   virtual void Report(Diagnostic d) = 0;
 
-  virtual bool HasErrors() const = 0;
-  virtual std::size_t Count() const = 0;
-  virtual std::size_t ErrorCount() const = 0;
-  virtual std::size_t WarningCount() const = 0;
+  [[nodiscard]] virtual bool HasErrors() const = 0;
+  [[nodiscard]] virtual std::size_t Count() const = 0;
+  [[nodiscard]] virtual std::size_t ErrorCount() const = 0;
+  [[nodiscard]] virtual std::size_t WarningCount() const = 0;
 
   virtual void Note(std::string_view code, std::string_view msg, std::optional<SourceSpan> where = std::nullopt) = 0;
   virtual void Warn(std::string_view code, std::string_view msg, std::optional<SourceSpan> where = std::nullopt) = 0;

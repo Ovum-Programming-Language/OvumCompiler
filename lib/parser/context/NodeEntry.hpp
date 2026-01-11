@@ -12,8 +12,8 @@ public:
   NodeEntry() = default;
   explicit NodeEntry(std::unique_ptr<AstNode> node);
 
-  const AstNode* GetNode() const noexcept;
-  AstNode* MutableNode() noexcept;
+  [[nodiscard]] const AstNode* GetNode() const noexcept;
+  [[nodiscard]] AstNode* MutableNode() const noexcept;
   void SetNode(std::unique_ptr<AstNode> node);
   std::unique_ptr<AstNode> ReleaseNode();
 

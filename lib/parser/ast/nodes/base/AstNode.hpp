@@ -7,7 +7,7 @@ namespace ovum::compiler::parser {
 
 class AstVisitor; // forward
 
-class AstNode {
+class AstNode { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~AstNode() = default;
 

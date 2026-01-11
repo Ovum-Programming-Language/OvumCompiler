@@ -8,7 +8,7 @@ namespace ovum::compiler::parser {
 
 class StateIfTail : public StateBase {
 public:
-  std::string_view Name() const override;
+  [[nodiscard]] std::string_view Name() const override;
   StepResult TryStep(ContextParser& ctx, ITokenStream& ts) const override;
 };
 

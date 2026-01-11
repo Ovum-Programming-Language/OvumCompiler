@@ -9,7 +9,7 @@
 
 namespace ovum::compiler::parser {
 
-class IParser {
+class IParser { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~IParser() = default;
   virtual std::unique_ptr<Module> Parse(ITokenStream& ts, IDiagnosticSink& diags) = 0;

@@ -41,7 +41,7 @@ public:
   }
 
 protected:
-  std::unique_ptr<T> node_;
+  std::unique_ptr<T> node_; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
 };
 } // namespace ovum::compiler::parser
 

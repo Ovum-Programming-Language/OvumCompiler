@@ -17,10 +17,10 @@ public:
   ResolvedTypeHandle& operator=(const ResolvedTypeHandle& other) = default;
   ResolvedTypeHandle& operator=(ResolvedTypeHandle&& other) noexcept = default;
 
-  const void* Decl() const noexcept;
-  std::string_view Mangled() const noexcept;
-  bool IsInterface() const noexcept;
-  bool IsValid() const noexcept;
+  [[nodiscard]] const void* Decl() const noexcept;
+  [[nodiscard]] std::string_view Mangled() const noexcept;
+  [[nodiscard]] bool IsInterface() const noexcept;
+  [[nodiscard]] bool IsValid() const noexcept;
 
 private:
   const void* decl_ = nullptr;

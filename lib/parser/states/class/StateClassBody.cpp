@@ -5,7 +5,6 @@
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/context/ContextParser.hpp"
-#include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/StateRegistry.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 
@@ -13,7 +12,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -21,7 +20,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -38,8 +37,7 @@ std::string_view StateClassBody::Name() const {
 IState::StepResult StateClassBody::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
-  if (class_decl == nullptr) {
+  if (const auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
@@ -47,13 +45,11 @@ IState::StepResult StateClassBody::TryStep(ContextParser& ctx, ITokenStream& ts)
     return std::unexpected(StateError(std::string_view("unexpected end of file in class body")));
   }
 
-  const Token& tok = ts.Peek();
-  if (tok.GetLexeme() == "}") {
+  if (const Token& tok = ts.Peek(); tok.GetLexeme() == "}") {
     ts.Consume();
     // Pop class and add to module
     auto class_node = ctx.PopNode();
-    Module* module = ctx.TopNodeAs<Module>();
-    if (module != nullptr) {
+    if (auto* module = ctx.TopNodeAs<Module>(); module != nullptr) {
       module->AddDecl(std::unique_ptr<Decl>(dynamic_cast<Decl*>(class_node.release())));
     }
     return false;

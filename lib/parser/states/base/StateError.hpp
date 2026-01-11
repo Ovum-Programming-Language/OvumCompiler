@@ -12,7 +12,7 @@ public:
   explicit StateError(std::string message);
   explicit StateError(std::string_view message);
 
-  const std::string& Message() const noexcept;
+  [[nodiscard]] const std::string& Message() const noexcept;
 
 private:
   std::string message_;

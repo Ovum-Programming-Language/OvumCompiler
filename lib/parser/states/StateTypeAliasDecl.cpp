@@ -16,7 +16,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts, const bool skip_newlines = true) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -33,20 +33,19 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
-        ctx.Diags()->Error(code, message, span);
+        ctx.Diags()->Error("P_TYPEALIAS_NAME", "expected type alias name", span);
       } else {
-        ctx.Diags()->Error(code, message);
+        ctx.Diags()->Error("P_TYPEALIAS_NAME", "expected type alias name");
       }
     }
     return "";
@@ -59,8 +58,7 @@ void ConsumeTerminators(ITokenStream& ts) {
   SkipTrivia(ts, false);
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
-    const std::string type = t.GetStringType();
-    if (type == "NEWLINE") {
+    if (const std::string type = t.GetStringType(); type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -81,7 +79,7 @@ std::string_view StateTypeAliasDecl::Name() const {
 IState::StepResult StateTypeAliasDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Module* module = ctx.TopNodeAs<Module>();
+  auto* module = ctx.TopNodeAs<Module>();
   if (module == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Module node on stack")));
   }
@@ -97,7 +95,7 @@ IState::StepResult StateTypeAliasDecl::TryStep(ContextParser& ctx, ITokenStream&
   ts.Consume();
 
   SkipTrivia(ts);
-  std::string name = ReadIdentifier(ctx, ts, "P_TYPEALIAS_NAME", "expected type alias name");
+  std::string name = ReadIdentifier(ctx, ts);
   if (name.empty()) {
     return std::unexpected(StateError(std::string_view("expected type alias name")));
   }
@@ -112,14 +110,14 @@ IState::StepResult StateTypeAliasDecl::TryStep(ContextParser& ctx, ITokenStream&
   ts.Consume();
 
   SkipTrivia(ts);
-  auto aliased_type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
+  const auto aliased_type = ctx.TypeParser()->ParseType(ts, *ctx.Diags());
   if (aliased_type == nullptr) {
     return std::unexpected(StateError(std::string_view("failed to parse aliased type")));
   }
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
   if (ts.LastConsumed() != nullptr) {
-    span = StateBase::Union(span, StateBase::SpanFrom(*ts.LastConsumed()));
+    span = Union(span, SpanFrom(*ts.LastConsumed()));
   }
   auto type_alias = ctx.Factory()->MakeTypeAlias(std::move(name), std::move(*aliased_type), span);
   module->AddDecl(std::move(type_alias));

@@ -5,7 +5,6 @@
 
 #include "ast/IAstFactory.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
-#include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/StateRegistry.hpp"
@@ -17,7 +16,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -25,7 +24,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -38,16 +37,15 @@ bool IsIdentifier(const Token& token) {
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
-        ctx.Diags()->Error(code, message, span);
+        ctx.Diags()->Error("P_CLASS_NAME", "expected class name", span);
       } else {
-        ctx.Diags()->Error(code, message);
+        ctx.Diags()->Error("P_CLASS_NAME", "expected class name");
       }
     }
     return "";
@@ -56,7 +54,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_vie
   return name;
 }
 
-std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
+std::unique_ptr<TypeReference> ParseType(const ContextParser& ctx, ITokenStream& ts) {
   if (ctx.TypeParser() == nullptr) {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_TYPE_PARSER", "type parser not available");
@@ -86,7 +84,7 @@ IState::StepResult StateClassHdr::TryStep(ContextParser& ctx, ITokenStream& ts) 
   ts.Consume();
 
   SkipTrivia(ts);
-  std::string name = ReadIdentifier(ctx, ts, "P_CLASS_NAME", "expected class name");
+  std::string name = ReadIdentifier(ctx, ts);
   if (name.empty()) {
     return std::unexpected(StateError(std::string_view("expected class name")));
   }

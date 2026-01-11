@@ -14,7 +14,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -22,7 +22,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -39,8 +39,7 @@ std::string_view StateUnsafeBlock::Name() const {
 IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* block = ctx.TopNodeAs<Block>();
-  if (block == nullptr) {
+  if (const auto* block = ctx.TopNodeAs<Block>(); block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
@@ -60,7 +59,7 @@ IState::StepResult StateUnsafeBlock::TryStep(ContextParser& ctx, ITokenStream& t
   ts.Consume();
   auto unsafe_body = ctx.Factory()->MakeBlock({}, SourceSpan{});
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  const SourceSpan span = SpanFrom(start);
   auto unsafe_stmt = ctx.Factory()->MakeUnsafeBlock(nullptr, span); // Pass nullptr for body initially
 
   // Push unsafe_stmt first, then body, so StateBlock can find unsafe_stmt as parent

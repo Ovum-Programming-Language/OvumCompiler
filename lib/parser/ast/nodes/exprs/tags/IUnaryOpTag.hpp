@@ -5,11 +5,11 @@
 
 namespace ovum::compiler::parser {
 
-class IUnaryOpTag {
+class IUnaryOpTag { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~IUnaryOpTag() = default;
 
-  virtual std::string_view Name() const = 0;
+  [[nodiscard]] virtual std::string_view Name() const = 0;
 };
 
 } // namespace ovum::compiler::parser

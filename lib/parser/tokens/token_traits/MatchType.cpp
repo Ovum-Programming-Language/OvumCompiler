@@ -2,7 +2,7 @@
 
 namespace ovum::compiler::parser {
 
-MatchType::MatchType(std::string_view type_name) : type_(type_name) {
+MatchType::MatchType(const std::string_view type_name) : type_(type_name) {
 }
 
 bool MatchType::TryMatch(const Token& token) const {

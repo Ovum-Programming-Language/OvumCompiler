@@ -5,10 +5,9 @@
 
 namespace ovum::compiler::parser {
 
-class IRecoveryStrategy {
+class IRecoveryStrategy { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
-  virtual ~IRecoveryStrategy() {
-  }
+  virtual ~IRecoveryStrategy() = default;
   virtual void SyncToStmtEnd(ITokenStream& ts) = 0;
   virtual void SyncToBlockEnd(ITokenStream& ts) = 0;
 };

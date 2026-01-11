@@ -5,11 +5,11 @@ namespace ovum::compiler::parser {
 
 SourceSpan StateBase::SpanFrom(const Token& token) {
   const auto& pos = token.GetPosition();
-  return SourceSpan(SourceId{}, pos, pos);
+  return {SourceId{}, pos, pos};
 }
 
-SourceSpan StateBase::Union(const SourceSpan& left, const SourceSpan& right) {
-  return SourceSpan::Union(left, right);
+SourceSpan StateBase::Union(const SourceSpan& lhs, const SourceSpan& rhs) {
+  return SourceSpan::Union(lhs, rhs);
 }
 
 } // namespace ovum::compiler::parser

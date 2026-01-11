@@ -17,7 +17,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -25,7 +25,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -34,20 +34,19 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
-        ctx.Diags()->Error(code, message, span);
+        ctx.Diags()->Error("P_FOR_ITER", "expected iterator name", span);
       } else {
-        ctx.Diags()->Error(code, message);
+        ctx.Diags()->Error("P_FOR_ITER", "expected iterator name");
       }
     }
     return "";
@@ -56,7 +55,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_vie
   return name;
 }
 
-std::unique_ptr<Expr> ParseExpression(ContextParser& ctx, ITokenStream& ts) {
+std::unique_ptr<Expr> ParseExpression(const ContextParser& ctx, ITokenStream& ts) {
   if (ctx.Expr() == nullptr) {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_EXPR_PARSER", "expression parser not available");
@@ -75,8 +74,7 @@ std::string_view StateForHead::Name() const {
 IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  auto* block = ctx.TopNodeAs<Block>();
-  if (block == nullptr) {
+  if (const auto* block = ctx.TopNodeAs<Block>(); block == nullptr) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 
@@ -100,7 +98,7 @@ IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) c
   ts.Consume();
 
   SkipTrivia(ts);
-  std::string iter_name = ReadIdentifier(ctx, ts, "P_FOR_ITER", "expected iterator name");
+  std::string iter_name = ReadIdentifier(ctx, ts);
   if (iter_name.empty()) {
     return std::unexpected(StateError(std::string_view("expected iterator name")));
   }
@@ -140,7 +138,7 @@ IState::StepResult StateForHead::TryStep(ContextParser& ctx, ITokenStream& ts) c
   ts.Consume();
   auto body = ctx.Factory()->MakeBlock({}, SourceSpan{});
 
-  SourceSpan span = StateBase::Union(SpanFrom(start), iter_expr->Span());
+  const SourceSpan span = Union(SpanFrom(start), iter_expr->Span());
   // Pass nullptr for body - it will be set later in StateBlock
   auto for_stmt = ctx.Factory()->MakeForStmt(std::move(iter_name), std::move(iter_expr), nullptr, span);
 

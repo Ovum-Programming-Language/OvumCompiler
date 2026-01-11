@@ -19,7 +19,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -27,16 +27,12 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
     break;
   }
-}
-
-SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
-  return StateBase::Union(a, b);
 }
 
 } // namespace
@@ -49,9 +45,9 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
   SkipTrivia(ts);
 
   // Check for FunctionDecl, MethodDecl, or CallDecl
-  FunctionDecl* func = ctx.TopNodeAs<FunctionDecl>();
-  MethodDecl* method = ctx.TopNodeAs<MethodDecl>();
-  CallDecl* call = ctx.TopNodeAs<CallDecl>();
+  auto* func = ctx.TopNodeAs<FunctionDecl>();
+  auto* method = ctx.TopNodeAs<MethodDecl>();
+  auto* call = ctx.TopNodeAs<CallDecl>();
 
   if (func == nullptr && method == nullptr && call == nullptr) {
     return std::unexpected(
@@ -69,13 +65,11 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
     auto decl_node = ctx.PopNode();
 
     if (func != nullptr) {
-      Module* module = ctx.TopNodeAs<Module>();
-      if (module != nullptr) {
+      if (auto* module = ctx.TopNodeAs<Module>(); module != nullptr) {
         module->AddDecl(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
       }
-    } else if (method != nullptr || call != nullptr) {
-      ClassDecl* class_decl = ctx.TopNodeAs<ClassDecl>();
-      if (class_decl != nullptr) {
+    } else if (method != nullptr) {
+      if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
         class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
       }
     }
@@ -85,7 +79,7 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
   if (tok.GetLexeme() == "{") {
     // Function with body - create block and push it
     ts.Consume();
-    auto block = ctx.Factory()->MakeBlock({}, StateBase::SpanFrom(tok));
+    auto block = ctx.Factory()->MakeBlock({}, SpanFrom(tok));
     ctx.PopState();
     ctx.PushNode(std::move(block));
     ctx.PushState(StateRegistry::Block());

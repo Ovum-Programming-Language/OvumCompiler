@@ -28,7 +28,7 @@ std::string PrintVisitor::Str() const {
   return buffer_.str();
 }
 
-void PrintVisitor::WriteIndent() {
+void PrintVisitor::WriteIndent() const {
   for (int i = 0; i < indent_; ++i) {
     *out_ << "  ";
   }
@@ -51,7 +51,7 @@ void PrintVisitor::Close() {
 
 void PrintVisitor::Visit(Module& node) {
   Open("Module name=\"" + node.Name() + "\"");
-  for (auto& declaration : node.MutableDecls()) {
+  for (const auto& declaration : node.MutableDecls()) {
     declaration->Accept(*this);
   }
   Close();
@@ -67,7 +67,7 @@ void PrintVisitor::Visit(FunctionDecl& node) {
 
 void PrintVisitor::Visit(ClassDecl& node) {
   Open(std::string("ClassDecl name=\"") + node.Name() + "\"");
-  for (auto& member : node.MutableMembers()) {
+  for (const auto& member : node.MutableMembers()) {
     member->Accept(*this);
   }
   Close();
@@ -79,7 +79,7 @@ void PrintVisitor::Visit(InterfaceMethod& node) {
 
 void PrintVisitor::Visit(InterfaceDecl& node) {
   Open(std::string("InterfaceDecl name=\"") + node.Name() + "\"");
-  for (auto& method_ptr : node.MutableMembers()) {
+  for (const auto& method_ptr : node.MutableMembers()) {
     method_ptr->Accept(*this);
   }
   Close();
@@ -167,7 +167,7 @@ void PrintVisitor::Visit(DestructorDecl& node) {
 void PrintVisitor::Visit(Block& node) {
   Open("Block");
 
-  for (auto& statement : node.GetStatements()) {
+  for (const auto& statement : node.GetStatements()) {
     statement->Accept(*this);
   }
 
@@ -324,7 +324,7 @@ void PrintVisitor::Visit(Call& node) {
   Close();
   Open("Args");
 
-  for (auto& argument : node.MutableArgs()) {
+  for (const auto& argument : node.MutableArgs()) {
     argument->Accept(*this);
   }
 
@@ -362,7 +362,7 @@ void PrintVisitor::Visit(SafeCall& node) {
   Close();
   Open("Args");
 
-  for (auto& argument : node.MutableArgs()) {
+  for (const auto& argument : node.MutableArgs()) {
     argument->Accept(*this);
   }
 
@@ -406,7 +406,7 @@ void PrintVisitor::Visit(StringLit& node) {
 }
 
 void PrintVisitor::Visit(CharLit& node) {
-  std::string printable(1, node.Value());
+  const std::string printable(1, node.Value());
   WriteLine(std::string("CharLit value='") + printable + "'");
 }
 

@@ -11,7 +11,7 @@ const AstNode* NodeEntry::GetNode() const noexcept {
   return node_.get();
 }
 
-AstNode* NodeEntry::MutableNode() noexcept {
+AstNode* NodeEntry::MutableNode() const noexcept {
   return node_.get();
 }
 

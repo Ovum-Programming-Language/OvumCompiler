@@ -11,10 +11,10 @@ class PostfixSpec {
 public:
   PostfixSpec(std::function<bool(const Token&)> match, int bp, bool keyword);
 
-  bool TryMatch(const Token& token) const;
+  [[nodiscard]] bool TryMatch(const Token& token) const;
 
-  int BindingPower() const noexcept;
-  bool IsKeyword() const noexcept;
+  [[nodiscard]] int BindingPower() const noexcept;
+  [[nodiscard]] bool IsKeyword() const noexcept;
 
   void SetBindingPower(int v) noexcept;
   void SetKeyword(bool v) noexcept;

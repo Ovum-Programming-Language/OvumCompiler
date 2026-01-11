@@ -15,7 +15,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -23,7 +23,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -40,8 +40,7 @@ std::string_view StateCallDeclHdr::Name() const {
 IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  auto* class_decl = ctx.TopNodeAs<ClassDecl>();
-  if (class_decl == nullptr) {
+  if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl == nullptr) {
     return std::unexpected(StateError(std::string_view("expected ClassDecl node on stack")));
   }
 
@@ -54,7 +53,7 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
   // Check for access modifier
   bool is_public = true;
   if (start.GetLexeme() == "public" || start.GetLexeme() == "private") {
-    is_public = (start.GetLexeme() == "public");
+    is_public = start.GetLexeme() == "public";
     ts.Consume();
     SkipTrivia(ts);
     if (ts.IsEof() || ts.Peek().GetLexeme() != "call") {
@@ -75,7 +74,7 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
     return std::unexpected(StateError(std::string_view("expected '(' after 'call'")));
   }
 
-  SourceSpan span = StateBase::SpanFrom(start);
+  SourceSpan span = SpanFrom(start);
   auto call = ctx.Factory()->MakeCallDecl(is_public, {}, nullptr, nullptr, span);
   ctx.PushNode(std::move(call));
 

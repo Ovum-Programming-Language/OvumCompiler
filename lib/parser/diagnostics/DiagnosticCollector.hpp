@@ -17,7 +17,13 @@ class DiagnosticCollector : public IDiagnosticSink {
 public:
   using Predicate = std::function<bool(const Diagnostic&)>;
 
+  DiagnosticCollector() = default;
   ~DiagnosticCollector() override = default;
+
+  DiagnosticCollector(const DiagnosticCollector&) = delete;
+  DiagnosticCollector& operator=(const DiagnosticCollector&) = delete;
+  DiagnosticCollector(DiagnosticCollector&&) = delete;
+  DiagnosticCollector& operator=(DiagnosticCollector&&) = delete;
 
   void Report(Diagnostic d) override;
   bool HasErrors() const override;

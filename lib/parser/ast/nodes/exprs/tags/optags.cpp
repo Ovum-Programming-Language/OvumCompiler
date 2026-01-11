@@ -1,4 +1,4 @@
-#include "OpTags.hpp"
+#include "optags.hpp"
 
 #include <string_view>
 
@@ -158,7 +158,7 @@ struct AssignCopy : IAssignOpTag {
 
 } // namespace
 
-namespace OpTags {
+namespace optags {
 
 const IBinaryOpTag& Add() {
   static BinaryAdd t;
@@ -285,6 +285,6 @@ const IAssignOpTag& CopyAssign() {
   return t;
 }
 
-} // namespace OpTags
+} // namespace optags
 
 } // namespace ovum::compiler::parser

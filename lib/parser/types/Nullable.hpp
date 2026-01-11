@@ -9,7 +9,7 @@ public:
 
   explicit Nullable(bool on) noexcept;
 
-  bool IsOn() const noexcept;
+  [[nodiscard]] bool IsOn() const noexcept;
 
   void Set(bool on) noexcept;
 

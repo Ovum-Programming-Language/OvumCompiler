@@ -30,7 +30,7 @@ const Block* IfStmt::ElseBlock() const noexcept {
   return else_block_.get();
 }
 
-Block* IfStmt::MutableElseBlock() noexcept {
+Block* IfStmt::MutableElseBlock() const noexcept {
   return else_block_.get();
 }
 

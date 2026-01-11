@@ -44,7 +44,7 @@ void Block::Clear() noexcept {
   stmts_.clear();
 }
 
-std::size_t Block::Size() const noexcept {
+size_t Block::Size() const noexcept {
   return stmts_.size();
 }
 

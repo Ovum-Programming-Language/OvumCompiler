@@ -4,7 +4,7 @@
 
 namespace ovum::compiler::parser {
 
-SourceSpan::SourceSpan(SourceId id, TokenPosition start, TokenPosition end) :
+SourceSpan::SourceSpan(SourceId id, const TokenPosition start, const TokenPosition end) :
     id_(std::move(id)), begin_(start), end_(end) {
   Normalize();
 }
@@ -30,7 +30,7 @@ void SourceSpan::Normalize() noexcept {
 }
 
 SourceSpan SourceSpan::SinglePoint(SourceId id, TokenPosition point) {
-  return SourceSpan(std::move(id), point, point);
+  return {std::move(id), point, point};
 }
 
 SourceSpan SourceSpan::Union(const SourceSpan& a, const SourceSpan& b) {
@@ -45,9 +45,9 @@ SourceSpan SourceSpan::Union(const SourceSpan& a, const SourceSpan& b) {
   if (a.id_ != b.id_) {
     return a;
   }
-  TokenPosition start = a.begin_ < b.begin_ ? a.begin_ : b.begin_;
-  TokenPosition end = a.end_ < b.end_ ? b.end_ : a.end_;
-  return SourceSpan(a.id_, start, end);
+  const TokenPosition start = a.begin_ < b.begin_ ? a.begin_ : b.begin_;
+  const TokenPosition end = a.end_ < b.end_ ? b.end_ : a.end_;
+  return {a.id_, start, end};
 }
 
 } // namespace ovum::compiler::parser

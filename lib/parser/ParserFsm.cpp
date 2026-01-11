@@ -19,9 +19,9 @@ ParserFsm::ParserFsm(std::unique_ptr<IExpressionParser> expr,
     expr_parser_(std::move(expr)), type_parser_(std::move(typep)), factory_(std::move(factory)) {
 }
 
-std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& token_stream, IDiagnosticSink& diagnostics) {
+std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& ts, IDiagnosticSink& diags) {
   ContextParser context;
-  context.SetDiagnostics(&diagnostics);
+  context.SetDiagnostics(&diags);
   context.SetExpr(expr_parser_.get());
   context.SetTypeParser(type_parser_.get());
   context.SetFactory(factory_.get());
@@ -31,13 +31,12 @@ std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& token_stream, IDiagnostic
   context.PushState(StateRegistry::Module());
 
   while (const IState* state = context.CurrentState()) {
-    auto name = state->Name();
-    auto step = state->TryStep(context, token_stream);
+    auto step = state->TryStep(context, ts);
 
     if (!step.has_value()) {
       const auto& message = step.error().Message();
-      diagnostics.Error("P0001", message.empty() ? "parse error" : message);
-      recovery.SyncToStatementEnd(token_stream);
+      diags.Error("P0001", message.empty() ? "parse error" : message);
+      recovery.SyncToStatementEnd(ts);
       context.PopState();
       continue;
     }
@@ -53,9 +52,7 @@ std::unique_ptr<Module> ParserFsm::Parse(ITokenStream& token_stream, IDiagnostic
     return std::make_unique<Module>();
   }
 
-  auto* as_module = dynamic_cast<Module*>(root.get());
-
-  if (as_module != nullptr) {
+  if (auto* as_module = dynamic_cast<Module*>(root.get()); as_module != nullptr) {
     root.release();
     return std::unique_ptr<Module>(as_module);
   }

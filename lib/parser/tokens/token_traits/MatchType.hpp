@@ -11,7 +11,7 @@ namespace ovum::compiler::parser {
 class MatchType : public ITokenMatcher {
 public:
   explicit MatchType(std::string_view type_name);
-  bool TryMatch(const Token& token) const override;
+  [[nodiscard]] bool TryMatch(const Token& token) const override;
 
 private:
   std::string_view type_;

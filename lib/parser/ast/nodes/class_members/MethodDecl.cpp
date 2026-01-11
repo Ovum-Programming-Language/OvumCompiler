@@ -43,55 +43,55 @@ void MethodDecl::SetPure(bool is_pure) noexcept {
 }
 
 const std::string& MethodDecl::Name() const noexcept {
-  return name;
+  return name_;
 }
 
 void MethodDecl::SetName(std::string new_name) {
-  name = std::move(new_name);
+  name_ = std::move(new_name);
 }
 
 const std::vector<Param>& MethodDecl::Params() const noexcept {
-  return params;
+  return params_;
 }
 
 std::vector<Param>& MethodDecl::MutableParams() noexcept {
-  return params;
+  return params_;
 }
 
 void MethodDecl::AddParam(Param param) {
-  params.emplace_back(std::move(param));
+  params_.emplace_back(std::move(param));
 }
 
 const TypeReference* MethodDecl::ReturnType() const noexcept {
-  return ret_type.get();
+  return ret_type_.get();
 }
 
 TypeReference* MethodDecl::MutableReturnType() noexcept {
-  return ret_type.get();
+  return ret_type_.get();
 }
 
 void MethodDecl::SetReturnType(std::unique_ptr<TypeReference> type) {
-  ret_type = std::move(type);
+  ret_type_ = std::move(type);
 }
 
 std::unique_ptr<TypeReference> MethodDecl::ReleaseReturnType() {
-  return std::move(ret_type);
+  return std::move(ret_type_);
 }
 
 const Block* MethodDecl::Body() const noexcept {
-  return body.get();
+  return body_.get();
 }
 
 Block* MethodDecl::MutableBody() noexcept {
-  return body.get();
+  return body_.get();
 }
 
 void MethodDecl::SetBody(std::unique_ptr<Block> block) {
-  body = std::move(block);
+  body_ = std::move(block);
 }
 
 std::unique_ptr<Block> MethodDecl::ReleaseBody() {
-  return std::move(body);
+  return std::move(body_);
 }
 
 } // namespace ovum::compiler::parser

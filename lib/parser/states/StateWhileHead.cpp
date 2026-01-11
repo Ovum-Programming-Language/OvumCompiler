@@ -15,7 +15,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -23,7 +23,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -31,7 +31,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
   }
 }
 
-std::unique_ptr<Expr> ParseExpression(ContextParser& ctx, ITokenStream& ts) {
+std::unique_ptr<Expr> ParseExpression(const ContextParser& ctx, ITokenStream& ts) {
   if (ctx.Expr() == nullptr) {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_EXPR_PARSER", std::string_view("expression parser not available"));
@@ -50,8 +50,7 @@ std::string_view StateWhileHead::Name() const {
 IState::StepResult StateWhileHead::TryStep(ContextParser& ctx, ITokenStream& ts) const {
   SkipTrivia(ts);
 
-  Block* parent_block = ctx.TopNodeAs<Block>();
-  if (!parent_block) {
+  if (const auto* parent_block = ctx.TopNodeAs<Block>(); !parent_block) {
     return std::unexpected(StateError(std::string_view("expected Block node on stack")));
   }
 

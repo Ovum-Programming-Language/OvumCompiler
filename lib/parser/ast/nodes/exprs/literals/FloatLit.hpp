@@ -9,11 +9,11 @@ class FloatLit : public Expr {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  double Value() const noexcept;
+  [[nodiscard]] double Value() const noexcept;
   void SetValue(double new_value) noexcept;
 
 private:
-  double value = 0.0;
+  double value_ = 0.0;
 };
 
 } // namespace ovum::compiler::parser

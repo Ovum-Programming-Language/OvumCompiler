@@ -13,16 +13,16 @@ class ForStmt : public Stmt {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  const std::string& IteratorName() const noexcept;
+  [[nodiscard]] const std::string& IteratorName() const noexcept;
   void SetIteratorName(std::string new_name);
 
-  const Expr* IteratorExpr() const noexcept;
-  Expr* MutableIteratorExpr() noexcept;
+  [[nodiscard]] const Expr* IteratorExpr() const noexcept;
+  [[nodiscard]] Expr* MutableIteratorExpr() const noexcept;
   void SetIteratorExpr(std::unique_ptr<Expr> expression);
   std::unique_ptr<Expr> ReleaseIteratorExpr();
 
-  const Block* Body() const noexcept;
-  Block* MutableBody() noexcept;
+  [[nodiscard]] const Block* Body() const noexcept;
+  [[nodiscard]] Block* MutableBody() const noexcept;
   void SetBody(std::unique_ptr<Block> body_block);
   std::unique_ptr<Block> ReleaseBody();
 

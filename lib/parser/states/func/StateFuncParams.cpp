@@ -18,7 +18,7 @@ namespace ovum::compiler::parser {
 
 namespace {
 
-void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
+void SkipTrivia(ITokenStream& ts) {
   while (!ts.IsEof()) {
     const Token& t = ts.Peek();
     const std::string type = t.GetStringType();
@@ -26,7 +26,7 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
       ts.Consume();
       continue;
     }
-    if (skip_newlines && type == "NEWLINE") {
+    if (type == "NEWLINE") {
       ts.Consume();
       continue;
     }
@@ -35,20 +35,19 @@ void SkipTrivia(ITokenStream& ts, bool skip_newlines = true) {
 }
 
 bool IsIdentifier(const Token& token) {
-  MatchIdentifier matcher;
+  const MatchIdentifier matcher;
   return matcher.TryMatch(token);
 }
 
-std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_view code, std::string_view message) {
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
   SkipTrivia(ts);
   if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
     if (ctx.Diags() != nullptr) {
-      const Token* tok = ts.TryPeek();
-      if (tok != nullptr) {
+      if (const Token* tok = ts.TryPeek(); tok != nullptr) {
         SourceSpan span = StateBase::SpanFrom(*tok);
-        ctx.Diags()->Error(code, message, span);
+        ctx.Diags()->Error("P_PARAM_NAME", "type parser not available", span);
       } else {
-        ctx.Diags()->Error(code, message);
+        ctx.Diags()->Error("P_PARAM_NAME", "type parser not available");
       }
     }
     return "";
@@ -57,7 +56,7 @@ std::string ReadIdentifier(ContextParser& ctx, ITokenStream& ts, std::string_vie
   return name;
 }
 
-std::unique_ptr<TypeReference> ParseType(ContextParser& ctx, ITokenStream& ts) {
+std::unique_ptr<TypeReference> ParseType(const ContextParser& ctx, ITokenStream& ts) {
   if (ctx.TypeParser() == nullptr) {
     if (ctx.Diags() != nullptr) {
       ctx.Diags()->Error("P_TYPE_PARSER", "type parser not available");
@@ -90,8 +89,7 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
     return std::unexpected(StateError(std::string_view("unexpected end of file in function parameters")));
   }
 
-  const Token& tok = ts.Peek();
-  if (tok.GetLexeme() == ")") {
+  if (const Token& tok = ts.Peek(); tok.GetLexeme() == ")") {
     ts.Consume();
     SkipTrivia(ts);
 
@@ -99,13 +97,12 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
     if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
       ts.Consume();
       SkipTrivia(ts);
-      auto return_type = ParseType(ctx, ts);
-      if (return_type != nullptr) {
+      if (auto return_type = ParseType(ctx, ts); return_type != nullptr) {
         if (func != nullptr) {
           func->SetReturnType(std::move(return_type));
         } else if (method != nullptr) {
           method->SetReturnType(std::move(return_type));
-        } else if (call != nullptr) {
+        } else {
           call->SetReturnType(std::move(return_type));
         }
       }
@@ -121,14 +118,12 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   std::vector<Param> params;
   while (true) {
     SkipTrivia(ts);
-    bool is_var = false;
     if (!ts.IsEof() && ts.Peek().GetLexeme() == "var") {
       ts.Consume();
-      is_var = true;
       SkipTrivia(ts);
     }
 
-    std::string name = ReadIdentifier(ctx, ts, "P_PARAM_NAME", "expected parameter name");
+    std::string name = ReadIdentifier(ctx, ts);
     if (name.empty()) {
       break;
     }
@@ -182,8 +177,7 @@ IState::StepResult StateFuncParams::TryStep(ContextParser& ctx, ITokenStream& ts
   if (!ts.IsEof() && ts.Peek().GetLexeme() == ":") {
     ts.Consume();
     SkipTrivia(ts);
-    auto return_type = ParseType(ctx, ts);
-    if (return_type != nullptr) {
+    if (auto return_type = ParseType(ctx, ts); return_type != nullptr) {
       if (func != nullptr) {
         func->SetReturnType(std::move(return_type));
       } else if (method != nullptr) {

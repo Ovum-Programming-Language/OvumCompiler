@@ -9,11 +9,11 @@ class BoolLit : public Expr {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  bool Value() const noexcept;
+  [[nodiscard]] bool Value() const noexcept;
   void SetValue(bool new_value) noexcept;
 
 private:
-  bool value = false;
+  bool value_ = false;
 };
 
 } // namespace ovum::compiler::parser

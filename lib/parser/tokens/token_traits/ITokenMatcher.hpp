@@ -5,10 +5,10 @@
 
 namespace ovum::compiler::parser {
 
-class ITokenMatcher {
+class ITokenMatcher { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~ITokenMatcher() = default;
-  virtual bool TryMatch(const Token& token) const = 0;
+  [[nodiscard]] virtual bool TryMatch(const Token& token) const = 0;
 };
 
 } // namespace ovum::compiler::parser

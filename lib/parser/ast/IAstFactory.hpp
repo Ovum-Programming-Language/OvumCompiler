@@ -57,7 +57,7 @@
 
 namespace ovum::compiler::parser {
 
-class IAstFactory {
+class IAstFactory { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
   virtual ~IAstFactory() = default;
 

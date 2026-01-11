@@ -6,9 +6,9 @@
 
 namespace ovum::compiler::parser {
 
-class StateBase : public IState {
+class StateBase : public IState { // NOLINT(cppcoreguidelines-special-member-functions)
 public:
-  using StepResult = IState::StepResult;
+  using StepResult = StepResult;
   ~StateBase() override = default;
 
   static SourceSpan SpanFrom(const Token& token);

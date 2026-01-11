@@ -2,12 +2,12 @@
 
 namespace ovum::compiler::parser {
 
-VarDeclStmtBuilder& VarDeclStmtBuilder::WithVar(bool is_var) {
+VarDeclStmtBuilder& VarDeclStmtBuilder::WithVar(const bool is_var) {
   node_->SetVar(is_var);
   return *this;
 }
 
-VarDeclStmtBuilder& VarDeclStmtBuilder::WithIsVar(bool is_var) {
+VarDeclStmtBuilder& VarDeclStmtBuilder::WithIsVar(const bool is_var) {
   return WithVar(is_var);
 }
 

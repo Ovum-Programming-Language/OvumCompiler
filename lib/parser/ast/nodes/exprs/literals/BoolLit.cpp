@@ -9,11 +9,11 @@ void BoolLit::Accept(AstVisitor& visitor) {
 }
 
 bool BoolLit::Value() const noexcept {
-  return value;
+  return value_;
 }
 
 void BoolLit::SetValue(bool new_value) noexcept {
-  value = new_value;
+  value_ = new_value;
 }
 
 } // namespace ovum::compiler::parser

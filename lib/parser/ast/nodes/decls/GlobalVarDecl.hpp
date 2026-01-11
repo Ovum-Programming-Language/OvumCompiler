@@ -14,18 +14,18 @@ class GlobalVarDecl : public Decl {
 public:
   void Accept(AstVisitor& visitor) override;
 
-  bool IsVar() const noexcept;
+  [[nodiscard]] bool IsVar() const noexcept;
   void SetVar(bool is_var) noexcept;
 
-  const std::string& Name() const noexcept;
+  [[nodiscard]] const std::string& Name() const noexcept;
   void SetName(std::string new_name);
 
-  const TypeReference& Type() const noexcept;
+  [[nodiscard]] const TypeReference& Type() const noexcept;
   TypeReference& MutableType() noexcept;
   void SetType(TypeReference type);
 
-  const Expr* Init() const noexcept;
-  Expr* MutableInit() noexcept;
+  [[nodiscard]] const Expr* Init() const noexcept;
+  [[nodiscard]] Expr* MutableInit() const noexcept;
   void SetInit(std::unique_ptr<Expr> expr);
   std::unique_ptr<Expr> ReleaseInit();
 
