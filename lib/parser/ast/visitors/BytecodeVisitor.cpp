@@ -2016,8 +2016,6 @@ void BytecodeVisitor::Visit(CastAs& node) {
   output_ << " else ";
   EmitBlockStartWithoutSpaces();
 
-  EmitCommandWithString("PushString", "Unexpected type");
-  EmitCommand("PrintLine");
   EmitCommand("PushNull");
 
   EmitBlockEnd();
