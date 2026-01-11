@@ -1307,7 +1307,6 @@ void BytecodeVisitor::Visit(Assign& node) {
 
   if (is_copy_assign) {
     std::string target_type_name;
-    std::string value_type_name;
 
     if (auto* target_ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
       if (auto type_it = variable_types_.find(target_ident->Name()); type_it != variable_types_.end()) {
@@ -1315,23 +1314,14 @@ void BytecodeVisitor::Visit(Assign& node) {
       }
     }
 
-    if (auto* value_ident = dynamic_cast<IdentRef*>(&node.MutableValue())) {
-      if (auto type_it = variable_types_.find(value_ident->Name()); type_it != variable_types_.end()) {
-        value_type_name = type_it->second;
-      }
-    } else {
-      value_type_name = GetTypeNameForExpr(&node.MutableValue());
-    }
+    bool target_is_primitive = target_type_name == "int" || target_type_name == "float" || target_type_name == "byte" ||
+                               target_type_name == "char" || target_type_name == "bool" ||
+                               target_type_name == "pointer";
 
-    bool target_is_ref = target_type_name != "int" && target_type_name != "float" && target_type_name != "byte" &&
-                         target_type_name != "char" && target_type_name != "bool" && target_type_name != "pointer" &&
-                         !target_type_name.empty();
-    bool value_is_ref = value_type_name != "int" && value_type_name != "float" && value_type_name != "byte" &&
-                        value_type_name != "char" && value_type_name != "bool" && value_type_name != "pointer" &&
-                        !value_type_name.empty();
-
-    if (target_is_ref && value_is_ref && target_type_name == value_type_name) {
+    if (!target_is_primitive && !target_type_name.empty()) {
       node.MutableValue().Accept(*this);
+
+      std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
 
       node.MutableTarget().Accept(*this);
 

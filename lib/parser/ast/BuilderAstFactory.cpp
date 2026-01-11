@@ -167,7 +167,10 @@ std::unique_ptr<ExprStmt> BuilderAstFactory::MakeExprStmt(std::unique_ptr<Expr> 
 
 std::unique_ptr<ReturnStmt> BuilderAstFactory::MakeReturnStmt(std::unique_ptr<Expr> value, SourceSpan span) {
   auto b = ParserBuilder::Make<ReturnStmt>();
-  b.WithValue(std::move(value)).WithSpan(span);
+  if (value != nullptr) {
+    b.WithValue(std::move(value));
+  }
+  b.WithSpan(span);
   return b.Build();
 }
 

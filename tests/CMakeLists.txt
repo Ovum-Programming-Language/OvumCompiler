@@ -11,6 +11,7 @@ add_executable(
         test_suites/PreprocessorUnitTestSuite.cpp
         preprocessor_tests.cpp
         parser_bytecode_tests.cpp
+        visitor_tests.cpp
 )
 
 target_link_libraries(

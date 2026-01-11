@@ -1693,6 +1693,117 @@ fun test(arr1: IntArray, arr2: IntArray): Void {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
+TEST_F(ParserBytecodeTest, CopyAssignmentInt) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(a: Int, b: Int): Void {
+    a := b
+}
+)");
+  EXPECT_NE(bc.find("_Int_copy_<M>_Int"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentIntWithExpression) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(a: Int): Void {
+    a := a + 1
+}
+)");
+  EXPECT_NE(bc.find("_Int_copy_<M>_int"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+  EXPECT_EQ(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("IntAdd"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentFloat) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(a: Float, b: Float): Void {
+    a := b
+}
+)");
+  EXPECT_NE(bc.find("_Float_copy_<M>_Float"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentFloatWithExpression) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(a: Float): Void {
+    a := a * 2.0
+}
+)");
+  EXPECT_NE(bc.find("_Float_copy_<M>_float"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+  EXPECT_NE(bc.find("FloatMultiply"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ReferenceAssignmentString) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(a: String, b: String): Void {
+    a = b
+}
+)");
+  EXPECT_EQ(bc.find("_String_copy_<M>_String"), std::string::npos);
+  EXPECT_NE(bc.find("SetLocal"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentField) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+    public var x: Int
+    public var y: Int
+}
+
+fun test(p: Point, v: Int): Void {
+    p.x := v
+}
+)");
+  EXPECT_NE(bc.find("SetField"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ReferenceAssignmentField) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+    public var x: Int
+    public var y: Int
+}
+
+fun test(p: Point, v: Int): Void {
+    p.x = v
+}
+)");
+  EXPECT_NE(bc.find("SetField"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentArrayElement) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr: IntArray, v: Int): Void {
+    arr[0] := v
+}
+)");
+  EXPECT_NE(bc.find("SetAt"), std::string::npos);
+  EXPECT_NE(bc.find("PushInt 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ReferenceAssignmentArrayElement) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr: IntArray, v: Int): Void {
+    arr[0] = v
+}
+)");
+  EXPECT_NE(bc.find("SetAt"), std::string::npos);
+  EXPECT_NE(bc.find("PushInt 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
+}
+
 TEST_F(ParserBytecodeTest, InterfaceIComparable) {
   const std::string bc = GenerateBytecode(R"(
 class Point implements IComparable {
