@@ -434,6 +434,7 @@ void BytecodeVisitor::Visit(Module& node) {
   method_return_types_.clear();
   class_fields_.clear();
   constructor_params_.clear();
+  type_aliases_.clear();
   pending_init_static_.clear();
 
   for (auto& decl : node.MutableDecls()) {
@@ -505,6 +506,10 @@ void BytecodeVisitor::Visit(Module& node) {
         pending_init_static_.push_back(gv->MutableInit());
         pending_init_static_names_.push_back(gv->Name());
       }
+    }
+
+    if (auto* ta = dynamic_cast<TypeAliasDecl*>(decl.get())) {
+      type_aliases_[ta->Name()] = ta->AliasedType();
     }
   }
 
@@ -701,7 +706,8 @@ void BytecodeVisitor::Visit(InterfaceMethod& node) {
   method_name_map_[node.Name()] = id;
 }
 
-void BytecodeVisitor::Visit(TypeAliasDecl&) {
+void BytecodeVisitor::Visit(TypeAliasDecl& node) {
+  type_aliases_[node.Name()] = node.AliasedType();
 }
 
 void BytecodeVisitor::Visit(GlobalVarDecl& node) {
@@ -2165,24 +2171,37 @@ std::string BytecodeVisitor::GenerateMethodVTableName(const std::string& method_
 }
 
 std::string BytecodeVisitor::TypeToMangledName(const TypeReference& type) {
+  TypeReference resolved_type = type;
+
+  if (!type.QualifiedName().empty()) {
+    std::string_view type_name = type.SimpleName();
+    auto alias_it = type_aliases_.find(std::string(type_name));
+    if (alias_it != type_aliases_.end()) {
+      resolved_type = alias_it->second;
+      if (type.IsNullable()) {
+        resolved_type.MakeNullable();
+      }
+    }
+  }
+
   std::ostringstream oss;
 
-  if (const auto& qname = type.QualifiedName(); !qname.empty()) {
+  if (const auto& qname = resolved_type.QualifiedName(); !qname.empty()) {
     oss << qname.back();
   }
 
-  if (type.Arity() > 0) {
+  if (resolved_type.Arity() > 0) {
     oss << "<";
-    for (size_t i = 0; i < type.Arity(); ++i) {
+    for (size_t i = 0; i < resolved_type.Arity(); ++i) {
       if (i) {
         oss << ",";
       }
-      oss << TypeToMangledName(type.TypeArguments()[i]);
+      oss << TypeToMangledName(resolved_type.TypeArguments()[i]);
     }
     oss << ">";
   }
 
-  if (type.IsNullable()) {
+  if (resolved_type.IsNullable()) {
     oss << "?";
   }
 

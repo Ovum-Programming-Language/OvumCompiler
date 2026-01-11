@@ -96,6 +96,7 @@ private:
   std::unordered_map<std::string, std::string> method_return_types_;
   std::unordered_map<std::string, std::vector<std::pair<std::string, TypeReference>>> class_fields_;
   std::unordered_map<std::string, std::vector<TypeReference>> constructor_params_;
+  std::unordered_map<std::string, TypeReference> type_aliases_;
 
   static const std::unordered_set<std::string> kBuiltinSystemCommands;
   static const std::unordered_map<std::string, std::string> kBuiltinReturnPrimitives;
@@ -118,7 +119,7 @@ private:
   void EmitBlockEndWithoutEscape();
   void EmitIfStart();
 
-  static std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
+  std::string GenerateFunctionId(const std::string& name, const std::vector<Param>& params);
 
   std::string GenerateMethodId(const std::string& class_name,
                                const std::string& method_name,
@@ -133,7 +134,7 @@ private:
   std::string GenerateConstructorId(const std::string& class_name, const std::vector<Param>& params);
   std::string GenerateDestructorId(const std::string& class_name);
   std::string GenerateCopyMethodId(const std::string& class_name, const std::string& param_type);
-  static std::string TypeToMangledName(const TypeReference& type);
+  std::string TypeToMangledName(const TypeReference& type);
   void VisitExpression(Expr* expr);
   void VisitStatement(Stmt* stmt);
   void VisitBlock(Block* block);

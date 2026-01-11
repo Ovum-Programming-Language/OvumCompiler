@@ -46,7 +46,28 @@ SourceSpan Union(const SourceSpan& a, const SourceSpan& b) {
   return SourceSpan::Union(a, b);
 }
 
-bool ParseInteger(const std::string& text, long long* out) {
+bool ParseIntegerLiteral(const std::string& text, long long* out) {
+  if (text.size() >= 2 && text[0] == '0' && (text[1] == 'x' || text[1] == 'X')) {
+    // Hex literal: 0x1A
+    try {
+      *out = std::stoll(text, nullptr, 16);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+  
+  if (text.size() >= 2 && text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) {
+    // Binary literal: 0b1010
+    try {
+      *out = std::stoll(text.substr(2), nullptr, 2);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+  
+  // Decimal literal: 42
   const char* begin = text.data();
   const char* end = begin + text.size();
   auto [ptr, ec] = std::from_chars(begin, end, *out, kDecimalBase);
@@ -79,7 +100,7 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
     const std::string& lexeme = token.GetLexeme();
 
     if (!lexeme.empty() && (lexeme.back() == 'b' || lexeme.back() == 'B')) {
-      if (const std::string num_part = lexeme.substr(0, lexeme.size() - 1); !ParseInteger(num_part, &value)) {
+      if (const std::string num_part = lexeme.substr(0, lexeme.size() - 1); !ParseIntegerLiteral(num_part, &value)) {
         diags.Error("E_LITERAL_BYTE", "invalid byte literal", span);
         return nullptr;
       }
@@ -93,7 +114,7 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
       return factory.MakeByte(static_cast<uint8_t>(value), span);
     }
 
-    if (!ParseInteger(lexeme, &value)) {
+    if (!ParseIntegerLiteral(lexeme, &value)) {
       diags.Error("E_LITERAL_INT", "invalid integer literal", span);
       return nullptr;
     }
@@ -123,7 +144,7 @@ std::unique_ptr<Expr> MakeLiteralFromToken(const Token& token, IAstFactory& fact
 
   if (ty == "LITERAL:Byte") {
     long long value = 0;
-    if (!ParseInteger(token.GetLexeme(), &value)) {
+    if (!ParseIntegerLiteral(token.GetLexeme(), &value)) {
       diags.Error("E_LITERAL_BYTE", "invalid byte literal", span);
       return nullptr;
     }

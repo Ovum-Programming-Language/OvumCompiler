@@ -1661,3 +1661,201 @@ fun Main(args: StringArray): int {
 }
 )OVUM");
 }
+
+TEST_F(ParserBytecodeTest, TypeAlias) {
+  const std::string bc = GenerateBytecode(R"(
+typealias UserId = Int
+typealias UserName = String
+
+fun test(id: UserId, name: UserName): Void {
+}
+)");
+  EXPECT_NE(bc.find("_Global_test_Int_String"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentString) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s1: String, s2: String): Void {
+    s1 := s2
+}
+)");
+  EXPECT_NE(bc.find("_String_copy_<M>_String"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CopyAssignmentArray) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr1: IntArray, arr2: IntArray): Void {
+    arr1 := arr2
+}
+)");
+  EXPECT_NE(bc.find("_IntArray_copy_<M>_IntArray"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, InterfaceIComparable) {
+  const std::string bc = GenerateBytecode(R"(
+class Point implements IComparable {
+    public val X: Int
+    public val Y: Int
+
+    public fun Point(x: Int, y: Int): Point {
+        this.X = x
+        this.Y = y
+        return this
+    }
+
+    public override fun IsLess(other: Object): Bool {
+        return true
+    }
+
+    public override fun Equals(other: Object): Bool {
+        return true
+    }
+}
+)");
+  EXPECT_NE(bc.find("IComparable"), std::string::npos);
+  EXPECT_NE(bc.find("IsLess"), std::string::npos);
+  EXPECT_NE(bc.find("Equals"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, InterfaceIHashable) {
+  const std::string bc = GenerateBytecode(R"(
+class Point implements IHashable {
+    public val X: Int
+    public val Y: Int
+
+    public fun Point(x: Int, y: Int): Point {
+        this.X = x
+        this.Y = y
+        return this
+    }
+
+    public override fun GetHash(): Int {
+        return Int(42)
+    }
+}
+)");
+  EXPECT_NE(bc.find("IHashable"), std::string::npos);
+  EXPECT_NE(bc.find("GetHash"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, InterfaceIStringConvertible) {
+  const std::string bc = GenerateBytecode(R"(
+class Point implements IStringConvertible {
+    public val X: Int
+    public val Y: Int
+
+    public fun Point(x: Int, y: Int): Point {
+        this.X = x
+        this.Y = y
+        return this
+    }
+
+    public override fun ToString(): String {
+        return "Point"
+    }
+}
+)");
+  EXPECT_NE(bc.find("IStringConvertible"), std::string::npos);
+  EXPECT_NE(bc.find("ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ArrayLength) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr: IntArray): Int {
+    return arr.Length()
+}
+)");
+  EXPECT_NE(bc.find("_IntArray_Length_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ArrayToString) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr: IntArray): String {
+    return arr.ToString()
+}
+)");
+  EXPECT_NE(bc.find("_IntArray_ToString_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ArrayIsLess) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(arr1: IntArray, arr2: IntArray): Bool {
+    return arr1.IsLess(arr2)
+}
+)");
+  EXPECT_NE(bc.find("_IntArray_IsLess_<M>"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, HexLiteral) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): int {
+    return 0x1A
+}
+)");
+  EXPECT_NE(bc.find("PushInt 26"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, BinaryLiteral) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): int {
+    return 0b1010
+}
+)");
+  EXPECT_NE(bc.find("PushInt 10"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, FloatScientificNotation) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): float {
+    return 2.0e10
+}
+)");
+  EXPECT_NE(bc.find("PushFloat"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, FloatSpecialValues) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): float {
+    return Infinity
+}
+)");
+  EXPECT_NE(bc.find("PushFloat"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, MultipleInterfaces) {
+  const std::string bc = GenerateBytecode(R"(
+class Point implements IStringConvertible, IComparable, IHashable {
+    public val X: Int
+    public val Y: Int
+
+    public fun Point(x: Int, y: Int): Point {
+        this.X = x
+        this.Y = y
+        return this
+    }
+
+    public override fun ToString(): String {
+        return "Point"
+    }
+
+    public override fun IsLess(other: Object): Bool {
+        return true
+    }
+
+    public override fun Equals(other: Object): Bool {
+        return true
+    }
+
+    public override fun GetHash(): Int {
+        return Int(42)
+    }
+}
+)");
+  EXPECT_NE(bc.find("IStringConvertible"), std::string::npos);
+  EXPECT_NE(bc.find("IComparable"), std::string::npos);
+  EXPECT_NE(bc.find("IHashable"), std::string::npos);
+}
