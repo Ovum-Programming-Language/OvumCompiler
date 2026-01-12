@@ -12,6 +12,7 @@ namespace ovum::compiler::lexer {
 namespace {
 inline constexpr int kHexAlphaOffset = 10;
 inline constexpr int kHexNibbleBits = 4;
+inline constexpr int kMaxByte = 255;
 } // namespace
 
 inline bool IsDec(char c) noexcept {
@@ -243,8 +244,8 @@ std::expected<OptToken, LexerError> NumberHandler::Scan(SourceCodeWrapper& wrapp
     if (value < 0) {
       value = 0;
     }
-    if (value > 255) {
-      value = 255;
+    if (value > kMaxByte) {
+      value = kMaxByte;
     }
     // Consume the 'b' suffix
     raw.push_back(wrapper.Advance());

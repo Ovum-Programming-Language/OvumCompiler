@@ -23,6 +23,7 @@ constexpr int kBpAssign = 5;
 constexpr int kBpPost = 100;
 constexpr int kDecimalBase = 10;
 constexpr int kMaxByteValue = 255;
+constexpr int kHexBase = 16;
 
 bool Lex(const Token& t, std::string_view s) {
   return t.GetLexeme() == s;
@@ -50,7 +51,7 @@ bool ParseIntegerLiteral(const std::string& text, long long* out) {
   if (text.size() >= 2 && text[0] == '0' && (text[1] == 'x' || text[1] == 'X')) {
     // Hex literal: 0x1A
     try {
-      *out = std::stoll(text, nullptr, 16);
+      *out = std::stoll(text, nullptr, kHexBase);
       return true;
     } catch (...) {
       return false;

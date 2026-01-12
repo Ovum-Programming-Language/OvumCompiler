@@ -56,7 +56,7 @@ void TypeChecker::Visit(Module& node) {
       FunctionSignature sig;
       sig.name = f->Name();
       for (const auto& param : f->Params()) {
-        sig.param_types.push_back(param.GetType());
+        sig.param_types.emplace_back(param.GetType());
       }
       if (f->ReturnType() != nullptr) {
         sig.return_type = std::make_unique<TypeReference>(*f->ReturnType());
@@ -222,7 +222,7 @@ void TypeChecker::Visit(MethodDecl& node) {
 void TypeChecker::Visit(VarDeclStmt& node) {
   if (node.MutableInit() != nullptr) {
     TypeReference init_type = InferExpressionType(node.MutableInit());
-    TypeReference declared_type = node.Type();
+    TypeReference declared_type = node.MutableType();
 
     if (!TypesCompatible(declared_type, init_type)) {
       std::ostringstream oss;
@@ -240,7 +240,7 @@ void TypeChecker::Visit(VarDeclStmt& node) {
 void TypeChecker::Visit(GlobalVarDecl& node) {
   if (node.MutableInit() != nullptr) {
     TypeReference init_type = InferExpressionType(node.MutableInit());
-    TypeReference declared_type = node.Type();
+    TypeReference declared_type = node.MutableType();
 
     if (!TypesCompatible(declared_type, init_type)) {
       std::ostringstream oss;
@@ -676,7 +676,7 @@ TypeReference* TypeChecker::ResolveTypeAlias(const TypeReference& type) {
 
 TypeReference TypeChecker::InferExpressionType(Expr* expr) {
   if (expr == nullptr) {
-    return TypeReference();
+    return {};
   }
 
   if (dynamic_cast<IntLit*>(expr) != nullptr) {
@@ -707,7 +707,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
     if (!current_class_name_.empty()) {
       return TypeReference(current_class_name_);
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* ident = dynamic_cast<IdentRef*>(expr)) {
@@ -717,7 +717,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
     if (auto global_it = global_variables_.find(ident->Name()); global_it != global_variables_.end()) {
       return global_it->second;
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* call = dynamic_cast<Call*>(expr)) {
@@ -780,7 +780,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
         }
       }
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
@@ -800,7 +800,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
       // FieldAccess on interface methods doesn't return a field type
       // It's used in method calls, which are handled separately
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* index_access = dynamic_cast<IndexAccess*>(expr)) {
@@ -830,7 +830,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
     if (type_name == "ObjectArray") {
       return TypeReference("Object");
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* safe_call = dynamic_cast<SafeCall*>(expr)) {
@@ -884,7 +884,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
         }
       }
     }
-    return TypeReference();
+    return {};
   }
 
   if (auto* binary = dynamic_cast<Binary*>(expr)) {
@@ -943,7 +943,7 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
     return TypeReference("bool");
   }
 
-  return TypeReference();
+  return {};
 }
 
 bool TypeChecker::TypesCompatible(const TypeReference& expected, const TypeReference& actual) {
