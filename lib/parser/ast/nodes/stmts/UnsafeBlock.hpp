@@ -1,0 +1,26 @@
+#ifndef PARSER_UNSAFEBLOCK_HPP_
+#define PARSER_UNSAFEBLOCK_HPP_
+
+#include <memory>
+
+#include "Block.hpp"
+#include "lib/parser/ast/nodes/base/Stmt.hpp"
+
+namespace ovum::compiler::parser {
+
+class UnsafeBlock : public Stmt {
+public:
+  void Accept(AstVisitor& visitor) override;
+
+  [[nodiscard]] const Block* Body() const noexcept;
+  Block* MutableBody() noexcept;
+  void SetBody(std::unique_ptr<Block> body_block);
+  std::unique_ptr<Block> ReleaseBody();
+
+private:
+  std::unique_ptr<Block> body_;
+};
+
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_UNSAFEBLOCK_HPP_

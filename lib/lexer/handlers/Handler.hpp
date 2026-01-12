@@ -11,7 +11,7 @@
 
 namespace ovum::compiler::lexer {
 
-using TokenPtr = ovum::TokenPtr;
+using TokenPtr = TokenPtr;
 using OptToken = std::optional<TokenPtr>;
 
 class Handler { // NOLINT(cppcoreguidelines-special-member-functions)

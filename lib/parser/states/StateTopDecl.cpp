@@ -1,0 +1,204 @@
+#include "StateTopDecl.hpp"
+
+#include <memory>
+#include <string>
+#include <string_view>
+
+#include "ast/IAstFactory.hpp"
+#include "lib/parser/ast/nodes/decls/GlobalVarDecl.hpp"
+#include "lib/parser/ast/nodes/decls/Module.hpp"
+#include "lib/parser/context/ContextParser.hpp"
+#include "lib/parser/diagnostics/IDiagnosticSink.hpp"
+#include "lib/parser/states/base/StateRegistry.hpp"
+#include "lib/parser/tokens/token_streams/ITokenStream.hpp"
+#include "lib/parser/tokens/token_traits/MatchIdentifier.hpp"
+#include "pratt/IExpressionParser.hpp"
+#include "type_parser/ITypeParser.hpp"
+
+namespace ovum::compiler::parser {
+
+namespace {
+
+void SkipTrivia(ITokenStream& ts, const bool skip_newlines = true) {
+  while (!ts.IsEof()) {
+    const Token& t = ts.Peek();
+    const std::string type = t.GetStringType();
+    if (type == "COMMENT") {
+      ts.Consume();
+      continue;
+    }
+    if (skip_newlines && type == "NEWLINE") {
+      ts.Consume();
+      continue;
+    }
+    break;
+  }
+}
+
+SourceSpan SpanFrom(const Token& token) {
+  return StateBase::SpanFrom(token);
+}
+
+bool IsIdentifier(const Token& token) {
+  const MatchIdentifier matcher;
+  return matcher.TryMatch(token);
+}
+
+void ReportUnexpected(IDiagnosticSink* diags, std::string_view code, std::string_view message, const Token* tok) {
+  if (diags == nullptr) {
+    return;
+  }
+  std::optional<SourceSpan> span;
+  if (tok != nullptr) {
+    span = SpanFrom(*tok);
+  }
+  diags->Error(code, message, span);
+}
+
+std::string ReadIdentifier(const ContextParser& ctx, ITokenStream& ts) {
+  SkipTrivia(ts);
+  if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
+    const Token* tok = ts.TryPeek();
+    ReportUnexpected(ctx.Diags(), "P_GLOBAL_VAR_NAME", "expected variable name", tok);
+    return "";
+  }
+  std::string name = ts.Consume()->GetLexeme();
+  return name;
+}
+
+std::unique_ptr<TypeReference> ParseType(const ContextParser& ctx, ITokenStream& ts) {
+  if (ctx.TypeParser() == nullptr) {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_TYPE_PARSER", std::string_view("type parser not available"));
+    }
+    return nullptr;
+  }
+  return ctx.TypeParser()->ParseType(ts, *ctx.Diags());
+}
+
+std::unique_ptr<Expr> ParseExpression(const ContextParser& ctx, ITokenStream& ts) {
+  if (ctx.Expr() == nullptr) {
+    if (ctx.Diags() != nullptr) {
+      ctx.Diags()->Error("P_EXPR_PARSER", std::string_view("expression parser not available"));
+    }
+    return nullptr;
+  }
+  return ctx.Expr()->Parse(ts, *ctx.Diags());
+}
+
+void ConsumeTerminators(ITokenStream& ts) {
+  SkipTrivia(ts, false);
+  while (!ts.IsEof()) {
+    const Token& t = ts.Peek();
+    if (const std::string type = t.GetStringType(); type == "NEWLINE") {
+      ts.Consume();
+      continue;
+    }
+    if (t.GetLexeme() == ";") {
+      ts.Consume();
+      continue;
+    }
+    break;
+  }
+}
+
+} // namespace
+
+std::string_view StateTopDecl::Name() const {
+  return "TopDecl";
+}
+
+IState::StepResult StateTopDecl::TryStep(ContextParser& ctx, ITokenStream& ts) const {
+  SkipTrivia(ts);
+
+  if (ts.IsEof()) {
+    return false;
+  }
+
+  auto* module = ctx.TopNodeAs<Module>();
+  if (module == nullptr) {
+    return std::unexpected(StateError(std::string_view("expected Module node on stack")));
+  }
+
+  const Token& start = ts.Peek();
+  const std::string lex = start.GetLexeme();
+  SourceSpan span = SpanFrom(start);
+
+  if (lex == "pure") {
+    ctx.PushState(StateRegistry::FuncHdr());
+    return true;
+  }
+
+  if (lex == "fun") {
+    ctx.PushState(StateRegistry::FuncHdr());
+    return true;
+  }
+
+  if (lex == "class") {
+    ctx.PushState(StateRegistry::ClassHdr());
+    return true;
+  }
+
+  if (lex == "interface") {
+    ctx.PushState(StateRegistry::InterfaceHdr());
+    return true;
+  }
+
+  if (lex == "typealias") {
+    ctx.PushState(StateRegistry::TypeAliasDecl());
+    return true;
+  }
+
+  if (lex == "var" || lex == "val") {
+    const bool is_var = lex == "var";
+    ts.Consume();
+    SkipTrivia(ts);
+
+    std::string name = ReadIdentifier(ctx, ts);
+    if (name.empty()) {
+      return std::unexpected(StateError(std::string_view("expected variable name")));
+    }
+
+    SkipTrivia(ts);
+    if (ts.IsEof() || ts.Peek().GetLexeme() != ":") {
+      ReportUnexpected(ctx.Diags(), "P_GLOBAL_VAR_COLON", "expected ':' after variable name", ts.TryPeek());
+      return std::unexpected(StateError(std::string_view("expected ':' after variable name")));
+    }
+    ts.Consume();
+
+    SkipTrivia(ts);
+    const auto type = ParseType(ctx, ts);
+    if (type == nullptr) {
+      return std::unexpected(StateError(std::string_view("failed to parse type")));
+    }
+
+    SkipTrivia(ts);
+    if (ts.IsEof() || ts.Peek().GetLexeme() != "=") {
+      ReportUnexpected(ctx.Diags(), "P_GLOBAL_VAR_INIT", "expected '=' for global variable", ts.TryPeek());
+      return std::unexpected(StateError(std::string_view("expected '=' for global variable")));
+    }
+    ts.Consume();
+
+    SkipTrivia(ts);
+    auto init = ParseExpression(ctx, ts);
+    if (init == nullptr) {
+      return std::unexpected(StateError(std::string_view("failed to parse initialization expression")));
+    }
+
+    span = Union(span, init->Span());
+    auto decl = ctx.Factory()->MakeGlobalVar(is_var, std::move(name), std::move(*type), std::move(init), span);
+    module->AddDecl(std::move(decl));
+
+    ConsumeTerminators(ts);
+    return true;
+  }
+
+  const Token* tok = ts.TryPeek();
+  ReportUnexpected(ctx.Diags(), "P_TOP_DECL", std::string_view("expected top-level declaration"), tok);
+  if (tok != nullptr) {
+    ts.Consume();
+  }
+  return true;
+}
+
+} // namespace ovum::compiler::parser

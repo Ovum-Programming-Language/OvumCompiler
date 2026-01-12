@@ -1,0 +1,35 @@
+#ifndef PARSER_INTERFACEMETHOD_HPP_
+#define PARSER_INTERFACEMETHOD_HPP_
+
+#include <memory>
+#include <vector>
+
+#include "lib/parser/ast/nodes/base/AstNode.hpp"
+#include "lib/parser/ast/nodes/base/Decl.hpp"
+#include "lib/parser/types/Param.hpp"
+#include "lib/parser/types/TypeReference.hpp"
+
+namespace ovum::compiler::parser {
+
+class InterfaceMethod : public Decl {
+public:
+  void Accept(AstVisitor& visitor) override;
+
+  [[nodiscard]] const std::string& Name() const noexcept;
+  void SetName(std::string new_name);
+
+  [[nodiscard]] const std::vector<Param>& Params() const noexcept;
+  std::vector<Param>& MutableParams() noexcept;
+
+  [[nodiscard]] const TypeReference* ReturnType() const noexcept;
+  void SetReturnType(std::unique_ptr<TypeReference> type);
+
+private:
+  std::string name_;
+  std::vector<Param> params_;
+  std::unique_ptr<TypeReference> ret_type_;
+};
+
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_INTERFACEMETHOD_HPP_

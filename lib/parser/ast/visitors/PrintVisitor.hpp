@@ -1,0 +1,80 @@
+#ifndef PARSER_PRINTVISITOR_HPP_
+#define PARSER_PRINTVISITOR_HPP_
+
+#include <ostream>
+#include <sstream>
+#include <string>
+
+#include "lib/parser/ast/AstVisitor.hpp"
+
+namespace ovum::compiler::parser {
+
+class PrintVisitor : public AstVisitor { // NOLINT(cppcoreguidelines-special-member-functions)
+public:
+  explicit PrintVisitor(std::ostream& output);
+  PrintVisitor();
+
+  ~PrintVisitor() override = default;
+
+  std::string Str() const;
+
+  void Visit(Module& node) override;
+  void Visit(FunctionDecl& node) override;
+  void Visit(ClassDecl& node) override;
+  void Visit(InterfaceMethod& node) override;
+  void Visit(InterfaceDecl& node) override;
+  void Visit(TypeAliasDecl& node) override;
+  void Visit(GlobalVarDecl& node) override;
+  void Visit(FieldDecl& node) override;
+  void Visit(StaticFieldDecl& node) override;
+  void Visit(MethodDecl& node) override;
+  void Visit(CallDecl& node) override;
+  void Visit(DestructorDecl& node) override;
+
+  void Visit(Block& node) override;
+  void Visit(VarDeclStmt& node) override;
+  void Visit(ExprStmt& node) override;
+  void Visit(ReturnStmt& node) override;
+  void Visit(BreakStmt& node) override;
+  void Visit(ContinueStmt& node) override;
+  void Visit(IfStmt& node) override;
+  void Visit(WhileStmt& node) override;
+  void Visit(ForStmt& node) override;
+  void Visit(UnsafeBlock& node) override;
+
+  void Visit(Binary& node) override;
+  void Visit(Unary& node) override;
+  void Visit(Assign& node) override;
+  void Visit(Call& node) override;
+  void Visit(FieldAccess& node) override;
+  void Visit(IndexAccess& node) override;
+  void Visit(NamespaceRef& node) override;
+  void Visit(SafeCall& node) override;
+  void Visit(Elvis& node) override;
+  void Visit(CastAs& node) override;
+  void Visit(TypeTestIs& node) override;
+  void Visit(IdentRef& node) override;
+  void Visit(IntLit& node) override;
+  void Visit(FloatLit& node) override;
+  void Visit(StringLit& node) override;
+  void Visit(CharLit& node) override;
+  void Visit(BoolLit& node) override;
+  void Visit(ByteLit& node) override;
+  void Visit(NullLit& node) override;
+  void Visit(ThisExpr& node) override;
+
+private:
+  void WriteIndent() const;
+  void WriteLine(const std::string& text);
+  void Open(const std::string& header);
+  void Close();
+
+  std::ostream* out_ = nullptr;
+  std::ostringstream buffer_;
+  int indent_ = 0;
+  bool use_buffer_ = false;
+};
+
+} // namespace ovum::compiler::parser
+
+#endif // PARSER_PRINTVISITOR_HPP_

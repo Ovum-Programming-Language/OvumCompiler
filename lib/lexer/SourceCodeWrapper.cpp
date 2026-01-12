@@ -8,10 +8,10 @@ const std::unordered_set<std::string_view> SourceCodeWrapper::kKeywords = {
     "fun",        "class",   "interface", "var",    "override", "pure",    "if",     "else",      "continue",
     "break",      "for",     "while",     "return", "unsafe",   "val",     "static", "public",    "private",
     "implements", "as",      "is",        "in",     "null",     "true",    "false",  "typealias", "destructor",
-    "call",       "#import", "#define",   "#undef", "#ifdef",   "#ifndef", "#else",  "#endif"};
+    "call",       "#import", "#define",   "#undef", "#ifdef",   "#ifndef", "#else",  "#endif",    "this"};
 
 const std::unordered_set<std::string_view> SourceCodeWrapper::kMultiOps = {
-    "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":="};
+    "*=", "+=", "-=", "/=", "==", "!=", "<=", ">=", "&&", "||", "?:", "?.", "::", ":=", "<<", ">>"};
 
 SourceCodeWrapper::SourceCodeWrapper(std::string_view src, bool keep_comments) :
     src_(src), keep_comments_(keep_comments) {

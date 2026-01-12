@@ -11,8 +11,9 @@ void LexerUnitTestSuite::TearDown() {
 std::vector<std::pair<std::string, std::string>> LexerUnitTestSuite::ExtractLexemesAndTypes(
     const std::vector<ovum::TokenPtr>& tokens) {
   std::vector<std::pair<std::string, std::string>> out;
-  if (tokens.empty())
+  if (tokens.empty()) {
     return out;
+  }
   // excluding the last token (EOF)
   for (size_t i = 0; i + 1 < tokens.size(); ++i) {
     out.emplace_back(tokens[i]->GetLexeme(), tokens[i]->GetStringType());
