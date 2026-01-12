@@ -79,7 +79,7 @@ protected:
         if (!diag.GetCode().empty()) {
           std::cout << " " << diag.GetCode();
         }
-        std::cout << ": " << diag.GetMessage();
+        std::cout << ": " << diag.GetDiagnosticsMessage();
 
         if (diag.GetWhere().has_value()) {
           std::cout << " (has location)";

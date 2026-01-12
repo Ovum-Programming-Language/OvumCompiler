@@ -71,7 +71,7 @@ const std::string& Diagnostic::GetCode() const noexcept {
 void Diagnostic::SetMessage(std::string m) {
   message_ = std::move(m);
 }
-const std::string& Diagnostic::GetMessage() const noexcept {
+const std::string& Diagnostic::GetDiagnosticsMessage() const noexcept {
   return message_;
 }
 
