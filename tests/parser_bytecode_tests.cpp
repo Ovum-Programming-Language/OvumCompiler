@@ -1970,3 +1970,159 @@ class Point implements IStringConvertible, IComparable, IHashable {
   EXPECT_NE(bc.find("IComparable"), std::string::npos);
   EXPECT_NE(bc.find("IHashable"), std::string::npos);
 }
+
+TEST_F(ParserBytecodeTest, InterfaceImplementationWithMethods) {
+  const std::string bc = GenerateBytecode(R"(
+interface IShape {
+  fun area(): float
+  fun perimeter(): float
+}
+
+class Circle implements IShape {
+  val radius: float = 1.0
+  
+  fun Circle(r: float): Circle {
+    this.radius = r
+    return this
+  }
+  
+  fun area(): float {
+    return 3.14 * this.radius * this.radius
+  }
+  
+  fun perimeter(): float {
+    return 2 * 3.14 * this.radius
+  }
+}
+
+fun test(): float {
+  val shape: IShape = Circle(5.0)
+  return shape.area()
+}
+)");
+  EXPECT_NE(bc.find("interface"), std::string::npos);
+  EXPECT_NE(bc.find("Circle"), std::string::npos);
+  EXPECT_NE(bc.find("area"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, NullableFieldAccess) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+  val x: int = 0
+}
+
+fun test(p: Point?): int? {
+  return p?.x
+}
+)");
+  EXPECT_NE(bc.find("SafeCall"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ElvisOperator) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: String?): String {
+  return x ?: "default"
+}
+)");
+  EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ElvisOperatorWithComplexExpression) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+  val x: int = 0
+}
+
+fun test(p: Point?): int {
+  return p?.x ?: 0
+}
+)");
+  EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
+  EXPECT_NE(bc.find("SafeCall"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, CastNullableType) {
+  const std::string bc = GenerateBytecode(R"(
+class Point {
+  val x: int = 0
+}
+
+fun test(obj: Object?): Point? {
+  return obj as Point?
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Nullable_Object"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, InterfaceMethodCall) {
+  const std::string bc = GenerateBytecode(R"(
+interface IDrawable {
+  fun draw(): Void
+}
+
+class Circle implements IDrawable {
+  fun draw(): Void {}
+}
+
+fun test(): Void {
+  val shape: IDrawable = Circle()
+  shape.draw()
+}
+)");
+  EXPECT_NE(bc.find("CallVirtual"), std::string::npos);
+  EXPECT_NE(bc.find("draw"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SafeCallOnNullableInterface) {
+  const std::string bc = GenerateBytecode(R"(
+interface IShape {
+  fun area(): float
+}
+
+class Circle implements IShape {
+  fun area(): float { return 3.14 }
+}
+
+fun test(shape: IShape?): float? {
+  return shape?.area()
+}
+)");
+  EXPECT_NE(bc.find("SafeCall"), std::string::npos);
+  EXPECT_NE(bc.find("area"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, ComplexNullableInterfaceChain) {
+  const std::string bc = GenerateBytecode(R"(
+interface IShape {
+  fun area(): float
+}
+
+class Circle implements IShape {
+  val radius: float = 1.0
+  fun area(): float { return 3.14 * this.radius * this.radius }
+}
+
+fun test(shape: IShape?): float {
+  return shape?.area() ?: 0.0
+}
+)");
+  EXPECT_NE(bc.find("SafeCall"), std::string::npos);
+  EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, TypeTestWithInterface) {
+  const std::string bc = GenerateBytecode(R"(
+interface IShape {
+  fun area(): float
+}
+
+class Circle implements IShape {
+  fun area(): float { return 3.14 }
+}
+
+fun test(obj: Object): bool {
+  return obj is IShape
+}
+)");
+  EXPECT_NE(bc.find("IsType"), std::string::npos);
+}
