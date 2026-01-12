@@ -12,6 +12,17 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
+
+# ArgParser
+FetchContent_Declare(
+    argparser
+    GIT_REPOSITORY https://github.com/bialger/ArgParser.git
+    GIT_TAG v1.3.5
+)
+
+FetchContent_MakeAvailable(argparser)
+
+
 # Ovum Common
 FetchContent_Declare(
     ovumcommon
