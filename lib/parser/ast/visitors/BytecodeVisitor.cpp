@@ -436,6 +436,8 @@ void BytecodeVisitor::Visit(Module& node) {
   constructor_params_.clear();
   type_aliases_.clear();
   pending_init_static_.clear();
+  pending_init_static_names_.clear();
+  pending_init_static_types_.clear();
 
   for (auto& decl : node.MutableDecls()) {
     if (auto* f = dynamic_cast<FunctionDecl*>(decl.get())) {
@@ -461,6 +463,7 @@ void BytecodeVisitor::Visit(Module& node) {
           if (sd->MutableInit() != nullptr) {
             pending_init_static_.push_back(sd->MutableInit());
             pending_init_static_names_.push_back(sd->Name());
+            pending_init_static_types_.push_back(sd->Type());
           }
         }
         if (const auto* md = dynamic_cast<MethodDecl*>(m.get())) {
@@ -505,6 +508,7 @@ void BytecodeVisitor::Visit(Module& node) {
       if (gv->MutableInit() != nullptr) {
         pending_init_static_.push_back(gv->MutableInit());
         pending_init_static_names_.push_back(gv->Name());
+        pending_init_static_types_.push_back(gv->Type());
       }
     }
 
@@ -519,6 +523,16 @@ void BytecodeVisitor::Visit(Module& node) {
   if (!pending_init_static_.empty()) {
     for (size_t i = 0; i < pending_init_static_.size(); ++i) {
       pending_init_static_[i]->Accept(*this);
+
+      // Add CallConstructor if type is a wrapper type (Float, Int, etc.)
+      if (i < pending_init_static_types_.size()) {
+        std::string type_name = TypeToMangledName(pending_init_static_types_[i]);
+        if (IsPrimitiveWrapper(type_name)) {
+          std::string primitive_type = GetPrimitiveTypeForWrapper(type_name);
+          EmitWrapConstructorCall(type_name, primitive_type);
+        }
+      }
+
       EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(pending_init_static_names_[i])));
     }
   }
@@ -712,6 +726,8 @@ void BytecodeVisitor::Visit(TypeAliasDecl& node) {
 
 void BytecodeVisitor::Visit(GlobalVarDecl& node) {
   (void) GetStaticIndex(node.Name());
+  std::string type_name = TypeToMangledName(node.Type());
+  variable_types_[node.Name()] = type_name;
 }
 
 void BytecodeVisitor::Visit(FieldDecl&) {
@@ -1332,19 +1348,26 @@ void BytecodeVisitor::Visit(Assign& node) {
   }
 
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
-    node.MutableValue().Accept(*this);
+    // Check if this is a global variable before generating code
+    bool is_global = static_variables_.contains(ident->Name());
 
     std::string expected_type_name;
     if (auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
       expected_type_name = type_it->second;
     }
 
+    node.MutableValue().Accept(*this);
+
     if (!expected_type_name.empty()) {
       std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
       EmitTypeConversionIfNeeded(expected_type_name, value_type_name);
     }
 
-    EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
+    if (is_global) {
+      EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(ident->Name())));
+    } else {
+      EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
+    }
   } else if (auto* index_access = dynamic_cast<IndexAccess*>(&node.MutableTarget())) {
     node.MutableValue().Accept(*this);
 
@@ -1516,6 +1539,44 @@ void BytecodeVisitor::Visit(Call& node) {
       }
       EmitCommandWithStringWithoutBraces("CallConstructor", ctor_it->second);
       return;
+    }
+
+    // Handle ToString for primitive types
+    if (name == "ToString" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For wrapper types, use their ToString method from kBuiltinMethods
+      if (kBuiltinTypeNames.contains(arg_type)) {
+        if (auto methods_it = kBuiltinMethods.find(arg_type); methods_it != kBuiltinMethods.end()) {
+          if (auto tostring_it = methods_it->second.find("ToString"); tostring_it != methods_it->second.end()) {
+            EmitCommandWithStringWithoutBraces("Call", tostring_it->second);
+            return;
+          }
+        }
+      }
+
+      // For primitive types, use special instructions
+      if (arg_type == "int") {
+        EmitCommand("IntToString");
+        return;
+      }
+      if (arg_type == "float") {
+        EmitCommand("FloatToString");
+        return;
+      }
+      if (arg_type == "byte") {
+        EmitCommand("ByteToString");
+        return;
+      }
+      if (arg_type == "char") {
+        EmitCommand("CharToString");
+        return;
+      }
+      if (arg_type == "bool") {
+        EmitCommand("BoolToString");
+        return;
+      }
     }
 
     if (auto it = function_name_map_.find(name); it != function_name_map_.end()) {
@@ -2229,9 +2290,22 @@ size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
 }
 
 void BytecodeVisitor::ResetLocalVariables() {
+  // Save global variable types before clearing
+  std::unordered_map<std::string, std::string> global_types;
+  for (const auto& [name, type] : variable_types_) {
+    if (static_variables_.contains(name)) {
+      global_types[name] = type;
+    }
+  }
+
   local_variables_.clear();
   variable_types_.clear();
   next_local_index_ = 0;
+
+  // Restore global variable types
+  for (const auto& [name, type] : global_types) {
+    variable_types_[name] = type;
+  }
 }
 
 BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {

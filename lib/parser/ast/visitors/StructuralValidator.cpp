@@ -5,6 +5,7 @@
 #include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/DestructorDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
+#include "lib/parser/ast/nodes/class_members/StaticFieldDecl.hpp"
 
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
 #include "lib/parser/ast/nodes/decls/FunctionDecl.hpp"
@@ -112,6 +113,15 @@ void StructuralValidator::Visit(SafeCall& node) {
   }
 
   (void) node.MutableObject();
+  WalkVisitor::Visit(node);
+}
+
+void StructuralValidator::Visit(StaticFieldDecl& node) {
+  // Static constants (val) cannot be initialized
+  if (!node.IsVar() && node.MutableInit() != nullptr) {
+    sink_.Error("E1401", "static constant cannot be initialized");
+  }
+
   WalkVisitor::Visit(node);
 }
 
