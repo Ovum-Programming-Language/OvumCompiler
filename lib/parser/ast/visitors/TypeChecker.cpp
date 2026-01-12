@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "lib/parser/ast/nodes/class_members/CallDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/FieldDecl.hpp"
 #include "lib/parser/ast/nodes/class_members/MethodDecl.hpp"
 #include "lib/parser/ast/nodes/decls/ClassDecl.hpp"
@@ -83,7 +84,19 @@ void TypeChecker::Visit(Module& node) {
           fields.emplace_back(fd->Name(), fd->Type());
         }
         if (const auto* md = dynamic_cast<MethodDecl*>(m.get())) {
-          if (md->Name() != class_name) {
+          if (md->Name() == class_name) {
+            // This is a constructor (method with same name as class)
+            MethodSignature sig;
+            sig.class_name = class_name;
+            sig.method_name = class_name;
+            for (const auto& param : md->Params()) {
+              sig.param_types.push_back(param.GetType());
+            }
+            if (md->ReturnType() != nullptr) {
+              sig.return_type = std::make_unique<TypeReference>(*md->ReturnType());
+            }
+            constructors_[class_name] = std::move(sig);
+          } else {
             MethodSignature sig;
             sig.class_name = class_name;
             sig.method_name = md->Name();
@@ -95,6 +108,19 @@ void TypeChecker::Visit(Module& node) {
             }
             methods_[class_name + "::" + md->Name()] = std::move(sig);
           }
+        }
+        if (const auto* cd = dynamic_cast<CallDecl*>(m.get())) {
+          // CallDecl is always a constructor
+          MethodSignature sig;
+          sig.class_name = class_name;
+          sig.method_name = class_name;
+          for (const auto& param : cd->Params()) {
+            sig.param_types.push_back(param.GetType());
+          }
+          if (cd->ReturnType() != nullptr) {
+            sig.return_type = std::make_unique<TypeReference>(*cd->ReturnType());
+          }
+          constructors_[class_name] = std::move(sig);
         }
       }
       class_fields_[class_name] = std::move(fields);
@@ -298,8 +324,27 @@ void TypeChecker::Visit(Call& node) {
       // Note: We don't check argument types for built-in array constructors
       // as they are handled by the runtime
     } else if (class_fields_.find(func_name) != class_fields_.end()) {
-      // It's a class constructor - allow any number of arguments for now
-      // TODO: validate constructor arguments based on CallDecl or MethodDecl
+      // It's a class constructor - validate arguments if constructor is defined
+      if (auto ctor_it = constructors_.find(func_name); ctor_it != constructors_.end()) {
+        const auto& sig = ctor_it->second;
+        if (node.Args().size() != sig.param_types.size()) {
+          std::ostringstream oss;
+          oss << "wrong number of arguments: expected " << sig.param_types.size() << ", got " << node.Args().size();
+          sink_.Error("E3006", oss.str(), node.Span());
+        } else {
+          for (size_t i = 0; i < node.Args().size(); ++i) {
+            TypeReference arg_type = InferExpressionType(node.Args()[i].get());
+            if (!TypesCompatible(sig.param_types[i], arg_type)) {
+              std::ostringstream oss;
+              oss << "argument " << (i + 1) << " type mismatch: expected '" << sig.param_types[i].ToStringHuman()
+                  << "', got '" << arg_type.ToStringHuman() << "'";
+              sink_.Error("E3007", oss.str(), node.Span());
+            }
+          }
+        }
+      }
+      // If no constructor found, allow any number of arguments for now
+      // (language may support default/implicit constructors)
     } else if (auto func_it = functions_.find(func_name); func_it != functions_.end()) {
       const auto& sig = func_it->second;
       if (node.Args().size() != sig.param_types.size()) {

@@ -1578,7 +1578,7 @@ TEST_F(VisitorTest, TypeChecker_Error_ComplexTypeMismatch) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E3012") == 0) {
+      if (diag.GetCode().starts_with("E3012")) {
         found_error = true;
         break;
       }
@@ -1625,7 +1625,7 @@ TEST_F(VisitorTest, TypeChecker_Error_ThisInNonMethodContext) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E300") || diag.GetCode().starts_with("E3015") == 0) {
+      if (diag.GetCode().starts_with("E300") || diag.GetCode().starts_with("E3015")) {
         found_error = true;
         break;
       }
@@ -1697,7 +1697,7 @@ TEST_F(VisitorTest, TypeChecker_Error_ComplexArrayIndexType) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E3010") == 0) {
+      if (diag.GetCode().starts_with("E3010")) {
         found_error = true;
         break;
       }
@@ -2641,7 +2641,7 @@ TEST_F(VisitorTest, TypeChecker_Error_InterfaceMethodNotFound) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E3014") == 0) {
+      if (diag.GetCode().starts_with("E3014")) {
         found_error = true;
         break;
       }
@@ -2771,7 +2771,7 @@ TEST_F(VisitorTest, TypeChecker_Error_SafeCallUnknownMethod) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E3014") == 0) {
+      if (diag.GetCode().starts_with("E3014")) {
         found_error = true;
         break;
       }
