@@ -1,6 +1,6 @@
 name: "CI tests"
 
-on: [ push, workflow_dispatch ]
+on: [push, workflow_dispatch]
 
 jobs:
   build-matrix:
@@ -11,22 +11,31 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows Latest MSVC", artifact: "Windows-MSVC.tar.xz",
-            os: windows-latest,
-            build_type: "Release", cc: "cl", cxx: "cl",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
+              name: "Windows Latest MSVC",
+              artifact: "Windows-MSVC.tar.xz",
+              os: windows-latest,
+              build_type: "Release",
+              cc: "cl",
+              cxx: "cl",
+              environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+            }
           - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
-            os: ubuntu-latest,
-            build_type: "Release", cc: "gcc", cxx: "g++"
-          }
+              name: "Ubuntu Latest GCC",
+              artifact: "Linux.tar.xz",
+              os: ubuntu-latest,
+              build_type: "Release",
+              cc: "gcc",
+              cxx: "g++",
+            }
           - {
-            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
-            os: macos-latest,
-            build_type: "Release", cc: "clang", cxx: "clang++"
-          }
-    
+              name: "macOS Latest Clang",
+              artifact: "macOS.tar.xz",
+              os: macos-latest,
+              build_type: "Release",
+              cc: "clang",
+              cxx: "clang++",
+            }
+
     steps:
       - uses: actions/checkout@v4
 
@@ -196,7 +205,7 @@ jobs:
           echo "Running clang-tidy-19 on ${#files[@]} files..."
           # Use clang-tidy-19 for better C++23 support and --extra-arg-before to ensure C++23 standard is set before other flags
           clang-tidy-19 "${files[@]}" -p cmake-build-tidy --format-style=file > tidy_output.txt 2>&1 || true
-          
+
           # Ensure file exists and is readable
           if [ ! -f tidy_output.txt ]; then
             echo "" > tidy_output.txt
@@ -213,11 +222,11 @@ jobs:
             errors=$(grep -c "error:" tidy_output.txt 2>/dev/null || echo "0")
             warnings=$(grep -c "warning:" tidy_output.txt 2>/dev/null || echo "0")
           fi
-          
+
           # Ensure we have clean integer values
           errors=$(echo "$errors" | tr -d '\n' | head -c 10)
           warnings=$(echo "$warnings" | tr -d '\n' | head -c 10)
-          
+
           # Default to 0 if empty or non-numeric
           errors=${errors:-0}
           warnings=${warnings:-0}
@@ -226,6 +235,12 @@ jobs:
           echo "warnings=$warnings" >> $GITHUB_OUTPUT
 
           echo "Found $errors errors and $warnings warnings"
+
+          if [ "$errors" -eq 0 ] && [ "$warnings" -le 3 ]; then
+            echo "clang-tidy found $warnings warnings"
+            cat tidy_output.txt
+            exit 0
+          fi
 
           # Fail if more than 3 warnings or any errors
           if [ "$errors" -gt 0 ] || [ "$warnings" -gt 3 ]; then
@@ -240,7 +255,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            
+
             try {
               let comment = '## 🔍 Code Quality Issues Found\n\n';
               
