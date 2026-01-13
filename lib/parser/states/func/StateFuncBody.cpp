@@ -9,11 +9,13 @@
 #include "lib/parser/ast/nodes/decls/FunctionDecl.hpp"
 #include "lib/parser/ast/nodes/decls/Module.hpp"
 #include "lib/parser/ast/nodes/stmts/Block.hpp"
+#include "lib/parser/ast/nodes/stmts/ReturnStmt.hpp"
 #include "lib/parser/context/ContextParser.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
 #include "lib/parser/states/base/StateRegistry.hpp"
 #include "lib/parser/tokens/token_streams/ITokenStream.hpp"
 #include "lib/parser/tokens/token_traits/MatchLexeme.hpp"
+#include "pratt/IExpressionParser.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -72,6 +74,63 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
       if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
         class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
       }
+    } else {
+      if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
+        class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
+      }
+    }
+    return false;
+  }
+
+  if (tok.GetLexeme() == "=") {
+    // Expression body (e.g., call(...): Type = fun(...) { ... })
+    // Parse the expression and create a block that returns it
+    ts.Consume();
+    SkipTrivia(ts);
+
+    if (ctx.Expr() == nullptr) {
+      if (ctx.Diags() != nullptr) {
+        ctx.Diags()->Error("P_EXPR_PARSER", std::string_view("expression parser not available"));
+      }
+      return std::unexpected(StateError(std::string_view("expression parser not available")));
+    }
+
+    auto expr = ctx.Expr()->Parse(ts, *ctx.Diags());
+    if (expr == nullptr) {
+      if (ctx.Diags() != nullptr) {
+        ctx.Diags()->Error("P_EXPR_PARSE", std::string_view("failed to parse expression body"));
+      }
+      return std::unexpected(StateError(std::string_view("failed to parse expression body")));
+    }
+
+    // Save span before moving expr
+    SourceSpan expr_span = expr->Span();
+
+    // Create a block with a return statement
+    auto return_stmt = ctx.Factory()->MakeReturnStmt(std::move(expr), expr_span);
+    std::vector<std::unique_ptr<Stmt>> stmts;
+    stmts.push_back(std::move(return_stmt));
+    auto block = ctx.Factory()->MakeBlock(std::move(stmts), SpanFrom(tok));
+
+    // Set the body on the declaration
+    if (func != nullptr) {
+      func->SetBody(std::move(block));
+      auto decl_node = ctx.PopNode();
+      if (auto* module = ctx.TopNodeAs<Module>(); module != nullptr) {
+        module->AddDecl(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
+      }
+    } else if (method != nullptr) {
+      method->SetBody(std::move(block));
+      auto decl_node = ctx.PopNode();
+      if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
+        class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
+      }
+    } else {
+      call->SetBody(std::move(block));
+      auto decl_node = ctx.PopNode();
+      if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
+        class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(decl_node.release())));
+      }
     }
     return false;
   }
@@ -87,9 +146,9 @@ IState::StepResult StateFuncBody::TryStep(ContextParser& ctx, ITokenStream& ts) 
   }
 
   if (ctx.Diags() != nullptr) {
-    ctx.Diags()->Error("P_FUN_BODY", std::string_view("expected '{' or ';' for function body"));
+    ctx.Diags()->Error("P_FUN_BODY", std::string_view("expected '{', ';', or '=' for function body"));
   }
-  return std::unexpected(StateError(std::string_view("expected '{' or ';' for function body")));
+  return std::unexpected(StateError(std::string_view("expected '{', ';', or '=' for function body")));
 }
 
 } // namespace ovum::compiler::parser

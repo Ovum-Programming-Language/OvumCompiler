@@ -80,7 +80,8 @@ IState::StepResult StateReturnTail::TryStep(ContextParser& ctx, ITokenStream& ts
   SkipTrivia(ts);
 
   // Check if there's a return value
-  if (ts.IsEof() || ts.Peek().GetLexeme() == ";" || ts.Peek().GetStringType() == "NEWLINE") {
+  if (ts.IsEof() || ts.Peek().GetLexeme() == ";" || ts.Peek().GetLexeme() == "}" ||
+      ts.Peek().GetStringType() == "NEWLINE") {
     // Return without value
     auto stmt = ctx.Factory()->MakeReturnStmt(nullptr, span);
     block->Append(std::move(stmt));

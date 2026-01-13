@@ -691,11 +691,40 @@ void BytecodeVisitor::Visit(CallDecl& node) {
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
 
-    EmitCommandWithInt("LoadLocal", 0);
-    EmitCommand("Return");
+    // Check if body ends with return statement
+    bool has_return = false;
+    if (const auto& stmts = node.MutableBody()->GetStatements(); !stmts.empty()) {
+      if (dynamic_cast<ReturnStmt*>(stmts.back().get()) != nullptr) {
+        has_return = true;
+      }
+    }
+
+    // Only add implicit return if body doesn't already have one
+    if (!has_return) {
+      if (node.ReturnType() != nullptr) {
+        std::string return_type_name = TypeToMangledName(*node.ReturnType());
+        if (return_type_name == "void") {
+          EmitCommand("Return");
+        } else {
+          EmitCommandWithInt("LoadLocal", 0);
+          EmitCommand("Return");
+        }
+      } else {
+        EmitCommand("Return");
+      }
+    }
   } else {
-    EmitCommandWithInt("LoadLocal", 0);
-    EmitCommand("Return");
+    if (node.ReturnType() != nullptr) {
+      std::string return_type_name = TypeToMangledName(*node.ReturnType());
+      if (return_type_name == "void") {
+        EmitCommand("Return");
+      } else {
+        EmitCommandWithInt("LoadLocal", 0);
+        EmitCommand("Return");
+      }
+    } else {
+      EmitCommand("Return");
+    }
   }
   EmitBlockEnd();
   output_ << "\n";
@@ -1059,7 +1088,6 @@ void BytecodeVisitor::Visit(ForStmt& node) {
       if (const auto local_it = local_variables_.find(ident->Name());
           var_it != variable_types_.end() && local_it != local_variables_.end()) {
         collection_index = local_it->second;
-        collection_var_name = ident->Name();
         collection_type = var_it->second;
       } else {
         node.MutableIteratorExpr()->Accept(*this);
@@ -1407,12 +1435,61 @@ void BytecodeVisitor::Visit(Call& node) {
       return;
     }
 
+    // Handle sys::ToString for primitive types
+    if (ns_name == "ToString" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // Handle wrapper types by unwrapping first
+      if (IsPrimitiveWrapper(arg_type)) {
+        std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        EmitCommand("Unwrap");
+        arg_type = primitive_type;
+      }
+
+      // For primitive types, use special instructions
+      if (arg_type == "int") {
+        EmitCommand("IntToString");
+        return;
+      }
+      if (arg_type == "float") {
+        EmitCommand("FloatToString");
+        return;
+      }
+      if (arg_type == "byte") {
+        EmitCommand("ByteToString");
+        return;
+      }
+      if (arg_type == "char") {
+        EmitCommand("CharToString");
+        return;
+      }
+      if (arg_type == "bool") {
+        EmitCommand("BoolToString");
+        return;
+      }
+    }
+
+    // Handle sys::Sqrt for float type
+    if (ns_name == "Sqrt" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // Sqrt only works with float type
+      if (arg_type == "float") {
+        EmitCommand("FloatSqrt");
+        return;
+      }
+    }
+
     std::string full_name = "sys::" + ns_name;
     if (auto it = function_name_map_.find(full_name); it != function_name_map_.end()) {
+      EmitArgumentsInReverse(args);
       EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
 
+    EmitArgumentsInReverse(args);
     EmitCommandWithStringWithoutBraces("Call", full_name);
     return;
   }
@@ -2449,6 +2526,29 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     return DetermineOperandType(&unary->MutableOperand());
   }
 
+  if (auto* call = dynamic_cast<Call*>(expr)) {
+    // Use GetTypeNameForExpr to determine return type
+    std::string return_type = GetTypeNameForExpr(call);
+    if (return_type == "int") {
+      return OperandType::kInt;
+    }
+    if (return_type == "float") {
+      return OperandType::kFloat;
+    }
+    if (return_type == "byte") {
+      return OperandType::kByte;
+    }
+    if (return_type == "bool") {
+      return OperandType::kBool;
+    }
+    if (return_type == "char") {
+      return OperandType::kChar;
+    }
+    if (return_type == "String") {
+      return OperandType::kString;
+    }
+  }
+
   return OperandType::kUnknown;
 }
 
@@ -2526,6 +2626,55 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
   }
   if (dynamic_cast<StringLit*>(expr) != nullptr) {
     return "String";
+  }
+
+  if (auto* call = dynamic_cast<Call*>(expr)) {
+    if (const auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
+      const std::string func_name = ident->Name();
+      if (const auto it = function_return_types_.find(func_name); it != function_return_types_.end()) {
+        return it->second;
+      }
+    }
+
+    // Handle sys::Sqrt and other sys namespace functions
+    if (auto* ns_ref = dynamic_cast<NamespaceRef*>(&call->MutableCallee())) {
+      std::string ns_name = ns_ref->Name();
+      // Check if namespace is "sys" by examining NamespaceExpr
+      if (const auto* ns_ident = dynamic_cast<IdentRef*>(&ns_ref->MutableNamespaceExpr())) {
+        if (ns_ident->Name() == "sys") {
+          // Check for built-in return types
+          if (const auto it = kBuiltinReturnPrimitives.find(ns_name); it != kBuiltinReturnPrimitives.end()) {
+            return it->second;
+          }
+          if (ns_name == "Sqrt" && call->Args().size() == 1) {
+            return "float";
+          }
+          if (ns_name == "ToString" && call->Args().size() == 1) {
+            // ToString returns String, but we need to check the argument type
+            // to determine which *ToString instruction to use
+            std::string arg_type = GetTypeNameForExpr(call->Args()[0].get());
+            if (arg_type == "int" || arg_type == "Int") {
+              return "String";
+            }
+            if (arg_type == "float" || arg_type == "Float") {
+              return "String";
+            }
+            // For other types, ToString still returns String
+            return "String";
+          }
+        }
+      }
+    }
+  }
+
+  if (const auto* cast = dynamic_cast<CastAs*>(expr)) {
+    return TypeToMangledName(cast->Type());
+  }
+
+  // For Call expressions, if we couldn't determine the type, return "unknown"
+  // to avoid infinite recursion (GetOperandTypeName -> DetermineOperandType -> GetTypeNameForExpr)
+  if (dynamic_cast<Call*>(expr) != nullptr) {
+    return "unknown";
   }
 
   return GetOperandTypeName(expr);

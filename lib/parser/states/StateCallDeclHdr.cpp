@@ -77,7 +77,7 @@ IState::StepResult StateCallDeclHdr::TryStep(ContextParser& ctx, ITokenStream& t
   SourceSpan span = SpanFrom(start);
   auto call = ctx.Factory()->MakeCallDecl(is_public, {}, nullptr, nullptr, span);
   ctx.PushNode(std::move(call));
-
+  ctx.PopState();
   ctx.PushState(StateRegistry::FuncParams());
   return true;
 }

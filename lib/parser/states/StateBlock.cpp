@@ -168,8 +168,7 @@ IState::StepResult StateBlock::TryStep(ContextParser& ctx, ITokenStream& ts) con
 
           // Pop call and add to class
           auto call_node = ctx.PopNode();
-          auto* class_decl = ctx.TopNodeAs<ClassDecl>();
-          if (class_decl != nullptr) {
+          if (auto* class_decl = ctx.TopNodeAs<ClassDecl>(); class_decl != nullptr) {
             class_decl->AddMember(std::unique_ptr<Decl>(dynamic_cast<Decl*>(call_node.release())));
           }
         }

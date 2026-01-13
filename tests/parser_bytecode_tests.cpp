@@ -1575,10 +1575,10 @@ fun test(): float {
 TEST_F(ParserBytecodeTest, SystemSqrt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: float): float {
-    return sys::Sqrt(x)
+    return sys::Sqrt(x + 1.0)
 }
 )");
-  EXPECT_NE(bc.find("sys::Sqrt"), std::string::npos);
+  EXPECT_NE(bc.find("FloatSqrt"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, CallIndirect) {
@@ -2455,4 +2455,162 @@ fun test(obj: Object): bool {
 }
 )");
   EXPECT_NE(bc.find("IsType"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, EmptyReturnInVoidFunction) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    return
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, EmptyReturnInIfBlock) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(start: int, end: int): Void {
+    if (start >= end) {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+  EXPECT_NE(bc.find("IntGreaterEqual"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, EmptyReturnWithMultiplePaths) {
+  const std::string bc = GenerateBytecode(R"(
+fun process(x: int): Void {
+    if (x < 0) {
+        return
+    }
+    if (x == 0) {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, EmptyReturnInMethod) {
+  const std::string bc = GenerateBytecode(R"(
+class Logger {
+    fun log(msg: String): Void {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, EmptyReturnInIfElse) {
+  const std::string bc = GenerateBytecode(R"(
+fun check(condition: bool): Void {
+    if (condition) {
+        return
+    } else {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringInt) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringFloat) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: float): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+)");
+  EXPECT_NE(bc.find("FloatToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringWithFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+pure fun Factorial(n: int): int {
+    if (n <= 1) {
+        return 1
+    }
+    return n * Factorial(n - 1)
+}
+
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(Factorial(n)))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos); // Should call Factorial
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringByte) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(b: byte): Void {
+    sys::PrintLine(sys::ToString(b))
+}
+)");
+  EXPECT_NE(bc.find("ByteToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringChar) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(c: char): Void {
+    sys::PrintLine(sys::ToString(c))
+}
+)");
+  EXPECT_NE(bc.find("CharToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringBool) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(b: bool): Void {
+    sys::PrintLine(sys::ToString(b))
+}
+)");
+  EXPECT_NE(bc.find("BoolToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysSqrtWithCasts) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): int {
+    var n_sqrt = sys::Sqrt(n as float) as int
+    return n_sqrt
+}
+)");
+  EXPECT_NE(bc.find("IntToFloat"), std::string::npos);
+  EXPECT_NE(bc.find("FloatSqrt"), std::string::npos);
+  EXPECT_NE(bc.find("FloatToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::Sqrt"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, SysToStringGetMemoryUsage) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    sys::PrintLine(sys::GetMemoryUsage().ToString())
+}
+)");
+  EXPECT_NE(bc.find("GetMemoryUsage"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("Call _Int_ToString_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
 }
