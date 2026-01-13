@@ -531,6 +531,7 @@ void BytecodeVisitor::Visit(Module& node) {
           std::string primitive_type = GetPrimitiveTypeForWrapper(type_name);
           EmitWrapConstructorCall(type_name, primitive_type);
         }
+        variable_types_[pending_init_static_names_[i]] = type_name;
       }
 
       EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(pending_init_static_names_[i])));
@@ -1107,6 +1108,7 @@ void BytecodeVisitor::Visit(ForStmt& node) {
 
   EmitCommandWithInt("PushInt", 0);
   size_t counter_index = GetLocalIndex(node.IteratorName() + "_i");
+  variable_types_[node.IteratorName() + "_i"] = "int";
   EmitCommandWithInt("SetLocal", static_cast<int64_t>(counter_index));
 
   EmitIndent();
@@ -1137,6 +1139,7 @@ void BytecodeVisitor::Visit(ForStmt& node) {
   EmitCommandWithStringWithoutBraces("Call", method_name);
 
   size_t item_index = GetLocalIndex(node.IteratorName());
+  variable_types_[node.IteratorName()] = GetElementTypeForArray(collection_type);
   EmitCommandWithInt("SetLocal", static_cast<int64_t>(item_index));
 
   if (node.MutableBody() != nullptr) {
@@ -1152,11 +1155,9 @@ void BytecodeVisitor::Visit(ForStmt& node) {
 }
 
 void BytecodeVisitor::Visit(UnsafeBlock& node) {
-  EmitCommand("UnsafeBlockStart");
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
   }
-  EmitCommand("UnsafeBlockEnd");
 }
 
 void BytecodeVisitor::Visit(Binary& node) {
@@ -1456,16 +1457,28 @@ void BytecodeVisitor::Visit(Call& node) {
         EmitCommand("FloatToString");
         return;
       }
-      if (arg_type == "byte") {
-        EmitCommand("ByteToString");
+    }
+
+    // Handle sys::ToInt for String type
+    if (ns_name == "ToInt" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For String type, use special instruction
+      if (arg_type == "String") {
+        EmitCommand("StringToInt");
         return;
       }
-      if (arg_type == "char") {
-        EmitCommand("CharToString");
-        return;
-      }
-      if (arg_type == "bool") {
-        EmitCommand("BoolToString");
+    }
+
+    // Handle sys::ToFloat for String type
+    if (ns_name == "ToFloat" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For String type, use special instruction
+      if (arg_type == "String") {
+        EmitCommand("StringToFloat");
         return;
       }
     }
@@ -1474,6 +1487,13 @@ void BytecodeVisitor::Visit(Call& node) {
     if (ns_name == "Sqrt" && args.size() == 1) {
       args[0]->Accept(*this);
       std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // Handle wrapper types by unwrapping first
+      if (IsPrimitiveWrapper(arg_type)) {
+        std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        EmitCommand("Unwrap");
+        arg_type = primitive_type;
+      }
 
       // Sqrt only works with float type
       if (arg_type == "float") {
@@ -1672,8 +1692,6 @@ void BytecodeVisitor::Visit(Call& node) {
   }
 
   if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableCallee())) {
-    field_access->MutableObject().Accept(*this);
-
     std::string method_name = field_access->Name();
 
     std::string object_type;
@@ -1801,6 +1819,21 @@ void BytecodeVisitor::Visit(Call& node) {
             }
           }
         }
+        
+        // For builtin types, if method not found in kBuiltinMethods, generate direct Call name
+        if (method_call.empty() && kBuiltinTypeNames.contains(object_type)) {
+          // Generate method name: _TypeName_MethodName_<C> or _TypeName_MethodName_<M>
+          // Default to <C> for const methods, can be adjusted if needed
+          method_call = "_" + object_type + "_" + method_name + "_<C>";
+          // Add parameter types if there are arguments
+          if (!args.empty()) {
+            // For now, assume Object type for all parameters (this matches most cases)
+            // More sophisticated type inference could be added later
+            for (size_t i = 0; i < args.size(); ++i) {
+              method_call += "_Object";
+            }
+          }
+        }
       }
 
       if (!method_call.empty()) {
@@ -1850,6 +1883,7 @@ void BytecodeVisitor::Visit(Call& node) {
           expected_param_types.emplace_back("int");
         }
 
+        // For regular Call: emit arguments first (right to left), then object
         for (size_t i = args.size(); i > 0; --i) {
           size_t arg_idx = i - 1;
           Expr* arg = args[arg_idx].get();
@@ -1874,14 +1908,17 @@ void BytecodeVisitor::Visit(Call& node) {
             }
           }
         }
+        field_access->MutableObject().Accept(*this);
 
         EmitCommandWithStringWithoutBraces("Call", method_call);
         return;
       }
 
+      // For CallVirtual: emit arguments first (right to left), then object (leftmost)
       for (auto& arg : std::ranges::reverse_view(args)) {
         arg->Accept(*this);
       }
+      field_access->MutableObject().Accept(*this);
       std::string vtable_name = "_" + method_name + "_<C>";
       if (!args.empty()) {
         vtable_name += "_Object";
@@ -1935,6 +1972,8 @@ void BytecodeVisitor::Visit(Call& node) {
     for (auto& arg : std::ranges::reverse_view(args)) {
       arg->Accept(*this);
     }
+    
+    field_access->MutableObject().Accept(*this);
 
     if (!specific_method_name.empty()) {
       EmitCommandWithStringWithoutBraces("Call", specific_method_name);
@@ -2628,9 +2667,18 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     return "String";
   }
 
+  if (auto* index_access = dynamic_cast<IndexAccess*>(expr)) {
+    std::string array_type = GetTypeNameForExpr(&index_access->MutableObject());
+    return GetElementTypeForArray(array_type);
+  }
+
   if (auto* call = dynamic_cast<Call*>(expr)) {
     if (const auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
-      const std::string func_name = ident->Name();
+      std::string func_name = ident->Name();
+      // Handle constructor calls for builtin wrapper types
+      if (kBuiltinTypeNames.contains(func_name)) {
+        return func_name;  // Int(0) returns "Int", Float(1.0) returns "Float", etc.
+      }
       if (const auto it = function_return_types_.find(func_name); it != function_return_types_.end()) {
         return it->second;
       }
@@ -2660,6 +2708,18 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
               return "String";
             }
             // For other types, ToString still returns String
+            return "String";
+          }
+          if (ns_name == "ToInt" && call->Args().size() == 1) {
+            return "int";
+          }
+          if (ns_name == "ToFloat" && call->Args().size() == 1) {
+            return "float";
+          }
+          if (ns_name == "GetOsName" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "ReadLine" && call->Args().size() == 0) {
             return "String";
           }
         }
@@ -2910,8 +2970,8 @@ std::string BytecodeVisitor::GetElementTypeForArray(const std::string& array_typ
   if (array_type == "CharArray") {
     return "char";
   }
-  if (array_type == "StringArray" || array_type == "ObjectArray") {
-    return "Object";
+  if (array_type == "StringArray") {
+    return "String";
   }
   return "Object";
 }

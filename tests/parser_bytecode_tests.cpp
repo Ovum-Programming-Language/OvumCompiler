@@ -197,8 +197,8 @@ fun test(): Void {
     }
 }
 )");
-  EXPECT_NE(bc.find("UnsafeBlockStart"), std::string::npos);
-  EXPECT_NE(bc.find("UnsafeBlockEnd"), std::string::npos);
+  EXPECT_EQ(bc.find("UnsafeBlockStart"), std::string::npos);
+  EXPECT_EQ(bc.find("UnsafeBlockEnd"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 42"), std::string::npos);
 }
 
@@ -2557,37 +2557,44 @@ fun test(n: int): Void {
   EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SysToStringByte) {
+TEST_F(ParserBytecodeTest, SysToIntWithArrayAccess) {
   const std::string bc = GenerateBytecode(R"(
-fun test(b: byte): Void {
-    sys::PrintLine(sys::ToString(b))
+fun test(sArr: StringArray): Int {
+    return sys::ToInt(sArr[0])
 }
 )");
-  EXPECT_NE(bc.find("ByteToString"), std::string::npos);
-  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
-  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
+}
+TEST_F(ParserBytecodeTest, SysStringToInt) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s: String): int {
+    return sys::ToInt(s)
+}
+)");
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SysToStringChar) {
+TEST_F(ParserBytecodeTest, SysStringToFloat) {
   const std::string bc = GenerateBytecode(R"(
-fun test(c: char): Void {
-    sys::PrintLine(sys::ToString(c))
+fun test(s: String): float {
+    return sys::ToFloat(s)
 }
 )");
-  EXPECT_NE(bc.find("CharToString"), std::string::npos);
-  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
-  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+  EXPECT_NE(bc.find("StringToFloat"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SysToStringBool) {
+TEST_F(ParserBytecodeTest, SysToIntWithFunctionCall) {
   const std::string bc = GenerateBytecode(R"(
-fun test(b: bool): Void {
-    sys::PrintLine(sys::ToString(b))
+fun test(): int {
+    return sys::ToInt(sys::ReadLine())
 }
 )");
-  EXPECT_NE(bc.find("BoolToString"), std::string::npos);
-  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
-  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_NE(bc.find("ReadLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTest, SysSqrtWithCasts) {
@@ -2613,4 +2620,31 @@ fun test(): Void {
   EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
   EXPECT_NE(bc.find("Call _Int_ToString_<C>"), std::string::npos);
   EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, StringEqualsCorrectOrderOfArguments) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s1: String, s2: String): bool {
+    return s1.Equals(s2)
+}
+)");
+  ASSERT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  ASSERT_NE(bc.find("LoadLocal 1"), std::string::npos);
+  EXPECT_LT(bc.find("LoadLocal 1"), bc.find("LoadLocal 0"));
+  EXPECT_NE(bc.find("_String_Equals"), std::string::npos);
+  EXPECT_EQ(bc.find("CallVirtual"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTest, InterfaceVirtualMethodCallCorrectOrderOfArguments) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(lhs : IComparable, rhs : IComparable): bool {
+    return lhs.IsLess(rhs)
+}
+)");
+  ASSERT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  ASSERT_NE(bc.find("LoadLocal 1"), std::string::npos);
+  EXPECT_LT(bc.find("LoadLocal 1"), bc.find("LoadLocal 0"));
+  EXPECT_NE(bc.find("_IsLess"), std::string::npos);
+  EXPECT_NE(bc.find("CallVirtual"), std::string::npos);
+  EXPECT_EQ(bc.find("_IComparable_IsLess"), std::string::npos);
 }
