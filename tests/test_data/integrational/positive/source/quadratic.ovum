@@ -1,0 +1,11 @@
+#import "maths.ovum"
+
+fun Main(args: StringArray): int {
+    val discriminant: int = CalculateQuadratic(2, 5, 3)
+    sys::PrintLine(sys::ToString(discriminant))
+    
+    val xorResult: int = BitwiseOperations(15, 7)
+    sys::PrintLine(sys::ToString(xorResult))
+    
+    return 0
+}

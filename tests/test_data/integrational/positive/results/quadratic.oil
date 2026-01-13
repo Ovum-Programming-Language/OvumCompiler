@@ -1,0 +1,53 @@
+init-static {
+}
+
+pure(int, int, int) function:3 _Global_CalculateQuadratic_int_int_int {
+  LoadLocal 2
+  LoadLocal 0
+  PushInt 4
+  IntMultiply
+  IntMultiply
+  LoadLocal 1
+  LoadLocal 1
+  IntMultiply
+  IntSubtract
+  Return
+}
+
+pure(int, int) function:2 _Global_BitwiseOperations_int_int {
+  LoadLocal 1
+  LoadLocal 0
+  IntAnd
+  SetLocal 2
+  LoadLocal 1
+  LoadLocal 0
+  IntOr
+  SetLocal 3
+  LoadLocal 1
+  LoadLocal 0
+  IntXor
+  SetLocal 4
+  LoadLocal 4
+  Return
+}
+
+function:1 _Global_Main_StringArray {
+  PushInt 3
+  PushInt 5
+  PushInt 2
+  Call _Global_CalculateQuadratic_int_int_int
+  SetLocal 1
+  LoadLocal 1
+  IntToString
+  PrintLine
+  PushInt 7
+  PushInt 15
+  Call _Global_BitwiseOperations_int_int
+  SetLocal 2
+  LoadLocal 2
+  IntToString
+  PrintLine
+  PushInt 0
+  Return
+}
+
