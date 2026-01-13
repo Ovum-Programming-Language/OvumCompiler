@@ -72,7 +72,7 @@ void TypeChecker::Visit(Module& node) {
       std::vector<std::string> interface_names;
       for (const auto& impl : c->Implements()) {
         if (!impl.QualifiedName().empty()) {
-          interface_names.push_back(std::string(impl.SimpleName()));
+          interface_names.emplace_back(impl.SimpleName());
         }
       }
       if (!interface_names.empty()) {
@@ -256,7 +256,7 @@ void TypeChecker::Visit(GlobalVarDecl& node) {
 void TypeChecker::Visit(FieldDecl& node) {
   if (node.MutableInit() != nullptr) {
     TypeReference init_type = InferExpressionType(node.MutableInit());
-    TypeReference declared_type = node.Type();
+    const TypeReference& declared_type = node.Type();
 
     if (!TypesCompatible(declared_type, init_type)) {
       std::ostringstream oss;

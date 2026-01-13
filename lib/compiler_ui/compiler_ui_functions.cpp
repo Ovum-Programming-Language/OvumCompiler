@@ -32,9 +32,10 @@ static void PrintDiagnosticMessage(const ovum::compiler::parser::Diagnostic& dia
   }
 
   out << ": " << diag.GetDiagnosticsMessage();
+  const std::optional<ovum::compiler::parser::SourceSpan>& where_opt = diag.GetWhere();
 
-  if (diag.GetWhere().has_value()) {
-    const ovum::compiler::parser::SourceSpan& where = *diag.GetWhere();
+  if (where_opt.has_value()) {
+    const ovum::compiler::parser::SourceSpan& where = where_opt.value();
 
     if (!where.GetSourceId().Path().empty()) {
       out << " \nAt " << where.GetSourceId().Path();

@@ -1819,7 +1819,7 @@ void BytecodeVisitor::Visit(Call& node) {
             }
           }
         }
-        
+
         // For builtin types, if method not found in kBuiltinMethods, generate direct Call name
         if (method_call.empty() && kBuiltinTypeNames.contains(object_type)) {
           // Generate method name: _TypeName_MethodName_<C> or _TypeName_MethodName_<M>
@@ -1972,7 +1972,7 @@ void BytecodeVisitor::Visit(Call& node) {
     for (auto& arg : std::ranges::reverse_view(args)) {
       arg->Accept(*this);
     }
-    
+
     field_access->MutableObject().Accept(*this);
 
     if (!specific_method_name.empty()) {
@@ -2677,7 +2677,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
       std::string func_name = ident->Name();
       // Handle constructor calls for builtin wrapper types
       if (kBuiltinTypeNames.contains(func_name)) {
-        return func_name;  // Int(0) returns "Int", Float(1.0) returns "Float", etc.
+        return func_name; // Int(0) returns "Int", Float(1.0) returns "Float", etc.
       }
       if (const auto it = function_return_types_.find(func_name); it != function_return_types_.end()) {
         return it->second;
