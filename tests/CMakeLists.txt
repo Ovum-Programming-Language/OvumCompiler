@@ -7,6 +7,8 @@ add_executable(
         test_functions.cpp
         test_suites/ProjectIntegrationTestSuite.cpp
         test_suites/LexerUnitTestSuite.cpp
+        test_suites/VisitorTestSuite.cpp
+        test_suites/ParserBytecodeTestSuite.cpp
         lexer_tests.cpp
         test_suites/PreprocessorUnitTestSuite.cpp
         preprocessor_tests.cpp
