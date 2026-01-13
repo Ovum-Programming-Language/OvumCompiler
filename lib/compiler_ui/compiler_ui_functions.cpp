@@ -33,21 +33,18 @@ static void PrintDiagnosticMessage(const ovum::compiler::parser::Diagnostic& dia
 
   out << ": " << diag.GetDiagnosticsMessage();
 
-  if (!diag.GetWhere().has_value()) {
-    out << "\n";
-    return;
-  }
-
-  if (!diag.GetWhere()->GetSourceId().Path().empty()) {
-    out << " \nAt " << diag.GetWhere()->GetSourceId().Path();
-  }
-
-  if (diag.GetWhere()->GetStart() == diag.GetWhere()->GetEnd()) {
-    out << " line " << diag.GetWhere()->GetStart().GetLine() << " column " << diag.GetWhere()->GetStart().GetColumn();
-  } else {
-    out << " from line " << diag.GetWhere()->GetStart().GetLine() << " column "
-        << diag.GetWhere()->GetStart().GetColumn() << " to line " << diag.GetWhere()->GetEnd().GetLine() << " column "
-        << diag.GetWhere()->GetEnd().GetColumn();
+  if (diag.GetWhere().has_value()) {
+    if (!(*diag.GetWhere()).GetSourceId().Path().empty()) {
+      out << " \nAt " << (*diag.GetWhere()).GetSourceId().Path();
+    }
+  
+    if ((*diag.GetWhere()).GetStart() == (*diag.GetWhere()).GetEnd()) {
+      out << " line " << (*diag.GetWhere()).GetStart().GetLine() << " column " << (*diag.GetWhere()).GetStart().GetColumn();
+    } else {
+      out << " from line " << (*diag.GetWhere()).GetStart().GetLine() << " column "
+          << (*diag.GetWhere()).GetStart().GetColumn() << " to line " << (*diag.GetWhere()).GetEnd().GetLine() << " column "
+          << (*diag.GetWhere()).GetEnd().GetColumn();
+    }
   }
 
   out << "\n";
