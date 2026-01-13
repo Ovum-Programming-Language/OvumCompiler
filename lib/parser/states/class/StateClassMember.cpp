@@ -182,6 +182,7 @@ IState::StepResult StateClassMember::TryStep(ContextParser& ctx, ITokenStream& t
 
   // Check for call
   if (lex == "call") {
+    ctx.PopState();
     ctx.PushState(StateRegistry::CallDeclHdr());
     return true;
   }

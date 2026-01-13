@@ -91,6 +91,7 @@ private:
 
   std::vector<Expr*> pending_init_static_;
   std::vector<std::string> pending_init_static_names_;
+  std::vector<TypeReference> pending_init_static_types_;
   std::unordered_map<std::string, std::string> method_name_map_;
   std::unordered_map<std::string, std::string> method_vtable_map_;
   std::unordered_map<std::string, std::string> method_return_types_;

@@ -17,6 +17,7 @@ public:
   void Visit(CallDecl& node) override;
   void Visit(MethodDecl& node) override;
   void Visit(DestructorDecl& node) override;
+  void Visit(StaticFieldDecl& node) override;
 
   void Visit(Call& node) override;
   void Visit(Binary& node) override;
