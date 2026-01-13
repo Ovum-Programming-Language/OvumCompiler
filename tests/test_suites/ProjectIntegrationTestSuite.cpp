@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <ranges>
 #include <sstream>
 
 #include "ProjectIntegrationTestSuite.hpp"
@@ -95,8 +96,8 @@ bool ProjectIntegrationTestSuite::CompareFiles(const std::filesystem::path& file
 
   // Normalize line endings by removing all \r characters
   // This handles \r\n (Windows), \n (Unix), and \r (old Mac) line endings
-  file_1_content.erase(std::remove(file_1_content.begin(), file_1_content.end(), '\r'), file_1_content.end());
-  file_2_content.erase(std::remove(file_2_content.begin(), file_2_content.end(), '\r'), file_2_content.end());
+  file_1_content.erase(std::ranges::remove(file_1_content, '\r').begin(), file_1_content.end());
+  file_2_content.erase(std::ranges::remove(file_2_content, '\r').begin(), file_2_content.end());
 
   // Compare normalized contents
   return file_1_content == file_2_content;
