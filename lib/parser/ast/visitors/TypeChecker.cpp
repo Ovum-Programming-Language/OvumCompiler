@@ -1677,483 +1677,971 @@ bool TypeChecker::IsImplicitlyConvertible(const TypeReference& from, const TypeR
 
 void TypeChecker::InitializeBuiltinMethods() {
   // String methods
-  BuiltinMethodSignature sig;
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["String"]["Length"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["String"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["String"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["String"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["String"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["String"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["String"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["String"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("ByteArray");
-  builtin_methods_["String"]["ToUtf8Bytes"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("ByteArray");
+    builtin_methods_["String"]["ToUtf8Bytes"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["String"]["Substring"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["String"]["Substring"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("String")};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["String"]["Compare"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("String")};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["String"]["Compare"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["String"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["String"]["IsLess"] = std::move(sig);
+  }
 
   // Int methods
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["Int"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["Int"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["Int"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["Int"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Int"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Int"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Int")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Int"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Int")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Int"]["IsLess"] = std::move(sig);
+  }
 
   // Float methods
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["Float"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["Float"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["Float"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["Float"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Float"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Float"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Float"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Float"]["IsLess"] = std::move(sig);
+  }
 
   // Byte methods
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["Byte"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["Byte"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["Byte"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["Byte"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Byte"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Byte"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Byte"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Byte"]["IsLess"] = std::move(sig);
+  }
 
   // Char methods
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["Char"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["Char"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["Char"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["Char"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Char"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Char"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Char"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Char"]["IsLess"] = std::move(sig);
+  }
 
   // Bool methods
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["Bool"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["Bool"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["Bool"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["Bool"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Bool"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Bool"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["Bool"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["Bool"]["IsLess"] = std::move(sig);
+  }
 
   // Array methods - IntArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["IntArray"]["Length"] = std::move(sig);
-  builtin_methods_["IntArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["IntArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["IntArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["IntArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["IntArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["IntArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["IntArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["IntArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["IntArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["IntArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["IntArray"]["Clear"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["IntArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["IntArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["IntArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["IntArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["IntArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["IntArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["RemoveAt"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["IntArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["IntArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["IntArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["IntArray"]["SetAt"] = std::move(sig);
+  }
 
   // Similar for other array types - FloatArray, ByteArray, BoolArray, CharArray, StringArray, ObjectArray
   // FloatArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["FloatArray"]["Length"] = std::move(sig);
-  builtin_methods_["FloatArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["FloatArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["FloatArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["FloatArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["FloatArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["FloatArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["FloatArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["FloatArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["FloatArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["FloatArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["FloatArray"]["Clear"] = std::move(sig);
-  builtin_methods_["FloatArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["FloatArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["FloatArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["FloatArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("float");
-  builtin_methods_["FloatArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("float")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["FloatArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("float")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["FloatArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["FloatArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("float");
+    builtin_methods_["FloatArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("float")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("float")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("float")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["FloatArray"]["SetAt"] = std::move(sig);
+  }
 
   // ByteArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["ByteArray"]["Length"] = std::move(sig);
-  builtin_methods_["ByteArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ByteArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["ByteArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ByteArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["ByteArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["ByteArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["ByteArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ByteArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["ByteArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["ByteArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ByteArray"]["Clear"] = std::move(sig);
-  builtin_methods_["ByteArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["ByteArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ByteArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["ByteArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("byte");
-  builtin_methods_["ByteArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("byte")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ByteArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("byte")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ByteArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["ByteArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("byte");
+    builtin_methods_["ByteArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("byte")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("byte")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("byte")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ByteArray"]["SetAt"] = std::move(sig);
+  }
 
   // BoolArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["BoolArray"]["Length"] = std::move(sig);
-  builtin_methods_["BoolArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["BoolArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["BoolArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["BoolArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["BoolArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["BoolArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["BoolArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["BoolArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["BoolArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["BoolArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["BoolArray"]["Clear"] = std::move(sig);
-  builtin_methods_["BoolArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["BoolArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["BoolArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["BoolArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["BoolArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("bool")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["BoolArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("bool")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["BoolArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["BoolArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["BoolArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("bool")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("bool")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("bool")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["BoolArray"]["SetAt"] = std::move(sig);
+  }
 
   // CharArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["CharArray"]["Length"] = std::move(sig);
-  builtin_methods_["CharArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["CharArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["CharArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["CharArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["CharArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["CharArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["CharArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["CharArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["CharArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["CharArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["CharArray"]["Clear"] = std::move(sig);
-  builtin_methods_["CharArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["CharArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["CharArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["CharArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("char");
-  builtin_methods_["CharArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("char")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["CharArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("char")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["CharArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["CharArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("char");
+    builtin_methods_["CharArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("char")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("char")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("char")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["CharArray"]["SetAt"] = std::move(sig);
+  }
 
   // StringArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["StringArray"]["Length"] = std::move(sig);
-  builtin_methods_["StringArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["StringArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["StringArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["StringArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["StringArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["StringArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["StringArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["StringArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["StringArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["StringArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["StringArray"]["Clear"] = std::move(sig);
-  builtin_methods_["StringArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["StringArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["StringArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["StringArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["StringArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("String")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["StringArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("String")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["StringArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["StringArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["StringArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("String")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("String")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("String")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["StringArray"]["SetAt"] = std::move(sig);
+  }
 
   // ObjectArray
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["ObjectArray"]["Length"] = std::move(sig);
-  builtin_methods_["ObjectArray"]["Capacity"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ObjectArray"]["Length"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["ObjectArray"]["ToString"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ObjectArray"]["Capacity"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["ObjectArray"]["GetHash"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["ObjectArray"]["ToString"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["ObjectArray"]["Equals"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["ObjectArray"]["GetHash"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["ObjectArray"]["IsLess"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["ObjectArray"]["Equals"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ObjectArray"]["Clear"] = std::move(sig);
-  builtin_methods_["ObjectArray"]["ShrinkToFit"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["ObjectArray"]["IsLess"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ObjectArray"]["Reserve"] = std::move(sig);
-  builtin_methods_["ObjectArray"]["RemoveAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["Clear"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("Object");
-  builtin_methods_["ObjectArray"]["GetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["ShrinkToFit"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("Object")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ObjectArray"]["Add"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["Reserve"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int"), TypeReference("Object")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["ObjectArray"]["InsertAt"] = std::move(sig);
-  builtin_methods_["ObjectArray"]["SetAt"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["RemoveAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("Object");
+    builtin_methods_["ObjectArray"]["GetAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("Object")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["Add"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("Object")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["InsertAt"] = std::move(sig);
+  }
+
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int"), TypeReference("Object")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["ObjectArray"]["SetAt"] = std::move(sig);
+  }
 
   // File methods
-  sig.param_types = {TypeReference("String"), TypeReference("String")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["File"]["Open"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("String"), TypeReference("String")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["File"]["Open"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = nullptr; // void
-  builtin_methods_["File"]["Close"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = nullptr; // void
+    builtin_methods_["File"]["Close"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["File"]["IsOpen"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["File"]["IsOpen"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = std::make_unique<TypeReference>("ByteArray");
-  builtin_methods_["File"]["Read"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = std::make_unique<TypeReference>("ByteArray");
+    builtin_methods_["File"]["Read"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("ByteArray")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["File"]["Write"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("ByteArray")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["File"]["Write"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("String");
-  builtin_methods_["File"]["ReadLine"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("String");
+    builtin_methods_["File"]["ReadLine"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("String")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["File"]["WriteLine"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("String")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["File"]["WriteLine"] = std::move(sig);
+  }
 
-  sig.param_types = {TypeReference("int")};
-  sig.return_type = nullptr; // void
-  builtin_methods_["File"]["Seek"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {TypeReference("int")};
+    sig.return_type = nullptr; // void
+    builtin_methods_["File"]["Seek"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("int");
-  builtin_methods_["File"]["Tell"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("int");
+    builtin_methods_["File"]["Tell"] = std::move(sig);
+  }
 
-  sig.param_types = {};
-  sig.return_type = std::make_unique<TypeReference>("bool");
-  builtin_methods_["File"]["Eof"] = std::move(sig);
+  {
+    BuiltinMethodSignature sig;
+    sig.param_types = {};
+    sig.return_type = std::make_unique<TypeReference>("bool");
+    builtin_methods_["File"]["Eof"] = std::move(sig);
+  }
 
   // Initialize Object interface with destructor
   InterfaceSignature object_interface;
