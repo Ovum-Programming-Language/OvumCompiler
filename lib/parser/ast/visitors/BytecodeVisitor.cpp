@@ -155,6 +155,8 @@ const std::unordered_map<std::string, std::string> BytecodeVisitor::kBuiltinRetu
     {"GetMemoryUsage", "Int"},
     {"GetPeakMemoryUsage", "Int"},
     {"GetProcessorCount", "Int"},
+    {"ParseDateTime", "Int"},
+    {"GetFileSize", "Int"},
 };
 
 const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int",
@@ -1438,14 +1440,19 @@ void BytecodeVisitor::Visit(Call& node) {
 
     // Handle sys::ToString for primitive types
     if (ns_name == "ToString" && args.size() == 1) {
-      args[0]->Accept(*this);
+      // Get the type first (without emitting code)
       std::string arg_type = GetTypeNameForExpr(args[0].get());
 
       // Handle wrapper types by unwrapping first
       if (IsPrimitiveWrapper(arg_type)) {
         std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        // Now emit the argument code
+        args[0]->Accept(*this);
         EmitCommand("Unwrap");
         arg_type = primitive_type;
+      } else {
+        // Emit the argument code
+        args[0]->Accept(*this);
       }
 
       // For primitive types, use special instructions
@@ -1461,11 +1468,13 @@ void BytecodeVisitor::Visit(Call& node) {
 
     // Handle sys::ToInt for String type
     if (ns_name == "ToInt" && args.size() == 1) {
-      args[0]->Accept(*this);
+      // Get the type first (without emitting code)
       std::string arg_type = GetTypeNameForExpr(args[0].get());
 
       // For String type, use special instruction
       if (arg_type == "String") {
+        // Now emit the argument code
+        args[0]->Accept(*this);
         EmitCommand("StringToInt");
         return;
       }
@@ -1473,11 +1482,13 @@ void BytecodeVisitor::Visit(Call& node) {
 
     // Handle sys::ToFloat for String type
     if (ns_name == "ToFloat" && args.size() == 1) {
-      args[0]->Accept(*this);
+      // Get the type first (without emitting code)
       std::string arg_type = GetTypeNameForExpr(args[0].get());
 
       // For String type, use special instruction
       if (arg_type == "String") {
+        // Now emit the argument code
+        args[0]->Accept(*this);
         EmitCommand("StringToFloat");
         return;
       }
@@ -1485,14 +1496,19 @@ void BytecodeVisitor::Visit(Call& node) {
 
     // Handle sys::Sqrt for float type
     if (ns_name == "Sqrt" && args.size() == 1) {
-      args[0]->Accept(*this);
+      // Get the type first (without emitting code)
       std::string arg_type = GetTypeNameForExpr(args[0].get());
 
       // Handle wrapper types by unwrapping first
       if (IsPrimitiveWrapper(arg_type)) {
         std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        // Now emit the argument code
+        args[0]->Accept(*this);
         EmitCommand("Unwrap");
         arg_type = primitive_type;
+      } else {
+        // Emit the argument code
+        args[0]->Accept(*this);
       }
 
       // Sqrt only works with float type
@@ -2722,6 +2738,153 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (ns_name == "ReadLine" && call->Args().size() == 0) {
             return "String";
           }
+          if (ns_name == "ReadChar" && call->Args().size() == 0) {
+            return "Char";
+          }
+          // Time and Date Operations
+          if (ns_name == "FormatDateTime" && call->Args().size() == 2) {
+            return "String";
+          }
+          if (ns_name == "FormatDateTimeMs" && call->Args().size() == 2) {
+            return "String";
+          }
+          if (ns_name == "ParseDateTime" && call->Args().size() == 2) {
+            return "Int";
+          }
+          // File Operations
+          if (ns_name == "FileExists" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DirectoryExists" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "CreateDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DeleteFile" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DeleteDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "MoveFile" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          if (ns_name == "CopyFile" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          if (ns_name == "GetFileSize" && call->Args().size() == 1) {
+            return "Int";
+          }
+          if (ns_name == "ListDirectory" && call->Args().size() == 1) {
+            return "StringArray";
+          }
+          if (ns_name == "GetCurrentDirectory" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "ChangeDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "GetAbsolutePath" && call->Args().size() == 1) {
+            return "String";
+          }
+          // Process Control
+          if (ns_name == "Sleep" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "SleepMs" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "SleepNs" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "Exit" && call->Args().size() == 1) {
+            return "Never";
+          }
+          if (ns_name == "GetEnvironmentVariable" && call->Args().size() == 1) {
+            return "String";
+          }
+          if (ns_name == "SetEnvironmentVariable" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          // Random Number Generation
+          if (ns_name == "SeedRandom" && call->Args().size() == 1) {
+            return "Void";
+          }
+          // System Information
+          if (ns_name == "GetOsVersion" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetArchitecture" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetUserName" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetHomeDirectory" && call->Args().size() == 0) {
+            return "String";
+          }
+          // Memory and Performance
+          if (ns_name == "ForceGarbageCollection" && call->Args().size() == 0) {
+            return "Void";
+          }
+          // FFI
+          if (ns_name == "Interop" && call->Args().size() == 4) {
+            return "int";
+          }
+          // I/O functions that return Void
+          if (ns_name == "Print" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "PrintLine" && call->Args().size() == 1) {
+            return "Void";
+          }
+        }
+      }
+    }
+
+    // Handle method calls on builtin types (e.g., array.Length(), array.GetAt(0))
+    if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
+      std::string method_name = field_access->Name();
+      std::string object_type = GetTypeNameForExpr(&field_access->MutableObject());
+
+      if (!object_type.empty() && kBuiltinTypeNames.contains(object_type)) {
+        // Handle array methods
+        if (object_type.find("Array") != std::string::npos) {
+          if (method_name == "Length" || method_name == "Capacity") {
+            return "int";
+          }
+          if (method_name == "GetAt") {
+            return GetElementTypeForArray(object_type);
+          }
+          if (method_name == "ToString") {
+            return "String";
+          }
+          if (method_name == "GetHash") {
+            return "int";
+          }
+        }
+        // Handle String methods
+        if (object_type == "String") {
+          if (method_name == "Length") {
+            return "int";
+          }
+          if (method_name == "Substring") {
+            return "String";
+          }
+          if (method_name == "Compare") {
+            return "int";
+          }
+          if (method_name == "ToUtf8Bytes") {
+            return "ByteArray";
+          }
+        }
+        // Handle wrapper type methods (Int, Float, etc.)
+        if (method_name == "ToString") {
+          return "String";
+        }
+        if (method_name == "GetHash") {
+          return "int";
         }
       }
     }

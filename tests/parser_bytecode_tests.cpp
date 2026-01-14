@@ -2443,6 +2443,30 @@ fun test(n: int): Void {
   EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
 }
 
+TEST_F(ParserBytecodeTestSuite, SysToStringWithBuiltinMethodCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(array: IntArray): Void {
+    sys::PrintLine(sys::ToString(array.Length()))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Call _IntArray_Length_<C>"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringWithBuiltinFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    sys::PrintLine(sys::ToString(sys::Random()))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Random"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
 TEST_F(ParserBytecodeTestSuite, SysToIntWithArrayAccess) {
   const std::string bc = GenerateBytecode(R"(
 fun test(sArr: StringArray): Int {
