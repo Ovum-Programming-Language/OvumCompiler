@@ -431,6 +431,7 @@ void BytecodeVisitor::EmitElseIfStart() {
 void BytecodeVisitor::Visit(Module& node) {
   function_name_map_.clear();
   function_return_types_.clear();
+  function_overloads_.clear();
   method_name_map_.clear();
   method_vtable_map_.clear();
   method_return_types_.clear();
@@ -444,13 +445,21 @@ void BytecodeVisitor::Visit(Module& node) {
   for (auto& decl : node.MutableDecls()) {
     if (auto* f = dynamic_cast<FunctionDecl*>(decl.get())) {
       std::string mangled = GenerateFunctionId(f->Name(), f->Params());
-      function_name_map_[f->Name()] = mangled;
+      function_name_map_[f->Name()] = mangled; // Keep for backward compatibility
 
+      FunctionOverload overload;
+      overload.mangled_name = mangled;
+      for (const auto& param : f->Params()) {
+        overload.param_types.push_back(param.GetType());
+      }
       if (f->ReturnType() != nullptr) {
-        function_return_types_[f->Name()] = TypeToMangledName(*f->ReturnType());
+        overload.return_type = TypeToMangledName(*f->ReturnType());
+        function_return_types_[f->Name()] = overload.return_type; // Keep last one for backward compatibility
       } else {
+        overload.return_type = "void";
         function_return_types_[f->Name()] = "void";
       }
+      function_overloads_[f->Name()].push_back(std::move(overload));
     }
 
     if (auto* c = dynamic_cast<ClassDecl*>(decl.get())) {
@@ -562,12 +571,21 @@ void BytecodeVisitor::Visit(FunctionDecl& node) {
   }
 
   std::string mangled = GenerateFunctionId(node.Name(), node.Params());
+  function_name_map_[node.Name()] = mangled; // Keep for backward compatibility
 
+  FunctionOverload overload;
+  overload.mangled_name = mangled;
+  for (const auto& param : node.Params()) {
+    overload.param_types.push_back(param.GetType());
+  }
   if (node.ReturnType() != nullptr) {
-    function_return_types_[node.Name()] = TypeToMangledName(*node.ReturnType());
+    overload.return_type = TypeToMangledName(*node.ReturnType());
+    function_return_types_[node.Name()] = overload.return_type; // Keep last one for backward compatibility
   } else {
+    overload.return_type = "void";
     function_return_types_[node.Name()] = "void";
   }
+  function_overloads_[node.Name()].push_back(std::move(overload));
 
   if (node.IsPure()) {
     output_ << "pure";
@@ -1692,6 +1710,17 @@ void BytecodeVisitor::Visit(Call& node) {
       }
     }
 
+    // Try to resolve overload
+    std::string resolved_mangled = ResolveFunctionOverload(name, args);
+    if (!resolved_mangled.empty()) {
+      for (auto& arg : std::ranges::reverse_view(args)) {
+        arg->Accept(*this);
+      }
+      EmitCommandWithStringWithoutBraces("Call", resolved_mangled);
+      return;
+    }
+
+    // Fallback to old behavior for backward compatibility
     if (auto it = function_name_map_.find(name); it != function_name_map_.end()) {
       for (auto& arg : std::ranges::reverse_view(args)) {
         arg->Accept(*this);
@@ -3141,6 +3170,107 @@ std::string BytecodeVisitor::GetElementTypeForArray(const std::string& array_typ
 
 bool BytecodeVisitor::IsBuiltinSystemCommand(const std::string& name) const {
   return kBuiltinSystemCommands.contains(name);
+}
+
+std::string BytecodeVisitor::ResolveFunctionOverload(const std::string& func_name,
+                                                     const std::vector<std::unique_ptr<Expr>>& args) {
+  auto overloads_it = function_overloads_.find(func_name);
+  if (overloads_it == function_overloads_.end()) {
+    return "";
+  }
+
+  const auto& overloads = overloads_it->second;
+  if (overloads.empty()) {
+    return "";
+  }
+
+  // If only one overload, return it (no resolution needed)
+  if (overloads.size() == 1) {
+    return overloads[0].mangled_name;
+  }
+
+  // Get argument types
+  std::vector<std::string> arg_types;
+  arg_types.reserve(args.size());
+  for (const auto& arg : args) {
+    arg_types.push_back(GetTypeNameForExpr(arg.get()));
+  }
+
+  // Find the best matching overload
+  int best_match_score = -1;
+  size_t best_match_index = 0;
+
+  for (size_t i = 0; i < overloads.size(); ++i) {
+    const auto& overload = overloads[i];
+
+    // Check argument count
+    if (overload.param_types.size() != arg_types.size()) {
+      continue;
+    }
+
+    // Score this overload based on type compatibility
+    int score = 0;
+    bool is_compatible = true;
+
+    for (size_t j = 0; j < arg_types.size(); ++j) {
+      const std::string& expected_type = TypeToMangledName(overload.param_types[j]);
+      const std::string& actual_type = arg_types[j];
+
+      if (expected_type == actual_type) {
+        score += 2; // Exact match
+      } else if (TypesCompatible(expected_type, actual_type)) {
+        score += 1; // Compatible (e.g., int -> Int, float -> Float)
+      } else {
+        is_compatible = false;
+        break;
+      }
+    }
+
+    if (is_compatible && score > best_match_score) {
+      best_match_score = score;
+      best_match_index = i;
+    }
+  }
+
+  if (best_match_score >= 0) {
+    return overloads[best_match_index].mangled_name;
+  }
+
+  return "";
+}
+
+bool BytecodeVisitor::TypesCompatible(const std::string& expected_type, const std::string& actual_type) {
+  // Exact match
+  if (expected_type == actual_type) {
+    return true;
+  }
+
+  // Primitive to wrapper conversions
+  if (IsPrimitiveWrapper(expected_type) && IsPrimitiveType(actual_type)) {
+    std::string expected_primitive = GetPrimitiveTypeForWrapper(expected_type);
+    return expected_primitive == actual_type;
+  }
+
+  // Wrapper to primitive conversions
+  if (IsPrimitiveType(expected_type) && IsPrimitiveWrapper(actual_type)) {
+    std::string actual_primitive = GetPrimitiveTypeForWrapper(actual_type);
+    return expected_type == actual_primitive;
+  }
+
+  // Numeric conversions (int <-> float, etc.)
+  if ((expected_type == "int" || expected_type == "Int") && (actual_type == "float" || actual_type == "Float")) {
+    return true; // float can be converted to int (with truncation)
+  }
+  if ((expected_type == "float" || expected_type == "Float") && (actual_type == "int" || actual_type == "Int")) {
+    return true; // int can be converted to float
+  }
+
+  // Object compatibility (any object can be assigned to Object)
+  if (expected_type == "Object") {
+    return true;
+  }
+
+  return false;
 }
 
 void BytecodeVisitor::EmitParameterConversions(const std::vector<std::unique_ptr<Expr>>& args,

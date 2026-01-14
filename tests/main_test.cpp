@@ -108,6 +108,10 @@ TEST_F(ProjectIntegrationTestSuite, ExampleFileSort) {
   CompileAndCompareExample("sort");
 }
 
+TEST_F(ProjectIntegrationTestSuite, ExampleFilePerformance) {
+  CompileAndCompareExample("performance");
+}
+
 // Integrational files compilation tests
 TEST_F(ProjectIntegrationTestSuite, IntegrationalFileQuadratic) {
   CompileAndCompareIntegrational("quadratic");

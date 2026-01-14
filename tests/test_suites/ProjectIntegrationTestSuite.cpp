@@ -23,13 +23,14 @@ void ProjectIntegrationTestSuite::TearDown() {
 void ProjectIntegrationTestSuite::CompileAndCompareExample(const std::string& filename_without_extension) {
   std::filesystem::path source_dir = std::filesystem::path(TEST_DATA_DIR) / "examples" / "source";
   std::filesystem::path compiled_dir = std::filesystem::path(TEST_DATA_DIR) / "examples" / "compiled";
+  std::filesystem::path include_dir = source_dir / "lib";
 
   std::filesystem::path source_file = source_dir / (filename_without_extension + ".ovum");
   std::filesystem::path expected_output = compiled_dir / (filename_without_extension + ".oil");
   std::filesystem::path actual_output =
       std::filesystem::path(kTemporaryDirectoryName) / (filename_without_extension + ".oil");
 
-  CompileAndCompareFile(source_file, expected_output, actual_output);
+  CompileAndCompareFile(source_file, expected_output, actual_output, include_dir);
 }
 
 void ProjectIntegrationTestSuite::CompileAndCompareIntegrational(const std::string& filename_without_extension) {

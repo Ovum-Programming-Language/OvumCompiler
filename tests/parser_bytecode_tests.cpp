@@ -2558,3 +2558,30 @@ fun test(lhs : IComparable, rhs : IComparable): bool {
   EXPECT_NE(bc.find("CallVirtual"), std::string::npos);
   EXPECT_EQ(bc.find("_IComparable_IsLess"), std::string::npos);
 }
+
+TEST_F(ParserBytecodeTestSuite, OverloadedFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+fun test(n: float): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+fun test(str: String): Void {
+    sys::PrintLine(str)
+}
+
+fun run() : Void {
+    test(1)
+    test(1.0)
+}
+)");
+  ASSERT_NE(bc.find("Call _Global_test_int"), std::string::npos);
+  ASSERT_NE(bc.find("Call _Global_test_float"), std::string::npos);
+  EXPECT_LT(bc.find("Call _Global_test_int"), bc.find("Call _Global_test_float"));
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("FloatToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call _Global_test_String"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
