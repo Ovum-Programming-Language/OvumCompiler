@@ -71,8 +71,8 @@ const std::unordered_set<std::string> kBuiltinSystemCommands = {"Print",
                                                                 "SleepNs",
                                                                 "Exit",
                                                                 "GetProcessId",
-                                                                "GetEnvironmentVariable",
-                                                                "SetEnvironmentVariable",
+                                                                "GetEnvironmentVar",
+                                                                "SetEnvironmentVar",
                                                                 "Random",
                                                                 "RandomRange",
                                                                 "RandomFloat",
@@ -87,8 +87,6 @@ const std::unordered_set<std::string> kBuiltinSystemCommands = {"Print",
                                                                 "GetArchitecture",
                                                                 "GetUserName",
                                                                 "GetHomeDirectory",
-                                                                "GetLastError",
-                                                                "ClearError",
                                                                 "Interop",
                                                                 "TypeOf"};
 
@@ -104,7 +102,8 @@ const std::unordered_set<std::string> kBuiltinTypeNames = {"Int",
                                                            "BoolArray",
                                                            "ByteArray",
                                                            "CharArray",
-                                                           "ObjectArray"};
+                                                           "ObjectArray",
+                                                           "File"};
 
 const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     // Random functions
@@ -125,9 +124,7 @@ const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     // Date/Time functions
     {"ParseDateTime", "Int"},
     {"FormatDateTime", "String"},
-    {"FormatDateTimeMs", "String"},
     // File operations
-    {"GetFileSize", "Int"},
     {"FileExists", "Bool"},
     {"DirectoryExists", "Bool"},
     {"CreateDirectory", "Bool"},
@@ -138,7 +135,6 @@ const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     {"ListDirectory", "StringArray"},
     {"GetCurrentDirectory", "String"},
     {"ChangeDirectory", "Bool"},
-    {"GetAbsolutePath", "String"},
     // I/O functions
     {"ReadLine", "String"},
     {"ReadChar", "Char"},
@@ -151,8 +147,7 @@ const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     {"GetUserName", "String"},
     {"GetHomeDirectory", "String"},
     // Environment
-    {"GetEnvironmentVariable", "String"},
-    {"SetEnvironmentVariable", "Bool"},
+    {"SetEnvironmentVar", "Bool"},
     // Math functions
     {"Sqrt", "float"},
     {"ToString", "String"},
@@ -1241,6 +1236,12 @@ TypeReference TypeChecker::InferExpressionType(Expr* expr) {
       // Check if namespace is "sys" by examining NamespaceExpr
       if (const auto* ns_ident = dynamic_cast<IdentRef*>(&ns_ref->MutableNamespaceExpr())) {
         if (ns_ident->Name() == "sys") {
+          // Handle GetEnvironmentVar - returns Nullable<String>
+          if (ns_name == "GetEnvironmentVar" && call->Args().size() == 1) {
+            TypeReference result("String");
+            result.MakeNullable();
+            return result;
+          }
           // Check for built-in return types
           if (const auto it = kBuiltinReturnTypes.find(ns_name); it != kBuiltinReturnTypes.end()) {
             std::string return_type_name = it->second;
@@ -2112,6 +2113,47 @@ void TypeChecker::InitializeBuiltinMethods() {
   sig.return_type = nullptr; // void
   builtin_methods_["ObjectArray"]["InsertAt"] = std::move(sig);
   builtin_methods_["ObjectArray"]["SetAt"] = std::move(sig);
+
+  // File methods
+  sig.param_types = {TypeReference("String"), TypeReference("String")};
+  sig.return_type = nullptr; // void
+  builtin_methods_["File"]["Open"] = std::move(sig);
+
+  sig.param_types = {};
+  sig.return_type = nullptr; // void
+  builtin_methods_["File"]["Close"] = std::move(sig);
+
+  sig.param_types = {};
+  sig.return_type = std::make_unique<TypeReference>("bool");
+  builtin_methods_["File"]["IsOpen"] = std::move(sig);
+
+  sig.param_types = {TypeReference("int")};
+  sig.return_type = std::make_unique<TypeReference>("ByteArray");
+  builtin_methods_["File"]["Read"] = std::move(sig);
+
+  sig.param_types = {TypeReference("ByteArray")};
+  sig.return_type = nullptr; // void
+  builtin_methods_["File"]["Write"] = std::move(sig);
+
+  sig.param_types = {};
+  sig.return_type = std::make_unique<TypeReference>("String");
+  builtin_methods_["File"]["ReadLine"] = std::move(sig);
+
+  sig.param_types = {TypeReference("String")};
+  sig.return_type = nullptr; // void
+  builtin_methods_["File"]["WriteLine"] = std::move(sig);
+
+  sig.param_types = {TypeReference("int")};
+  sig.return_type = nullptr; // void
+  builtin_methods_["File"]["Seek"] = std::move(sig);
+
+  sig.param_types = {};
+  sig.return_type = std::make_unique<TypeReference>("int");
+  builtin_methods_["File"]["Tell"] = std::move(sig);
+
+  sig.param_types = {};
+  sig.return_type = std::make_unique<TypeReference>("bool");
+  builtin_methods_["File"]["Eof"] = std::move(sig);
 
   // Initialize Object interface with destructor
   InterfaceSignature object_interface;

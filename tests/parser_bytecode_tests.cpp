@@ -2114,7 +2114,7 @@ fun test(arr1: IntArray, arr2: IntArray): Bool {
     return arr1.IsLess(arr2)
 }
 )");
-  EXPECT_NE(bc.find("_IntArray_IsLess_<M>"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_IsLess_<C>"), std::string::npos);
 }
 
 TEST_F(ParserBytecodeTestSuite, HexLiteral) {

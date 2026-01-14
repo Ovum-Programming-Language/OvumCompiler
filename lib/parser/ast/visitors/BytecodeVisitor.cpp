@@ -121,8 +121,8 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinSystemCommands = 
                                                                                  "SleepNs",
                                                                                  "Exit",
                                                                                  "GetProcessId",
-                                                                                 "GetEnvironmentVariable",
-                                                                                 "SetEnvironmentVariable",
+                                                                                 "GetEnvironmentVar",
+                                                                                 "SetEnvironmentVar",
                                                                                  "Random",
                                                                                  "RandomRange",
                                                                                  "RandomFloat",
@@ -137,8 +137,6 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinSystemCommands = 
                                                                                  "GetArchitecture",
                                                                                  "GetUserName",
                                                                                  "GetHomeDirectory",
-                                                                                 "GetLastError",
-                                                                                 "ClearError",
                                                                                  "Interop",
                                                                                  "TypeOf"};
 
@@ -156,7 +154,6 @@ const std::unordered_map<std::string, std::string> BytecodeVisitor::kBuiltinRetu
     {"GetPeakMemoryUsage", "Int"},
     {"GetProcessorCount", "Int"},
     {"ParseDateTime", "Int"},
-    {"GetFileSize", "Int"},
 };
 
 const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int",
@@ -171,7 +168,8 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int
                                                                             "BoolArray",
                                                                             "ByteArray",
                                                                             "CharArray",
-                                                                            "ObjectArray"};
+                                                                            "ObjectArray",
+                                                                            "File"};
 
 const std::unordered_set<std::string> BytecodeVisitor::kPrimitiveTypeNames = {"int", "float", "byte", "char", "bool"};
 
@@ -182,38 +180,45 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_String_ToString_<C>"},
          {"Length", "_String_Length_<C>"},
          {"Equals", "_String_Equals_<C>_Object"},
+         {"IsLess", "_String_IsLess_<C>_Object"},
          {"Substring", "_String_Substring_<C>_int_int"},
          {"Compare", "_String_Compare_<C>_String"},
+         {"ToUtf8Bytes", "_String_ToUtf8Bytes_<C>"},
      }},
     {"Int",
      {
          {"ToString", "_Int_ToString_<C>"},
          {"GetHash", "_Int_GetHash_<C>"},
          {"Equals", "_Int_Equals_<C>_Object"},
+         {"IsLess", "_Int_IsLess_<C>_Object"},
      }},
     {"Float",
      {
          {"ToString", "_Float_ToString_<C>"},
          {"GetHash", "_Float_GetHash_<C>"},
          {"Equals", "_Float_Equals_<C>_Object"},
+         {"IsLess", "_Float_IsLess_<C>_Object"},
      }},
     {"Byte",
      {
          {"ToString", "_Byte_ToString_<C>"},
          {"GetHash", "_Byte_GetHash_<C>"},
          {"Equals", "_Byte_Equals_<C>_Object"},
+         {"IsLess", "_Byte_IsLess_<C>_Object"},
      }},
     {"Char",
      {
          {"ToString", "_Char_ToString_<C>"},
          {"GetHash", "_Char_GetHash_<C>"},
          {"Equals", "_Char_Equals_<C>_Object"},
+         {"IsLess", "_Char_IsLess_<C>_Object"},
      }},
     {"Bool",
      {
          {"ToString", "_Bool_ToString_<C>"},
          {"GetHash", "_Bool_GetHash_<C>"},
          {"Equals", "_Bool_Equals_<C>_Object"},
+         {"IsLess", "_Bool_IsLess_<C>_Object"},
      }},
     {"IntArray",
      {
@@ -221,6 +226,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_IntArray_ToString_<C>"},
          {"GetHash", "_IntArray_GetHash_<C>"},
          {"Equals", "_IntArray_Equals_<C>_Object"},
+         {"IsLess", "_IntArray_IsLess_<C>_Object"},
          {"Clear", "_IntArray_Clear_<M>"},
          {"ShrinkToFit", "_IntArray_ShrinkToFit_<M>"},
          {"Reserve", "_IntArray_Reserve_<M>_int"},
@@ -237,6 +243,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_FloatArray_ToString_<C>"},
          {"GetHash", "_FloatArray_GetHash_<C>"},
          {"Equals", "_FloatArray_Equals_<C>_Object"},
+         {"IsLess", "_FloatArray_IsLess_<C>_Object"},
          {"Clear", "_FloatArray_Clear_<M>"},
          {"ShrinkToFit", "_FloatArray_ShrinkToFit_<M>"},
          {"Reserve", "_FloatArray_Reserve_<M>_int"},
@@ -253,6 +260,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_ByteArray_ToString_<C>"},
          {"GetHash", "_ByteArray_GetHash_<C>"},
          {"Equals", "_ByteArray_Equals_<C>_Object"},
+         {"IsLess", "_ByteArray_IsLess_<C>_Object"},
          {"Clear", "_ByteArray_Clear_<M>"},
          {"ShrinkToFit", "_ByteArray_ShrinkToFit_<M>"},
          {"Reserve", "_ByteArray_Reserve_<M>_int"},
@@ -269,6 +277,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_BoolArray_ToString_<C>"},
          {"GetHash", "_BoolArray_GetHash_<C>"},
          {"Equals", "_BoolArray_Equals_<C>_Object"},
+         {"IsLess", "_BoolArray_IsLess_<C>_Object"},
          {"Clear", "_BoolArray_Clear_<M>"},
          {"ShrinkToFit", "_BoolArray_ShrinkToFit_<M>"},
          {"Reserve", "_BoolArray_Reserve_<M>_int"},
@@ -285,6 +294,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_CharArray_ToString_<C>"},
          {"GetHash", "_CharArray_GetHash_<C>"},
          {"Equals", "_CharArray_Equals_<C>_Object"},
+         {"IsLess", "_CharArray_IsLess_<C>_Object"},
          {"Clear", "_CharArray_Clear_<M>"},
          {"ShrinkToFit", "_CharArray_ShrinkToFit_<M>"},
          {"Reserve", "_CharArray_Reserve_<M>_int"},
@@ -301,14 +311,15 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_StringArray_ToString_<C>"},
          {"GetHash", "_StringArray_GetHash_<C>"},
          {"Equals", "_StringArray_Equals_<C>_Object"},
+         {"IsLess", "_StringArray_IsLess_<C>_Object"},
          {"Clear", "_StringArray_Clear_<M>"},
          {"ShrinkToFit", "_StringArray_ShrinkToFit_<M>"},
          {"Reserve", "_StringArray_Reserve_<M>_int"},
          {"Capacity", "_StringArray_Capacity_<C>"},
-         {"Add", "_StringArray_Add_<M>_Object"},
+         {"Add", "_StringArray_Add_<M>_String"},
          {"RemoveAt", "_StringArray_RemoveAt_<M>_int"},
-         {"InsertAt", "_StringArray_InsertAt_<M>_int_Object"},
-         {"SetAt", "_StringArray_SetAt_<M>_int_Object"},
+         {"InsertAt", "_StringArray_InsertAt_<M>_int_String"},
+         {"SetAt", "_StringArray_SetAt_<M>_int_String"},
          {"GetAt", "_StringArray_GetAt_<C>_int"},
      }},
     {"ObjectArray",
@@ -317,6 +328,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_ObjectArray_ToString_<C>"},
          {"GetHash", "_ObjectArray_GetHash_<C>"},
          {"Equals", "_ObjectArray_Equals_<C>_Object"},
+         {"IsLess", "_ObjectArray_IsLess_<C>_Object"},
          {"Clear", "_ObjectArray_Clear_<M>"},
          {"ShrinkToFit", "_ObjectArray_ShrinkToFit_<M>"},
          {"Reserve", "_ObjectArray_Reserve_<M>_int"},
@@ -326,6 +338,19 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"InsertAt", "_ObjectArray_InsertAt_<M>_int_Object"},
          {"SetAt", "_ObjectArray_SetAt_<M>_int_Object"},
          {"GetAt", "_ObjectArray_GetAt_<C>_int"},
+     }},
+    {"File",
+     {
+         {"Open", "_File_Open_<M>_String_String"},
+         {"Close", "_File_Close_<M>"},
+         {"IsOpen", "_File_IsOpen_<C>"},
+         {"Read", "_File_Read_<M>_Int"},
+         {"Write", "_File_Write_<M>_ByteArray"},
+         {"ReadLine", "_File_ReadLine_<M>"},
+         {"WriteLine", "_File_WriteLine_<M>_String"},
+         {"Seek", "_File_Seek_<M>_Int"},
+         {"Tell", "_File_Tell_<C>"},
+         {"Eof", "_File_Eof_<C>"},
      }},
 };
 
@@ -2774,9 +2799,6 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (ns_name == "FormatDateTime" && call->Args().size() == 2) {
             return "String";
           }
-          if (ns_name == "FormatDateTimeMs" && call->Args().size() == 2) {
-            return "String";
-          }
           if (ns_name == "ParseDateTime" && call->Args().size() == 2) {
             return "Int";
           }
@@ -2802,9 +2824,6 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (ns_name == "CopyFile" && call->Args().size() == 2) {
             return "Bool";
           }
-          if (ns_name == "GetFileSize" && call->Args().size() == 1) {
-            return "Int";
-          }
           if (ns_name == "ListDirectory" && call->Args().size() == 1) {
             return "StringArray";
           }
@@ -2813,9 +2832,6 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           }
           if (ns_name == "ChangeDirectory" && call->Args().size() == 1) {
             return "Bool";
-          }
-          if (ns_name == "GetAbsolutePath" && call->Args().size() == 1) {
-            return "String";
           }
           // Process Control
           if (ns_name == "Sleep" && call->Args().size() == 1) {
@@ -2830,10 +2846,10 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (ns_name == "Exit" && call->Args().size() == 1) {
             return "Never";
           }
-          if (ns_name == "GetEnvironmentVariable" && call->Args().size() == 1) {
-            return "String";
+          if (ns_name == "GetEnvironmentVar" && call->Args().size() == 1) {
+            return "String?";  // Returns Nullable<String>
           }
-          if (ns_name == "SetEnvironmentVariable" && call->Args().size() == 2) {
+          if (ns_name == "SetEnvironmentVar" && call->Args().size() == 2) {
             return "Bool";
           }
           // Random Number Generation
