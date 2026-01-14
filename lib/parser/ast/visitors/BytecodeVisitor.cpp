@@ -2394,7 +2394,7 @@ std::string BytecodeVisitor::GenerateConstructorId(const std::string& class_name
 }
 
 std::string BytecodeVisitor::GenerateDestructorId(const std::string& class_name) {
-  return "_" + class_name + "_destructor";
+  return "_" + class_name + "_destructor_<M>";
 }
 
 std::string BytecodeVisitor::GenerateCopyMethodId(const std::string& class_name, const std::string& param_type) {
