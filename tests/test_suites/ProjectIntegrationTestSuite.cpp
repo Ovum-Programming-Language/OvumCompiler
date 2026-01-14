@@ -59,7 +59,7 @@ void ProjectIntegrationTestSuite::CompileAndCompareFile(const std::filesystem::p
 
   // Build compiler command
   std::ostringstream cmd;
-  cmd << "ovumc -nn -m " << source_file.string() << " -o " << actual_output_file.string();
+  cmd << "ovumc -m " << source_file.string() << " -o " << actual_output_file.string();
 
   if (!include_dir.empty() && std::filesystem::exists(include_dir)) {
     cmd << " -I " << include_dir.string();

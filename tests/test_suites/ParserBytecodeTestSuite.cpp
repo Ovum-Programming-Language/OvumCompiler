@@ -97,13 +97,6 @@ std::string ParserBytecodeTestSuite::GenerateBytecode(const std::string& code) {
     return "";
   }
   module->Accept(visitor);
-  std::string bytecode = out.str();
 
-  if (test_info != nullptr) {
-    std::cout << "\n=== Bytecode for test: " << test_info->name() << " ===\n";
-    std::cout << bytecode;
-    std::cout << "\n=== End of bytecode ===\n\n";
-  }
-
-  return bytecode;
+  return out.str();
 }
