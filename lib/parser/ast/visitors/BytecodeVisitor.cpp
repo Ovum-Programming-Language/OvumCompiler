@@ -2847,7 +2847,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
             return "Never";
           }
           if (ns_name == "GetEnvironmentVar" && call->Args().size() == 1) {
-            return "String?";  // Returns Nullable<String>
+            return "String?"; // Returns Nullable<String>
           }
           if (ns_name == "SetEnvironmentVar" && call->Args().size() == 2) {
             return "Bool";
