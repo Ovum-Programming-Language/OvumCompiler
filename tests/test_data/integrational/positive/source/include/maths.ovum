@@ -1,0 +1,13 @@
+pure fun CalculateQuadratic(a: int, b: int, c: int): int {
+    // Calculate discriminant: b^2 - 4ac
+    return b * b - 4 * a * c
+}
+
+pure fun BitwiseOperations(first: int, second: int): int {
+    val andResult: int = first & second
+    val orResult: int = first | second
+    val xorResult: int = first ^ second
+    
+    // Return XOR result (most interesting)
+    return xorResult
+}

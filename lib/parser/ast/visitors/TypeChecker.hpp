@@ -46,9 +46,19 @@ private:
     std::unique_ptr<TypeReference> return_type;
   };
 
+  struct FunctionOverload {
+    std::vector<TypeReference> param_types;
+    std::unique_ptr<TypeReference> return_type;
+  };
+
   struct MethodSignature {
     std::string class_name;
     std::string method_name;
+    std::vector<TypeReference> param_types;
+    std::unique_ptr<TypeReference> return_type;
+  };
+
+  struct BuiltinMethodSignature {
     std::vector<TypeReference> param_types;
     std::unique_ptr<TypeReference> return_type;
   };
@@ -59,7 +69,14 @@ private:
   bool IsSameType(const TypeReference& a, const TypeReference& b);
   bool IsPrimitiveWrapper(const std::string& type_name) const;
   bool IsPrimitiveType(const std::string& type_name) const;
+  bool IsClassType(const std::string& type_name) const;
   bool IsImplicitlyConvertible(const TypeReference& from, const TypeReference& to);
+  const FunctionOverload* ResolveFunctionOverload(const std::string& func_name,
+                                                  const std::vector<std::unique_ptr<Expr>>& args);
+  const BuiltinMethodSignature* FindBuiltinMethod(const std::string& type_name, const std::string& method_name);
+  std::string GetFundamentalTypeName(const TypeReference& type);
+  TypeReference GetElementTypeForArray(const TypeReference& array_type);
+  void InitializeBuiltinMethods();
 
   IDiagnosticSink& sink_;
   TypeReference* current_return_type_ = nullptr;
@@ -71,7 +88,8 @@ private:
   };
 
   std::unordered_map<std::string, TypeReference> variable_types_;
-  std::unordered_map<std::string, FunctionSignature> functions_;
+  std::unordered_map<std::string, FunctionSignature> functions_; // Kept for backward compatibility
+  std::unordered_map<std::string, std::vector<FunctionOverload>> function_overloads_;
   std::unordered_map<std::string, MethodSignature> methods_;
   std::unordered_map<std::string, std::vector<std::pair<std::string, TypeReference>>> class_fields_;
   std::unordered_map<std::string, InterfaceSignature> interfaces_;
@@ -79,6 +97,7 @@ private:
   std::unordered_map<std::string, TypeReference> type_aliases_;
   std::unordered_map<std::string, TypeReference> global_variables_;
   std::unordered_map<std::string, MethodSignature> constructors_;
+  std::unordered_map<std::string, std::unordered_map<std::string, BuiltinMethodSignature>> builtin_methods_;
 };
 
 } // namespace ovum::compiler::parser

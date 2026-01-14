@@ -6,6 +6,8 @@ add_library(compiler_ui STATIC
 target_link_libraries(compiler_ui PUBLIC
         lexer
         preprocessor
+        parser
+        argparser
 )
 
 target_include_directories(compiler_ui PUBLIC ${PROJECT_SOURCE_DIR})

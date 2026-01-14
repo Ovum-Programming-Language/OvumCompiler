@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "lib/parser/ast/AstVisitor.hpp"
+#include "lib/parser/types/TypeReference.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -85,12 +86,19 @@ private:
   size_t next_local_index_{0};
   size_t next_static_index_{0};
 
-  std::unordered_map<std::string, std::string> function_name_map_;
+  struct FunctionOverload {
+    std::string mangled_name;
+    std::vector<TypeReference> param_types;
+    std::string return_type;
+  };
+  std::unordered_map<std::string, std::vector<FunctionOverload>> function_overloads_;
+  std::unordered_map<std::string, std::string> function_name_map_; // Kept for backward compatibility
   std::unordered_map<std::string, std::string> function_return_types_;
   size_t next_function_id_{0};
 
   std::vector<Expr*> pending_init_static_;
   std::vector<std::string> pending_init_static_names_;
+  std::vector<TypeReference> pending_init_static_types_;
   std::unordered_map<std::string, std::string> method_name_map_;
   std::unordered_map<std::string, std::string> method_vtable_map_;
   std::unordered_map<std::string, std::string> method_return_types_;
@@ -169,6 +177,8 @@ private:
   void EmitParameterConversions(const std::vector<std::unique_ptr<Expr>>& args,
                                 const std::vector<TypeReference>& expected_types);
   void EmitArgumentsInReverse(const std::vector<std::unique_ptr<Expr>>& args);
+  std::string ResolveFunctionOverload(const std::string& func_name, const std::vector<std::unique_ptr<Expr>>& args);
+  bool TypesCompatible(const std::string& expected_type, const std::string& actual_type);
 };
 
 } // namespace ovum::compiler::parser

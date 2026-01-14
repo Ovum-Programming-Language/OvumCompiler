@@ -1,122 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <unordered_set>
+#include "test_suites/ParserBytecodeTestSuite.hpp"
 
-#include "lib/lexer/Lexer.hpp"
-#include "lib/parser/ParserFsm.hpp"
-#include "lib/parser/ast/BuilderAstFactory.hpp"
-#include "lib/parser/ast/visitors/BytecodeVisitor.hpp"
-#include "lib/parser/diagnostics/DiagnosticCollector.hpp"
-#include "lib/parser/pratt/DefaultOperatorResolver.hpp"
-#include "lib/parser/pratt/PrattExpressionParser.hpp"
-#include "lib/parser/tokens/token_streams/VectorTokenStream.hpp"
-#include "lib/parser/type_parser/QNameTypeParser.hpp"
-#include "lib/preprocessor/directives_processor/TokenDirectivesProcessor.hpp"
-
-using namespace ovum::compiler::parser;
-using namespace ovum::compiler::lexer;
-using namespace ovum::compiler::preprocessor;
-
-using TokenPtr = ovum::TokenPtr;
-
-class ParserBytecodeTest : public ::testing::Test {
-protected:
-  void SetUp() override {
-    factory_ = std::make_shared<BuilderAstFactory>();
-    type_parser_ = std::make_unique<QNameTypeParser>(*factory_);
-    auto resolver = std::make_unique<DefaultOperatorResolver>();
-    expr_parser_ = std::make_unique<PrattExpressionParser>(std::move(resolver), factory_, type_parser_.get());
-    parser_ = std::make_unique<ParserFsm>(std::move(expr_parser_), std::move(type_parser_), factory_);
-  }
-
-  std::unique_ptr<Module> Parse(const std::string& code) {
-    Lexer lexer(code, false);
-    auto tokens_result = lexer.Tokenize();
-    if (!tokens_result.has_value()) {
-      return nullptr;
-    }
-
-    std::vector<TokenPtr> tokens = std::move(tokens_result.value());
-
-    std::unordered_set<std::string> predefined;
-    TokenDirectivesProcessor directives(predefined);
-    auto processed = directives.Process(tokens);
-    if (!processed.has_value()) {
-      return nullptr;
-    }
-
-    VectorTokenStream stream(processed.value());
-    return parser_->Parse(stream, diags_);
-  }
-
-  std::string GenerateBytecode(const std::string& code) {
-    auto module = Parse(code);
-
-    const ::testing::TestInfo* const test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-    if (test_info != nullptr && (diags_.ErrorCount() > 0 || diags_.WarningCount() > 0)) {
-      std::cout << "\n=== Parser Diagnostics for test: " << test_info->name() << " ===\n";
-      for (const auto& diag : diags_.All()) {
-        if (diag.IsSuppressed()) {
-          continue;
-        }
-
-        std::string severity_str = "UNKNOWN";
-        if (diag.GetSeverity()) {
-          if (diag.GetSeverity()->Level() >= 3) {
-            severity_str = "ERROR";
-          } else if (diag.GetSeverity()->Level() >= 2) {
-            severity_str = "WARNING";
-          } else {
-            severity_str = "NOTE";
-          }
-        }
-
-        std::cout << "[" << severity_str << "]";
-        if (!diag.GetCode().empty()) {
-          std::cout << " " << diag.GetCode();
-        }
-        std::cout << ": " << diag.GetMessage();
-
-        if (diag.GetWhere().has_value()) {
-          std::cout << " (has location)";
-        }
-        std::cout << "\n";
-      }
-      std::cout << "=== End of diagnostics ===\n\n";
-    }
-
-    EXPECT_NE(module, nullptr);
-    EXPECT_EQ(diags_.ErrorCount(), 0);
-
-    std::ostringstream out;
-    BytecodeVisitor visitor(out);
-    if (!module) {
-      return "";
-    }
-    module->Accept(visitor);
-    std::string bytecode = out.str();
-
-    if (test_info != nullptr) {
-      std::cout << "\n=== Bytecode for test: " << test_info->name() << " ===\n";
-      std::cout << bytecode;
-      std::cout << "\n=== End of bytecode ===\n\n";
-    }
-
-    return bytecode;
-  }
-
-  DiagnosticCollector diags_;                      // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::unique_ptr<ParserFsm> parser_;              // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::unique_ptr<IExpressionParser> expr_parser_; // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::unique_ptr<ITypeParser> type_parser_;       // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::shared_ptr<IAstFactory> factory_;           // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-};
-
-TEST_F(ParserBytecodeTest, PushInt) {
+TEST_F(ParserBytecodeTestSuite, PushInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): int {
     return 42
@@ -125,7 +11,7 @@ fun test(): int {
   EXPECT_NE(bc.find("PushInt 42"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushFloat) {
+TEST_F(ParserBytecodeTestSuite, PushFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): float {
     return 3.14
@@ -134,7 +20,7 @@ fun test(): float {
   EXPECT_NE(bc.find("PushFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushBool) {
+TEST_F(ParserBytecodeTestSuite, PushBool) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): bool {
     return true
@@ -143,7 +29,7 @@ fun test(): bool {
   EXPECT_NE(bc.find("PushBool"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushChar) {
+TEST_F(ParserBytecodeTestSuite, PushChar) {
   const std::string bc = GenerateBytecode(R"(
 fun Main(args: StringArray): int {
     val x: Char = 'a'
@@ -153,7 +39,7 @@ fun Main(args: StringArray): int {
   EXPECT_NE(bc.find("PushChar"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushByte) {
+TEST_F(ParserBytecodeTestSuite, PushByte) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): byte {
     return 42b
@@ -162,7 +48,7 @@ fun test(): byte {
   EXPECT_NE(bc.find("PushByte"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushString) {
+TEST_F(ParserBytecodeTestSuite, PushString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): String {
     return "Hello"
@@ -171,7 +57,7 @@ fun test(): String {
   EXPECT_NE(bc.find("PushString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PushNull) {
+TEST_F(ParserBytecodeTestSuite, PushNull) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): String? {
     return null
@@ -180,7 +66,7 @@ fun test(): String? {
   EXPECT_NE(bc.find("PushNull"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, Pop) {
+TEST_F(ParserBytecodeTestSuite, Pop) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): Void {
     x + 1
@@ -189,7 +75,7 @@ fun test(x: int): Void {
   EXPECT_NE(bc.find("Pop"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, UnsafeBlock) {
+TEST_F(ParserBytecodeTestSuite, UnsafeBlock) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): Void {
     unsafe {
@@ -197,12 +83,12 @@ fun test(): Void {
     }
 }
 )");
-  EXPECT_NE(bc.find("UnsafeBlockStart"), std::string::npos);
-  EXPECT_NE(bc.find("UnsafeBlockEnd"), std::string::npos);
+  EXPECT_EQ(bc.find("UnsafeBlockStart"), std::string::npos);
+  EXPECT_EQ(bc.find("UnsafeBlockEnd"), std::string::npos);
   EXPECT_NE(bc.find("PushInt 42"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignment) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignment) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public var x: Int;
@@ -219,7 +105,7 @@ fun test(p1: Point, p2: Point): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, LoadLocal) {
+TEST_F(ParserBytecodeTestSuite, LoadLocal) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): int {
     return x
@@ -228,7 +114,7 @@ fun test(x: int): int {
   EXPECT_NE(bc.find("LoadLocal 0"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SetLocal) {
+TEST_F(ParserBytecodeTestSuite, SetLocal) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): int {
     var x: int = 10
@@ -239,29 +125,41 @@ fun test(): int {
   EXPECT_NE(bc.find("SetLocal"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, LoadStatic) {
+TEST_F(ParserBytecodeTestSuite, LoadStatic) {
   const std::string bc = GenerateBytecode(R"(
-val global: int = 42
+global val a: int = 42
 
 fun test(): int {
-    return global
+    return a
 }
 )");
   EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SetStatic) {
+TEST_F(ParserBytecodeTestSuite, SetStatic) {
   const std::string bc = GenerateBytecode(R"(
-val global: int = 42
+global val a: int = 42
 
 fun test(): Void {
-    global = 100
+    a = 100
 }
 )");
   EXPECT_NE(bc.find("SetStatic"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, GlobalVariableInitStatic) {
+TEST_F(ParserBytecodeTestSuite, SetStaticCallConstructor) {
+  const std::string bc = GenerateBytecode(R"(
+global val a: Int = 42
+
+fun test(): Void {
+    a = 100
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalVariableInitStatic) {
   const std::string bc = GenerateBytecode(R"(
 val x: Int = 42
 )");
@@ -269,7 +167,7 @@ val x: Int = 42
   EXPECT_NE(bc.find("PushInt 42"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, MultipleGlobalVariables) {
+TEST_F(ParserBytecodeTestSuite, MultipleGlobalVariables) {
   const std::string bc = GenerateBytecode(R"(
 val x: Int = 1
 val y: Int = 2
@@ -279,7 +177,325 @@ val z: Int = 3
   EXPECT_NE(bc.find("SetStatic"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntArithmetic) {
+TEST_F(ParserBytecodeTestSuite, GlobalFloatWithConstructor) {
+  const std::string bc = GenerateBytecode(R"(
+global val pi: Float = 3.14159
+
+fun test(): Void {
+    pi = 2.718
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Float_float"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+  EXPECT_NE(bc.find("PushFloat"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalVarMutable) {
+  const std::string bc = GenerateBytecode(R"(
+global var counter: Int = 0
+
+fun increment(): Void {
+    counter = counter + 1
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalInExpression) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Int = 10
+global val y: Int = 20
+
+fun sum(): Int {
+    return x + y
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("IntAdd"), std::string::npos);
+  EXPECT_NE(bc.find("init-static"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalByteConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val b: Byte = 42b
+
+fun test(): Void {
+    b = 100b
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Byte_byte"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalBoolConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val flag: Bool = true
+
+fun test(): Void {
+    flag = false
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Bool_bool"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalCharConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val ch: Char = 'A'
+
+fun test(): Void {
+    ch = 'B'
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Char_char"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalMultipleFunctions) {
+  const std::string bc = GenerateBytecode(R"(
+global var value: Int = 0
+
+fun get(): Int {
+    return value
+}
+
+fun set(x: Int): Void {
+    value = x
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalWithArithmetic) {
+  const std::string bc = GenerateBytecode(R"(
+global val a: Int = 5
+global val b: Int = 3
+
+fun compute(): Int {
+    return a * b + a - b
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("IntMultiply"), std::string::npos);
+  EXPECT_NE(bc.find("IntAdd"), std::string::npos);
+  EXPECT_NE(bc.find("IntSubtract"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalWithComparison) {
+  const std::string bc = GenerateBytecode(R"(
+global val threshold: Int = 100
+
+fun check(x: Int): bool {
+    return x > threshold
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("IntGreaterThan"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalPrimitiveTypes) {
+  const std::string bc = GenerateBytecode(R"(
+global val i: int = 42
+global val f: float = 3.14
+global val b: bool = true
+
+fun test(): Void {
+    i = 100
+    f = 2.718
+    b = false
+}
+)");
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+  EXPECT_NE(bc.find("PushInt 100"), std::string::npos);
+  EXPECT_NE(bc.find("PushFloat"), std::string::npos);
+  EXPECT_NE(bc.find("PushBool"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ToStringIntConversion) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: int): String {
+    return ToString(x)
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_EQ(bc.find("Call ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ToStringFloatConversion) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: float): String {
+    return ToString(x)
+}
+)");
+  EXPECT_NE(bc.find("FloatToString"), std::string::npos);
+  EXPECT_EQ(bc.find("Call ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ToStringByteConversion) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: byte): String {
+    return ToString(x)
+}
+)");
+  EXPECT_NE(bc.find("ByteToString"), std::string::npos);
+  EXPECT_EQ(bc.find("Call ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ToStringCharConversion) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: char): String {
+    return ToString(x)
+}
+)");
+  EXPECT_NE(bc.find("CharToString"), std::string::npos);
+  EXPECT_EQ(bc.find("Call ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ToStringBoolConversion) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(x: bool): String {
+    return ToString(x)
+}
+)");
+  EXPECT_NE(bc.find("BoolToString"), std::string::npos);
+  EXPECT_EQ(bc.find("Call ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalIntToWrapperConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Int = 42
+
+fun test(): Void {
+    x = 100
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalFloatToWrapperConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Float = 3.14
+
+fun test(): Void {
+    x = 2.718
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Float_float"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalByteToWrapperConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Byte = 42b
+
+fun test(): Void {
+    x = 100b
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Byte_byte"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalCharToWrapperConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Char = 'A'
+
+fun test(): Void {
+    x = 'B'
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Char_char"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalBoolToWrapperConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val x: Bool = true
+
+fun test(): Void {
+    x = false
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Bool_bool"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalIntToStringChain) {
+  const std::string bc = GenerateBytecode(R"(
+global val value: Int = 42
+
+fun test(): String {
+    return ToString(value)
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("Call _Int_ToString_<C>"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalFloatToStringChain) {
+  const std::string bc = GenerateBytecode(R"(
+global val pi: Float = 3.14159
+
+fun test(): String {
+    return ToString(pi)
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("Call _Float_ToString_<C>"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalIntArithmeticWithConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val a: Int = 10
+global val b: Int = 20
+
+fun test(): Int {
+    return a + b
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("Unwrap"), std::string::npos);
+  EXPECT_NE(bc.find("IntAdd"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalIntComparisonWithConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val threshold: Int = 100
+
+fun check(x: Int): bool {
+    return x > threshold
+}
+)");
+  EXPECT_NE(bc.find("LoadStatic"), std::string::npos);
+  EXPECT_NE(bc.find("Unwrap"), std::string::npos);
+  EXPECT_NE(bc.find("IntGreaterThan"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, GlobalMixedTypesConversion) {
+  const std::string bc = GenerateBytecode(R"(
+global val count: Int = 0
+global val rate: Float = 1.5
+global val active: Bool = true
+
+fun update(): Void {
+    count = 10
+    rate = 2.5
+    active = false
+}
+)");
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Float_float"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Bool_bool"), std::string::npos);
+  EXPECT_NE(bc.find("SetStatic"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, IntArithmetic) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: int, b: int): int {
     return a + b - a * b / b % b
@@ -292,7 +508,7 @@ fun test(a: int, b: int): int {
   EXPECT_NE(bc.find("IntModulo"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntComparison) {
+TEST_F(ParserBytecodeTestSuite, IntComparison) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: int, b: int): bool {
     return a < b && a <= b && a > 0 && a >= 0 && a == a && a != b
@@ -306,7 +522,7 @@ fun test(a: int, b: int): bool {
   EXPECT_NE(bc.find("IntNotEqual"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntNegate) {
+TEST_F(ParserBytecodeTestSuite, IntNegate) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): int {
     return -x
@@ -315,7 +531,7 @@ fun test(x: int): int {
   EXPECT_NE(bc.find("IntNegate"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntBitwiseOperations) {
+TEST_F(ParserBytecodeTestSuite, IntBitwiseOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: int, b: int): int {
     return a & b | a ^ b << 2 >> 1
@@ -328,7 +544,7 @@ fun test(a: int, b: int): int {
   EXPECT_NE(bc.find("IntRightShift"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntBitwiseNot) {
+TEST_F(ParserBytecodeTestSuite, IntBitwiseNot) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: int): int {
     return ~a
@@ -337,7 +553,7 @@ fun test(a: int): int {
   EXPECT_NE(bc.find("IntNot"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComparisonOrder) {
+TEST_F(ParserBytecodeTestSuite, ComparisonOrder) {
   const std::string bc = GenerateBytecode(R"(
 fun f(x: Int): Bool {
   return x <= 5;
@@ -353,7 +569,7 @@ fun f(x: Int): Bool {
   EXPECT_LT(pos_x, pos_cmp);
 }
 
-TEST_F(ParserBytecodeTest, FloatArithmetic) {
+TEST_F(ParserBytecodeTestSuite, FloatArithmetic) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: float, b: float): float {
     return a + b * a - b / a
@@ -365,7 +581,7 @@ fun test(a: float, b: float): float {
   EXPECT_NE(bc.find("FloatDivide"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatComparison) {
+TEST_F(ParserBytecodeTestSuite, FloatComparison) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: float, b: float): bool {
     return a < b && a <= b && a > 0.0 && a >= 0.0 && a == a && a != b
@@ -379,7 +595,7 @@ fun test(a: float, b: float): bool {
   EXPECT_NE(bc.find("FloatNotEqual"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatNegate) {
+TEST_F(ParserBytecodeTestSuite, FloatNegate) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: float): float {
     return -x
@@ -388,7 +604,7 @@ fun test(x: float): float {
   EXPECT_NE(bc.find("FloatNegate"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteArithmetic) {
+TEST_F(ParserBytecodeTestSuite, ByteArithmetic) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: byte, b: byte): byte {
     return a + b - a * b / b % b
@@ -401,7 +617,7 @@ fun test(a: byte, b: byte): byte {
   EXPECT_NE(bc.find("ByteModulo"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteComparison) {
+TEST_F(ParserBytecodeTestSuite, ByteComparison) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: byte, b: byte): bool {
     return a < b && a <= b && a > 0 && a >= 0 && a == a && a != b
@@ -415,7 +631,7 @@ fun test(a: byte, b: byte): bool {
   EXPECT_NE(bc.find("ByteNotEqual"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteNegate) {
+TEST_F(ParserBytecodeTestSuite, ByteNegate) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: byte): byte {
     return -a
@@ -424,7 +640,7 @@ fun test(a: byte): byte {
   EXPECT_NE(bc.find("ByteNegate"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteBitwiseOperations) {
+TEST_F(ParserBytecodeTestSuite, ByteBitwiseOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: byte, b: byte): byte {
     return a & b | a ^ b << 2 >> 1
@@ -437,7 +653,7 @@ fun test(a: byte, b: byte): byte {
   EXPECT_NE(bc.find("ByteRightShift"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteBitwiseNot) {
+TEST_F(ParserBytecodeTestSuite, ByteBitwiseNot) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: byte): byte {
     return ~~a
@@ -446,7 +662,7 @@ fun test(a: byte): byte {
   EXPECT_NE(bc.find("ByteNot"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, BoolLogicalOperations) {
+TEST_F(ParserBytecodeTestSuite, BoolLogicalOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: bool, b: bool): bool {
     return a && b || !a
@@ -457,7 +673,7 @@ fun test(a: bool, b: bool): bool {
   EXPECT_NE(bc.find("BoolNot"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, BoolXor) {
+TEST_F(ParserBytecodeTestSuite, BoolXor) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: bool, b: bool): bool {
     return a ^ b
@@ -466,7 +682,7 @@ fun test(a: bool, b: bool): bool {
   EXPECT_NE(bc.find("BoolXor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringConcat) {
+TEST_F(ParserBytecodeTestSuite, StringConcat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): String {
     val a: String = "Hello"
@@ -477,7 +693,7 @@ fun test(): String {
   EXPECT_NE(bc.find("StringConcat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringLength) {
+TEST_F(ParserBytecodeTestSuite, StringLength) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s: String): int {
     return s.Length()
@@ -486,7 +702,7 @@ fun test(s: String): int {
   EXPECT_NE(bc.find("String_Length"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringSubstring) {
+TEST_F(ParserBytecodeTestSuite, StringSubstring) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s: String, start: int, len: int): String {
     return s.Substring(start, len)
@@ -495,7 +711,7 @@ fun test(s: String, start: int, len: int): String {
   EXPECT_NE(bc.find("String_Substring"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringCompare) {
+TEST_F(ParserBytecodeTestSuite, StringCompare) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: String, b: String): int {
     return a.Compare(b)
@@ -504,7 +720,7 @@ fun test(a: String, b: String): int {
   EXPECT_NE(bc.find("String_Compare"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntToFloat) {
+TEST_F(ParserBytecodeTestSuite, IntToFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): float {
     return x as float
@@ -513,7 +729,7 @@ fun test(x: int): float {
   EXPECT_NE(bc.find("IntToFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatToInt) {
+TEST_F(ParserBytecodeTestSuite, FloatToInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: float): int {
     return x as int
@@ -522,7 +738,7 @@ fun test(x: float): int {
   EXPECT_NE(bc.find("FloatToInt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteToInt) {
+TEST_F(ParserBytecodeTestSuite, ByteToInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: byte): int {
     return x as int
@@ -531,7 +747,7 @@ fun test(x: byte): int {
   EXPECT_NE(bc.find("ByteToInt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CharToByte) {
+TEST_F(ParserBytecodeTestSuite, CharToByte) {
   const std::string bc = GenerateBytecode(R"(
 fun test(c: char): byte {
     return c as byte
@@ -540,7 +756,7 @@ fun test(c: char): byte {
   EXPECT_NE(bc.find("CharToByte"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteToChar) {
+TEST_F(ParserBytecodeTestSuite, ByteToChar) {
   const std::string bc = GenerateBytecode(R"(
 fun test(b: byte): char {
     return b as char
@@ -549,7 +765,7 @@ fun test(b: byte): char {
   EXPECT_NE(bc.find("ByteToChar"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, BoolToByte) {
+TEST_F(ParserBytecodeTestSuite, BoolToByte) {
   const std::string bc = GenerateBytecode(R"(
 fun test(b: bool): byte {
     return b as byte
@@ -558,7 +774,7 @@ fun test(b: bool): byte {
   EXPECT_NE(bc.find("BoolToByte"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringToInt) {
+TEST_F(ParserBytecodeTestSuite, StringToInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s: String): int {
     return s as int
@@ -567,7 +783,7 @@ fun test(s: String): int {
   EXPECT_NE(bc.find("StringToInt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringToFloat) {
+TEST_F(ParserBytecodeTestSuite, StringToFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s: String): float {
     return s as float
@@ -576,7 +792,7 @@ fun test(s: String): float {
   EXPECT_NE(bc.find("StringToFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntToString) {
+TEST_F(ParserBytecodeTestSuite, IntToString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): String {
     return x as String
@@ -585,7 +801,7 @@ fun test(x: int): String {
   EXPECT_NE(bc.find("IntToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatToString) {
+TEST_F(ParserBytecodeTestSuite, FloatToString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: float): String {
     return x as String
@@ -594,7 +810,7 @@ fun test(x: float): String {
   EXPECT_NE(bc.find("FloatToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IfStatement) {
+TEST_F(ParserBytecodeTestSuite, IfStatement) {
   const std::string bc = GenerateBytecode(R"(
 fun f(x: Int): Void {
   if (x > 0) {
@@ -606,7 +822,7 @@ fun f(x: Int): Void {
   EXPECT_NE(bc.find("IntGreaterThan"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IfElseStatement) {
+TEST_F(ParserBytecodeTestSuite, IfElseStatement) {
   const std::string bc = GenerateBytecode(R"(
 fun f(x: Int): Void {
   if (x > 0) {
@@ -619,7 +835,7 @@ fun f(x: Int): Void {
   EXPECT_NE(bc.find("else {"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, NestedIf) {
+TEST_F(ParserBytecodeTestSuite, NestedIf) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int, y: int): int {
     if (x > 0) {
@@ -637,7 +853,7 @@ fun test(x: int, y: int): int {
   EXPECT_NE(bc.find("else"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, WhileLoop) {
+TEST_F(ParserBytecodeTestSuite, WhileLoop) {
   const std::string bc = GenerateBytecode(R"(
 fun f(): Void {
   while (true) {
@@ -651,7 +867,7 @@ fun f(): Void {
   EXPECT_NE(bc.find("Continue"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ForLoop) {
+TEST_F(ParserBytecodeTestSuite, ForLoop) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): int {
     var sum: int = 0
@@ -664,7 +880,7 @@ fun test(arr: IntArray): int {
   EXPECT_NE(bc.find("while"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ForLoopWithBreak) {
+TEST_F(ParserBytecodeTestSuite, ForLoopWithBreak) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): int {
     var sum: int = 0
@@ -681,7 +897,7 @@ fun test(arr: IntArray): int {
   EXPECT_NE(bc.find("Break"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ForLoopWithContinue) {
+TEST_F(ParserBytecodeTestSuite, ForLoopWithContinue) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): int {
     var sum: int = 0
@@ -698,7 +914,7 @@ fun test(arr: IntArray): int {
   EXPECT_NE(bc.find("Continue"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, NestedForLoops) {
+TEST_F(ParserBytecodeTestSuite, NestedForLoops) {
   const std::string bc = GenerateBytecode(R"(
 fun test(rows: IntArrayArray): int {
     var sum: int = 0
@@ -713,7 +929,7 @@ fun test(rows: IntArrayArray): int {
   EXPECT_NE(bc.find("while"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, Return) {
+TEST_F(ParserBytecodeTestSuite, Return) {
   const std::string bc = GenerateBytecode(R"(
 fun main(): Void {
   return;
@@ -722,7 +938,7 @@ fun main(): Void {
   EXPECT_NE(bc.find("Return"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, MultipleReturnPaths) {
+TEST_F(ParserBytecodeTestSuite, MultipleReturnPaths) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): int {
     if (x < 0) {
@@ -738,7 +954,7 @@ fun test(x: int): int {
   EXPECT_NE(bc.find("Return"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, GetField) {
+TEST_F(ParserBytecodeTestSuite, GetField) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public val x: Int;
@@ -752,7 +968,7 @@ fun test(p: Point): int {
   EXPECT_NE(bc.find("GetField"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SetField) {
+TEST_F(ParserBytecodeTestSuite, SetField) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public var x: Int;
@@ -767,7 +983,7 @@ fun test(p: Point, x: int, y: int): Void {
   EXPECT_NE(bc.find("SetField"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CallConstructor) {
+TEST_F(ParserBytecodeTestSuite, CallConstructor) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public val x: Int;
@@ -787,7 +1003,7 @@ fun test(): Point {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CallVirtual) {
+TEST_F(ParserBytecodeTestSuite, CallVirtual) {
   const std::string bc = GenerateBytecode(R"(
 interface IBase {
     fun Method(): Void
@@ -808,7 +1024,7 @@ fun test(obj: IBase): Void {
   EXPECT_NE(bc.find("CallVirtual"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, Unwrap) {
+TEST_F(ParserBytecodeTestSuite, Unwrap) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: Int?): int {
     return x!
@@ -817,7 +1033,7 @@ fun test(x: Int?): int {
   EXPECT_NE(bc.find("Unwrap"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ClassDeclaration) {
+TEST_F(ParserBytecodeTestSuite, ClassDeclaration) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   public val x: Int;
@@ -827,7 +1043,7 @@ class Point {
   EXPECT_NE(bc.find("vtable Point"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ClassConstructor) {
+TEST_F(ParserBytecodeTestSuite, ClassConstructor) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   public val x: Int;
@@ -843,7 +1059,7 @@ class Point {
   EXPECT_NE(bc.find("vtable Point"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ClassDestructor) {
+TEST_F(ParserBytecodeTestSuite, ClassDestructor) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   public val x: Int;
@@ -855,7 +1071,7 @@ class Point {
   EXPECT_NE(bc.find("vtable Point"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceDeclaration) {
+TEST_F(ParserBytecodeTestSuite, InterfaceDeclaration) {
   const std::string bc = GenerateBytecode(R"(
 interface Drawable {
   fun Draw(): Void;
@@ -868,7 +1084,7 @@ class Point implements Drawable {
   EXPECT_NE(bc.find("interface"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, GetIndex) {
+TEST_F(ParserBytecodeTestSuite, GetIndex) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, i: int): int {
     return arr[i]
@@ -877,7 +1093,7 @@ fun test(arr: IntArray, i: int): int {
   EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SetIndex) {
+TEST_F(ParserBytecodeTestSuite, SetIndex) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, i: int, value: int): Void {
     arr[i] = value
@@ -886,7 +1102,7 @@ fun test(arr: IntArray, i: int, value: int): Void {
   EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IsNull) {
+TEST_F(ParserBytecodeTestSuite, IsNull) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?): bool {
     return x == null
@@ -895,7 +1111,7 @@ fun test(x: String?): bool {
   EXPECT_NE(bc.find("IsNull"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IsNotNull) {
+TEST_F(ParserBytecodeTestSuite, IsNotNull) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?): bool {
     return x != null
@@ -905,7 +1121,7 @@ fun test(x: String?): bool {
   EXPECT_NE(bc.find("BoolNot"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, NullCoalesce) {
+TEST_F(ParserBytecodeTestSuite, NullCoalesce) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?): String {
     return x ?: "default"
@@ -914,7 +1130,7 @@ fun test(x: String?): String {
   EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SafeCall) {
+TEST_F(ParserBytecodeTestSuite, SafeCall) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?): String? {
     return x?.ToString()
@@ -923,7 +1139,7 @@ fun test(x: String?): String? {
   EXPECT_NE(bc.find("SafeCall"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, TypeTest) {
+TEST_F(ParserBytecodeTestSuite, TypeTest) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: Object): bool {
     return x is String
@@ -932,7 +1148,7 @@ fun test(x: Object): bool {
   EXPECT_NE(bc.find("IsType"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CastAs) {
+TEST_F(ParserBytecodeTestSuite, CastAs) {
   GenerateBytecode(R"(
 fun test(x: Object): String {
     return x as String
@@ -940,7 +1156,7 @@ fun test(x: Object): String {
 )");
 }
 
-TEST_F(ParserBytecodeTest, TypeOf) {
+TEST_F(ParserBytecodeTestSuite, TypeOf) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int): String {
     return sys::TypeOf(x)
@@ -949,7 +1165,7 @@ fun test(x: int): String {
   EXPECT_NE(bc.find("TypeOf"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SizeOf) {
+TEST_F(ParserBytecodeTestSuite, SizeOf) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public val x: Int;
@@ -963,7 +1179,7 @@ fun test(): int {
   EXPECT_NE(bc.find("SizeOf"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FunctionCall) {
+TEST_F(ParserBytecodeTestSuite, FunctionCall) {
   const std::string bc = GenerateBytecode(R"(
 fun add(a: int, b: int): int {
     return a + b
@@ -978,7 +1194,7 @@ fun test(x: int, y: int): int {
   EXPECT_NE(bc.find("add"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, MethodCall) {
+TEST_F(ParserBytecodeTestSuite, MethodCall) {
   const std::string bc = GenerateBytecode(R"(
 class Calculator {
     fun Add(a: int, b: int): int {
@@ -995,7 +1211,7 @@ fun test(calc: Calculator, x: int, y: int): int {
   EXPECT_NE(bc.find("Add"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FunctionArgumentOrder) {
+TEST_F(ParserBytecodeTestSuite, FunctionArgumentOrder) {
   const std::string bc = GenerateBytecode(R"(
 fun f(a: Int, b: Int): Int {
   return a + b;
@@ -1011,7 +1227,7 @@ fun f(a: Int, b: Int): Int {
   EXPECT_LT(pos_a, pos_add);
 }
 
-TEST_F(ParserBytecodeTest, FunctionNameMangling) {
+TEST_F(ParserBytecodeTestSuite, FunctionNameMangling) {
   const std::string bc = GenerateBytecode(R"(
 fun Add(a: Int, b: Int): Int {
   return a + b;
@@ -1020,7 +1236,7 @@ fun Add(a: Int, b: Int): Int {
   EXPECT_NE(bc.find("_Global_Add_Int_Int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexExpression) {
+TEST_F(ParserBytecodeTestSuite, ComplexExpression) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: int, b: int, c: int, d: int): int {
     return (a + b) * (c - d) / (a % b)
@@ -1033,7 +1249,7 @@ fun test(a: int, b: int, c: int, d: int): int {
   EXPECT_NE(bc.find("IntModulo"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexControlFlow) {
+TEST_F(ParserBytecodeTestSuite, ComplexControlFlow) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int, y: int): int {
     if (x > 0) {
@@ -1053,7 +1269,7 @@ fun test(x: int, y: int): int {
   EXPECT_NE(bc.find("Return"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexLoopOperations) {
+TEST_F(ParserBytecodeTestSuite, ComplexLoopOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): int {
     var sum: int = 0
@@ -1076,7 +1292,7 @@ fun test(arr: IntArray): int {
   EXPECT_NE(bc.find("Continue"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexNestedStructures) {
+TEST_F(ParserBytecodeTestSuite, ComplexNestedStructures) {
   const std::string bc = GenerateBytecode(R"(
 class Node {
     public val value: Int;
@@ -1099,7 +1315,7 @@ fun test(root: Node): int {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexTypeConversions) {
+TEST_F(ParserBytecodeTestSuite, ComplexTypeConversions) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: int, y: float, z: byte, c: char, b: bool): Void {
     val f: float = x as float
@@ -1122,7 +1338,7 @@ fun test(x: int, y: float, z: byte, c: char, b: bool): Void {
   EXPECT_NE(bc.find("FloatToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexStringOperations) {
+TEST_F(ParserBytecodeTestSuite, ComplexStringOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s1: String, s2: String, start: int, len: int): Void {
     val concat: String = s1 + s2
@@ -1145,7 +1361,7 @@ fun test(s1: String, s2: String, start: int, len: int): Void {
   EXPECT_NE(bc.find("FloatToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexNullableOperations) {
+TEST_F(ParserBytecodeTestSuite, ComplexNullableOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?, y: String?): String {
     if (x == null) {
@@ -1160,7 +1376,7 @@ fun test(x: String?, y: String?): String {
   EXPECT_NE(bc.find("SafeCall"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexObjectOperations) {
+TEST_F(ParserBytecodeTestSuite, ComplexObjectOperations) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public var x: Int;
@@ -1185,7 +1401,7 @@ fun test(): int {
   EXPECT_NE(bc.find("GetField"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexArrayOperations) {
+TEST_F(ParserBytecodeTestSuite, ComplexArrayOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, i: int, j: int, value: int): int {
     arr[i] = value
@@ -1197,7 +1413,7 @@ fun test(arr: IntArray, i: int, j: int, value: int): int {
   EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemPrintLine) {
+TEST_F(ParserBytecodeTestSuite, SystemPrintLine) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): Void {
     sys::PrintLine("Hello")
@@ -1206,7 +1422,7 @@ fun test(): Void {
   EXPECT_NE(bc.find("PrintLine"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemPrint) {
+TEST_F(ParserBytecodeTestSuite, SystemPrint) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): Void {
     sys::Print("Hello")
@@ -1215,7 +1431,7 @@ fun test(): Void {
   EXPECT_NE(bc.find("Print"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemReadLine) {
+TEST_F(ParserBytecodeTestSuite, SystemReadLine) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): String {
     return sys::ReadLine()
@@ -1224,7 +1440,7 @@ fun test(): String {
   EXPECT_NE(bc.find("ReadLine"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemReadInt) {
+TEST_F(ParserBytecodeTestSuite, SystemReadInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): int {
     return sys::ReadInt()
@@ -1233,7 +1449,7 @@ fun test(): int {
   EXPECT_NE(bc.find("ReadInt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemReadFloat) {
+TEST_F(ParserBytecodeTestSuite, SystemReadFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): float {
     return sys::ReadFloat()
@@ -1242,16 +1458,16 @@ fun test(): float {
   EXPECT_NE(bc.find("ReadFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SystemSqrt) {
+TEST_F(ParserBytecodeTestSuite, SystemSqrt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: float): float {
-    return sys::Sqrt(x)
+    return sys::Sqrt(x + 1.0)
 }
 )");
-  EXPECT_NE(bc.find("sys::Sqrt"), std::string::npos);
+  EXPECT_NE(bc.find("FloatSqrt"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CallIndirect) {
+TEST_F(ParserBytecodeTestSuite, CallIndirect) {
   const std::string bc = GenerateBytecode(R"(
 fun test(f: Function<int, int>, x: int): int {
     return f(x)
@@ -1260,7 +1476,7 @@ fun test(f: Function<int, int>, x: int): int {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PureFunction) {
+TEST_F(ParserBytecodeTestSuite, PureFunction) {
   const std::string bc = GenerateBytecode(R"(
 pure fun Hash(x: int): int {
     return x * 31
@@ -1270,7 +1486,7 @@ pure fun Hash(x: int): int {
   EXPECT_NE(bc.find("int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PureFunctionWithReturnType) {
+TEST_F(ParserBytecodeTestSuite, PureFunctionWithReturnType) {
   const std::string bc = GenerateBytecode(R"(
 pure fun Compute(a: Int, b: Int): Int {
     return a + b
@@ -1282,7 +1498,7 @@ pure fun Compute(a: Int, b: Int): Int {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveWrapperInt) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveWrapperInt) {
   const std::string bc = GenerateBytecode(R"(
 fun f(a: Int, b: Int): Int {
     return a + b
@@ -1295,7 +1511,7 @@ fun f(a: Int, b: Int): Int {
   EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveWrapperFloat) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveWrapperFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun f(a: Float, b: Float): Float {
     return a * b
@@ -1306,7 +1522,7 @@ fun f(a: Float, b: Float): Float {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveWrapperByte) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveWrapperByte) {
   const std::string bc = GenerateBytecode(R"(
 fun f(a: Byte, b: Byte): Byte {
     return a & b
@@ -1317,7 +1533,7 @@ fun f(a: Byte, b: Byte): Byte {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveIntVsWrapper) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveIntVsWrapper) {
   const std::string bc = GenerateBytecode(R"(
 fun f1(a: int, b: int): int {
     return a + b
@@ -1331,7 +1547,7 @@ fun f2(a: Int, b: Int): Int {
   EXPECT_NE(bc.find("_Global_f2_Int_Int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, IntArray) {
+TEST_F(ParserBytecodeTestSuite, IntArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, i: int): int {
     return arr[i]
@@ -1341,7 +1557,7 @@ fun test(arr: IntArray, i: int): int {
   EXPECT_NE(bc.find("_IntArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatArray) {
+TEST_F(ParserBytecodeTestSuite, FloatArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: FloatArray, i: int): float {
     return arr[i]
@@ -1351,7 +1567,7 @@ fun test(arr: FloatArray, i: int): float {
   EXPECT_NE(bc.find("_FloatArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ByteArray) {
+TEST_F(ParserBytecodeTestSuite, ByteArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: ByteArray, i: int): byte {
     return arr[i]
@@ -1361,7 +1577,7 @@ fun test(arr: ByteArray, i: int): byte {
   EXPECT_NE(bc.find("_ByteArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, BoolArray) {
+TEST_F(ParserBytecodeTestSuite, BoolArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: BoolArray, i: int): bool {
     return arr[i]
@@ -1371,7 +1587,7 @@ fun test(arr: BoolArray, i: int): bool {
   EXPECT_NE(bc.find("_BoolArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CharArray) {
+TEST_F(ParserBytecodeTestSuite, CharArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: CharArray, i: int): char {
     return arr[i]
@@ -1381,7 +1597,7 @@ fun test(arr: CharArray, i: int): char {
   EXPECT_NE(bc.find("_CharArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ObjectArray) {
+TEST_F(ParserBytecodeTestSuite, ObjectArray) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public val x: Int;
@@ -1395,7 +1611,7 @@ fun test(arr: ObjectArray, i: int): Object {
   EXPECT_NE(bc.find("_ObjectArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, StringArray) {
+TEST_F(ParserBytecodeTestSuite, StringArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: StringArray, i: int): String {
     return arr[i]
@@ -1405,7 +1621,7 @@ fun test(arr: StringArray, i: int): String {
   EXPECT_NE(bc.find("_StringArray_GetAt_<C>_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ArraySetOperations) {
+TEST_F(ParserBytecodeTestSuite, ArraySetOperations) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, i: int, value: int): Void {
     arr[i] = value
@@ -1414,7 +1630,7 @@ fun test(arr: IntArray, i: int, value: int): Void {
   EXPECT_NE(bc.find("_IntArray_SetAt_<M>_int_int"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, UnwrapOperation) {
+TEST_F(ParserBytecodeTestSuite, UnwrapOperation) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public val x: Int;
@@ -1428,7 +1644,7 @@ fun test(p: Point): int {
   EXPECT_NE(bc.find("Unwrap"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveWrapperWithLiteral) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveWrapperWithLiteral) {
   const std::string bc = GenerateBytecode(R"(
 fun f(a: Int): Int {
     return a + 10
@@ -1441,7 +1657,7 @@ fun f(a: Int): Int {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, PrimitiveWrapperMixedTypes) {
+TEST_F(ParserBytecodeTestSuite, PrimitiveWrapperMixedTypes) {
   const std::string bc = GenerateBytecode(R"(
 fun f1(a: Int, b: int): Int {
     return a + b
@@ -1455,7 +1671,7 @@ fun f2(a: int, b: Int): Int {
   EXPECT_NE(bc.find("CallConstructor"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ArrayOfPrimitiveWrappers) {
+TEST_F(ParserBytecodeTestSuite, ArrayOfPrimitiveWrappers) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: ObjectArray, i: int): Int {
     val obj: Object = arr[i]
@@ -1466,7 +1682,7 @@ fun test(arr: ObjectArray, i: int): Int {
 }
 
 // Array Creation Tests
-TEST_F(ParserBytecodeTest, CreateIntArray) {
+TEST_F(ParserBytecodeTestSuite, CreateIntArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): IntArray {
     return IntArray(10, -1)
@@ -1478,7 +1694,7 @@ fun test(): IntArray {
   EXPECT_NE(bc.find("PushInt 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateFloatArray) {
+TEST_F(ParserBytecodeTestSuite, CreateFloatArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): FloatArray {
     return FloatArray(5, 0.0)
@@ -1490,7 +1706,7 @@ fun test(): FloatArray {
   EXPECT_NE(bc.find("PushFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateByteArray) {
+TEST_F(ParserBytecodeTestSuite, CreateByteArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): ByteArray {
     return ByteArray(8, 0)
@@ -1502,7 +1718,7 @@ fun test(): ByteArray {
   EXPECT_NE(bc.find("PushInt 0"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateBoolArray) {
+TEST_F(ParserBytecodeTestSuite, CreateBoolArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): BoolArray {
     return BoolArray(3, false)
@@ -1514,7 +1730,7 @@ fun test(): BoolArray {
   EXPECT_NE(bc.find("PushBool false"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateCharArray) {
+TEST_F(ParserBytecodeTestSuite, CreateCharArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): CharArray {
     return CharArray(4, ' ')
@@ -1526,7 +1742,7 @@ fun test(): CharArray {
   EXPECT_NE(bc.find("PushChar"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateStringArray) {
+TEST_F(ParserBytecodeTestSuite, CreateStringArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): StringArray {
     return StringArray(5, "Null")
@@ -1538,7 +1754,7 @@ fun test(): StringArray {
   EXPECT_NE(bc.find("PushString \"Null\""), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateObjectArray) {
+TEST_F(ParserBytecodeTestSuite, CreateObjectArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): ObjectArray {
     return ObjectArray(3, null)
@@ -1550,7 +1766,7 @@ fun test(): ObjectArray {
   EXPECT_NE(bc.find("PushNull"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateArrayWithVariable) {
+TEST_F(ParserBytecodeTestSuite, CreateArrayWithVariable) {
   const std::string bc = GenerateBytecode(R"(
 fun test(size: int): IntArray {
     val arr: IntArray = IntArray(size, 0)
@@ -1563,7 +1779,7 @@ fun test(size: int): IntArray {
   EXPECT_NE(bc.find("PushInt 0"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CreateArrayAndInitialize) {
+TEST_F(ParserBytecodeTestSuite, CreateArrayAndInitialize) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): IntArray {
     val arr: IntArray = IntArray(3, 0)
@@ -1581,7 +1797,7 @@ fun test(): IntArray {
   EXPECT_NE(bc.find("PushInt 30"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ForGC) {
+TEST_F(ParserBytecodeTestSuite, ForGC) {
   GenerateBytecode(R"OVUM(
 class Point implements IStringConvertible {
     public var X: Float
@@ -1662,7 +1878,7 @@ fun Main(args: StringArray): int {
 )OVUM");
 }
 
-TEST_F(ParserBytecodeTest, TypeAlias) {
+TEST_F(ParserBytecodeTestSuite, TypeAlias) {
   const std::string bc = GenerateBytecode(R"(
 typealias UserId = Int
 typealias UserName = String
@@ -1673,7 +1889,7 @@ fun test(id: UserId, name: UserName): Void {
   EXPECT_NE(bc.find("_Global_test_Int_String"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentString) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(s1: String, s2: String): Void {
     s1 := s2
@@ -1683,7 +1899,7 @@ fun test(s1: String, s2: String): Void {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentArray) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentArray) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr1: IntArray, arr2: IntArray): Void {
     arr1 := arr2
@@ -1693,7 +1909,7 @@ fun test(arr1: IntArray, arr2: IntArray): Void {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentInt) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentInt) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: Int, b: Int): Void {
     a := b
@@ -1705,7 +1921,7 @@ fun test(a: Int, b: Int): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentIntWithExpression) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentIntWithExpression) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: Int): Void {
     a := a + 1
@@ -1717,7 +1933,7 @@ fun test(a: Int): Void {
   EXPECT_NE(bc.find("IntAdd"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentFloat) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentFloat) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: Float, b: Float): Void {
     a := b
@@ -1727,7 +1943,7 @@ fun test(a: Float, b: Float): Void {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentFloatWithExpression) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentFloatWithExpression) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: Float): Void {
     a := a * 2.0
@@ -1738,7 +1954,7 @@ fun test(a: Float): Void {
   EXPECT_NE(bc.find("FloatMultiply"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ReferenceAssignmentString) {
+TEST_F(ParserBytecodeTestSuite, ReferenceAssignmentString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(a: String, b: String): Void {
     a = b
@@ -1748,7 +1964,7 @@ fun test(a: String, b: String): Void {
   EXPECT_NE(bc.find("SetLocal"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentField) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentField) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public var x: Int
@@ -1764,7 +1980,7 @@ fun test(p: Point, v: Int): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ReferenceAssignmentField) {
+TEST_F(ParserBytecodeTestSuite, ReferenceAssignmentField) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
     public var x: Int
@@ -1780,7 +1996,7 @@ fun test(p: Point, v: Int): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CopyAssignmentArrayElement) {
+TEST_F(ParserBytecodeTestSuite, CopyAssignmentArrayElement) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, v: Int): Void {
     arr[0] := v
@@ -1792,7 +2008,7 @@ fun test(arr: IntArray, v: Int): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ReferenceAssignmentArrayElement) {
+TEST_F(ParserBytecodeTestSuite, ReferenceAssignmentArrayElement) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray, v: Int): Void {
     arr[0] = v
@@ -1804,7 +2020,7 @@ fun test(arr: IntArray, v: Int): Void {
   EXPECT_NE(bc.find("LoadLocal 1"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceIComparable) {
+TEST_F(ParserBytecodeTestSuite, InterfaceIComparable) {
   const std::string bc = GenerateBytecode(R"(
 class Point implements IComparable {
     public val X: Int
@@ -1830,7 +2046,7 @@ class Point implements IComparable {
   EXPECT_NE(bc.find("Equals"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceIHashable) {
+TEST_F(ParserBytecodeTestSuite, InterfaceIHashable) {
   const std::string bc = GenerateBytecode(R"(
 class Point implements IHashable {
     public val X: Int
@@ -1851,7 +2067,7 @@ class Point implements IHashable {
   EXPECT_NE(bc.find("GetHash"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceIStringConvertible) {
+TEST_F(ParserBytecodeTestSuite, InterfaceIStringConvertible) {
   const std::string bc = GenerateBytecode(R"(
 class Point implements IStringConvertible {
     public val X: Int
@@ -1872,7 +2088,7 @@ class Point implements IStringConvertible {
   EXPECT_NE(bc.find("ToString"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ArrayLength) {
+TEST_F(ParserBytecodeTestSuite, ArrayLength) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): Int {
     return arr.Length()
@@ -1882,7 +2098,7 @@ fun test(arr: IntArray): Int {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ArrayToString) {
+TEST_F(ParserBytecodeTestSuite, ArrayToString) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr: IntArray): String {
     return arr.ToString()
@@ -1892,16 +2108,16 @@ fun test(arr: IntArray): String {
   EXPECT_NE(bc.find("Call"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ArrayIsLess) {
+TEST_F(ParserBytecodeTestSuite, ArrayIsLess) {
   const std::string bc = GenerateBytecode(R"(
 fun test(arr1: IntArray, arr2: IntArray): Bool {
     return arr1.IsLess(arr2)
 }
 )");
-  EXPECT_NE(bc.find("_IntArray_IsLess_<M>"), std::string::npos);
+  EXPECT_NE(bc.find("_IntArray_IsLess_<C>"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, HexLiteral) {
+TEST_F(ParserBytecodeTestSuite, HexLiteral) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): int {
     return 0x1A
@@ -1910,7 +2126,7 @@ fun test(): int {
   EXPECT_NE(bc.find("PushInt 26"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, BinaryLiteral) {
+TEST_F(ParserBytecodeTestSuite, BinaryLiteral) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): int {
     return 0b1010
@@ -1919,7 +2135,7 @@ fun test(): int {
   EXPECT_NE(bc.find("PushInt 10"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatScientificNotation) {
+TEST_F(ParserBytecodeTestSuite, FloatScientificNotation) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): float {
     return 2.0e10
@@ -1928,7 +2144,7 @@ fun test(): float {
   EXPECT_NE(bc.find("PushFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, FloatSpecialValues) {
+TEST_F(ParserBytecodeTestSuite, FloatSpecialValues) {
   const std::string bc = GenerateBytecode(R"(
 fun test(): float {
     return Infinity
@@ -1937,7 +2153,7 @@ fun test(): float {
   EXPECT_NE(bc.find("PushFloat"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, MultipleInterfaces) {
+TEST_F(ParserBytecodeTestSuite, MultipleInterfaces) {
   const std::string bc = GenerateBytecode(R"(
 class Point implements IStringConvertible, IComparable, IHashable {
     public val X: Int
@@ -1971,7 +2187,7 @@ class Point implements IStringConvertible, IComparable, IHashable {
   EXPECT_NE(bc.find("IHashable"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceImplementationWithMethods) {
+TEST_F(ParserBytecodeTestSuite, InterfaceImplementationWithMethods) {
   const std::string bc = GenerateBytecode(R"(
 interface IShape {
   fun area(): float
@@ -2005,7 +2221,7 @@ fun test(): float {
   EXPECT_NE(bc.find("area"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, NullableFieldAccess) {
+TEST_F(ParserBytecodeTestSuite, NullableFieldAccess) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   val x: int = 0
@@ -2018,7 +2234,7 @@ fun test(p: Point?): int? {
   EXPECT_NE(bc.find("SafeCall"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ElvisOperator) {
+TEST_F(ParserBytecodeTestSuite, ElvisOperator) {
   const std::string bc = GenerateBytecode(R"(
 fun test(x: String?): String {
   return x ?: "default"
@@ -2027,7 +2243,7 @@ fun test(x: String?): String {
   EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ElvisOperatorWithComplexExpression) {
+TEST_F(ParserBytecodeTestSuite, ElvisOperatorWithComplexExpression) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   val x: int = 0
@@ -2041,7 +2257,7 @@ fun test(p: Point?): int {
   EXPECT_NE(bc.find("SafeCall"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, CastNullableType) {
+TEST_F(ParserBytecodeTestSuite, CastNullableType) {
   const std::string bc = GenerateBytecode(R"(
 class Point {
   val x: int = 0
@@ -2054,7 +2270,7 @@ fun test(obj: Object?): Point? {
   EXPECT_NE(bc.find("CallConstructor _Nullable_Object"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, InterfaceMethodCall) {
+TEST_F(ParserBytecodeTestSuite, InterfaceMethodCall) {
   const std::string bc = GenerateBytecode(R"(
 interface IDrawable {
   fun draw(): Void
@@ -2073,7 +2289,7 @@ fun test(): Void {
   EXPECT_NE(bc.find("draw"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, SafeCallOnNullableInterface) {
+TEST_F(ParserBytecodeTestSuite, SafeCallOnNullableInterface) {
   const std::string bc = GenerateBytecode(R"(
 interface IShape {
   fun area(): float
@@ -2091,7 +2307,7 @@ fun test(shape: IShape?): float? {
   EXPECT_NE(bc.find("area"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, ComplexNullableInterfaceChain) {
+TEST_F(ParserBytecodeTestSuite, ComplexNullableInterfaceChain) {
   const std::string bc = GenerateBytecode(R"(
 interface IShape {
   fun area(): float
@@ -2110,7 +2326,7 @@ fun test(shape: IShape?): float {
   EXPECT_NE(bc.find("NullCoalesce"), std::string::npos);
 }
 
-TEST_F(ParserBytecodeTest, TypeTestWithInterface) {
+TEST_F(ParserBytecodeTestSuite, TypeTestWithInterface) {
   const std::string bc = GenerateBytecode(R"(
 interface IShape {
   fun area(): float
@@ -2125,4 +2341,272 @@ fun test(obj: Object): bool {
 }
 )");
   EXPECT_NE(bc.find("IsType"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, EmptyReturnInVoidFunction) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    return
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, EmptyReturnInIfBlock) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(start: int, end: int): Void {
+    if (start >= end) {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+  EXPECT_NE(bc.find("IntGreaterEqual"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, EmptyReturnWithMultiplePaths) {
+  const std::string bc = GenerateBytecode(R"(
+fun process(x: int): Void {
+    if (x < 0) {
+        return
+    }
+    if (x == 0) {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, EmptyReturnInMethod) {
+  const std::string bc = GenerateBytecode(R"(
+class Logger {
+    fun log(msg: String): Void {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, EmptyReturnInIfElse) {
+  const std::string bc = GenerateBytecode(R"(
+fun check(condition: bool): Void {
+    if (condition) {
+        return
+    } else {
+        return
+    }
+}
+)");
+  EXPECT_NE(bc.find("Return"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringInt) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringFloat) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: float): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+)");
+  EXPECT_NE(bc.find("FloatToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringWithFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+pure fun Factorial(n: int): int {
+    if (n <= 1) {
+        return 1
+    }
+    return n * Factorial(n - 1)
+}
+
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(Factorial(n)))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Call"), std::string::npos); // Should call Factorial
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringWithBuiltinMethodCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(array: IntArray): Void {
+    sys::PrintLine(sys::ToString(array.Length()))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Call _IntArray_Length_<C>"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringWithBuiltinFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    sys::PrintLine(sys::ToString(sys::Random()))
+}
+)");
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_NE(bc.find("Random"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToIntWithArrayAccess) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(sArr: StringArray): Int {
+    return sys::ToInt(sArr[0])
+}
+)");
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
+}
+TEST_F(ParserBytecodeTestSuite, SysStringToInt) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s: String): int {
+    return sys::ToInt(s)
+}
+)");
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysStringToFloat) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s: String): float {
+    return sys::ToFloat(s)
+}
+)");
+  EXPECT_NE(bc.find("StringToFloat"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToFloat"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToIntWithFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): int {
+    return sys::ToInt(sys::ReadLine())
+}
+)");
+  EXPECT_NE(bc.find("StringToInt"), std::string::npos);
+  EXPECT_NE(bc.find("ReadLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToInt"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysSqrtWithCasts) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): int {
+    var n_sqrt = sys::Sqrt(n as float) as int
+    return n_sqrt
+}
+)");
+  EXPECT_NE(bc.find("IntToFloat"), std::string::npos);
+  EXPECT_NE(bc.find("FloatSqrt"), std::string::npos);
+  EXPECT_NE(bc.find("FloatToInt"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::Sqrt"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, SysToStringGetMemoryUsage) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(): Void {
+    sys::PrintLine(sys::GetMemoryUsage().ToString())
+}
+)");
+  EXPECT_NE(bc.find("GetMemoryUsage"), std::string::npos);
+  EXPECT_NE(bc.find("CallConstructor _Int_int"), std::string::npos);
+  EXPECT_NE(bc.find("Call _Int_ToString_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, StringEqualsCorrectOrderOfArguments) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(s1: String, s2: String): bool {
+    return s1.Equals(s2)
+}
+)");
+  ASSERT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  ASSERT_NE(bc.find("LoadLocal 1"), std::string::npos);
+  EXPECT_LT(bc.find("LoadLocal 1"), bc.find("LoadLocal 0"));
+  EXPECT_NE(bc.find("_String_Equals"), std::string::npos);
+  EXPECT_EQ(bc.find("CallVirtual"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, InterfaceVirtualMethodCallCorrectOrderOfArguments) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(lhs : IComparable, rhs : IComparable): bool {
+    return lhs.IsLess(rhs)
+}
+)");
+  ASSERT_NE(bc.find("LoadLocal 0"), std::string::npos);
+  ASSERT_NE(bc.find("LoadLocal 1"), std::string::npos);
+  EXPECT_LT(bc.find("LoadLocal 1"), bc.find("LoadLocal 0"));
+  EXPECT_NE(bc.find("_IsLess"), std::string::npos);
+  EXPECT_NE(bc.find("CallVirtual"), std::string::npos);
+  EXPECT_EQ(bc.find("_IComparable_IsLess"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, OverloadedFunctionCall) {
+  const std::string bc = GenerateBytecode(R"(
+fun test(n: int): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+fun test(n: float): Void {
+    sys::PrintLine(sys::ToString(n))
+}
+fun test(str: String): Void {
+    sys::PrintLine(str)
+}
+
+fun run() : Void {
+    test(1)
+    test(1.0)
+}
+)");
+  ASSERT_NE(bc.find("Call _Global_test_int"), std::string::npos);
+  ASSERT_NE(bc.find("Call _Global_test_float"), std::string::npos);
+  EXPECT_LT(bc.find("Call _Global_test_int"), bc.find("Call _Global_test_float"));
+  EXPECT_NE(bc.find("IntToString"), std::string::npos);
+  EXPECT_NE(bc.find("FloatToString"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Call _Global_test_String"), std::string::npos);
+  EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
+}
+
+TEST_F(ParserBytecodeTestSuite, ChainedMethodCall) {
+  const std::string bc = GenerateBytecode(R"(
+class Logger {
+    private val name: String = "Logger"
+
+    public fun Log(msg: String): String {
+        sys::PrintLine(msg)
+        return name
+    }
+}
+
+class Logics {
+    private val logger: Logger
+
+    public fun Test(msg: String): int {
+        return this.logger.Log(msg).Length()
+    }
+}
+)");
+  EXPECT_NE(bc.find("Call _Logger_Log_<C>_String"), std::string::npos);
+  EXPECT_NE(bc.find("Call _String_Length_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Pop"), std::string::npos);
 }

@@ -30,7 +30,7 @@ public:
   [[nodiscard]] const std::string& GetCode() const noexcept;
 
   void SetMessage(std::string m);
-  [[nodiscard]] const std::string& GetMessage() const noexcept;
+  [[nodiscard]] const std::string& GetDiagnosticsMessage() const noexcept;
 
   void SetCategory(std::string cat);
   [[nodiscard]] const std::string& GetCategory() const noexcept;

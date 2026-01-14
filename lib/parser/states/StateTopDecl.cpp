@@ -121,8 +121,21 @@ IState::StepResult StateTopDecl::TryStep(ContextParser& ctx, ITokenStream& ts) c
   }
 
   const Token& start = ts.Peek();
-  const std::string lex = start.GetLexeme();
+  std::string lex = start.GetLexeme();
   SourceSpan span = SpanFrom(start);
+
+  // Check for optional "global" modifier
+  if (lex == "global") {
+    ts.Consume();
+    SkipTrivia(ts);
+    if (ts.IsEof()) {
+      ReportUnexpected(
+          ctx.Diags(), "P_TOP_DECL", std::string_view("expected declaration after 'global'"), ts.TryPeek());
+      return std::unexpected(StateError(std::string_view("expected declaration after 'global'")));
+    }
+    lex = ts.Peek().GetLexeme();
+    span = Union(span, SpanFrom(ts.Peek()));
+  }
 
   if (lex == "pure") {
     ctx.PushState(StateRegistry::FuncHdr());
@@ -173,19 +186,19 @@ IState::StepResult StateTopDecl::TryStep(ContextParser& ctx, ITokenStream& ts) c
     }
 
     SkipTrivia(ts);
-    if (ts.IsEof() || ts.Peek().GetLexeme() != "=") {
-      ReportUnexpected(ctx.Diags(), "P_GLOBAL_VAR_INIT", "expected '=' for global variable", ts.TryPeek());
-      return std::unexpected(StateError(std::string_view("expected '=' for global variable")));
+    std::unique_ptr<Expr> init = nullptr;
+    if (!ts.IsEof() && ts.Peek().GetLexeme() == "=") {
+      ts.Consume();
+      SkipTrivia(ts);
+      init = ParseExpression(ctx, ts);
+      if (init == nullptr) {
+        return std::unexpected(StateError(std::string_view("failed to parse initialization expression")));
+      }
+      span = Union(span, init->Span());
     }
-    ts.Consume();
 
-    SkipTrivia(ts);
-    auto init = ParseExpression(ctx, ts);
-    if (init == nullptr) {
-      return std::unexpected(StateError(std::string_view("failed to parse initialization expression")));
-    }
-
-    span = Union(span, init->Span());
+    // Only global variables (with "global" keyword or at top level) can be declared here
+    // If "global" keyword is present or we're at top level, create GlobalVarDecl
     auto decl = ctx.Factory()->MakeGlobalVar(is_var, std::move(name), std::move(*type), std::move(init), span);
     module->AddDecl(std::move(decl));
 

@@ -145,7 +145,7 @@ bool DiagnosticCollector::ShouldKeep(const Diagnostic& d) const {
 
 bool DiagnosticCollector::IsDuplicate(const Diagnostic& d) const {
   for (const auto& prev : diags_) {
-    if (prev.GetCode() == d.GetCode() && prev.GetMessage() == d.GetMessage() &&
+    if (prev.GetCode() == d.GetCode() && prev.GetDiagnosticsMessage() == d.GetDiagnosticsMessage() &&
         (prev.GetSeverity() && d.GetSeverity() ? prev.GetSeverity()->Level() == d.GetSeverity()->Level()
                                                : prev.GetSeverity() == d.GetSeverity())) {
       return true;

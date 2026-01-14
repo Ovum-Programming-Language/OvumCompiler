@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <limits>
 #include <ranges>
 #include <sstream>
 #include <string>
@@ -121,8 +123,8 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinSystemCommands = 
                                                                                  "SleepNs",
                                                                                  "Exit",
                                                                                  "GetProcessId",
-                                                                                 "GetEnvironmentVariable",
-                                                                                 "SetEnvironmentVariable",
+                                                                                 "GetEnvironmentVar",
+                                                                                 "SetEnvironmentVar",
                                                                                  "Random",
                                                                                  "RandomRange",
                                                                                  "RandomFloat",
@@ -137,8 +139,6 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinSystemCommands = 
                                                                                  "GetArchitecture",
                                                                                  "GetUserName",
                                                                                  "GetHomeDirectory",
-                                                                                 "GetLastError",
-                                                                                 "ClearError",
                                                                                  "Interop",
                                                                                  "TypeOf"};
 
@@ -155,6 +155,7 @@ const std::unordered_map<std::string, std::string> BytecodeVisitor::kBuiltinRetu
     {"GetMemoryUsage", "Int"},
     {"GetPeakMemoryUsage", "Int"},
     {"GetProcessorCount", "Int"},
+    {"ParseDateTime", "Int"},
 };
 
 const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int",
@@ -169,7 +170,8 @@ const std::unordered_set<std::string> BytecodeVisitor::kBuiltinTypeNames = {"Int
                                                                             "BoolArray",
                                                                             "ByteArray",
                                                                             "CharArray",
-                                                                            "ObjectArray"};
+                                                                            "ObjectArray",
+                                                                            "File"};
 
 const std::unordered_set<std::string> BytecodeVisitor::kPrimitiveTypeNames = {"int", "float", "byte", "char", "bool"};
 
@@ -180,38 +182,45 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_String_ToString_<C>"},
          {"Length", "_String_Length_<C>"},
          {"Equals", "_String_Equals_<C>_Object"},
+         {"IsLess", "_String_IsLess_<C>_Object"},
          {"Substring", "_String_Substring_<C>_int_int"},
          {"Compare", "_String_Compare_<C>_String"},
+         {"ToUtf8Bytes", "_String_ToUtf8Bytes_<C>"},
      }},
     {"Int",
      {
          {"ToString", "_Int_ToString_<C>"},
          {"GetHash", "_Int_GetHash_<C>"},
          {"Equals", "_Int_Equals_<C>_Object"},
+         {"IsLess", "_Int_IsLess_<C>_Object"},
      }},
     {"Float",
      {
          {"ToString", "_Float_ToString_<C>"},
          {"GetHash", "_Float_GetHash_<C>"},
          {"Equals", "_Float_Equals_<C>_Object"},
+         {"IsLess", "_Float_IsLess_<C>_Object"},
      }},
     {"Byte",
      {
          {"ToString", "_Byte_ToString_<C>"},
          {"GetHash", "_Byte_GetHash_<C>"},
          {"Equals", "_Byte_Equals_<C>_Object"},
+         {"IsLess", "_Byte_IsLess_<C>_Object"},
      }},
     {"Char",
      {
          {"ToString", "_Char_ToString_<C>"},
          {"GetHash", "_Char_GetHash_<C>"},
          {"Equals", "_Char_Equals_<C>_Object"},
+         {"IsLess", "_Char_IsLess_<C>_Object"},
      }},
     {"Bool",
      {
          {"ToString", "_Bool_ToString_<C>"},
          {"GetHash", "_Bool_GetHash_<C>"},
          {"Equals", "_Bool_Equals_<C>_Object"},
+         {"IsLess", "_Bool_IsLess_<C>_Object"},
      }},
     {"IntArray",
      {
@@ -219,6 +228,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_IntArray_ToString_<C>"},
          {"GetHash", "_IntArray_GetHash_<C>"},
          {"Equals", "_IntArray_Equals_<C>_Object"},
+         {"IsLess", "_IntArray_IsLess_<C>_Object"},
          {"Clear", "_IntArray_Clear_<M>"},
          {"ShrinkToFit", "_IntArray_ShrinkToFit_<M>"},
          {"Reserve", "_IntArray_Reserve_<M>_int"},
@@ -235,6 +245,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_FloatArray_ToString_<C>"},
          {"GetHash", "_FloatArray_GetHash_<C>"},
          {"Equals", "_FloatArray_Equals_<C>_Object"},
+         {"IsLess", "_FloatArray_IsLess_<C>_Object"},
          {"Clear", "_FloatArray_Clear_<M>"},
          {"ShrinkToFit", "_FloatArray_ShrinkToFit_<M>"},
          {"Reserve", "_FloatArray_Reserve_<M>_int"},
@@ -251,6 +262,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_ByteArray_ToString_<C>"},
          {"GetHash", "_ByteArray_GetHash_<C>"},
          {"Equals", "_ByteArray_Equals_<C>_Object"},
+         {"IsLess", "_ByteArray_IsLess_<C>_Object"},
          {"Clear", "_ByteArray_Clear_<M>"},
          {"ShrinkToFit", "_ByteArray_ShrinkToFit_<M>"},
          {"Reserve", "_ByteArray_Reserve_<M>_int"},
@@ -267,6 +279,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_BoolArray_ToString_<C>"},
          {"GetHash", "_BoolArray_GetHash_<C>"},
          {"Equals", "_BoolArray_Equals_<C>_Object"},
+         {"IsLess", "_BoolArray_IsLess_<C>_Object"},
          {"Clear", "_BoolArray_Clear_<M>"},
          {"ShrinkToFit", "_BoolArray_ShrinkToFit_<M>"},
          {"Reserve", "_BoolArray_Reserve_<M>_int"},
@@ -283,6 +296,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_CharArray_ToString_<C>"},
          {"GetHash", "_CharArray_GetHash_<C>"},
          {"Equals", "_CharArray_Equals_<C>_Object"},
+         {"IsLess", "_CharArray_IsLess_<C>_Object"},
          {"Clear", "_CharArray_Clear_<M>"},
          {"ShrinkToFit", "_CharArray_ShrinkToFit_<M>"},
          {"Reserve", "_CharArray_Reserve_<M>_int"},
@@ -299,14 +313,15 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_StringArray_ToString_<C>"},
          {"GetHash", "_StringArray_GetHash_<C>"},
          {"Equals", "_StringArray_Equals_<C>_Object"},
+         {"IsLess", "_StringArray_IsLess_<C>_Object"},
          {"Clear", "_StringArray_Clear_<M>"},
          {"ShrinkToFit", "_StringArray_ShrinkToFit_<M>"},
          {"Reserve", "_StringArray_Reserve_<M>_int"},
          {"Capacity", "_StringArray_Capacity_<C>"},
-         {"Add", "_StringArray_Add_<M>_Object"},
+         {"Add", "_StringArray_Add_<M>_String"},
          {"RemoveAt", "_StringArray_RemoveAt_<M>_int"},
-         {"InsertAt", "_StringArray_InsertAt_<M>_int_Object"},
-         {"SetAt", "_StringArray_SetAt_<M>_int_Object"},
+         {"InsertAt", "_StringArray_InsertAt_<M>_int_String"},
+         {"SetAt", "_StringArray_SetAt_<M>_int_String"},
          {"GetAt", "_StringArray_GetAt_<C>_int"},
      }},
     {"ObjectArray",
@@ -315,6 +330,7 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"ToString", "_ObjectArray_ToString_<C>"},
          {"GetHash", "_ObjectArray_GetHash_<C>"},
          {"Equals", "_ObjectArray_Equals_<C>_Object"},
+         {"IsLess", "_ObjectArray_IsLess_<C>_Object"},
          {"Clear", "_ObjectArray_Clear_<M>"},
          {"ShrinkToFit", "_ObjectArray_ShrinkToFit_<M>"},
          {"Reserve", "_ObjectArray_Reserve_<M>_int"},
@@ -324,6 +340,19 @@ const std::unordered_map<std::string, std::unordered_map<std::string, std::strin
          {"InsertAt", "_ObjectArray_InsertAt_<M>_int_Object"},
          {"SetAt", "_ObjectArray_SetAt_<M>_int_Object"},
          {"GetAt", "_ObjectArray_GetAt_<C>_int"},
+     }},
+    {"File",
+     {
+         {"Open", "_File_Open_<M>_String_String"},
+         {"Close", "_File_Close_<M>"},
+         {"IsOpen", "_File_IsOpen_<C>"},
+         {"Read", "_File_Read_<M>_Int"},
+         {"Write", "_File_Write_<M>_ByteArray"},
+         {"ReadLine", "_File_ReadLine_<M>"},
+         {"WriteLine", "_File_WriteLine_<M>_String"},
+         {"Seek", "_File_Seek_<M>_Int"},
+         {"Tell", "_File_Tell_<C>"},
+         {"Eof", "_File_Eof_<C>"},
      }},
 };
 
@@ -353,7 +382,10 @@ void BytecodeVisitor::EmitCommandWithFloat(const std::string& command, double va
   if (value == std::floor(value) && std::isfinite(value)) {
     output_ << value << ".0";
   } else {
-    output_ << value;
+    const auto default_precision{output_.precision()};
+    output_ << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10 - 2) << value;
+    output_ << std::setprecision(default_precision);
+    output_.unsetf(std::ios::fixed);
   }
   output_ << "\n";
 }
@@ -429,6 +461,7 @@ void BytecodeVisitor::EmitElseIfStart() {
 void BytecodeVisitor::Visit(Module& node) {
   function_name_map_.clear();
   function_return_types_.clear();
+  function_overloads_.clear();
   method_name_map_.clear();
   method_vtable_map_.clear();
   method_return_types_.clear();
@@ -436,17 +469,27 @@ void BytecodeVisitor::Visit(Module& node) {
   constructor_params_.clear();
   type_aliases_.clear();
   pending_init_static_.clear();
+  pending_init_static_names_.clear();
+  pending_init_static_types_.clear();
 
   for (auto& decl : node.MutableDecls()) {
     if (auto* f = dynamic_cast<FunctionDecl*>(decl.get())) {
       std::string mangled = GenerateFunctionId(f->Name(), f->Params());
-      function_name_map_[f->Name()] = mangled;
+      function_name_map_[f->Name()] = mangled; // Keep for backward compatibility
 
+      FunctionOverload overload;
+      overload.mangled_name = mangled;
+      for (const auto& param : f->Params()) {
+        overload.param_types.push_back(param.GetType());
+      }
       if (f->ReturnType() != nullptr) {
-        function_return_types_[f->Name()] = TypeToMangledName(*f->ReturnType());
+        overload.return_type = TypeToMangledName(*f->ReturnType());
+        function_return_types_[f->Name()] = overload.return_type; // Keep last one for backward compatibility
       } else {
+        overload.return_type = "void";
         function_return_types_[f->Name()] = "void";
       }
+      function_overloads_[f->Name()].push_back(std::move(overload));
     }
 
     if (auto* c = dynamic_cast<ClassDecl*>(decl.get())) {
@@ -461,6 +504,7 @@ void BytecodeVisitor::Visit(Module& node) {
           if (sd->MutableInit() != nullptr) {
             pending_init_static_.push_back(sd->MutableInit());
             pending_init_static_names_.push_back(sd->Name());
+            pending_init_static_types_.push_back(sd->Type());
           }
         }
         if (const auto* md = dynamic_cast<MethodDecl*>(m.get())) {
@@ -505,6 +549,7 @@ void BytecodeVisitor::Visit(Module& node) {
       if (gv->MutableInit() != nullptr) {
         pending_init_static_.push_back(gv->MutableInit());
         pending_init_static_names_.push_back(gv->Name());
+        pending_init_static_types_.push_back(gv->Type());
       }
     }
 
@@ -519,6 +564,17 @@ void BytecodeVisitor::Visit(Module& node) {
   if (!pending_init_static_.empty()) {
     for (size_t i = 0; i < pending_init_static_.size(); ++i) {
       pending_init_static_[i]->Accept(*this);
+
+      // Add CallConstructor if type is a wrapper type (Float, Int, etc.)
+      if (i < pending_init_static_types_.size()) {
+        std::string type_name = TypeToMangledName(pending_init_static_types_[i]);
+        if (IsPrimitiveWrapper(type_name)) {
+          std::string primitive_type = GetPrimitiveTypeForWrapper(type_name);
+          EmitWrapConstructorCall(type_name, primitive_type);
+        }
+        variable_types_[pending_init_static_names_[i]] = type_name;
+      }
+
       EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(pending_init_static_names_[i])));
     }
   }
@@ -545,12 +601,21 @@ void BytecodeVisitor::Visit(FunctionDecl& node) {
   }
 
   std::string mangled = GenerateFunctionId(node.Name(), node.Params());
+  function_name_map_[node.Name()] = mangled; // Keep for backward compatibility
 
+  FunctionOverload overload;
+  overload.mangled_name = mangled;
+  for (const auto& param : node.Params()) {
+    overload.param_types.push_back(param.GetType());
+  }
   if (node.ReturnType() != nullptr) {
-    function_return_types_[node.Name()] = TypeToMangledName(*node.ReturnType());
+    overload.return_type = TypeToMangledName(*node.ReturnType());
+    function_return_types_[node.Name()] = overload.return_type; // Keep last one for backward compatibility
   } else {
+    overload.return_type = "void";
     function_return_types_[node.Name()] = "void";
   }
+  function_overloads_[node.Name()].push_back(std::move(overload));
 
   if (node.IsPure()) {
     output_ << "pure";
@@ -677,11 +742,40 @@ void BytecodeVisitor::Visit(CallDecl& node) {
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
 
-    EmitCommandWithInt("LoadLocal", 0);
-    EmitCommand("Return");
+    // Check if body ends with return statement
+    bool has_return = false;
+    if (const auto& stmts = node.MutableBody()->GetStatements(); !stmts.empty()) {
+      if (dynamic_cast<ReturnStmt*>(stmts.back().get()) != nullptr) {
+        has_return = true;
+      }
+    }
+
+    // Only add implicit return if body doesn't already have one
+    if (!has_return) {
+      if (node.ReturnType() != nullptr) {
+        std::string return_type_name = TypeToMangledName(*node.ReturnType());
+        if (return_type_name == "void") {
+          EmitCommand("Return");
+        } else {
+          EmitCommandWithInt("LoadLocal", 0);
+          EmitCommand("Return");
+        }
+      } else {
+        EmitCommand("Return");
+      }
+    }
   } else {
-    EmitCommandWithInt("LoadLocal", 0);
-    EmitCommand("Return");
+    if (node.ReturnType() != nullptr) {
+      std::string return_type_name = TypeToMangledName(*node.ReturnType());
+      if (return_type_name == "void") {
+        EmitCommand("Return");
+      } else {
+        EmitCommandWithInt("LoadLocal", 0);
+        EmitCommand("Return");
+      }
+    } else {
+      EmitCommand("Return");
+    }
   }
   EmitBlockEnd();
   output_ << "\n";
@@ -712,6 +806,8 @@ void BytecodeVisitor::Visit(TypeAliasDecl& node) {
 
 void BytecodeVisitor::Visit(GlobalVarDecl& node) {
   (void) GetStaticIndex(node.Name());
+  std::string type_name = TypeToMangledName(node.Type());
+  variable_types_[node.Name()] = type_name;
 }
 
 void BytecodeVisitor::Visit(FieldDecl&) {
@@ -927,15 +1023,29 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
       } else if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
         const std::string method_name = field_access->Name();
 
-        std::string object_type;
-        if (const auto* obj_ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-          if (const auto type_it = variable_types_.find(obj_ident->Name()); type_it != variable_types_.end()) {
-            object_type = type_it->second;
+        // Use GetTypeNameForExpr to determine object type, which handles chained calls
+        std::string object_type = GetTypeNameForExpr(&field_access->MutableObject());
+
+        // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+        if (object_type == "unknown" || object_type.empty()) {
+          if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+            if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+              std::string nested_method_name = nested_field_access->Name();
+              std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+
+              if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+                std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+                if (const auto nested_it = method_return_types_.find(nested_method_key);
+                    nested_it != method_return_types_.end()) {
+                  object_type = nested_it->second;
+                }
+              }
+            }
           }
         }
 
         std::string method_key;
-        if (!object_type.empty()) {
+        if (!object_type.empty() && !kBuiltinTypeNames.contains(object_type)) {
           method_key = object_type + "::" + method_name;
         } else if (!current_class_name_.empty()) {
           method_key = current_class_name_ + "::" + method_name;
@@ -1043,7 +1153,6 @@ void BytecodeVisitor::Visit(ForStmt& node) {
       if (const auto local_it = local_variables_.find(ident->Name());
           var_it != variable_types_.end() && local_it != local_variables_.end()) {
         collection_index = local_it->second;
-        collection_var_name = ident->Name();
         collection_type = var_it->second;
       } else {
         node.MutableIteratorExpr()->Accept(*this);
@@ -1063,6 +1172,7 @@ void BytecodeVisitor::Visit(ForStmt& node) {
 
   EmitCommandWithInt("PushInt", 0);
   size_t counter_index = GetLocalIndex(node.IteratorName() + "_i");
+  variable_types_[node.IteratorName() + "_i"] = "int";
   EmitCommandWithInt("SetLocal", static_cast<int64_t>(counter_index));
 
   EmitIndent();
@@ -1093,6 +1203,7 @@ void BytecodeVisitor::Visit(ForStmt& node) {
   EmitCommandWithStringWithoutBraces("Call", method_name);
 
   size_t item_index = GetLocalIndex(node.IteratorName());
+  variable_types_[node.IteratorName()] = GetElementTypeForArray(collection_type);
   EmitCommandWithInt("SetLocal", static_cast<int64_t>(item_index));
 
   if (node.MutableBody() != nullptr) {
@@ -1108,11 +1219,9 @@ void BytecodeVisitor::Visit(ForStmt& node) {
 }
 
 void BytecodeVisitor::Visit(UnsafeBlock& node) {
-  EmitCommand("UnsafeBlockStart");
   if (node.MutableBody() != nullptr) {
     node.MutableBody()->Accept(*this);
   }
-  EmitCommand("UnsafeBlockEnd");
 }
 
 void BytecodeVisitor::Visit(Binary& node) {
@@ -1332,19 +1441,26 @@ void BytecodeVisitor::Visit(Assign& node) {
   }
 
   if (auto* ident = dynamic_cast<IdentRef*>(&node.MutableTarget())) {
-    node.MutableValue().Accept(*this);
+    // Check if this is a global variable before generating code
+    bool is_global = static_variables_.contains(ident->Name());
 
     std::string expected_type_name;
     if (auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
       expected_type_name = type_it->second;
     }
 
+    node.MutableValue().Accept(*this);
+
     if (!expected_type_name.empty()) {
       std::string value_type_name = GetTypeNameForExpr(&node.MutableValue());
       EmitTypeConversionIfNeeded(expected_type_name, value_type_name);
     }
 
-    EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
+    if (is_global) {
+      EmitCommandWithInt("SetStatic", static_cast<int64_t>(GetStaticIndex(ident->Name())));
+    } else {
+      EmitCommandWithInt("SetLocal", static_cast<int64_t>(GetLocalIndex(ident->Name())));
+    }
   } else if (auto* index_access = dynamic_cast<IndexAccess*>(&node.MutableTarget())) {
     node.MutableValue().Accept(*this);
 
@@ -1384,12 +1500,94 @@ void BytecodeVisitor::Visit(Call& node) {
       return;
     }
 
+    // Handle sys::ToString for primitive types
+    if (ns_name == "ToString" && args.size() == 1) {
+      // Get the type first (without emitting code)
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // Handle wrapper types by unwrapping first
+      if (IsPrimitiveWrapper(arg_type)) {
+        std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        // Now emit the argument code
+        args[0]->Accept(*this);
+        EmitCommand("Unwrap");
+        arg_type = primitive_type;
+      } else {
+        // Emit the argument code
+        args[0]->Accept(*this);
+      }
+
+      // For primitive types, use special instructions
+      if (arg_type == "int") {
+        EmitCommand("IntToString");
+        return;
+      }
+      if (arg_type == "float") {
+        EmitCommand("FloatToString");
+        return;
+      }
+    }
+
+    // Handle sys::ToInt for String type
+    if (ns_name == "ToInt" && args.size() == 1) {
+      // Get the type first (without emitting code)
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For String type, use special instruction
+      if (arg_type == "String") {
+        // Now emit the argument code
+        args[0]->Accept(*this);
+        EmitCommand("StringToInt");
+        return;
+      }
+    }
+
+    // Handle sys::ToFloat for String type
+    if (ns_name == "ToFloat" && args.size() == 1) {
+      // Get the type first (without emitting code)
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For String type, use special instruction
+      if (arg_type == "String") {
+        // Now emit the argument code
+        args[0]->Accept(*this);
+        EmitCommand("StringToFloat");
+        return;
+      }
+    }
+
+    // Handle sys::Sqrt for float type
+    if (ns_name == "Sqrt" && args.size() == 1) {
+      // Get the type first (without emitting code)
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // Handle wrapper types by unwrapping first
+      if (IsPrimitiveWrapper(arg_type)) {
+        std::string primitive_type = GetPrimitiveTypeForWrapper(arg_type);
+        // Now emit the argument code
+        args[0]->Accept(*this);
+        EmitCommand("Unwrap");
+        arg_type = primitive_type;
+      } else {
+        // Emit the argument code
+        args[0]->Accept(*this);
+      }
+
+      // Sqrt only works with float type
+      if (arg_type == "float") {
+        EmitCommand("FloatSqrt");
+        return;
+      }
+    }
+
     std::string full_name = "sys::" + ns_name;
     if (auto it = function_name_map_.find(full_name); it != function_name_map_.end()) {
+      EmitArgumentsInReverse(args);
       EmitCommandWithStringWithoutBraces("Call", it->second);
       return;
     }
 
+    EmitArgumentsInReverse(args);
     EmitCommandWithStringWithoutBraces("Call", full_name);
     return;
   }
@@ -1518,6 +1716,55 @@ void BytecodeVisitor::Visit(Call& node) {
       return;
     }
 
+    // Handle ToString for primitive types
+    if (name == "ToString" && args.size() == 1) {
+      args[0]->Accept(*this);
+      std::string arg_type = GetTypeNameForExpr(args[0].get());
+
+      // For wrapper types, use their ToString method from kBuiltinMethods
+      if (kBuiltinTypeNames.contains(arg_type)) {
+        if (auto methods_it = kBuiltinMethods.find(arg_type); methods_it != kBuiltinMethods.end()) {
+          if (auto tostring_it = methods_it->second.find("ToString"); tostring_it != methods_it->second.end()) {
+            EmitCommandWithStringWithoutBraces("Call", tostring_it->second);
+            return;
+          }
+        }
+      }
+
+      // For primitive types, use special instructions
+      if (arg_type == "int") {
+        EmitCommand("IntToString");
+        return;
+      }
+      if (arg_type == "float") {
+        EmitCommand("FloatToString");
+        return;
+      }
+      if (arg_type == "byte") {
+        EmitCommand("ByteToString");
+        return;
+      }
+      if (arg_type == "char") {
+        EmitCommand("CharToString");
+        return;
+      }
+      if (arg_type == "bool") {
+        EmitCommand("BoolToString");
+        return;
+      }
+    }
+
+    // Try to resolve overload
+    std::string resolved_mangled = ResolveFunctionOverload(name, args);
+    if (!resolved_mangled.empty()) {
+      for (auto& arg : std::ranges::reverse_view(args)) {
+        arg->Accept(*this);
+      }
+      EmitCommandWithStringWithoutBraces("Call", resolved_mangled);
+      return;
+    }
+
+    // Fallback to old behavior for backward compatibility
     if (auto it = function_name_map_.find(name); it != function_name_map_.end()) {
       for (auto& arg : std::ranges::reverse_view(args)) {
         arg->Accept(*this);
@@ -1534,8 +1781,6 @@ void BytecodeVisitor::Visit(Call& node) {
   }
 
   if (auto* field_access = dynamic_cast<FieldAccess*>(&node.MutableCallee())) {
-    field_access->MutableObject().Accept(*this);
-
     std::string method_name = field_access->Name();
 
     std::string object_type;
@@ -1663,6 +1908,21 @@ void BytecodeVisitor::Visit(Call& node) {
             }
           }
         }
+
+        // For builtin types, if method not found in kBuiltinMethods, generate direct Call name
+        if (method_call.empty() && kBuiltinTypeNames.contains(object_type)) {
+          // Generate method name: _TypeName_MethodName_<C> or _TypeName_MethodName_<M>
+          // Default to <C> for const methods, can be adjusted if needed
+          method_call = "_" + object_type + "_" + method_name + "_<C>";
+          // Add parameter types if there are arguments
+          if (!args.empty()) {
+            // For now, assume Object type for all parameters (this matches most cases)
+            // More sophisticated type inference could be added later
+            for (size_t i = 0; i < args.size(); ++i) {
+              method_call += "_Object";
+            }
+          }
+        }
       }
 
       if (!method_call.empty()) {
@@ -1712,6 +1972,7 @@ void BytecodeVisitor::Visit(Call& node) {
           expected_param_types.emplace_back("int");
         }
 
+        // For regular Call: emit arguments first (right to left), then object
         for (size_t i = args.size(); i > 0; --i) {
           size_t arg_idx = i - 1;
           Expr* arg = args[arg_idx].get();
@@ -1736,14 +1997,17 @@ void BytecodeVisitor::Visit(Call& node) {
             }
           }
         }
+        field_access->MutableObject().Accept(*this);
 
         EmitCommandWithStringWithoutBraces("Call", method_call);
         return;
       }
 
+      // For CallVirtual: emit arguments first (right to left), then object (leftmost)
       for (auto& arg : std::ranges::reverse_view(args)) {
         arg->Accept(*this);
       }
+      field_access->MutableObject().Accept(*this);
       std::string vtable_name = "_" + method_name + "_<C>";
       if (!args.empty()) {
         vtable_name += "_Object";
@@ -1797,6 +2061,8 @@ void BytecodeVisitor::Visit(Call& node) {
     for (auto& arg : std::ranges::reverse_view(args)) {
       arg->Accept(*this);
     }
+
+    field_access->MutableObject().Accept(*this);
 
     if (!specific_method_name.empty()) {
       EmitCommandWithStringWithoutBraces("Call", specific_method_name);
@@ -2128,7 +2394,7 @@ std::string BytecodeVisitor::GenerateConstructorId(const std::string& class_name
 }
 
 std::string BytecodeVisitor::GenerateDestructorId(const std::string& class_name) {
-  return "_" + class_name + "_destructor";
+  return "_" + class_name + "_destructor_<M>";
 }
 
 std::string BytecodeVisitor::GenerateCopyMethodId(const std::string& class_name, const std::string& param_type) {
@@ -2229,9 +2495,22 @@ size_t BytecodeVisitor::GetStaticIndex(const std::string& name) {
 }
 
 void BytecodeVisitor::ResetLocalVariables() {
+  // Save global variable types before clearing
+  std::unordered_map<std::string, std::string> global_types;
+  for (const auto& [name, type] : variable_types_) {
+    if (static_variables_.contains(name)) {
+      global_types[name] = type;
+    }
+  }
+
   local_variables_.clear();
   variable_types_.clear();
   next_local_index_ = 0;
+
+  // Restore global variable types
+  for (const auto& [name, type] : global_types) {
+    variable_types_[name] = type;
+  }
 }
 
 BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
@@ -2279,7 +2558,71 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  if (const auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
+  if (auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
+    // First, try to get the object type using GetTypeNameForExpr
+    // This handles cases where the object is a variable, method call result, etc.
+    std::string object_type_name = GetTypeNameForExpr(&field_access->MutableObject());
+
+    // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+    if (object_type_name == "unknown" || object_type_name.empty()) {
+      if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+        // Get the return type of the nested call by examining its structure
+        if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+          std::string nested_method_name = nested_field_access->Name();
+          std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+
+          // Check if this is a method call on a user-defined type
+          if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+            std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+            if (const auto nested_it = method_return_types_.find(nested_method_key);
+                nested_it != method_return_types_.end()) {
+              object_type_name = nested_it->second;
+            }
+          }
+        }
+      }
+
+      // If that didn't work, try checking if it's a direct IdentRef
+      if (object_type_name.empty() || object_type_name == "unknown") {
+        if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
+          if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
+            object_type_name = type_it->second;
+          }
+        }
+      }
+    }
+
+    // If we have an object type, look up the field in that class
+    if (!object_type_name.empty() && object_type_name != "unknown") {
+      if (const auto fields_it = class_fields_.find(object_type_name); fields_it != class_fields_.end()) {
+        for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
+          if (fst == field_access->Name()) {
+            const std::string& type_name = TypeToMangledName(snd);
+            if (type_name == "int" || type_name == "Int") {
+              return OperandType::kInt;
+            }
+            if (type_name == "float" || type_name == "Float") {
+              return OperandType::kFloat;
+            }
+            if (type_name == "byte" || type_name == "Byte") {
+              return OperandType::kByte;
+            }
+            if (type_name == "bool" || type_name == "Bool") {
+              return OperandType::kBool;
+            }
+            if (type_name == "char" || type_name == "Char") {
+              return OperandType::kChar;
+            }
+            if (type_name == "String") {
+              return OperandType::kString;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Fallback: check current class if we're inside a class
     if (!current_class_name_.empty()) {
       if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
         for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
@@ -2375,6 +2718,29 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     return DetermineOperandType(&unary->MutableOperand());
   }
 
+  if (auto* call = dynamic_cast<Call*>(expr)) {
+    // Use GetTypeNameForExpr to determine return type
+    std::string return_type = GetTypeNameForExpr(call);
+    if (return_type == "int") {
+      return OperandType::kInt;
+    }
+    if (return_type == "float") {
+      return OperandType::kFloat;
+    }
+    if (return_type == "byte") {
+      return OperandType::kByte;
+    }
+    if (return_type == "bool") {
+      return OperandType::kBool;
+    }
+    if (return_type == "char") {
+      return OperandType::kChar;
+    }
+    if (return_type == "String") {
+      return OperandType::kString;
+    }
+  }
+
   return OperandType::kUnknown;
 }
 
@@ -2407,14 +2773,41 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
   }
 
   if (auto* field = dynamic_cast<FieldAccess*>(expr)) {
-    std::string object_type_name;
-    if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
-      if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
-        object_type_name = type_it->second;
+    // First, try to get the object type recursively using GetTypeNameForExpr
+    // This handles cases where the object is a variable, method call result, etc.
+    std::string object_type_name = GetTypeNameForExpr(&field->MutableObject());
+
+    // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+    if (object_type_name == "unknown" || object_type_name.empty()) {
+      if (auto* nested_call = dynamic_cast<Call*>(&field->MutableObject())) {
+        // Get the return type of the nested call by examining its structure
+        if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+          std::string nested_method_name = nested_field_access->Name();
+          std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+
+          // Check if this is a method call on a user-defined type
+          if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+            std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+            if (const auto nested_it = method_return_types_.find(nested_method_key);
+                nested_it != method_return_types_.end()) {
+              object_type_name = nested_it->second;
+            }
+          }
+        }
+      }
+
+      // If that didn't work, try checking if it's a direct IdentRef
+      if (object_type_name.empty() || object_type_name == "unknown") {
+        if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
+          if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
+            object_type_name = type_it->second;
+          }
+        }
       }
     }
 
-    if (!object_type_name.empty()) {
+    // If we have an object type, look up the field in that class
+    if (!object_type_name.empty() && object_type_name != "unknown") {
       if (const auto fields_it = class_fields_.find(object_type_name); fields_it != class_fields_.end()) {
         for (const auto& [fst, snd] : fields_it->second) {
           if (fst == field->Name()) {
@@ -2424,6 +2817,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
       }
     }
 
+    // Fallback: check current class if we're inside a class
     if (!current_class_name_.empty()) {
       if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
         for (const auto& [fst, snd] : fields_it->second) {
@@ -2452,6 +2846,253 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
   }
   if (dynamic_cast<StringLit*>(expr) != nullptr) {
     return "String";
+  }
+
+  if (auto* index_access = dynamic_cast<IndexAccess*>(expr)) {
+    std::string array_type = GetTypeNameForExpr(&index_access->MutableObject());
+    return GetElementTypeForArray(array_type);
+  }
+
+  if (auto* call = dynamic_cast<Call*>(expr)) {
+    if (const auto* ident = dynamic_cast<IdentRef*>(&call->MutableCallee())) {
+      std::string func_name = ident->Name();
+      // Handle constructor calls for builtin wrapper types
+      if (kBuiltinTypeNames.contains(func_name)) {
+        return func_name; // Int(0) returns "Int", Float(1.0) returns "Float", etc.
+      }
+      if (const auto it = function_return_types_.find(func_name); it != function_return_types_.end()) {
+        return it->second;
+      }
+    }
+
+    // Handle sys::Sqrt and other sys namespace functions
+    if (auto* ns_ref = dynamic_cast<NamespaceRef*>(&call->MutableCallee())) {
+      std::string ns_name = ns_ref->Name();
+      // Check if namespace is "sys" by examining NamespaceExpr
+      if (const auto* ns_ident = dynamic_cast<IdentRef*>(&ns_ref->MutableNamespaceExpr())) {
+        if (ns_ident->Name() == "sys") {
+          // Check for built-in return types
+          if (const auto it = kBuiltinReturnPrimitives.find(ns_name); it != kBuiltinReturnPrimitives.end()) {
+            return it->second;
+          }
+          if (ns_name == "Sqrt" && call->Args().size() == 1) {
+            return "float";
+          }
+          if (ns_name == "ToString" && call->Args().size() == 1) {
+            // ToString returns String, but we need to check the argument type
+            // to determine which *ToString instruction to use
+            std::string arg_type = GetTypeNameForExpr(call->Args()[0].get());
+            if (arg_type == "int" || arg_type == "Int") {
+              return "String";
+            }
+            if (arg_type == "float" || arg_type == "Float") {
+              return "String";
+            }
+            // For other types, ToString still returns String
+            return "String";
+          }
+          if (ns_name == "ToInt" && call->Args().size() == 1) {
+            return "int";
+          }
+          if (ns_name == "ToFloat" && call->Args().size() == 1) {
+            return "float";
+          }
+          if (ns_name == "GetOsName" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "ReadLine" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "ReadChar" && call->Args().size() == 0) {
+            return "Char";
+          }
+          // Time and Date Operations
+          if (ns_name == "FormatDateTime" && call->Args().size() == 2) {
+            return "String";
+          }
+          if (ns_name == "ParseDateTime" && call->Args().size() == 2) {
+            return "Int";
+          }
+          // File Operations
+          if (ns_name == "FileExists" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DirectoryExists" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "CreateDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DeleteFile" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "DeleteDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          if (ns_name == "MoveFile" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          if (ns_name == "CopyFile" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          if (ns_name == "ListDirectory" && call->Args().size() == 1) {
+            return "StringArray";
+          }
+          if (ns_name == "GetCurrentDirectory" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "ChangeDirectory" && call->Args().size() == 1) {
+            return "Bool";
+          }
+          // Process Control
+          if (ns_name == "Sleep" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "SleepMs" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "SleepNs" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "Exit" && call->Args().size() == 1) {
+            return "Never";
+          }
+          if (ns_name == "GetEnvironmentVar" && call->Args().size() == 1) {
+            return "String?"; // Returns Nullable<String>
+          }
+          if (ns_name == "SetEnvironmentVar" && call->Args().size() == 2) {
+            return "Bool";
+          }
+          // Random Number Generation
+          if (ns_name == "SeedRandom" && call->Args().size() == 1) {
+            return "Void";
+          }
+          // System Information
+          if (ns_name == "GetOsVersion" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetArchitecture" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetUserName" && call->Args().size() == 0) {
+            return "String";
+          }
+          if (ns_name == "GetHomeDirectory" && call->Args().size() == 0) {
+            return "String";
+          }
+          // Memory and Performance
+          if (ns_name == "ForceGarbageCollection" && call->Args().size() == 0) {
+            return "Void";
+          }
+          // FFI
+          if (ns_name == "Interop" && call->Args().size() == 4) {
+            return "int";
+          }
+          // I/O functions that return Void
+          if (ns_name == "Print" && call->Args().size() == 1) {
+            return "Void";
+          }
+          if (ns_name == "PrintLine" && call->Args().size() == 1) {
+            return "Void";
+          }
+        }
+      }
+    }
+
+    // Handle method calls on builtin types (e.g., array.Length(), array.GetAt(0))
+    if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
+      std::string method_name = field_access->Name();
+      std::string object_type = GetTypeNameForExpr(&field_access->MutableObject());
+
+      if (!object_type.empty() && kBuiltinTypeNames.contains(object_type)) {
+        // Handle array methods
+        if (object_type.find("Array") != std::string::npos) {
+          if (method_name == "Length" || method_name == "Capacity") {
+            return "int";
+          }
+          if (method_name == "GetAt") {
+            return GetElementTypeForArray(object_type);
+          }
+          if (method_name == "ToString") {
+            return "String";
+          }
+          if (method_name == "GetHash") {
+            return "int";
+          }
+        }
+        // Handle String methods
+        if (object_type == "String") {
+          if (method_name == "Length") {
+            return "int";
+          }
+          if (method_name == "Substring") {
+            return "String";
+          }
+          if (method_name == "Compare") {
+            return "int";
+          }
+          if (method_name == "ToUtf8Bytes") {
+            return "ByteArray";
+          }
+        }
+        // Handle wrapper type methods (Int, Float, etc.)
+        if (method_name == "ToString") {
+          return "String";
+        }
+        if (method_name == "GetHash") {
+          return "int";
+        }
+      }
+
+      // Handle method calls on user-defined types
+      // Check method_return_types_ for the return type of this method
+      if (!object_type.empty() && !kBuiltinTypeNames.contains(object_type)) {
+        std::string method_key = object_type + "::" + method_name;
+        if (const auto it = method_return_types_.find(method_key); it != method_return_types_.end()) {
+          return it->second;
+        }
+      }
+
+      // Handle chained method calls: if object_type is "unknown", it might be a Call expression
+      // Try to determine the return type of the nested call to use as object_type
+      if (object_type == "unknown" || object_type.empty()) {
+        if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+          // Get the return type of the nested call by examining its structure
+          if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+            std::string nested_method_name = nested_field_access->Name();
+            std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+
+            // Check if this is a method call on a user-defined type
+            if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+              std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+              if (const auto nested_it = method_return_types_.find(nested_method_key);
+                  nested_it != method_return_types_.end()) {
+                // Use the return type of the nested call as the object type for this call
+                std::string return_type = nested_it->second;
+                std::string chained_method_key = return_type + "::" + method_name;
+                if (const auto chained_it = method_return_types_.find(chained_method_key);
+                    chained_it != method_return_types_.end()) {
+                  return chained_it->second;
+                }
+                // If the chained method doesn't exist, at least return the return type of the nested call
+                // This helps with type propagation in chained calls
+                return return_type;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (const auto* cast = dynamic_cast<CastAs*>(expr)) {
+    return TypeToMangledName(cast->Type());
+  }
+
+  // For Call expressions, if we couldn't determine the type, return "unknown"
+  // to avoid infinite recursion (GetOperandTypeName -> DetermineOperandType -> GetTypeNameForExpr)
+  if (dynamic_cast<Call*>(expr) != nullptr) {
+    return "unknown";
   }
 
   return GetOperandTypeName(expr);
@@ -2687,14 +3328,115 @@ std::string BytecodeVisitor::GetElementTypeForArray(const std::string& array_typ
   if (array_type == "CharArray") {
     return "char";
   }
-  if (array_type == "StringArray" || array_type == "ObjectArray") {
-    return "Object";
+  if (array_type == "StringArray") {
+    return "String";
   }
   return "Object";
 }
 
 bool BytecodeVisitor::IsBuiltinSystemCommand(const std::string& name) const {
   return kBuiltinSystemCommands.contains(name);
+}
+
+std::string BytecodeVisitor::ResolveFunctionOverload(const std::string& func_name,
+                                                     const std::vector<std::unique_ptr<Expr>>& args) {
+  auto overloads_it = function_overloads_.find(func_name);
+  if (overloads_it == function_overloads_.end()) {
+    return "";
+  }
+
+  const auto& overloads = overloads_it->second;
+  if (overloads.empty()) {
+    return "";
+  }
+
+  // If only one overload, return it (no resolution needed)
+  if (overloads.size() == 1) {
+    return overloads[0].mangled_name;
+  }
+
+  // Get argument types
+  std::vector<std::string> arg_types;
+  arg_types.reserve(args.size());
+  for (const auto& arg : args) {
+    arg_types.push_back(GetTypeNameForExpr(arg.get()));
+  }
+
+  // Find the best matching overload
+  int best_match_score = -1;
+  size_t best_match_index = 0;
+
+  for (size_t i = 0; i < overloads.size(); ++i) {
+    const auto& overload = overloads[i];
+
+    // Check argument count
+    if (overload.param_types.size() != arg_types.size()) {
+      continue;
+    }
+
+    // Score this overload based on type compatibility
+    int score = 0;
+    bool is_compatible = true;
+
+    for (size_t j = 0; j < arg_types.size(); ++j) {
+      const std::string& expected_type = TypeToMangledName(overload.param_types[j]);
+      const std::string& actual_type = arg_types[j];
+
+      if (expected_type == actual_type) {
+        score += 2; // Exact match
+      } else if (TypesCompatible(expected_type, actual_type)) {
+        score += 1; // Compatible (e.g., int -> Int, float -> Float)
+      } else {
+        is_compatible = false;
+        break;
+      }
+    }
+
+    if (is_compatible && score > best_match_score) {
+      best_match_score = score;
+      best_match_index = i;
+    }
+  }
+
+  if (best_match_score >= 0) {
+    return overloads[best_match_index].mangled_name;
+  }
+
+  return "";
+}
+
+bool BytecodeVisitor::TypesCompatible(const std::string& expected_type, const std::string& actual_type) {
+  // Exact match
+  if (expected_type == actual_type) {
+    return true;
+  }
+
+  // Primitive to wrapper conversions
+  if (IsPrimitiveWrapper(expected_type) && IsPrimitiveType(actual_type)) {
+    std::string expected_primitive = GetPrimitiveTypeForWrapper(expected_type);
+    return expected_primitive == actual_type;
+  }
+
+  // Wrapper to primitive conversions
+  if (IsPrimitiveType(expected_type) && IsPrimitiveWrapper(actual_type)) {
+    std::string actual_primitive = GetPrimitiveTypeForWrapper(actual_type);
+    return expected_type == actual_primitive;
+  }
+
+  // Numeric conversions (int <-> float, etc.)
+  if ((expected_type == "int" || expected_type == "Int") && (actual_type == "float" || actual_type == "Float")) {
+    return true; // float can be converted to int (with truncation)
+  }
+  if ((expected_type == "float" || expected_type == "Float") && (actual_type == "int" || actual_type == "Int")) {
+    return true; // int can be converted to float
+  }
+
+  // Object compatibility (any object can be assigned to Object)
+  if (expected_type == "Object") {
+    return true;
+  }
+
+  return false;
 }
 
 void BytecodeVisitor::EmitParameterConversions(const std::vector<std::unique_ptr<Expr>>& args,

@@ -12,10 +12,11 @@ namespace ovum::compiler::parser {
 
 constexpr std::size_t kDefaultMaxBlockLen = 200;
 constexpr std::size_t kDefaultMaxClassMembers = 64;
+constexpr std::size_t kDefaultMaxNesting = 6;
 
 struct LintOptions {
   std::size_t max_block_len = kDefaultMaxBlockLen;
-  std::size_t max_nesting = 4;
+  std::size_t max_nesting = kDefaultMaxNesting;
   std::size_t max_class_members = kDefaultMaxClassMembers;
   bool warn_empty_blocks = true;
   bool warn_public_fields = true;

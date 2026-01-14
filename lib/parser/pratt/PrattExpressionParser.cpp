@@ -402,7 +402,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePrefix(ITokenStream& ts, IDiag
     return factory_->MakeBool(value, SpanFrom(look));
   }
 
-  diags.Error("E_EXPR_PRIMARY", "expected primary expression");
+  diags.Error("E_EXPR_PRIMARY", "expected primary expression", SpanFrom(look));
   return nullptr;
 }
 
@@ -424,7 +424,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
     const SourceSpan start_span = base ? base->Span() : SpanFrom(look);
     auto args = ParseArgList(ts, diags, ')');
     if (args.empty() && (ts.IsEof() || !Lex(ts.Peek(), ")"))) {
-      diags.Error("E_CALL_CLOSE", "expected ')'");
+      diags.Error("E_CALL_CLOSE", "expected ')'", SpanFrom(look));
       return nullptr;
     }
 
@@ -445,7 +445,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
     ts.Consume();
 
     if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
-      diags.Error("E_DOT_IDENT", "expected identifier after '.'");
+      diags.Error("E_DOT_IDENT", "expected identifier after '.'", SpanFrom(look));
       return nullptr;
     }
 
@@ -456,7 +456,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
       ts.Consume();
       auto args = ParseArgList(ts, diags, ')');
       if (args.empty() && (ts.IsEof() || !Lex(ts.Peek(), ")"))) {
-        diags.Error("E_CALL_CLOSE", "expected ')'");
+        diags.Error("E_CALL_CLOSE", "expected ')'", SpanFrom(look));
         return nullptr;
       }
 
@@ -482,7 +482,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
     ts.Consume();
 
     if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
-      diags.Error("E_SAFECALL_IDENT", "expected identifier after '?.'");
+      diags.Error("E_SAFECALL_IDENT", "expected identifier after '?.'", SpanFrom(look));
       return nullptr;
     }
 
@@ -495,7 +495,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
       args = ParseArgList(ts, diags, ')');
 
       if (args.empty() && (ts.IsEof() || !Lex(ts.Peek(), ")"))) {
-        diags.Error("E_CALL_CLOSE", "expected ')'");
+        diags.Error("E_CALL_CLOSE", "expected ')'", SpanFrom(look));
         return nullptr;
       }
 
@@ -517,7 +517,7 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
   if (Lex(look, "::")) {
     ts.Consume();
     if (ts.IsEof() || !IsIdentifier(ts.Peek())) {
-      diags.Error("E_NS_IDENT", "expected identifier after '::'");
+      diags.Error("E_NS_IDENT", "expected identifier after '::'", SpanFrom(look));
       return nullptr;
     }
 
@@ -533,12 +533,12 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
 
     std::unique_ptr<Expr> index_expr = ParseExpr(ts, diags, 0);
     if (!index_expr) {
-      diags.Error("E_INDEX_EXPR", "expected index expression");
+      diags.Error("E_INDEX_EXPR", "expected index expression", SpanFrom(look));
       return nullptr;
     }
 
     if (ts.IsEof() || !Lex(ts.Peek(), "]")) {
-      diags.Error("E_INDEX_CLOSE", "expected ']' after index expression");
+      diags.Error("E_INDEX_CLOSE", "expected ']' after index expression", SpanFrom(look));
       return nullptr;
     }
 
@@ -553,13 +553,13 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
 
   if (Lex(look, "as")) {
     if (type_parser_ == nullptr) {
-      diags.Error("E_TYPE_POSTFIX", "type postfix ('as') requires type parser");
+      diags.Error("E_TYPE_POSTFIX", "type postfix ('as') requires type parser", SpanFrom(look));
       return nullptr;
     }
     ts.Consume();
     auto type = type_parser_->ParseType(ts, diags);
     if (!type) {
-      diags.Error("E_TYPE_PARSE", "failed to parse type after 'as'");
+      diags.Error("E_TYPE_PARSE", "failed to parse type after 'as'", SpanFrom(look));
       return nullptr;
     }
     SourceSpan span = base ? base->Span() : SpanFrom(look);
@@ -571,13 +571,13 @@ std::unique_ptr<Expr> PrattExpressionParser::ParsePostfix(ITokenStream& ts,
 
   if (Lex(look, "is")) {
     if (type_parser_ == nullptr) {
-      diags.Error("E_TYPE_POSTFIX", "type postfix ('is') requires type parser");
+      diags.Error("E_TYPE_POSTFIX", "type postfix ('is') requires type parser", SpanFrom(look));
       return nullptr;
     }
     ts.Consume();
     auto type = type_parser_->ParseType(ts, diags);
     if (!type) {
-      diags.Error("E_TYPE_PARSE", "failed to parse type after 'is'");
+      diags.Error("E_TYPE_PARSE", "failed to parse type after 'is'", SpanFrom(look));
       return nullptr;
     }
     SourceSpan span = base ? base->Span() : SpanFrom(look);
