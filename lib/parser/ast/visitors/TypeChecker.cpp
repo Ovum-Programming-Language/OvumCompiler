@@ -41,6 +41,7 @@
 #include "lib/parser/ast/nodes/stmts/ReturnStmt.hpp"
 #include "lib/parser/ast/nodes/stmts/VarDeclStmt.hpp"
 #include "lib/parser/diagnostics/IDiagnosticSink.hpp"
+#include "types/TypeReference.hpp"
 
 namespace ovum::compiler::parser {
 
@@ -488,8 +489,31 @@ void TypeChecker::Visit(Call& node) {
         oss << "wrong number of arguments: expected 2, got " << node.Args().size();
         sink_.Error("E3006", oss.str(), node.Span());
       }
+
+      TypeReference arg0_type = InferExpressionType(node.Args()[0].get());
+      TypeReference arg1_type = InferExpressionType(node.Args()[1].get());
+
+      if (arg0_type.SimpleName() != "int") {
+        std::ostringstream oss;
+        oss << "argument 1 type mismatch: expected 'int', got '" << arg0_type.ToStringHuman() << "'";
+        sink_.Error("E3007", oss.str(), node.Span());
+      }
+
+      if (arg1_type.SimpleName() != GetElementTypeForArray(TypeReference(func_name)).SimpleName()) {
+        std::ostringstream oss;
+        oss << "argument 2 type mismatch: expected '"
+            << GetElementTypeForArray(TypeReference(func_name)).ToStringHuman() << "', got '"
+            << arg1_type.ToStringHuman() << "'";
+        sink_.Error("E3007", oss.str(), node.Span());
+      }
       // Note: We don't check argument types for built-in array constructors
       // as they are handled by the runtime
+    } else if (kBuiltinTypeNames.find(func_name) !=
+               kBuiltinTypeNames.end()) { // Check if it's a built-in type name (used as constructor)
+      // Built-in type constructors are valid, just visit arguments
+      // Don't emit errors for them
+      WalkVisitor::Visit(node);
+      return;
     } else if (class_fields_.find(func_name) != class_fields_.end()) {
       // It's a class constructor - validate arguments if constructor is defined
       if (auto ctor_it = constructors_.find(func_name); ctor_it != constructors_.end()) {
