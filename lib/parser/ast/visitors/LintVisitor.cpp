@@ -54,9 +54,9 @@ void LintVisitor::LeaveLoop() {
   }
 }
 
-void LintVisitor::CheckNestingDepth(const SourceSpan&) const {
+void LintVisitor::CheckNestingDepth(const SourceSpan& source) const {
   if (opts_.warn_deep_nesting && nesting_depth_ > opts_.max_nesting) {
-    sink_.Warn("W0201", "deep nesting");
+    sink_.Warn("W0201", "deep nesting", source);
   }
 }
 
@@ -78,7 +78,7 @@ bool LintVisitor::IsPureExpr(Expr& expression) {
 
 void LintVisitor::Visit(Module& node) {
   if (opts_.warn_module_without_decls && node.MutableDecls().empty()) {
-    sink_.Warn("W0001", "module has no declarations");
+    sink_.Warn("W0001", "module has no declarations", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -86,7 +86,7 @@ void LintVisitor::Visit(Module& node) {
 
 void LintVisitor::Visit(ClassDecl& node) {
   if (opts_.warn_large_class && node.MutableMembers().size() > opts_.max_class_members) {
-    sink_.Warn("W0101", "class has too many members");
+    sink_.Warn("W0101", "class has too many members", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -96,7 +96,7 @@ void LintVisitor::Visit(FunctionDecl& node) {
   if (opts_.warn_empty_bodies) {
     if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
-        sink_.Warn("W0102", "function body is empty");
+        sink_.Warn("W0102", "function body is empty", node.Span());
       }
     }
   }
@@ -109,7 +109,7 @@ void LintVisitor::Visit(MethodDecl& node) {
     if (!node.IsPure()) {
       if (const auto* b = node.MutableBody()) {
         if (b->Size() == 0) {
-          sink_.Warn("W0103", "method body is empty");
+          sink_.Warn("W0103", "method body is empty", node.Span());
         }
       }
     }
@@ -122,7 +122,7 @@ void LintVisitor::Visit(CallDecl& node) {
   if (opts_.warn_empty_bodies) {
     if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
-        sink_.Warn("W0104", "call body is empty");
+        sink_.Warn("W0104", "call body is empty", node.Span());
       }
     }
   }
@@ -134,7 +134,7 @@ void LintVisitor::Visit(DestructorDecl& node) {
   if (opts_.warn_empty_bodies) {
     if (const auto* b = node.MutableBody()) {
       if (b->Size() == 0) {
-        sink_.Warn("W0105", "destructor body is empty");
+        sink_.Warn("W0105", "destructor body is empty", node.Span());
       }
     }
   }
@@ -146,7 +146,7 @@ void LintVisitor::Visit(Block& node) {
   EnterBody();
 
   if (opts_.warn_empty_blocks && node.GetStatements().empty()) {
-    sink_.Warn("W0202", "empty block");
+    sink_.Warn("W0202", "empty block", node.Span());
   }
 
   CheckNestingDepth();
@@ -155,7 +155,7 @@ void LintVisitor::Visit(Block& node) {
     bool terminated = false;
     for (const auto& stmt : node.GetStatements()) {
       if (terminated) {
-        sink_.Warn("W0301", "unreachable statement");
+        sink_.Warn("W0301", "unreachable statement", stmt->Span());
         continue;
       }
 
@@ -167,7 +167,7 @@ void LintVisitor::Visit(Block& node) {
   }
 
   if (opts_.max_block_len > 0 && node.GetStatements().size() > opts_.max_block_len) {
-    sink_.Warn("W0203", "block is too long");
+    sink_.Warn("W0203", "block is too long", node.Span());
   }
 
   for (const auto& stmt : node.GetStatements()) {
@@ -181,7 +181,7 @@ void LintVisitor::Visit(ExprStmt& node) {
   if (opts_.warn_pure_expr_stmt) {
     if (auto* e = node.MutableExpression()) {
       if (IsPureExpr(*e)) {
-        sink_.Warn("W0401", "expression statement has no effect");
+        sink_.Warn("W0401", "expression statement has no effect", node.Span());
       }
     }
   }
@@ -194,14 +194,14 @@ void LintVisitor::Visit(ReturnStmt& node) {
 
 void LintVisitor::Visit(BreakStmt& node) {
   if (opts_.warn_break_continue_outside_loop && loop_depth_ == 0) {
-    sink_.Error("E0301", "break outside of loop");
+    sink_.Error("E0301", "break outside of loop", node.Span());
   }
   WalkVisitor::Visit(node);
 }
 
 void LintVisitor::Visit(ContinueStmt& node) {
   if (opts_.warn_break_continue_outside_loop && loop_depth_ == 0) {
-    sink_.Error("E0302", "continue outside of loop");
+    sink_.Error("E0302", "continue outside of loop", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -211,13 +211,13 @@ void LintVisitor::Visit(IfStmt& node) {
   EnterBody();
 
   if (opts_.warn_if_without_branches && node.MutableBranches().empty() && !node.HasElse()) {
-    sink_.Warn("W0501", "if statement has no branches");
+    sink_.Warn("W0501", "if statement has no branches", node.Span());
   }
 
   for (auto& br : node.MutableBranches()) {
     if (auto* then_blk = br.MutableThen()) {
       if (opts_.warn_empty_blocks && then_blk->GetStatements().empty()) {
-        sink_.Warn("W0502", "then-branch is empty");
+        sink_.Warn("W0502", "then-branch is empty", then_blk->Span());
       }
     }
   }
@@ -225,7 +225,7 @@ void LintVisitor::Visit(IfStmt& node) {
   if (opts_.warn_empty_else && node.HasElse()) {
     if (auto* eb = node.MutableElseBlock()) {
       if (eb->GetStatements().empty()) {
-        sink_.Warn("W0503", "else-branch is empty");
+        sink_.Warn("W0503", "else-branch is empty", eb->Span());
       }
     }
   }
@@ -239,14 +239,14 @@ void LintVisitor::Visit(WhileStmt& node) {
   EnterBody();
 
   if (opts_.warn_missing_loop_cond_or_iterable && node.MutableCondition() == nullptr) {
-    sink_.Error("E0401", "while loop without condition");
+    sink_.Error("E0401", "while loop without condition", node.Span());
   }
 
   if (opts_.warn_while_true) {
     if (auto* cond = node.MutableCondition()) {
       if (const auto* bl = dynamic_cast<BoolLit*>(cond)) {
         if (bl->Value()) {
-          sink_.Warn("W0601", "while(true) loop");
+          sink_.Warn("W0601", "while(true) loop", node.Span());
         }
       }
     }
@@ -263,7 +263,7 @@ void LintVisitor::Visit(ForStmt& node) {
   EnterBody();
 
   if (opts_.warn_missing_loop_cond_or_iterable && node.MutableIteratorExpr() == nullptr) {
-    sink_.Error("E0402", "for loop without iterable expression");
+    sink_.Error("E0402", "for loop without iterable expression", node.Span());
   }
 
   EnterLoop();
@@ -278,7 +278,7 @@ void LintVisitor::Visit(UnsafeBlock& node) {
   if (opts_.warn_empty_blocks) {
     if (auto* b = node.MutableBody()) {
       if (b->GetStatements().empty()) {
-        sink_.Warn("W0701", "empty unsafe block");
+        sink_.Warn("W0701", "empty unsafe block", node.Span());
       }
     }
   }
@@ -289,7 +289,7 @@ void LintVisitor::Visit(UnsafeBlock& node) {
 
 void LintVisitor::Visit(GlobalVarDecl& node) {
   if (opts_.warn_mutable_globals && node.IsVar()) {
-    sink_.Warn("W0801", "mutable global variable");
+    sink_.Warn("W0801", "mutable global variable", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -297,7 +297,7 @@ void LintVisitor::Visit(GlobalVarDecl& node) {
 
 void LintVisitor::Visit(FieldDecl& node) {
   if (opts_.warn_public_fields && node.IsPublic()) {
-    sink_.Warn("W0802", "public field");
+    sink_.Warn("W0802", "public field", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -305,7 +305,7 @@ void LintVisitor::Visit(FieldDecl& node) {
 
 void LintVisitor::Visit(StaticFieldDecl& node) {
   if (opts_.warn_static_mutable_fields && node.IsVar()) {
-    sink_.Warn("W0803", "static mutable field");
+    sink_.Warn("W0803", "static mutable field", node.Span());
   }
 
   WalkVisitor::Visit(node);
@@ -313,7 +313,7 @@ void LintVisitor::Visit(StaticFieldDecl& node) {
 
 void LintVisitor::Visit(StringLit& node) {
   if (opts_.warn_empty_string_literal && node.Value().empty()) {
-    sink_.Warn("W0901", "empty string literal");
+    sink_.Warn("W0901", "empty string literal", node.Span());
   }
 
   WalkVisitor::Visit(node);
