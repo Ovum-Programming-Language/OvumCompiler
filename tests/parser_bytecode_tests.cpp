@@ -2585,3 +2585,28 @@ fun run() : Void {
   EXPECT_EQ(bc.find("Call _Global_test_String"), std::string::npos);
   EXPECT_EQ(bc.find("Call sys::ToString"), std::string::npos);
 }
+
+TEST_F(ParserBytecodeTestSuite, ChainedMethodCall) {
+  const std::string bc = GenerateBytecode(R"(
+class Logger {
+    private val name: String = "Logger"
+
+    public fun Log(msg: String): String {
+        sys::PrintLine(msg)
+        return name
+    }
+}
+
+class Logics {
+    private val logger: Logger
+
+    public fun Test(msg: String): int {
+        return this.logger.Log(msg).Length()
+    }
+}
+)");
+  EXPECT_NE(bc.find("Call _Logger_Log_<C>_String"), std::string::npos);
+  EXPECT_NE(bc.find("Call _String_Length_<C>"), std::string::npos);
+  EXPECT_NE(bc.find("PrintLine"), std::string::npos);
+  EXPECT_EQ(bc.find("Pop"), std::string::npos);
+}

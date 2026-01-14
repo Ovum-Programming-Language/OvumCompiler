@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <ranges>
 #include <sstream>
 #include <string>
@@ -63,7 +64,6 @@ namespace {
 constexpr size_t kPointerSizeBytes = 8;
 constexpr size_t kIntFloatSizeBytes = 8;
 constexpr size_t kByteCharBoolSizeBytes = 1;
-constexpr size_t kFloatPrecision = 15;
 
 size_t FieldSizeForType(const TypeReference& t) {
   if (t.QualifiedName().empty()) {
@@ -383,8 +383,9 @@ void BytecodeVisitor::EmitCommandWithFloat(const std::string& command, double va
     output_ << value << ".0";
   } else {
     const auto default_precision{output_.precision()};
-    output_ << std::setprecision(kFloatPrecision) << value;
+    output_ << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10 - 2) << value;
     output_ << std::setprecision(default_precision);
+    output_.unsetf(std::ios::fixed);
   }
   output_ << "\n";
 }
@@ -1022,15 +1023,28 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
       } else if (auto* field_access = dynamic_cast<FieldAccess*>(&call->MutableCallee())) {
         const std::string method_name = field_access->Name();
 
-        std::string object_type;
-        if (const auto* obj_ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
-          if (const auto type_it = variable_types_.find(obj_ident->Name()); type_it != variable_types_.end()) {
-            object_type = type_it->second;
+        // Use GetTypeNameForExpr to determine object type, which handles chained calls
+        std::string object_type = GetTypeNameForExpr(&field_access->MutableObject());
+
+        // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+        if (object_type == "unknown" || object_type.empty()) {
+          if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+            if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+              std::string nested_method_name = nested_field_access->Name();
+              std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+              
+              if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+                std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+                if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+                  object_type = nested_it->second;
+                }
+              }
+            }
           }
         }
 
         std::string method_key;
-        if (!object_type.empty()) {
+        if (!object_type.empty() && !kBuiltinTypeNames.contains(object_type)) {
           method_key = object_type + "::" + method_name;
         } else if (!current_class_name_.empty()) {
           method_key = current_class_name_ + "::" + method_name;
@@ -2543,7 +2557,70 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
-  if (const auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
+  if (auto* field_access = dynamic_cast<FieldAccess*>(expr)) {
+    // First, try to get the object type using GetTypeNameForExpr
+    // This handles cases where the object is a variable, method call result, etc.
+    std::string object_type_name = GetTypeNameForExpr(&field_access->MutableObject());
+    
+    // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+    if (object_type_name == "unknown" || object_type_name.empty()) {
+      if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+        // Get the return type of the nested call by examining its structure
+        if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+          std::string nested_method_name = nested_field_access->Name();
+          std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+          
+          // Check if this is a method call on a user-defined type
+          if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+            std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+            if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+              object_type_name = nested_it->second;
+            }
+          }
+        }
+      }
+      
+      // If that didn't work, try checking if it's a direct IdentRef
+      if (object_type_name.empty() || object_type_name == "unknown") {
+        if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
+          if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
+            object_type_name = type_it->second;
+          }
+        }
+      }
+    }
+
+    // If we have an object type, look up the field in that class
+    if (!object_type_name.empty() && object_type_name != "unknown") {
+      if (const auto fields_it = class_fields_.find(object_type_name); fields_it != class_fields_.end()) {
+        for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
+          if (fst == field_access->Name()) {
+            const std::string& type_name = TypeToMangledName(snd);
+            if (type_name == "int" || type_name == "Int") {
+              return OperandType::kInt;
+            }
+            if (type_name == "float" || type_name == "Float") {
+              return OperandType::kFloat;
+            }
+            if (type_name == "byte" || type_name == "Byte") {
+              return OperandType::kByte;
+            }
+            if (type_name == "bool" || type_name == "Bool") {
+              return OperandType::kBool;
+            }
+            if (type_name == "char" || type_name == "Char") {
+              return OperandType::kChar;
+            }
+            if (type_name == "String") {
+              return OperandType::kString;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Fallback: check current class if we're inside a class
     if (!current_class_name_.empty()) {
       if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
         for (const auto& fields = fields_it->second; const auto& [fst, snd] : fields) {
@@ -2694,14 +2771,40 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
   }
 
   if (auto* field = dynamic_cast<FieldAccess*>(expr)) {
-    std::string object_type_name;
-    if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
-      if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
-        object_type_name = type_it->second;
+    // First, try to get the object type recursively using GetTypeNameForExpr
+    // This handles cases where the object is a variable, method call result, etc.
+    std::string object_type_name = GetTypeNameForExpr(&field->MutableObject());
+    
+    // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
+    if (object_type_name == "unknown" || object_type_name.empty()) {
+      if (auto* nested_call = dynamic_cast<Call*>(&field->MutableObject())) {
+        // Get the return type of the nested call by examining its structure
+        if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+          std::string nested_method_name = nested_field_access->Name();
+          std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+          
+          // Check if this is a method call on a user-defined type
+          if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+            std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+            if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+              object_type_name = nested_it->second;
+            }
+          }
+        }
+      }
+      
+      // If that didn't work, try checking if it's a direct IdentRef
+      if (object_type_name.empty() || object_type_name == "unknown") {
+        if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
+          if (const auto type_it = variable_types_.find(ident->Name()); type_it != variable_types_.end()) {
+            object_type_name = type_it->second;
+          }
+        }
       }
     }
 
-    if (!object_type_name.empty()) {
+    // If we have an object type, look up the field in that class
+    if (!object_type_name.empty() && object_type_name != "unknown") {
       if (const auto fields_it = class_fields_.find(object_type_name); fields_it != class_fields_.end()) {
         for (const auto& [fst, snd] : fields_it->second) {
           if (fst == field->Name()) {
@@ -2711,6 +2814,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
       }
     }
 
+    // Fallback: check current class if we're inside a class
     if (!current_class_name_.empty()) {
       if (const auto fields_it = class_fields_.find(current_class_name_); fields_it != class_fields_.end()) {
         for (const auto& [fst, snd] : fields_it->second) {
@@ -2934,6 +3038,43 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
         }
         if (method_name == "GetHash") {
           return "int";
+        }
+      }
+
+      // Handle method calls on user-defined types
+      // Check method_return_types_ for the return type of this method
+      if (!object_type.empty() && !kBuiltinTypeNames.contains(object_type)) {
+        std::string method_key = object_type + "::" + method_name;
+        if (const auto it = method_return_types_.find(method_key); it != method_return_types_.end()) {
+          return it->second;
+        }
+      }
+
+      // Handle chained method calls: if object_type is "unknown", it might be a Call expression
+      // Try to determine the return type of the nested call to use as object_type
+      if (object_type == "unknown" || object_type.empty()) {
+        if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
+          // Get the return type of the nested call by examining its structure
+          if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
+            std::string nested_method_name = nested_field_access->Name();
+            std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
+            
+            // Check if this is a method call on a user-defined type
+            if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
+              std::string nested_method_key = nested_object_type + "::" + nested_method_name;
+              if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+                // Use the return type of the nested call as the object type for this call
+                std::string return_type = nested_it->second;
+                std::string chained_method_key = return_type + "::" + method_name;
+                if (const auto chained_it = method_return_types_.find(chained_method_key); chained_it != method_return_types_.end()) {
+                  return chained_it->second;
+                }
+                // If the chained method doesn't exist, at least return the return type of the nested call
+                // This helps with type propagation in chained calls
+                return return_type;
+              }
+            }
+          }
         }
       }
     }
