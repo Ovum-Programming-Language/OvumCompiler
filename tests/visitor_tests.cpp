@@ -1619,7 +1619,7 @@ TEST_F(VisitorTestSuite, TypeChecker_Error_ComplexArrayIndexType) {
 
     bool found_error = false;
     for (const auto& diag : diags_.All()) {
-      if (diag.GetCode().starts_with("E3010") == 0) {
+      if (diag.GetCode().starts_with("E3010")) {
         found_error = true;
         break;
       }
