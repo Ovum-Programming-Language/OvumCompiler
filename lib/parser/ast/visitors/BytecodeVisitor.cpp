@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <ranges>
 #include <sstream>
@@ -62,6 +63,7 @@ namespace {
 constexpr size_t kPointerSizeBytes = 8;
 constexpr size_t kIntFloatSizeBytes = 8;
 constexpr size_t kByteCharBoolSizeBytes = 1;
+constexpr size_t kFloatPrecision = 15;
 
 size_t FieldSizeForType(const TypeReference& t) {
   if (t.QualifiedName().empty()) {
@@ -380,7 +382,9 @@ void BytecodeVisitor::EmitCommandWithFloat(const std::string& command, double va
   if (value == std::floor(value) && std::isfinite(value)) {
     output_ << value << ".0";
   } else {
-    output_ << value;
+    const auto default_precision{output_.precision()};
+    output_ << std::setprecision(kFloatPrecision) << value;
+    output_ << std::setprecision(default_precision);
   }
   output_ << "\n";
 }
