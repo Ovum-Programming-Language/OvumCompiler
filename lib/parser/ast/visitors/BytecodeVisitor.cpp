@@ -1032,10 +1032,11 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
             if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
               std::string nested_method_name = nested_field_access->Name();
               std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
-              
+
               if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
                 std::string nested_method_key = nested_object_type + "::" + nested_method_name;
-                if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+                if (const auto nested_it = method_return_types_.find(nested_method_key);
+                    nested_it != method_return_types_.end()) {
                   object_type = nested_it->second;
                 }
               }
@@ -2561,7 +2562,7 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     // First, try to get the object type using GetTypeNameForExpr
     // This handles cases where the object is a variable, method call result, etc.
     std::string object_type_name = GetTypeNameForExpr(&field_access->MutableObject());
-    
+
     // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
     if (object_type_name == "unknown" || object_type_name.empty()) {
       if (auto* nested_call = dynamic_cast<Call*>(&field_access->MutableObject())) {
@@ -2569,17 +2570,18 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
         if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
           std::string nested_method_name = nested_field_access->Name();
           std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
-          
+
           // Check if this is a method call on a user-defined type
           if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
             std::string nested_method_key = nested_object_type + "::" + nested_method_name;
-            if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+            if (const auto nested_it = method_return_types_.find(nested_method_key);
+                nested_it != method_return_types_.end()) {
               object_type_name = nested_it->second;
             }
           }
         }
       }
-      
+
       // If that didn't work, try checking if it's a direct IdentRef
       if (object_type_name.empty() || object_type_name == "unknown") {
         if (auto* ident = dynamic_cast<IdentRef*>(&field_access->MutableObject())) {
@@ -2774,7 +2776,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
     // First, try to get the object type recursively using GetTypeNameForExpr
     // This handles cases where the object is a variable, method call result, etc.
     std::string object_type_name = GetTypeNameForExpr(&field->MutableObject());
-    
+
     // If object_type is "unknown" (from a Call expression), try to resolve it for chained calls
     if (object_type_name == "unknown" || object_type_name.empty()) {
       if (auto* nested_call = dynamic_cast<Call*>(&field->MutableObject())) {
@@ -2782,17 +2784,18 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
         if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
           std::string nested_method_name = nested_field_access->Name();
           std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
-          
+
           // Check if this is a method call on a user-defined type
           if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
             std::string nested_method_key = nested_object_type + "::" + nested_method_name;
-            if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+            if (const auto nested_it = method_return_types_.find(nested_method_key);
+                nested_it != method_return_types_.end()) {
               object_type_name = nested_it->second;
             }
           }
         }
       }
-      
+
       // If that didn't work, try checking if it's a direct IdentRef
       if (object_type_name.empty() || object_type_name == "unknown") {
         if (const auto* ident = dynamic_cast<IdentRef*>(&field->MutableObject())) {
@@ -3058,15 +3061,17 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (auto* nested_field_access = dynamic_cast<FieldAccess*>(&nested_call->MutableCallee())) {
             std::string nested_method_name = nested_field_access->Name();
             std::string nested_object_type = GetTypeNameForExpr(&nested_field_access->MutableObject());
-            
+
             // Check if this is a method call on a user-defined type
             if (!nested_object_type.empty() && !kBuiltinTypeNames.contains(nested_object_type)) {
               std::string nested_method_key = nested_object_type + "::" + nested_method_name;
-              if (const auto nested_it = method_return_types_.find(nested_method_key); nested_it != method_return_types_.end()) {
+              if (const auto nested_it = method_return_types_.find(nested_method_key);
+                  nested_it != method_return_types_.end()) {
                 // Use the return type of the nested call as the object type for this call
                 std::string return_type = nested_it->second;
                 std::string chained_method_key = return_type + "::" + method_name;
-                if (const auto chained_it = method_return_types_.find(chained_method_key); chained_it != method_return_types_.end()) {
+                if (const auto chained_it = method_return_types_.find(chained_method_key);
+                    chained_it != method_return_types_.end()) {
                   return chained_it->second;
                 }
                 // If the chained method doesn't exist, at least return the return type of the nested call
