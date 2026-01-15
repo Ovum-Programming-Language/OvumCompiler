@@ -126,21 +126,21 @@ const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     {"ParseDateTime", "Int"},
     {"FormatDateTime", "String"},
     // File operations
-    {"FileExists", "Bool"},
-    {"DirectoryExists", "Bool"},
-    {"CreateDirectory", "Bool"},
-    {"DeleteFile", "Bool"},
-    {"DeleteDirectory", "Bool"},
-    {"MoveFile", "Bool"},
-    {"CopyFile", "Bool"},
+    {"FileExists", "bool"},
+    {"DirectoryExists", "bool"},
+    {"CreateDirectory", "bool"},
+    {"DeleteFile", "bool"},
+    {"DeleteDirectory", "bool"},
+    {"MoveFile", "bool"},
+    {"CopyFile", "bool"},
     {"ListDirectory", "StringArray"},
     {"GetCurrentDirectory", "String"},
-    {"ChangeDirectory", "Bool"},
+    {"ChangeDirectory", "bool"},
     // I/O functions
     {"ReadLine", "String"},
-    {"ReadChar", "Char"},
-    {"ReadInt", "Int"},
-    {"ReadFloat", "Float"},
+    {"ReadChar", "char"},
+    {"ReadInt", "int"},
+    {"ReadFloat", "float"},
     // System information
     {"GetOsName", "String"},
     {"GetOsVersion", "String"},
@@ -148,7 +148,7 @@ const std::unordered_map<std::string, std::string> kBuiltinReturnTypes = {
     {"GetUserName", "String"},
     {"GetHomeDirectory", "String"},
     // Environment
-    {"SetEnvironmentVar", "Bool"},
+    {"SetEnvironmentVar", "bool"},
     // Math functions
     {"Sqrt", "float"},
     {"ToString", "String"},
@@ -2628,7 +2628,7 @@ void TypeChecker::InitializeBuiltinMethods() {
   {
     BuiltinMethodSignature sig;
     sig.param_types = {TypeReference("ByteArray")};
-    sig.return_type = nullptr; // void
+    sig.return_type = std::make_unique<TypeReference>("int"); // int
     builtin_methods_["File"]["Write"] = std::move(sig);
   }
 

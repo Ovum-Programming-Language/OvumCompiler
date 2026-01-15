@@ -15,8 +15,8 @@ Ovum is a strongly statically typed, single-threaded programming language focuse
 
 ## Prerequisites
 
-- **CMake** 3.12 or higher
-- **C++17** compatible compiler (GCC, Clang, or MSVC)
+- **CMake** 3.25 or higher
+- **C++23** compatible compiler (GCC, Clang, or MSVC)
 - **Git** (for dependency management)
 
 ## Quick Start
@@ -59,7 +59,7 @@ Once built, the `ovumc` compiler can be used to compile Ovum source files:
 
 ```bash
 # Compile an Ovum source file
-ovumc input.ovum -o output.bytecode
+ovumc -m input.ovum -o output.oil -I ./ -D SOME_FLAG
 
 # Show help
 ovumc -h
@@ -108,7 +108,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ## Related Projects
 
 - **[OvumLanguage](https://github.com/Ovum-Programming-Language/OvumLanguage)** - Main language repository with documentation and specifications
-- **[OvumVM](https://github.com/Ovum-Programming-Language/OvumVM)** - Virtual Machine implementation (planned)
+- **[OvumVM](https://github.com/Ovum-Programming-Language/OvumVM)** - Virtual Machine implementation
+- **[OvumExamples](https://github.com/Ovum-Programming-Language/OvumExamples)** - Examples of code in Ovum with bytecode
 
 ## License
 

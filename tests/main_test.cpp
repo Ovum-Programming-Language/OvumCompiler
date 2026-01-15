@@ -116,6 +116,10 @@ TEST_F(ProjectIntegrationTestSuite, ExampleFileNBody) {
   CompileAndCompareExample("nbody");
 }
 
+TEST_F(ProjectIntegrationTestSuite, ExampleFileFile) {
+  CompileAndCompareExample("file");
+}
+
 // Integrational files compilation tests
 TEST_F(ProjectIntegrationTestSuite, IntegrationalFileQuadratic) {
   CompileAndCompareIntegrational("quadratic");

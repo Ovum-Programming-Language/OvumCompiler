@@ -1044,6 +1044,22 @@ void BytecodeVisitor::Visit(ExprStmt& node) {
           }
         }
 
+        // Check if this is a builtin type method that returns void
+        if (!object_type.empty() && kBuiltinTypeNames.contains(object_type)) {
+          if (object_type == "File") {
+            if (method_name == "Open" || method_name == "Close" || method_name == "WriteLine" ||
+                method_name == "Seek") {
+              should_pop = false;
+            }
+          } else if (object_type.find("Array") != std::string::npos) {
+            if (method_name == "Add" || method_name == "RemoveAt" || method_name == "InsertAt" ||
+                method_name == "SetAt" || method_name == "Clear" || method_name == "Reserve" ||
+                method_name == "ShrinkToFit") {
+              should_pop = false;
+            }
+          }
+        }
+
         std::string method_key;
         if (!object_type.empty() && !kBuiltinTypeNames.contains(object_type)) {
           method_key = object_type + "::" + method_name;
@@ -1470,6 +1486,14 @@ void BytecodeVisitor::Visit(Assign& node) {
     EmitTypeConversionIfNeeded(elem_type, value_type_name);
 
     index_access->MutableIndexExpr().Accept(*this);
+
+    // Unwrap the index if it's a wrapper type (e.g., Int -> int)
+    // Array SetAt methods expect int, not Int wrapper
+    std::string index_type = GetTypeNameForExpr(&index_access->MutableIndexExpr());
+    if (IsPrimitiveWrapper(index_type)) {
+      EmitCommand("Unwrap");
+    }
+
     index_access->MutableObject().Accept(*this);
 
     std::string method_name = GenerateArraySetAtMethodName(array_type);
@@ -2114,6 +2138,14 @@ void BytecodeVisitor::Visit(FieldAccess& node) {
 
 void BytecodeVisitor::Visit(IndexAccess& node) {
   node.MutableIndexExpr().Accept(*this);
+
+  // Unwrap the index if it's a wrapper type (e.g., Int -> int)
+  // Array GetAt methods expect int, not Int wrapper
+  std::string index_type = GetTypeNameForExpr(&node.MutableIndexExpr());
+  if (IsPrimitiveWrapper(index_type)) {
+    EmitCommand("Unwrap");
+  }
+
   node.MutableObject().Accept(*this);
 
   std::string array_type = GetTypeNameForExpr(&node.MutableObject());
@@ -2675,6 +2707,31 @@ BytecodeVisitor::OperandType BytecodeVisitor::DetermineOperandType(Expr* expr) {
     }
   }
 
+  if (auto* index_access = dynamic_cast<IndexAccess*>(expr)) {
+    // Get the element type of the array
+    std::string array_type = GetTypeNameForExpr(&index_access->MutableObject());
+    std::string elem_type = GetElementTypeForArray(array_type);
+
+    if (elem_type == "int") {
+      return OperandType::kInt;
+    }
+    if (elem_type == "float") {
+      return OperandType::kFloat;
+    }
+    if (elem_type == "byte") {
+      return OperandType::kByte;
+    }
+    if (elem_type == "bool") {
+      return OperandType::kBool;
+    }
+    if (elem_type == "char") {
+      return OperandType::kChar;
+    }
+    if (elem_type == "String") {
+      return OperandType::kString;
+    }
+  }
+
   if (auto* binary = dynamic_cast<Binary*>(expr)) {
     OperandType lhs_type = DetermineOperandType(&binary->MutableLhs());
     OperandType rhs_type = DetermineOperandType(&binary->MutableRhs());
@@ -2904,7 +2961,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
             return "String";
           }
           if (ns_name == "ReadChar" && call->Args().size() == 0) {
-            return "Char";
+            return "char";
           }
           // Time and Date Operations
           if (ns_name == "FormatDateTime" && call->Args().size() == 2) {
@@ -2915,25 +2972,25 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           }
           // File Operations
           if (ns_name == "FileExists" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "DirectoryExists" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "CreateDirectory" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "DeleteFile" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "DeleteDirectory" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "MoveFile" && call->Args().size() == 2) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "CopyFile" && call->Args().size() == 2) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "ListDirectory" && call->Args().size() == 1) {
             return "StringArray";
@@ -2942,7 +2999,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
             return "String";
           }
           if (ns_name == "ChangeDirectory" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           // Process Control
           if (ns_name == "Sleep" && call->Args().size() == 1) {
@@ -2961,7 +3018,7 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
             return "String?"; // Returns Nullable<String>
           }
           if (ns_name == "SetEnvironmentVar" && call->Args().size() == 2) {
-            return "Bool";
+            return "bool";
           }
           // Random Number Generation
           if (ns_name == "SeedRandom" && call->Args().size() == 1) {
@@ -3019,6 +3076,17 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (method_name == "GetHash") {
             return "int";
           }
+          if (method_name == "Equals") {
+            return "bool";
+          }
+          if (method_name == "IsLess") {
+            return "bool";
+          }
+          if (method_name == "Add" || method_name == "RemoveAt" || method_name == "InsertAt" ||
+              method_name == "SetAt" || method_name == "Clear" || method_name == "Reserve" ||
+              method_name == "ShrinkToFit") {
+            return "void";
+          }
         }
         // Handle String methods
         if (object_type == "String") {
@@ -3034,6 +3102,12 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           if (method_name == "ToUtf8Bytes") {
             return "ByteArray";
           }
+          if (method_name == "Equals") {
+            return "bool";
+          }
+          if (method_name == "IsLess") {
+            return "bool";
+          }
         }
         // Handle wrapper type methods (Int, Float, etc.)
         if (method_name == "ToString") {
@@ -3041,6 +3115,30 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
         }
         if (method_name == "GetHash") {
           return "int";
+        }
+        if (method_name == "Equals") {
+          return "bool";
+        }
+        if (method_name == "IsLess") {
+          return "bool";
+        }
+        // Handle File methods
+        if (object_type == "File") {
+          if (method_name == "Open" || method_name == "Close" || method_name == "WriteLine" || method_name == "Seek") {
+            return "void";
+          }
+          if (method_name == "IsOpen" || method_name == "Eof") {
+            return "bool";
+          }
+          if (method_name == "Read") {
+            return "ByteArray";
+          }
+          if (method_name == "ReadLine") {
+            return "String";
+          }
+          if (method_name == "Tell" || method_name == "Write") {
+            return "int";
+          }
         }
       }
 
