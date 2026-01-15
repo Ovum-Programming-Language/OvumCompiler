@@ -2972,13 +2972,13 @@ std::string BytecodeVisitor::GetTypeNameForExpr(Expr* expr) {
           }
           // File Operations
           if (ns_name == "FileExists" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "DirectoryExists" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "CreateDirectory" && call->Args().size() == 1) {
-            return "Bool";
+            return "bool";
           }
           if (ns_name == "DeleteFile" && call->Args().size() == 1) {
             return "bool";
